@@ -24,7 +24,7 @@ button{width:100%;border:0;border-radius:14px;padding:14px 18px;font-size:16px;f
 <body>
 <div class="wrap"><div class="card">
 <h1>🔎 อ่านรูป/เอกสาร</h1>
-<p class="muted">อิ่มอุ่นจะเลือกมุมเอกสารอัตโนมัติ แล้วอ่านข้อความบนเครื่องนี้</p>
+<p class="muted">อิ่มอุ่นจะลองอ่านข้อความบนเครื่องนี้ก่อน ถ้าอ่านไม่ชัดจะพากลับ LINE เพื่อกรอกเอง</p>
 <p class="privacy">🔒 OCR ทำบนอุปกรณ์นี้ รูปหรือ PDF จะไม่ถูกส่งไปบริการ OCR ภายนอก</p>
 <div id="media"></div>
 <div id="status">กำลังตรวจสอบลิงก์…</div>
@@ -36,13 +36,18 @@ button{width:100%;border:0;border-radius:14px;padding:14px 18px;font-size:16px;f
 </div></div>
 <script>
 const API='https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/line-intake-review';
-const MAX_DIM=2600,PROBE_DIM=950;
+const MAX_DIM=1800,PROBE_DIM=650;
 const st=document.getElementById('status'),fill=document.getElementById('fill'),res=document.getElementById('result'),btn=document.getElementById('run'),media=document.getElementById('media'),detail=document.getElementById('detail');
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
 
 function getToken(){return new URLSearchParams(location.hash.replace(/^#/,'')).get('token')||''}
 function setStatus(t,p,d=''){st.textContent=t;if(Number.isFinite(p))fill.style.width=Math.max(0,Math.min(100,p))+'%';detail.textContent=d}
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+let runDone=false,activeWorker=null,wakeLock=null;
+async function keepAwake(){try{if('wakeLock' in navigator)wakeLock=await navigator.wakeLock.request('screen')}catch{}}
+async function releaseWake(){try{if(wakeLock)await wakeLock.release()}catch{}wakeLock=null}
+
 async function api(body){
  const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),cache:'no-store'});
  const d=await r.json().catch(()=>({}));
@@ -122,6 +127,7 @@ async function chooseRotation(w,img){
  await w.setParameters({tessedit_pageseg_mode:Tesseract.PSM.SPARSE_TEXT,preserve_interword_spaces:'1',user_defined_dpi:'220'});
  let best={rotation:rotations[0],score:-1,confidence:0};
  for(let i=0;i<rotations.length;i++){
+  if(runDone)throw new Error('ocr_cancelled');
   const rot=rotations[i];
   setStatus('กำลังหามุมเอกสาร…',18+Math.round(i/rotations.length*14),'ลองมุม '+rot+'°');
   const probe=enhanceCanvas(rotateCanvas(probeBase,rot));
@@ -132,17 +138,17 @@ async function chooseRotation(w,img){
  return best;
 }
 async function createOcrWorker(){
- setStatus('กำลังโหลด OCR ภาษาไทยและอังกฤษ…',8,'โมเดลขนาดเล็กสำหรับมือถือ');
+ setStatus('กำลังโหลด OCR ภาษาไทย…',8,'โมเดลขนาดเล็กสำหรับมือถือ');
  let timer;
  const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('โหลด OCR นานเกินไป กรุณาลองใหม่')),25000)});
  try{
   const w=await Promise.race([
-   Tesseract.createWorker(['tha','eng'],Tesseract.OEM.LSTM_ONLY,{
+   Tesseract.createWorker('tha',Tesseract.OEM.LSTM_ONLY,{
     workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@7.0.0/dist/worker.min.js',
     corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@7.0.0',
     langPath:'https://tessdata.projectnaptha.com/4.0.0_fast',
     logger:m=>{
-     if(m.status==='loading language traineddata')setStatus('กำลังโหลดภาษาไทยและอังกฤษ…',10,'ครั้งแรกอาจใช้เวลาสักครู่');
+     if(m.status==='loading language traineddata')setStatus('กำลังโหลดภาษาไทย…',10,'ครั้งแรกอาจใช้เวลาสักครู่');
      if(m.status==='initializing api')setStatus('กำลังเตรียม OCR…',14);
      if(m.status==='recognizing text'){
       const p=30+Math.round((m.progress||0)*58);
@@ -152,6 +158,8 @@ async function createOcrWorker(){
    }),
    timeout
   ]);
+  if(runDone){try{await w.terminate()}catch{};throw new Error('ocr_cancelled')}
+  activeWorker=w;
   return w;
  }finally{clearTimeout(timer)}
 }
@@ -194,7 +202,7 @@ async function imageOCR(fileUrl){
    orientation_degrees:orient.rotation,
    preprocessing:'multi-rotation-probe+grayscale+contrast'
   };
- }finally{try{await w.terminate()}catch{}}
+ }finally{try{await w.terminate()}catch{}if(activeWorker===w)activeWorker=null}
 }
 async function pdfOCR(fileUrl){
  setStatus('กำลังเปิด PDF…',5);
@@ -218,7 +226,7 @@ async function pdfOCR(fileUrl){
    quality:qualities.length?qualities.reduce((a,b)=>a+b,0)/qualities.length:0,
    mode,orientation_degrees:0,preprocessing:'pdf_text_or_grayscale+contrast'
   };
- }finally{try{if(w)await w.terminate()}catch{}}
+ }finally{try{if(w)await w.terminate()}catch{}if(activeWorker===w)activeWorker=null}
 }
 async function autoClose(){
  await sleep(650);
@@ -229,12 +237,19 @@ async function autoClose(){
  }
 }
 async function run(){
- btn.hidden=true;res.innerHTML='';media.innerHTML='';detail.textContent='';
+ btn.hidden=true;res.innerHTML='';media.innerHTML='';detail.textContent='';runDone=false;
+ const token=getToken();
+ if(!token){setStatus('อ่านเอกสารไม่สำเร็จ',0);res.innerHTML='<div class="err">⚠️ ลิงก์ไม่ถูกต้องหรือหมดอายุ</div>';return}
+ await keepAwake();
+ let hardTimer;
+ const hardTimeout=new Promise((_,reject)=>{hardTimer=setTimeout(()=>reject(new Error('ocr_hard_timeout')),30000)});
  try{
-  const token=getToken();if(!token)throw new Error('ลิงก์ไม่ถูกต้องหรือหมดอายุ');
   setStatus('กำลังเปิดไฟล์…',1);
   const boot=await api({action:'bootstrap',token});
-  const out=boot.mime_type==='application/pdf'?await pdfOCR(boot.file_url):await imageOCR(boot.file_url);
+  const out=await Promise.race([
+    boot.mime_type==='application/pdf'?pdfOCR(boot.file_url):imageOCR(boot.file_url),
+    hardTimeout
+  ]);
   setStatus('กำลังส่งผลให้ LINE…',96,'ตรวจคุณภาพ OCR '+Math.round(out.quality||0)+'/100');
   await api({
     action:'ocr_result',token,
@@ -245,14 +260,21 @@ async function run(){
     page_segmentation:out.mode,
     preprocessing:out.preprocessing
   });
+  runDone=true;clearTimeout(hardTimer);await releaseWake();
   setStatus('ส่งผลกลับ LINE แล้ว',100,'กำลังกลับ LINE…');
   res.innerHTML='<div class="ok">✅ อ่านเอกสารเสร็จแล้ว<br><br>ผลถูกส่งกลับ LINE แล้ว กำลังปิดหน้านี้อัตโนมัติ…</div>';
   autoClose();
  }catch(e){
-  console.error(e);
-  setStatus('อ่านเอกสารไม่สำเร็จ',0);
-  res.innerHTML='<div class="err">⚠️ '+esc(e?.message||e)+'<br><br>ไฟล์ต้นฉบับยังปลอดภัยและยังไม่ถูกบันทึกเป็นข้อมูลสุขภาพจริง</div>';
-  btn.hidden=false;
+  console.error(e);runDone=true;clearTimeout(hardTimer);
+  try{if(activeWorker)await activeWorker.terminate()}catch{}activeWorker=null;
+  await releaseWake();
+  const msg=String(e?.message||e);
+  if(msg!=='ocr_cancelled'){
+    try{await api({action:'manual_fallback',token,reason:msg==='ocr_hard_timeout'?'ocr_timeout_mobile':'ocr_client_error'})}catch(err){console.error('manual_fallback',err)}
+  }
+  setStatus('เปลี่ยนไปกรอกเองใน LINE',100,'กำลังกลับ LINE…');
+  res.innerHTML='<div class="note">✍️ OCR บนมือถือใช้เวลานานหรืออ่านไม่ชัด<br><br>อิ่มอุ่นส่งขั้นตอน “กรอกเอง” กลับไปใน LINE แล้ว กำลังปิดหน้านี้…</div>';
+  autoClose();
  }
 }
 btn.onclick=run;
