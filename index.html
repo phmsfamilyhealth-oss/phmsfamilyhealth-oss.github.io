@@ -24,7 +24,7 @@ button{width:100%;border:0;border-radius:14px;padding:14px 18px;font-size:16px;f
 <body>
 <div class="wrap"><div class="card">
 <h1>🔎 อ่านรูป/เอกสาร</h1>
-<p class="muted">อิ่มอุ่นจะตรวจมุมเอกสาร ปรับภาพ และอ่านข้อความให้อัตโนมัติ</p>
+<p class="muted">อิ่มอุ่นจะลองหลายมุม เลือกมุมที่อ่านข้อความได้ดีที่สุด แล้วส่งผลกลับ LINE อัตโนมัติ</p>
 <p class="privacy">🔒 OCR ทำบนอุปกรณ์นี้ รูปหรือ PDF จะไม่ถูกส่งไปบริการ OCR ภายนอก</p>
 <div id="media"></div>
 <div id="status">กำลังตรวจสอบลิงก์…</div>
@@ -32,11 +32,11 @@ button{width:100%;border:0;border-radius:14px;padding:14px 18px;font-size:16px;f
 <div id="detail" class="small"></div>
 <div id="result"></div>
 <button id="run" hidden>ลองอ่านอีกครั้ง</button>
-<div class="small">ครั้งแรกอาจใช้เวลานานกว่าครั้งถัดไปเล็กน้อย เพราะต้องโหลดโมเดลภาษาไทยและอังกฤษลงในอุปกรณ์</div>
+<div class="small">หลังอ่านเสร็จ ระบบจะพยายามปิดหน้านี้และกลับ LINE ให้อัตโนมัติ</div>
 </div></div>
 <script>
 const API='https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/line-intake-review';
-const MAX_DIM=2600;
+const MAX_DIM=2600,PROBE_DIM=950;
 const st=document.getElementById('status'),fill=document.getElementById('fill'),res=document.getElementById('result'),btn=document.getElementById('run'),media=document.getElementById('media'),detail=document.getElementById('detail');
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
 
@@ -103,31 +103,33 @@ function usefulRatio(text){
  const useful=(compact.match(/[\p{L}\p{N}]/gu)||[]).length;
  return useful/compact.length;
 }
+function domainHits(text){
+ const s=String(text||'').toLowerCase();
+ const pats=[/นัด|appointment|follow[- ]?up/,/เวลา|time|\b\d{1,2}[:.]\d{2}\b/,/วันที่|date|\b\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}\b/,/\bhn\b|hospital number/,/คลินิก|แผนก|doctor|แพทย์/,/ยา|medication|\bmg\b|tablet|รับประทาน/,/ใบเสร็จ|receipt|total|บาท/];
+ return pats.reduce((n,p)=>n+(p.test(s)?1:0),0);
+}
 function quality(result){
  const text=String(result?.data?.text||'');
  const conf=Math.max(0,Math.min(100,Number(result?.data?.confidence||0)));
  const ratio=usefulRatio(text);
  const lengthBonus=Math.min(12,Math.log10(Math.max(1,text.replace(/\s/g,'').length))*5);
- return Math.max(0,Math.min(100,conf*.68+ratio*20+lengthBonus));
+ return Math.max(0,Math.min(100,conf*.60+ratio*18+lengthBonus+Math.min(10,domainHits(text)*2)));
 }
-async function detectOrientation(img){
- setStatus('กำลังตรวจมุมเอกสาร…',5,'ป้องกัน OCR อ่านภาพเอียง');
- let worker;
- try{
-  const probe=scaledCanvas(img,1400);
-  worker=await Tesseract.createWorker('eng',Tesseract.OEM.DEFAULT,{
-   legacyCore:true,legacyLang:true,
-   logger:m=>{if(m.status==='loading tesseract core'||m.status==='loading language traineddata')setStatus('กำลังตรวจมุมเอกสาร…',6)}
-  });
-  const d=await worker.detect(probe);
-  const orientation=Number(d?.data?.orientation_degrees||0);
-  const confidence=Number(d?.data?.orientation_confidence||0);
-  const correction=((360-orientation)%360+360)%360;
-  return {correction,orientation,confidence};
- }catch(e){
-  console.warn('orientation_detect_failed',e);
-  return {correction:0,orientation:0,confidence:0};
- }finally{try{if(worker)await worker.terminate()}catch{}}
+async function chooseRotation(w,img){
+ const probeBase=scaledCanvas(img,PROBE_DIM);
+ const landscape=probeBase.width>probeBase.height*1.10;
+ const rotations=landscape?[90,270,0]:[0,180,90,270];
+ await w.setParameters({tessedit_pageseg_mode:Tesseract.PSM.SPARSE_TEXT,preserve_interword_spaces:'1',user_defined_dpi:'220'});
+ let best={rotation:rotations[0],score:-1,confidence:0};
+ for(let i=0;i<rotations.length;i++){
+  const rot=rotations[i];
+  setStatus('กำลังหามุมเอกสาร…',12+Math.round(i/rotations.length*18),'ลองมุม '+rot+'°');
+  const probe=enhanceCanvas(rotateCanvas(probeBase,rot));
+  const r=await w.recognize(probe);
+  const score=quality(r);
+  if(score>best.score)best={rotation:rot,score,confidence:Number(r?.data?.confidence||0)};
+ }
+ return best;
 }
 async function createOcrWorker(){
  setStatus('กำลังโหลด OCR ภาษาไทยและอังกฤษ…',14);
@@ -141,11 +143,6 @@ async function createOcrWorker(){
     setStatus('กำลังอ่านข้อความ…',p,'OCR อัตโนมัติบนอุปกรณ์');
    }
   }
- });
- await w.setParameters({
-  tessedit_pageseg_mode:Tesseract.PSM.AUTO,
-  preserve_interword_spaces:'1',
-  user_defined_dpi:'300'
  });
  return w;
 }
@@ -163,17 +160,31 @@ async function bestImageOCR(w,canvas){
  return {text:String(best?.data?.text||''),confidence:Number(best?.data?.confidence||0),quality:bestQ,mode};
 }
 async function imageOCR(fileUrl){
- const blob=await fileBlob(fileUrl),img=await blobImage(blob);
- const orient=await detectOrientation(img);
- let base=scaledCanvas(img,MAX_DIM);
- base=rotateCanvas(base,orient.correction);
- const enhanced=enhanceCanvas(base);
- media.replaceChildren(enhanced);enhanced.className='preview';
- setStatus('ปรับภาพเรียบร้อยแล้ว',12,'หมุน '+orient.correction+'° • grayscale + contrast');
- const w=await createOcrWorker();
+ const blob=await fileBlob(fileUrl),img=await blobImage(blob),w=await createOcrWorker();
  try{
-  const out=await bestImageOCR(w,enhanced);
-  return {...out,orientation_degrees:orient.correction,preprocessing:'rotate+grayscale+contrast'};
+  const orient=await chooseRotation(w,img);
+  setStatus('เลือกมุม '+orient.rotation+'°',34,'คะแนนมุม '+Math.round(orient.score)+'/100');
+  const full=enhanceCanvas(rotateCanvas(scaledCanvas(img,MAX_DIM),orient.rotation));
+  media.replaceChildren(full);full.className='preview';
+
+  await w.setParameters({tessedit_pageseg_mode:Tesseract.PSM.AUTO,preserve_interword_spaces:'1',user_defined_dpi:'300'});
+  setStatus('กำลังอ่านข้อความจริง…',38,'โหมดเอกสารอัตโนมัติ');
+  let best=await w.recognize(full),bestQ=quality(best),mode='auto';
+
+  if(bestQ<58||Number(best?.data?.confidence||0)<48){
+   setStatus('กำลังเก็บข้อความเพิ่มเติม…',76,'ผลรอบแรกยังไม่ชัด');
+   await w.setParameters({tessedit_pageseg_mode:Tesseract.PSM.SPARSE_TEXT,preserve_interword_spaces:'1',user_defined_dpi:'300'});
+   const retry=await w.recognize(full),q=quality(retry);
+   if(q>bestQ){best=retry;bestQ=q;mode='sparse_text'}
+  }
+  return {
+   text:String(best?.data?.text||''),
+   confidence:Number(best?.data?.confidence||0),
+   quality:bestQ,
+   mode,
+   orientation_degrees:orient.rotation,
+   preprocessing:'multi-rotation-probe+grayscale+contrast'
+  };
  }finally{try{await w.terminate()}catch{}}
 }
 async function pdfOCR(fileUrl){
@@ -200,6 +211,14 @@ async function pdfOCR(fileUrl){
   };
  }finally{try{if(w)await w.terminate()}catch{}}
 }
+async function autoClose(){
+ await new Promise(r=>setTimeout(r,850));
+ try{window.close()}catch{}
+ await new Promise(r=>setTimeout(r,500));
+ if(document.visibilityState==='visible'){
+  try{if(history.length>1)history.back()}catch{}
+ }
+}
 async function run(){
  btn.hidden=true;res.innerHTML='';media.innerHTML='';detail.textContent='';
  try{
@@ -217,8 +236,9 @@ async function run(){
     page_segmentation:out.mode,
     preprocessing:out.preprocessing
   });
-  setStatus('เสร็จแล้ว',100);
-  res.innerHTML='<div class="ok">✅ อ่านเอกสารเสร็จแล้ว<br><br>ผลถูกส่งกลับ LINE อัตโนมัติแล้ว กลับไปตรวจข้อความแล้วเลือก <b>ยืนยัน</b> หรือ <b>ยกเลิก</b> ได้เลย</div>';
+  setStatus('ส่งผลกลับ LINE แล้ว',100,'กำลังกลับ LINE…');
+  res.innerHTML='<div class="ok">✅ อ่านเอกสารเสร็จแล้ว<br><br>ผลถูกส่งกลับ LINE แล้ว กำลังปิดหน้านี้อัตโนมัติ…</div>';
+  autoClose();
  }catch(e){
   console.error(e);
   setStatus('อ่านเอกสารไม่สำเร็จ',0);
