@@ -24,7 +24,7 @@ button{width:100%;border:0;border-radius:14px;padding:14px 18px;font-size:16px;f
 <body>
 <div class="wrap"><div class="card">
 <h1>🔎 อ่านรูป/เอกสาร</h1>
-<p class="muted">อิ่มอุ่นจะลองหลายมุม เลือกมุมที่อ่านข้อความได้ดีที่สุด แล้วส่งผลกลับ LINE อัตโนมัติ</p>
+<p class="muted">อิ่มอุ่นจะเลือกมุมเอกสารอัตโนมัติ แล้วอ่านข้อความบนเครื่องนี้</p>
 <p class="privacy">🔒 OCR ทำบนอุปกรณ์นี้ รูปหรือ PDF จะไม่ถูกส่งไปบริการ OCR ภายนอก</p>
 <div id="media"></div>
 <div id="status">กำลังตรวจสอบลิงก์…</div>
@@ -118,12 +118,12 @@ function quality(result){
 async function chooseRotation(w,img){
  const probeBase=scaledCanvas(img,PROBE_DIM);
  const landscape=probeBase.width>probeBase.height*1.10;
- const rotations=landscape?[90,270,0]:[0,180,90,270];
+ const rotations=landscape?[90,270]:[0,180];
  await w.setParameters({tessedit_pageseg_mode:Tesseract.PSM.SPARSE_TEXT,preserve_interword_spaces:'1',user_defined_dpi:'220'});
  let best={rotation:rotations[0],score:-1,confidence:0};
  for(let i=0;i<rotations.length;i++){
   const rot=rotations[i];
-  setStatus('กำลังหามุมเอกสาร…',12+Math.round(i/rotations.length*18),'ลองมุม '+rot+'°');
+  setStatus('กำลังหามุมเอกสาร…',18+Math.round(i/rotations.length*14),'ลองมุม '+rot+'°');
   const probe=enhanceCanvas(rotateCanvas(probeBase,rot));
   const r=await w.recognize(probe);
   const score=quality(r);
@@ -132,19 +132,28 @@ async function chooseRotation(w,img){
  return best;
 }
 async function createOcrWorker(){
- setStatus('กำลังโหลด OCR ภาษาไทยและอังกฤษ…',14);
- const w=await Tesseract.createWorker(['tha','eng'],Tesseract.OEM.LSTM_ONLY,{
-  workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@7.0.0/dist/worker.min.js',
-  corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@7.0.0',
-  langPath:'https://tessdata.projectnaptha.com/4.0.0_best',
-  logger:m=>{
-   if(m.status==='recognizing text'){
-    const p=22+Math.round((m.progress||0)*68);
-    setStatus('กำลังอ่านข้อความ…',p,'OCR อัตโนมัติบนอุปกรณ์');
-   }
-  }
- });
- return w;
+ setStatus('กำลังโหลด OCR ภาษาไทยและอังกฤษ…',8,'โมเดลขนาดเล็กสำหรับมือถือ');
+ let timer;
+ const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('โหลด OCR นานเกินไป กรุณาลองใหม่')),25000)});
+ try{
+  const w=await Promise.race([
+   Tesseract.createWorker(['tha','eng'],Tesseract.OEM.LSTM_ONLY,{
+    workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@7.0.0/dist/worker.min.js',
+    corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@7.0.0',
+    langPath:'https://tessdata.projectnaptha.com/4.0.0_fast',
+    logger:m=>{
+     if(m.status==='loading language traineddata')setStatus('กำลังโหลดภาษาไทยและอังกฤษ…',10,'ครั้งแรกอาจใช้เวลาสักครู่');
+     if(m.status==='initializing api')setStatus('กำลังเตรียม OCR…',14);
+     if(m.status==='recognizing text'){
+      const p=30+Math.round((m.progress||0)*58);
+      setStatus('กำลังอ่านข้อความ…',p,'กำลังประมวลผลบนอุปกรณ์');
+     }
+    }
+   }),
+   timeout
+  ]);
+  return w;
+ }finally{clearTimeout(timer)}
 }
 async function bestImageOCR(w,canvas){
  setStatus('กำลังอ่านข้อความ…',22,'โหมดเอกสารหลายช่อง');
@@ -212,11 +221,11 @@ async function pdfOCR(fileUrl){
  }finally{try{if(w)await w.terminate()}catch{}}
 }
 async function autoClose(){
- await new Promise(r=>setTimeout(r,850));
+ await sleep(650);
  try{window.close()}catch{}
- await new Promise(r=>setTimeout(r,500));
+ await sleep(500);
  if(document.visibilityState==='visible'){
-  try{if(history.length>1)history.back()}catch{}
+  try{history.back()}catch{}
  }
 }
 async function run(){
