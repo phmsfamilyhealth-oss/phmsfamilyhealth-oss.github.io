@@ -241,11 +241,14 @@ async function run(){
  const token=getToken();
  if(!token){setStatus('อ่านเอกสารไม่สำเร็จ',0);res.innerHTML='<div class="err">⚠️ ลิงก์ไม่ถูกต้องหรือหมดอายุ</div>';return}
  await keepAwake();
- let hardTimer;
- const hardTimeout=new Promise((_,reject)=>{hardTimer=setTimeout(()=>reject(new Error('ocr_hard_timeout')),30000)});
+ let hardTimer,slowTimer;
+ const hardTimeout=new Promise((_,reject)=>{hardTimer=setTimeout(()=>reject(new Error('ocr_hard_timeout')),90000)});
  try{
   setStatus('กำลังเปิดไฟล์…',1);
   const boot=await api({action:'bootstrap',token});
+  if(boot.intent_resource==='appointment'){
+    slowTimer=setTimeout(()=>{api({action:'processing_slow',token}).catch(err=>console.error('processing_slow',err))},60000);
+  }
   const out=await Promise.race([
     boot.mime_type==='application/pdf'?pdfOCR(boot.file_url):imageOCR(boot.file_url),
     hardTimeout
@@ -260,12 +263,12 @@ async function run(){
     page_segmentation:out.mode,
     preprocessing:out.preprocessing
   });
-  runDone=true;clearTimeout(hardTimer);await releaseWake();
+  runDone=true;clearTimeout(hardTimer);clearTimeout(slowTimer);await releaseWake();
   setStatus('ส่งผลกลับ LINE แล้ว',100,'กำลังกลับ LINE…');
   res.innerHTML='<div class="ok">✅ อ่านเอกสารเสร็จแล้ว<br><br>ผลถูกส่งกลับ LINE แล้ว กำลังปิดหน้านี้อัตโนมัติ…</div>';
   autoClose();
  }catch(e){
-  console.error(e);runDone=true;clearTimeout(hardTimer);
+  console.error(e);runDone=true;clearTimeout(hardTimer);clearTimeout(slowTimer);
   try{if(activeWorker)await activeWorker.terminate()}catch{}activeWorker=null;
   await releaseWake();
   const msg=String(e?.message||e);
