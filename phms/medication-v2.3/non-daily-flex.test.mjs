@@ -1,5 +1,5 @@
 import test from "node:test";import assert from "node:assert/strict";import {NON_DAILY_SCREENS,renderNonDailyFlex} from "./non-daily-flex.mjs";
-const theme={header:"#0066AA",primaryText:"#112233",background:"#FFFFFF",backBackground:"#DCECFB",backText:"#113355"};
+const theme={header:"#0066AA",primaryText:"#112233",background:"#FFFFFF",backBackground:"#DCECFB",backText:"#113355",buttonText:"#FFFFFF"};
 const a={label:"ต่อไป",token:"medctx:abcdefghijklmno"},back={label:"↩️ กลับ",token:"medctx:back-secure-12345"};
 for(const screen of NON_DAILY_SCREENS)test("Flex card "+screen,()=>{const x=renderNonDailyFlex({screen,subtitle:"สำหรับสมาชิก",lines:["ใช้เฉพาะวันที่ได้รับคำสั่ง"],actions:[a],backAction:back,theme});assert.equal(x.type,"flex");assert.equal(x.contents.footer.contents.at(-1).height,"44px");assert.equal(x.contents.footer.contents.at(-1).action.data,back.token)});
 test("all nine screens defined",()=>assert.equal(NON_DAILY_SCREENS.length,9));
