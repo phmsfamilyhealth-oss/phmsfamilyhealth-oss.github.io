@@ -1,0 +1,10 @@
+import test from "node:test";import assert from "node:assert/strict";import {proposeOneOffScheduleChange as p} from "./schedule-one-off-shift.mjs";
+const base={scheduledDoseId:"c1f19518-7dc0-4b39-a134-fceeea802b6d",reason:"ผู้ดูแลพบการเปลี่ยนเวลาชั่วคราว",kind:"shift",requestedAt:"2026-10-24T14:00:00+07:00",actorAuthorized:true,orderVerified:true};
+test("one off proposal does not modify main order",()=>assert.equal(p(base).changeMasterOrder,false));
+test("requires audit",()=>assert.equal(p(base).requiresTransactionalAudit,true));
+test("reject unauthorized actor",()=>assert.throws(()=>p({...base,actorAuthorized:false})));
+test("reject unverified order",()=>assert.throws(()=>p({...base,orderVerified:false})));
+test("reject missing reason",()=>assert.throws(()=>p({...base,reason:""})));
+test("reject unrecognized action",()=>assert.throws(()=>p({...base,kind:"cancel"})));
+test("reject invalid time",()=>assert.throws(()=>p({...base,requestedAt:"bad-date"})));
+test("skip needs reason but no new date",()=>assert.equal(p({...base,kind:"skip",requestedAt:null}).requestedAt,null));
