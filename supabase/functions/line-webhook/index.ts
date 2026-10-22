@@ -6078,6 +6078,17 @@ function phmsApptPickerCard(title:string,sub:string,options:any[],back=false){
    ...(back?[{type:'button',style:'primary',action:{type:'postback',label:'↩️ กลับเลือกแบบ',data:'เลือกประเภทนัดใหม่'}}]:[]),
    {type:'button',style:'primary',action:{type:'postback',label:'❌ ยกเลิกเพิ่มนัด',data:'ยกเลิกเพิ่มนัด'}}]}}}
 }
+/* PHMS_SELECTED_PERSON_APPOINTMENT_CONTEXT_FIX: use existing selected person; no repeat selection. */
+async function appointmentActivePersonName(u:string,k:string,id:string):Promise<string>{
+ try{
+  const d=one(await rpc(u,k,'phms_get_line_person_dashboard',{p_line_user_id:id}));
+  const name=String(d?.display_name||d?.first_name||'').trim();
+  return name||'บุคคลที่เลือก';
+ }catch(err){
+  console.error('appointment_person_context_lookup_failed',String(err));
+  return 'บุคคลที่เลือก';
+ }
+}
 async function replyAppointmentTypePicker(rt:string,u:string,k:string,id:string,t:string,personName:string){
  const hist=await phmsAppointmentHistoryPresence(u,k,id);
  let canReschedule=false;
@@ -11824,7 +11835,7 @@ async function personDashboardMessages(u:string,k:string,id:string,title='👤 �
    {type:'text',text:'ข้อมูลของ '+String(d?.display_name||'บุคคล').trim(),weight:'regular',size:'md',color:'#111111',wrap:true,margin:'xs'},
    
   ]},
-  body:{type:'box',layout:'vertical',spacing:'xs',paddingAll:'10px',contents:profileBody},
+  body:{type:'box',layout:'vertical',height:'340px',spacing:'xs',paddingAll:'10px',contents:profileBody},
   footer:{type:'box',layout:'vertical',spacing:'xs',paddingAll:'8px',contents:profileFooter}
  };
  let extraSummary:any=null;
@@ -15636,7 +15647,7 @@ if(sourceType==='user'&&id&&e.replyToken&&e.type==='postback'&&c==='เพิ่
 /* PHMS_REFILL_SLICE1_LIVE_V1 */
 if(sourceType==='user'&&id&&e.replyToken){
  const prev=await getState(u,k,id);
- const isRefillCommand=c==='phms_refill_begin'||c==='phms_refill_cancel'||c==='phms_refill_confirm'||c==='phms_refill_back'||c==='phms_refill_meds_done'||/^phms_refill_med [a-f0-9-]{36}$/.test(c)||/^phms_refill_detail [a-f0-9-]{36}$/.test(c);
+ const isRefillCommand=c==='phms_refill_begin'||c==='phms_refill_cancel'||c==='phms_refill_confirm'||c==='phms_refill_back'||c==='phms_refill_med_done'||c==='phms_refill_med_more'||/^phms_refill_med [a-f0-9-]{36}$/.test(c)||/^phms_refill_detail [a-f0-9-]{36}$/.test(c);
  if(isRefillCommand||prev?.state_key==='phms_refill_s1'){
   try{
    const done=async(title:string,lines:string[],actions:any[]=[])=>await replyMessages(e.replyToken,t,[phmsRefillStepCard(title,lines,actions)]);
@@ -15646,7 +15657,7 @@ if(sourceType==='user'&&id&&e.replyToken){
     const meds=Array.isArray(opt?.items)?opt.items:[];
     if(!meds.length){await done('💊 นัดรับยาเดิม',['ยังไม่มีรายการยาในทะเบียนของบุคคลนี้','เพิ่มข้อมูลยาในทะเบียนก่อน แล้วกลับมานัดรับยา'],[{label:'↩️ กลับ',data:'เพิ่มนัด'}]);continue;}
     await state(u,k,id,'phms_refill_s1',{step:'med',key:crypto.randomUUID(),person:opt.person_name,person_id:opt.person_id,meds:[]});
-    await done('💊 เลือกยาที่จะรับ',['ผู้รับยา: '+String(opt.person_name||'บุคคลที่เลือก'),'เลือกยาได้หลายรายการ กดอีกครั้งเพื่อยกเลิก'],[...meds.slice(0,8).map((m:any)=>({label:String(m.name||'ยา').slice(0,18),data:'phms_refill_med '+m.person_medication_id})),{label:'❌ ยกเลิก',data:'phms_refill_cancel'}]);continue;
+    await done('💊 รับยาเดิม — เลือกยา',['นัดรับยาให้ '+String(opt.person_name||'บุคคลที่เลือก'),'เลือกรายการยาที่จะรับ'],[...meds.slice(0,8).map((m:any)=>({label:String(m.name||'ยา').slice(0,18),data:'phms_refill_med '+m.person_medication_id})),{label:'↩️ กลับ',data:'phms_refill_cancel'}]);continue;
    }
    if(/^phms_refill_detail [a-f0-9-]{36}$/.test(c)){
      const d=one(await rpc(u,k,'phms_med_v23_refill_detail',{p_line_user_id:id,p_appointment_id:c.split(' ')[1]}));
@@ -15656,20 +15667,25 @@ if(sourceType==='user'&&id&&e.replyToken){
    if(!d.key)throw Error('refill_session_expired');
    if(/^phms_refill_med [a-f0-9-]{36}$/.test(c)){
      const opt=one(await rpc(u,k,'phms_med_v23_refill_options',{p_line_user_id:id}));
-     if(d.step!=='med'||opt?.person_id!==d.person_id)throw Error('refill_person_context_changed');
-     const medId=c.split(' ')[1];
-     if(!opt?.items?.some((m:any)=>m.person_medication_id===medId))throw Error('refill_medication_not_authorized');
-     const selected=new Set<string>(Array.isArray(d.meds)?d.meds:[]);
-     if(selected.has(medId))selected.delete(medId);else selected.add(medId);
-     d.meds=[...selected];await state(u,k,id,'phms_refill_s1',d);
-     await done('💊 เลือกยาที่จะรับ',['ผู้รับยา: '+String(d.person||'-'),'เลือกแล้ว '+d.meds.length+' รายการ','กดชื่อยาเพื่อเลือกหรือยกเลิก'],[...opt.items.slice(0,8).map((m:any)=>({label:(selected.has(m.person_medication_id)?'✅ ':'▫️ ')+String(m.name||'ยา').slice(0,15),data:'phms_refill_med '+m.person_medication_id})),...(d.meds.length?[{label:'➡️ เลือกวันนัด',data:'phms_refill_meds_done'}]:[]),{label:'❌ ยกเลิก',data:'phms_refill_cancel'}]);continue;
+     if(opt?.person_id!==d.person_id)throw Error('refill_person_context_changed');
+     if(!opt?.items?.some((m:any)=>m.person_medication_id===c.split(' ')[1]))throw Error('refill_medication_not_authorized');
+     const chosen=c.split(' ')[1];d.meds=Array.isArray(d.meds)?d.meds:[];if(d.meds.includes(chosen))d.meds=d.meds.filter((v:string)=>v!==chosen);else d.meds.push(chosen);
+     if(d.meds.length>40)throw Error('refill_too_many_medicines');
+     d.step='med';await state(u,k,id,'phms_refill_s1',d);
+     await done('💊 ยาที่เลือกแล้ว',['เลือกแล้ว '+d.meds.length+' รายการ','เพิ่มรายการอื่นได้ หรือกดเลือกวันนัด'],[{label:'💊 เลือกยาเพิ่ม',data:'phms_refill_med_more'},{label:'📅 เลือกวันนัด',data:'phms_refill_med_done'},{label:'❌ ยกเลิก',data:'phms_refill_cancel'}]);continue;
    }
-   if(c==='phms_refill_meds_done'){
-     if(d.step!=='med'||!Array.isArray(d.meds)||!d.meds.length)throw Error('refill_no_meds_selected');
+   if(c==='phms_refill_med_more'){
      const opt=one(await rpc(u,k,'phms_med_v23_refill_options',{p_line_user_id:id}));
-     if(opt?.person_id!==d.person_id||!d.meds.every((v:string)=>opt?.items?.some((m:any)=>m.person_medication_id===v)))throw Error('refill_person_context_changed');
+     const choices=(opt?.items||[]).filter((m:any)=>!(d.meds||[]).includes(m.person_medication_id));
+     if(!choices.length){await done('💊 เลือกยาครบแล้ว',['คุณเลือก '+String(d.meds?.length||0)+' รายการ'],[{label:'📅 เลือกวันนัด',data:'phms_refill_med_done'}]);continue;}
+     await done('💊 เลือกรายการเพิ่ม',['เลือกยาที่จะรับเพิ่ม'],[...choices.slice(0,5).map((m:any)=>({label:String(m.name||'ยา').slice(0,18),data:'phms_refill_med '+m.person_medication_id})),{label:'📅 เลือกวันนัด',data:'phms_refill_med_done'}]);continue;
+   }
+   if(c==='phms_refill_med_done'){
+     if(!Array.isArray(d.meds)||!d.meds.length)throw Error('refill_medication_required');
+     const opt=one(await rpc(u,k,'phms_med_v23_refill_options',{p_line_user_id:id}));
+     if(opt?.person_id!==d.person_id||!d.meds.every((v:string)=>opt.items?.some((m:any)=>m.person_medication_id===v)))throw Error('refill_person_context_changed');
      d.step='date';await state(u,k,id,'phms_refill_s1',d);
-     await done('📅 นัดรับยาวันไหน',['พิมพ์วันและเวลา เช่น 2026-11-05 09:00','ใช้เวลาประเทศไทย'],[{label:'↩️ เลือกยาใหม่',data:'phms_refill_begin'}]);continue;
+     await done('📅 นัดรับยาวันไหน',['พิมพ์วันและเวลา เช่น 2026-11-05 09:00','ใช้เวลาประเทศไทย (เวลาโรงพยาบาล)'],[{label:'💊 เลือกยาเพิ่ม',data:'phms_refill_med_more'}]);continue;
    }
    if(c==='phms_refill_back'){
      if(d.step==='review'){d.step='location';await state(u,k,id,'phms_refill_s1',d);await done('🏥 จุดรับยา',['พิมพ์จุดรับยาที่โรงพยาบาล เช่น ห้องจ่ายยา OPD']);}
@@ -15679,8 +15695,8 @@ if(sourceType==='user'&&id&&e.replyToken){
    if(c==='phms_refill_confirm'){
      if(d.step!=='review'||!Array.isArray(d.meds)||!d.meds.length||!d.at||!d.hospital)throw Error('refill_incomplete');
      const opt=one(await rpc(u,k,'phms_med_v23_refill_options',{p_line_user_id:id}));
-     if(opt?.person_id!==d.person_id||!d.meds.every((v:string)=>opt?.items?.some((m:any)=>m.person_medication_id===v)))throw Error('refill_person_context_changed');
-     const saved=one(await rpc(u,k,'phms_med_v23_refill_create',{p_line_user_id:id,p_key:d.key,p_at:d.at,p_hospital:d.hospital,p_location:d.location||null,p_items:d.meds.map((person_medication_id:string)=>({person_medication_id})),p_notes:null}));
+     if(opt?.person_id!==d.person_id||new Set(d.meds).size!==d.meds.length||!d.meds.every((v:string)=>opt.items?.some((m:any)=>m.person_medication_id===v)))throw Error('refill_person_context_changed');
+     const saved=one(await rpc(u,k,'phms_med_v23_refill_create',{p_line_user_id:id,p_key:d.key,p_at:d.at,p_hospital:d.hospital,p_location:d.location||null,p_items:d.meds.map((v:string)=>({person_medication_id:v})),p_notes:null}));
      const detail=one(await rpc(u,k,'phms_med_v23_refill_detail',{p_line_user_id:id,p_appointment_id:saved.appointment_id}));
      await clear(u,k,id);
      await done('✅ บันทึกนัดรับยาเรียบร้อย',['โรงพยาบาล: '+String(detail.hospital_name||'-'),'วันนัด: '+String(detail.appointment_at||'-'),'รายการยา: '+String(detail.items?.length||0)+' รายการ','ยังไม่มีการเพิ่มยาลงสต็อกจากใบนัด'],[{label:'🔎 ดูรายละเอียด',data:'phms_refill_detail '+saved.appointment_id},{label:'↩️ เมนูนัด',data:'เพิ่มนัด'}]);continue;
@@ -15700,7 +15716,7 @@ if(sourceType==='user'&&id&&e.replyToken){
     if(d.step==='location'){
      if(c.length<2||c.length>180)throw Error('refill_location_invalid');
      d.location=c==='ไม่ทราบ'?null:c;d.step='review';await state(u,k,id,'phms_refill_s1',d);
-     await done('🔎 ตรวจข้อมูลก่อนบันทึก',['ผู้รับยา: '+String(d.person||'-'),'วันนัด: '+String(d.at),'โรงพยาบาล: '+d.hospital,'จุดรับยา: '+String(d.location||'ยังไม่ทราบ'),'จำนวนรายการยา: '+String(d.meds?.length||0),'นัดนี้ยังไม่เพิ่มสต็อกยา'],[{label:'✅ ยืนยันบันทึก',data:'phms_refill_confirm'},{label:'↩️ แก้จุดรับยา',data:'phms_refill_back'},{label:'❌ ยกเลิก',data:'phms_refill_cancel'}]);continue;
+     await done('🔎 ตรวจข้อมูลก่อนบันทึก',['ผู้รับยา: '+String(d.person||'-'),'รายการยา: '+String(d.meds?.length||0)+' รายการ','วันนัด: '+String(d.at),'โรงพยาบาล: '+d.hospital,'จุดรับยา: '+String(d.location||'ยังไม่ทราบ'),'นัดนี้ยังไม่เพิ่มสต็อกยา'],[{label:'✅ ยืนยันบันทึก',data:'phms_refill_confirm'},{label:'↩️ แก้จุดรับยา',data:'phms_refill_back'},{label:'❌ ยกเลิก',data:'phms_refill_cancel'}]);continue;
     }
    }
    if(d.step==='review'){await done('🔎 ตรวจข้อมูลก่อนบันทึก',['เลือกปุ่มยืนยัน หรือย้อนกลับแก้ไข'],[{label:'✅ ยืนยันบันทึก',data:'phms_refill_confirm'},{label:'↩️ แก้ไข',data:'phms_refill_back'}]);continue;}
