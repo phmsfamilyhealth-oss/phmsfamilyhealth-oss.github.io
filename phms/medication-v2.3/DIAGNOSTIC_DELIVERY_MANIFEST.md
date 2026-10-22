@@ -5,6 +5,9 @@ Production DB inspected 2026-10-22. No existing procedure/investigation tables o
 ## Verified infrastructure
 - Applied: `phms_diagnostic_appointment_procedure_items_20261022` (additive table; RLS enabled and no direct client grants)
 - Applied: `phms_diagnostic_appointment_authorized_detail_20261022` (authorized server-side read-only RPC; not connected to LINE yet)
+- Applied: `phms_diagnostic_add_procedure_idempotent_20261022` (idempotent, locked procedure insertion RPC; service-role only; not connected to LINE yet)
+- Production readback: procedure rows = 0; RLS enabled; anon cannot execute write or detail RPC; service_role may execute.
+- Live line-webhook v1323; no references to diagnostic add-procedure RPC. Feature remains OFF.
 - LINE UAT and clinical validation: NOT VERIFIED
 
 | Requirement | Component | DB/RPC | LINE screen | Postback | Navigation | Test | Deploy | Evidence | Status |
