@@ -1,0 +1,25 @@
+name: PHMS Medication Navigation Contract
+on:
+  push:
+    branches:
+      - feature/med-v23-navigation-gated
+    paths:
+      - "phms/medication-v2.3/**"
+      - ".github/workflows/phms-med-navigation.yml"
+  pull_request:
+    paths:
+      - "phms/medication-v2.3/**"
+      - ".github/workflows/phms-med-navigation.yml"
+permissions:
+  contents: read
+jobs:
+  navigation-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run navigation unit tests
+        run: node --test phms/medication-v2.3/navigation-registry.test.mjs
