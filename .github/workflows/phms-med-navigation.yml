@@ -22,4 +22,4 @@ jobs:
         with:
           node-version: '22'
       - name: Run navigation unit tests
-        run: node --test phms/medication-v2.3/navigation-registry.test.mjs
+        run: node --test phms/medication-v2.3/*.test.mjs
