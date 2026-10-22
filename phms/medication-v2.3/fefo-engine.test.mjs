@@ -1,0 +1,18 @@
+import test from "node:test";import assert from "node:assert/strict";
+import {containerCode,rankPickableContainers} from "./fefo-engine.mjs";
+const base={containerId:"MED-001-001",productMatched:true,orderVerified:true,familyAuthorized:true,locationAuthorized:true,sharedUseAuthorized:true,labelStatus:"LABEL_VERIFIED",lifecycleStatus:"unopened",quarantined:false,recalled:false,availableQuantity:5,expiryDate:"2030-12-31",receivedAt:"2026-01-01"};
+const clock=new Date("2026-10-22");
+test("stable human readable codes",()=>assert.equal(containerCode(1,2),"MED-001-002"));
+test("sequence widens after 999",()=>assert.equal(containerCode(1000,1001),"MED-1000-1001"));
+test("invalid sequences rejected",()=>assert.throws(()=>containerCode(0,1)));
+test("FEFO sorts by effective expiry not sequence",()=>assert.equal(rankPickableContainers([{...base},{...base,containerId:"MED-001-002",expiryDate:"2027-01-01"}],clock).eligible[0].containerId,"MED-001-002"));
+test("unverified label blocked",()=>assert.equal(rankPickableContainers([{...base,labelStatus:"LABEL_PENDING"}],clock).eligible.length,0));
+test("missing expiry blocked",()=>assert.equal(rankPickableContainers([{...base,expiryDate:null}],clock).eligible.length,0));
+test("expired container blocked",()=>assert.equal(rankPickableContainers([{...base,expiryDate:"2025-01-01"}],clock).eligible.length,0));
+test("empty container blocked",()=>assert.equal(rankPickableContainers([{...base,availableQuantity:0}],clock).eligible.length,0));
+test("wrong patient order blocked",()=>assert.equal(rankPickableContainers([{...base,orderVerified:false}],clock).eligible.length,0));
+test("cross family access blocked",()=>assert.equal(rankPickableContainers([{...base,familyAuthorized:false}],clock).eligible.length,0));
+test("opened bottle uses beyond use limit",()=>assert.equal(rankPickableContainers([{...base,lifecycleStatus:"opened",openedRequiresBeyondUseDate:true,beyondUseAt:"2026-10-20"}],clock).eligible.length,0));
+test("opened bottle without beyond use date blocked when required",()=>assert.equal(rankPickableContainers([{...base,lifecycleStatus:"opened",openedRequiresBeyondUseDate:true}],clock).eligible.length,0));
+test("recalled container blocked",()=>assert.equal(rankPickableContainers([{...base,recalled:true}],clock).eligible.length,0));
+test("same expiry sorts deterministically by receipt date",()=>assert.equal(rankPickableContainers([{...base,containerId:"MED-001-002",receivedAt:"2026-05-01"},base],clock).eligible[0].containerId,"MED-001-001"));

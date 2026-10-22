@@ -1,0 +1,11 @@
+import test from "node:test";import assert from "node:assert/strict";
+import {checkMedicationNavigation,auditFlexBackButtons} from "./flex-navigation-audit.mjs";
+const back={type:"postback",label:"↩️ กลับ",data:"previous"};
+const yes=a=>String(a.label||"").startsWith("↩️");
+test("deny missing family authorization",()=>assert.equal(checkMedicationNavigation("med.list",{personChecked:true,permissionChecked:true}).ok,false));
+test("resolve only checked scope",()=>assert.equal(checkMedicationNavigation("med.list",{personChecked:true,familyChecked:true,permissionChecked:true}).back,"med.overview"));
+test("44px box passed",()=>assert.equal(auditFlexBackButtons({type:"bubble",footer:{contents:[{type:"box",height:"44px",action:back}]}},yes).ok,true));
+test("40px box rejected",()=>assert.equal(auditFlexBackButtons({type:"bubble",footer:{contents:[{type:"box",height:"40px",action:back}]}},yes).ok,false));
+test("native Flex button rejected for strict 44px",()=>assert.equal(auditFlexBackButtons({type:"bubble",footer:{contents:[{type:"button",height:"md",action:back}]}},yes).ok,false));
+test("duplicate backs rejected",()=>assert.equal(auditFlexBackButtons({type:"bubble",footer:{contents:[{type:"box",height:"44px",action:back},{type:"box",height:"44px",action:back}]}},yes).ok,false));
+test("carousel back on page 2 rejected",()=>assert.equal(auditFlexBackButtons({type:"carousel",contents:[{type:"bubble"},{type:"bubble",footer:{contents:[{type:"box",height:"44px",action:back}]}}]},yes).ok,false));
