@@ -34,5 +34,10 @@
     "Refill receipt -> inventory -> container -> expenses acceptance",
     "Actual storage byte-upload and notification delivery acceptance",
     "Visual 593px layout acceptance on LINE"
-  ]
+  ],
+  "ci": {
+    "run_id": 39921807440,
+    "conclusion": "success",
+    "url": "https://github.com/phmsfamilyhealth-oss/phmsfamilyhealth-oss.github.io/actions/runs/39921807440"
+  }
 }
