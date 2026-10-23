@@ -1,0 +1,1824 @@
+{
+  "passed": 14,
+  "engine": [
+    {
+      "version": "PostgreSQL 17.5 on aarch64-unknown-linux-gnu, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit"
+    }
+  ],
+  "network": "disabled: no LINE credentials or dispatcher network",
+  "calls": [
+    {
+      "name": "phms_start_line_structured_text_intake",
+      "result": {
+        "ok": true,
+        "raw_text": "นัดทดสอบระบบเท่านั้น",
+        "bucket_id": null,
+        "byte_size": null,
+        "mime_type": null,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "359ce2cf-9a69-4009-b7bf-0501212f8257",
+        "candidates": [
+          {
+            "id": "8d52703e-75ee-412a-9fa2-a115c9e96268",
+            "ordinal": 1,
+            "conflict_data": {
+              "warnings": [],
+              "checked_at": "2026-10-23T07:57:34.274+00:00",
+              "person_mismatch": false,
+              "blocking_conflicts": [],
+              "duplicate_detected": false
+            },
+            "review_status": "needs_review",
+            "candidate_type": "appointment",
+            "confidence_data": {
+              "provider": "line_structured_manual",
+              "human_entered": true,
+              "quality_score": 1,
+              "classification_confidence": 1
+            },
+            "normalized_data": {
+              "title": "นัดสังเคราะห์ตรวจระบบ",
+              "source_text": "นัดทดสอบระบบเท่านั้น",
+              "hospital_name": "สถานพยาบาลทดสอบ",
+              "appointment_at": "2026-12-20T10:00:00+07:00",
+              "extraction_mode": "line_structured_manual",
+              "appointment_type": "new_case",
+              "preparation_notes": "นำใบนัดมาด้วย"
+            },
+            "validation_data": {
+              "warnings": [],
+              "validated_at": "2026-10-23T07:57:34.274+00:00",
+              "blocking_errors": []
+            },
+            "fingerprint_sha256": "bd6227000d816f22685c782b92ec00a13758c221c970f29607fc4e49ac188dba",
+            "reconciliation_data": {
+              "checked_at": "2026-10-23T07:57:34.274+00:00",
+              "match_count": 0,
+              "fingerprint_sha256": "bd6227000d816f22685c782b92ec00a13758c221c970f29607fc4e49ac188dba"
+            }
+          }
+        ],
+        "session_id": "be6138a2-87de-4114-bac2-f42f8f0751a2",
+        "can_confirm": true,
+        "object_name": null,
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "359ce2cf-9a6",
+        "document_type": "appointment",
+        "session_status": "review",
+        "candidate_count": 1,
+        "checksum_sha256": null,
+        "person_required": false,
+        "raw_text_length": 20,
+        "canonical_commit": false,
+        "storage_asset_id": null,
+        "extraction_status": "completed",
+        "person_mismatch_count": 0,
+        "source_duplicate_file": false,
+        "blocking_conflict_count": 0,
+        "blocking_candidate_count": 0,
+        "classification_confidence": 1,
+        "duplicate_candidate_count": 0,
+        "source_sha256_person_mismatch": false
+      }
+    },
+    {
+      "name": "phms_finalize_line_intake_review",
+      "result": {
+        "ok": true,
+        "decision": "confirm",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "359ce2cf-9a69-4009-b7bf-0501212f8257",
+        "next_stage": "12J",
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "359ce2cf-9a6",
+        "document_type": "appointment",
+        "session_status": "confirmed",
+        "candidate_count": 1,
+        "canonical_commit": false,
+        "idempotent_replay": false,
+        "duplicate_conflict_check": "passed"
+      }
+    },
+    {
+      "name": "phms_line_try_canonical_commit",
+      "result": {
+        "ok": true,
+        "records": [
+          {
+            "ok": true,
+            "status": "scheduled",
+            "candidate_id": "8d52703e-75ee-412a-9fa2-a115c9e96268",
+            "resource_type": "appointment",
+            "appointment_id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+            "historical_record": false,
+            "idempotent_replay": false,
+            "recurring_care_plan": {
+              "ok": true,
+              "reason": "not_recurring_care",
+              "synced": false
+            }
+          }
+        ],
+        "batch_id": "be667f54-ffa7-4ee5-8670-af37f00fea7c",
+        "committed": true,
+        "pilot_gate": {
+          "mode": "pilot",
+          "reason": "pilot_scope_allowed",
+          "allowed": true,
+          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "operation": "commit",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "resources": [
+            "appointment"
+          ],
+          "max_people": 10,
+          "max_records": 500,
+          "active_people": 1,
+          "current_records": 2,
+          "requested_records": 1
+        },
+        "session_id": "be6138a2-87de-4114-bac2-f42f8f0751a2",
+        "resource_group": "clinical",
+        "resource_counts": {
+          "medications": 0,
+          "appointments": 1,
+          "health_measurements": 0
+        },
+        "canonical_commit": true,
+        "idempotent_replay": false,
+        "storage_promotion_required": false,
+        "temporary_source_asset_count": 0
+      }
+    },
+    {
+      "name": "phms_finalize_line_intake_review",
+      "result": {
+        "ok": true,
+        "decision": "confirm",
+        "source_id": "359ce2cf-9a69-4009-b7bf-0501212f8257",
+        "source_code": "359ce2cf-9a6",
+        "session_status": "confirmed",
+        "canonical_commit": false,
+        "idempotent_replay": true
+      }
+    },
+    {
+      "name": "phms_line_try_canonical_commit",
+      "result": {
+        "ok": true,
+        "records": [
+          {
+            "ok": true,
+            "status": "scheduled",
+            "candidate_id": "8d52703e-75ee-412a-9fa2-a115c9e96268",
+            "resource_type": "appointment",
+            "appointment_id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+            "historical_record": false,
+            "idempotent_replay": false,
+            "recurring_care_plan": {
+              "ok": true,
+              "reason": "not_recurring_care",
+              "synced": false
+            }
+          }
+        ],
+        "batch_id": "be667f54-ffa7-4ee5-8670-af37f00fea7c",
+        "committed": true,
+        "pilot_gate": {
+          "mode": "pilot",
+          "reason": "pilot_scope_allowed",
+          "allowed": true,
+          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "operation": "commit",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "resources": [
+            "appointment"
+          ],
+          "max_people": 10,
+          "max_records": 500,
+          "active_people": 1,
+          "current_records": 3,
+          "requested_records": 1
+        },
+        "session_id": "be6138a2-87de-4114-bac2-f42f8f0751a2",
+        "resource_group": "clinical",
+        "resource_counts": {
+          "medications": 0,
+          "appointments": 1,
+          "health_measurements": 0
+        },
+        "canonical_commit": true,
+        "idempotent_replay": true,
+        "storage_promotion_required": false,
+        "temporary_source_asset_count": 0
+      }
+    },
+    {
+      "name": "phms_line_appointment_workspace",
+      "result": {
+        "ok": true,
+        "item": {
+          "id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+          "code": "125b88c9-f93",
+          "title": "นัดสังเคราะห์ตรวจระบบ",
+          "status": "scheduled",
+          "resource": "appointment",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "created_at": "2026-10-23T07:57:34.348+00:00",
+          "created_by": "10000000-0000-4000-8000-000000000001",
+          "updated_at": "2026-10-23T07:57:34.348+00:00",
+          "hospital_name": "สถานพยาบาลทดสอบ",
+          "appointment_at": "2026-12-20T03:00:00+00:00",
+          "organization_id": "641e2763-9035-44a9-9354-ed4026bfcbed",
+          "appointment_type": "new_case",
+          "family_person_id": "40000000-0000-4000-8000-000000000001",
+          "visit_time_known": true,
+          "preparation_notes": "นำใบนัดมาด้วย",
+          "arrival_lead_minutes": 0,
+          "assignee_ack_days_before": 7,
+          "reminder_offsets_minutes": [
+            10080,
+            4320,
+            1440
+          ],
+          "post_visit_followup_minutes": 0,
+          "post_visit_followup_time_local": "20:00:00"
+        },
+        "tasks": [
+          {
+            "id": "7b554bf5-9823-4899-a72e-48ca9c86da85",
+            "code": "7b554bf5-982",
+            "title": "📄 เอาใบนัดไปด้วย",
+            "status": "pending",
+            "task_type": "document"
+          },
+          {
+            "id": "4f0a6438-01da-4786-9c73-c8853e63043c",
+            "code": "4f0a6438-01d",
+            "title": "นำใบนัดมาด้วย",
+            "status": "pending",
+            "task_type": "other"
+          }
+        ],
+        "access": {
+          "can_update": true,
+          "full_access": true,
+          "is_assignee": false,
+          "detail_access": "full",
+          "has_person_view": true
+        },
+        "assignees": [],
+        "documents": [],
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "record_id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+        "reminders": [],
+        "person_name": "ไม่ระบุชื่อ",
+        "record_code": "125b88c9-f93",
+        "acknowledgements": [],
+        "linked_resources": []
+      }
+    },
+    {
+      "name": "phms_start_line_structured_text_intake",
+      "result": {
+        "ok": true,
+        "raw_text": "ข้อมูลสังเคราะห์ follow_up",
+        "bucket_id": null,
+        "byte_size": null,
+        "mime_type": null,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "d1a2a0a5-5280-4283-8046-44d19e46fa9a",
+        "candidates": [
+          {
+            "id": "6ae5a165-f4cf-4394-853a-01bc2f931511",
+            "ordinal": 1,
+            "conflict_data": {
+              "warnings": [],
+              "checked_at": "2026-10-23T07:57:34.483+00:00",
+              "person_mismatch": false,
+              "blocking_conflicts": [],
+              "duplicate_detected": false
+            },
+            "review_status": "needs_review",
+            "candidate_type": "appointment",
+            "confidence_data": {
+              "provider": "line_structured_manual",
+              "human_entered": true,
+              "quality_score": 1,
+              "classification_confidence": 1
+            },
+            "normalized_data": {
+              "title": "ทดสอบ follow_up",
+              "source_text": "ข้อมูลสังเคราะห์ follow_up",
+              "hospital_name": "สถานพยาบาลทดสอบ",
+              "appointment_at": "2027-01-01T10:00:00+07:00",
+              "extraction_mode": "line_structured_manual",
+              "appointment_type": "follow_up"
+            },
+            "validation_data": {
+              "warnings": [],
+              "validated_at": "2026-10-23T07:57:34.483+00:00",
+              "blocking_errors": []
+            },
+            "fingerprint_sha256": "7201297637ff3bc5765cb8118e650b7ba80e2133a6cf4f6ab0f0aa5894eb5edc",
+            "reconciliation_data": {
+              "checked_at": "2026-10-23T07:57:34.483+00:00",
+              "match_count": 0,
+              "fingerprint_sha256": "7201297637ff3bc5765cb8118e650b7ba80e2133a6cf4f6ab0f0aa5894eb5edc"
+            }
+          }
+        ],
+        "session_id": "b830c93d-dd3f-42bf-af9c-8564b6c3c63b",
+        "can_confirm": true,
+        "object_name": null,
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "d1a2a0a5-528",
+        "document_type": "appointment",
+        "session_status": "review",
+        "candidate_count": 1,
+        "checksum_sha256": null,
+        "person_required": false,
+        "raw_text_length": 26,
+        "canonical_commit": false,
+        "storage_asset_id": null,
+        "extraction_status": "completed",
+        "person_mismatch_count": 0,
+        "source_duplicate_file": false,
+        "blocking_conflict_count": 0,
+        "blocking_candidate_count": 0,
+        "classification_confidence": 1,
+        "duplicate_candidate_count": 0,
+        "source_sha256_person_mismatch": false
+      }
+    },
+    {
+      "name": "phms_finalize_line_intake_review",
+      "result": {
+        "ok": true,
+        "decision": "confirm",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "d1a2a0a5-5280-4283-8046-44d19e46fa9a",
+        "next_stage": "12J",
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "d1a2a0a5-528",
+        "document_type": "appointment",
+        "session_status": "confirmed",
+        "candidate_count": 1,
+        "canonical_commit": false,
+        "idempotent_replay": false,
+        "duplicate_conflict_check": "passed"
+      }
+    },
+    {
+      "name": "phms_line_try_canonical_commit",
+      "result": {
+        "ok": true,
+        "records": [
+          {
+            "ok": true,
+            "status": "scheduled",
+            "candidate_id": "6ae5a165-f4cf-4394-853a-01bc2f931511",
+            "resource_type": "appointment",
+            "appointment_id": "a2b311d9-71db-4c9e-9914-d1e3425d768a",
+            "historical_record": false,
+            "idempotent_replay": false,
+            "recurring_care_plan": {
+              "ok": true,
+              "reason": "not_recurring_care",
+              "synced": false
+            }
+          }
+        ],
+        "batch_id": "893d9dbc-6b40-4b20-868f-ff81b859d0e8",
+        "committed": true,
+        "pilot_gate": {
+          "mode": "pilot",
+          "reason": "pilot_scope_allowed",
+          "allowed": true,
+          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "operation": "commit",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "resources": [
+            "appointment"
+          ],
+          "max_people": 10,
+          "max_records": 500,
+          "active_people": 1,
+          "current_records": 3,
+          "requested_records": 1
+        },
+        "session_id": "b830c93d-dd3f-42bf-af9c-8564b6c3c63b",
+        "resource_group": "clinical",
+        "resource_counts": {
+          "medications": 0,
+          "appointments": 1,
+          "health_measurements": 0
+        },
+        "canonical_commit": true,
+        "idempotent_replay": false,
+        "storage_promotion_required": false,
+        "temporary_source_asset_count": 0
+      }
+    },
+    {
+      "name": "phms_start_line_structured_text_intake",
+      "result": {
+        "ok": true,
+        "raw_text": "ข้อมูลสังเคราะห์ referral",
+        "bucket_id": null,
+        "byte_size": null,
+        "mime_type": null,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "f45f11ce-934e-41eb-a73d-ac14743f7127",
+        "candidates": [
+          {
+            "id": "a2540b2e-9ab5-4b75-a3c4-033897d22291",
+            "ordinal": 1,
+            "conflict_data": {
+              "warnings": [],
+              "checked_at": "2026-10-23T07:57:34.532+00:00",
+              "person_mismatch": false,
+              "blocking_conflicts": [],
+              "duplicate_detected": false
+            },
+            "review_status": "needs_review",
+            "candidate_type": "appointment",
+            "confidence_data": {
+              "provider": "line_structured_manual",
+              "human_entered": true,
+              "quality_score": 1,
+              "classification_confidence": 1
+            },
+            "normalized_data": {
+              "title": "ทดสอบ referral",
+              "source_text": "ข้อมูลสังเคราะห์ referral",
+              "hospital_name": "สถานพยาบาลทดสอบ",
+              "appointment_at": "2027-01-02T10:00:00+07:00",
+              "extraction_mode": "line_structured_manual",
+              "appointment_type": "referral"
+            },
+            "validation_data": {
+              "warnings": [],
+              "validated_at": "2026-10-23T07:57:34.532+00:00",
+              "blocking_errors": []
+            },
+            "fingerprint_sha256": "1339f0b4e31633efa1d94809f5a03d7e094c3235b4ebcb3017d5202e4bfd5fed",
+            "reconciliation_data": {
+              "checked_at": "2026-10-23T07:57:34.532+00:00",
+              "match_count": 0,
+              "fingerprint_sha256": "1339f0b4e31633efa1d94809f5a03d7e094c3235b4ebcb3017d5202e4bfd5fed"
+            }
+          }
+        ],
+        "session_id": "5196fef9-f710-4606-a2e2-127b8e54ff18",
+        "can_confirm": true,
+        "object_name": null,
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "f45f11ce-934",
+        "document_type": "appointment",
+        "session_status": "review",
+        "candidate_count": 1,
+        "checksum_sha256": null,
+        "person_required": false,
+        "raw_text_length": 25,
+        "canonical_commit": false,
+        "storage_asset_id": null,
+        "extraction_status": "completed",
+        "person_mismatch_count": 0,
+        "source_duplicate_file": false,
+        "blocking_conflict_count": 0,
+        "blocking_candidate_count": 0,
+        "classification_confidence": 1,
+        "duplicate_candidate_count": 0,
+        "source_sha256_person_mismatch": false
+      }
+    },
+    {
+      "name": "phms_finalize_line_intake_review",
+      "result": {
+        "ok": true,
+        "decision": "confirm",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "f45f11ce-934e-41eb-a73d-ac14743f7127",
+        "next_stage": "12J",
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "f45f11ce-934",
+        "document_type": "appointment",
+        "session_status": "confirmed",
+        "candidate_count": 1,
+        "canonical_commit": false,
+        "idempotent_replay": false,
+        "duplicate_conflict_check": "passed"
+      }
+    },
+    {
+      "name": "phms_line_try_canonical_commit",
+      "result": {
+        "ok": true,
+        "records": [
+          {
+            "ok": true,
+            "status": "scheduled",
+            "candidate_id": "a2540b2e-9ab5-4b75-a3c4-033897d22291",
+            "resource_type": "appointment",
+            "appointment_id": "009f2f7a-87dc-4a2b-8fa2-23193f8e822e",
+            "historical_record": false,
+            "idempotent_replay": false,
+            "recurring_care_plan": {
+              "ok": true,
+              "reason": "not_recurring_care",
+              "synced": false
+            }
+          }
+        ],
+        "batch_id": "89111431-b75b-44a0-a9d6-c704379b71bf",
+        "committed": true,
+        "pilot_gate": {
+          "mode": "pilot",
+          "reason": "pilot_scope_allowed",
+          "allowed": true,
+          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "operation": "commit",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "resources": [
+            "appointment"
+          ],
+          "max_people": 10,
+          "max_records": 500,
+          "active_people": 1,
+          "current_records": 4,
+          "requested_records": 1
+        },
+        "session_id": "5196fef9-f710-4606-a2e2-127b8e54ff18",
+        "resource_group": "clinical",
+        "resource_counts": {
+          "medications": 0,
+          "appointments": 1,
+          "health_measurements": 0
+        },
+        "canonical_commit": true,
+        "idempotent_replay": false,
+        "storage_promotion_required": false,
+        "temporary_source_asset_count": 0
+      }
+    },
+    {
+      "name": "phms_start_line_structured_text_intake",
+      "result": {
+        "ok": true,
+        "raw_text": "ข้อมูลสังเคราะห์ investigation",
+        "bucket_id": null,
+        "byte_size": null,
+        "mime_type": null,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "914e0cfc-18af-4c1d-8d76-ba56b630ca83",
+        "candidates": [
+          {
+            "id": "c9aa526f-7ade-495d-98d0-3e1f2581f9f1",
+            "ordinal": 1,
+            "conflict_data": {
+              "warnings": [],
+              "checked_at": "2026-10-23T07:57:34.585+00:00",
+              "person_mismatch": false,
+              "blocking_conflicts": [],
+              "duplicate_detected": false
+            },
+            "review_status": "needs_review",
+            "candidate_type": "appointment",
+            "confidence_data": {
+              "provider": "line_structured_manual",
+              "human_entered": true,
+              "quality_score": 1,
+              "classification_confidence": 1
+            },
+            "normalized_data": {
+              "title": "ทดสอบ investigation",
+              "source_text": "ข้อมูลสังเคราะห์ investigation",
+              "hospital_name": "สถานพยาบาลทดสอบ",
+              "appointment_at": "2027-01-03T10:00:00+07:00",
+              "extraction_mode": "line_structured_manual",
+              "appointment_type": "investigation"
+            },
+            "validation_data": {
+              "warnings": [],
+              "validated_at": "2026-10-23T07:57:34.585+00:00",
+              "blocking_errors": []
+            },
+            "fingerprint_sha256": "3e016b8ad399466d0cb06a77b19f2540533e29145256e70880d9da422600dff5",
+            "reconciliation_data": {
+              "checked_at": "2026-10-23T07:57:34.585+00:00",
+              "match_count": 0,
+              "fingerprint_sha256": "3e016b8ad399466d0cb06a77b19f2540533e29145256e70880d9da422600dff5"
+            }
+          }
+        ],
+        "session_id": "6d146718-3988-4000-bf35-4aec1f4c044a",
+        "can_confirm": true,
+        "object_name": null,
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "914e0cfc-18a",
+        "document_type": "appointment",
+        "session_status": "review",
+        "candidate_count": 1,
+        "checksum_sha256": null,
+        "person_required": false,
+        "raw_text_length": 30,
+        "canonical_commit": false,
+        "storage_asset_id": null,
+        "extraction_status": "completed",
+        "person_mismatch_count": 0,
+        "source_duplicate_file": false,
+        "blocking_conflict_count": 0,
+        "blocking_candidate_count": 0,
+        "classification_confidence": 1,
+        "duplicate_candidate_count": 0,
+        "source_sha256_person_mismatch": false
+      }
+    },
+    {
+      "name": "phms_finalize_line_intake_review",
+      "result": {
+        "ok": true,
+        "decision": "confirm",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "914e0cfc-18af-4c1d-8d76-ba56b630ca83",
+        "next_stage": "12J",
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "914e0cfc-18a",
+        "document_type": "appointment",
+        "session_status": "confirmed",
+        "candidate_count": 1,
+        "canonical_commit": false,
+        "idempotent_replay": false,
+        "duplicate_conflict_check": "passed"
+      }
+    },
+    {
+      "name": "phms_line_try_canonical_commit",
+      "result": {
+        "ok": true,
+        "records": [
+          {
+            "ok": true,
+            "status": "scheduled",
+            "candidate_id": "c9aa526f-7ade-495d-98d0-3e1f2581f9f1",
+            "resource_type": "appointment",
+            "appointment_id": "8a8b8abb-e161-4385-bc8f-b369575dc6a6",
+            "historical_record": false,
+            "idempotent_replay": false,
+            "recurring_care_plan": {
+              "ok": true,
+              "reason": "not_recurring_care",
+              "synced": false
+            }
+          }
+        ],
+        "batch_id": "b8a52a4d-a48a-41e9-a9de-aebe077d7dbe",
+        "committed": true,
+        "pilot_gate": {
+          "mode": "pilot",
+          "reason": "pilot_scope_allowed",
+          "allowed": true,
+          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "operation": "commit",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "resources": [
+            "appointment"
+          ],
+          "max_people": 10,
+          "max_records": 500,
+          "active_people": 1,
+          "current_records": 5,
+          "requested_records": 1
+        },
+        "session_id": "6d146718-3988-4000-bf35-4aec1f4c044a",
+        "resource_group": "clinical",
+        "resource_counts": {
+          "medications": 0,
+          "appointments": 1,
+          "health_measurements": 0
+        },
+        "canonical_commit": true,
+        "idempotent_replay": false,
+        "storage_promotion_required": false,
+        "temporary_source_asset_count": 0
+      }
+    },
+    {
+      "name": "phms_start_line_structured_text_intake",
+      "result": {
+        "ok": true,
+        "raw_text": "ข้อมูลสังเคราะห์ procedure",
+        "bucket_id": null,
+        "byte_size": null,
+        "mime_type": null,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "f9bc7e97-2707-4a87-8a91-6cca2693257d",
+        "candidates": [
+          {
+            "id": "91bac54a-6db0-43ff-a7f7-0a3948fd9d91",
+            "ordinal": 1,
+            "conflict_data": {
+              "warnings": [],
+              "checked_at": "2026-10-23T07:57:34.632+00:00",
+              "person_mismatch": false,
+              "blocking_conflicts": [],
+              "duplicate_detected": false
+            },
+            "review_status": "needs_review",
+            "candidate_type": "appointment",
+            "confidence_data": {
+              "provider": "line_structured_manual",
+              "human_entered": true,
+              "quality_score": 1,
+              "classification_confidence": 1
+            },
+            "normalized_data": {
+              "title": "ทดสอบ procedure",
+              "source_text": "ข้อมูลสังเคราะห์ procedure",
+              "hospital_name": "สถานพยาบาลทดสอบ",
+              "appointment_at": "2027-01-04T10:00:00+07:00",
+              "extraction_mode": "line_structured_manual",
+              "appointment_type": "procedure"
+            },
+            "validation_data": {
+              "warnings": [],
+              "validated_at": "2026-10-23T07:57:34.632+00:00",
+              "blocking_errors": []
+            },
+            "fingerprint_sha256": "117ba374654fe5868616e10cd1b5cc7169154caf5a2b87359b53d3f7b20dc4b9",
+            "reconciliation_data": {
+              "checked_at": "2026-10-23T07:57:34.632+00:00",
+              "match_count": 0,
+              "fingerprint_sha256": "117ba374654fe5868616e10cd1b5cc7169154caf5a2b87359b53d3f7b20dc4b9"
+            }
+          }
+        ],
+        "session_id": "5315f545-04f3-478d-9b45-c341a8125f02",
+        "can_confirm": true,
+        "object_name": null,
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "f9bc7e97-270",
+        "document_type": "appointment",
+        "session_status": "review",
+        "candidate_count": 1,
+        "checksum_sha256": null,
+        "person_required": false,
+        "raw_text_length": 26,
+        "canonical_commit": false,
+        "storage_asset_id": null,
+        "extraction_status": "completed",
+        "person_mismatch_count": 0,
+        "source_duplicate_file": false,
+        "blocking_conflict_count": 0,
+        "blocking_candidate_count": 0,
+        "classification_confidence": 1,
+        "duplicate_candidate_count": 0,
+        "source_sha256_person_mismatch": false
+      }
+    },
+    {
+      "name": "phms_finalize_line_intake_review",
+      "result": {
+        "ok": true,
+        "decision": "confirm",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "f9bc7e97-2707-4a87-8a91-6cca2693257d",
+        "next_stage": "12J",
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "f9bc7e97-270",
+        "document_type": "appointment",
+        "session_status": "confirmed",
+        "candidate_count": 1,
+        "canonical_commit": false,
+        "idempotent_replay": false,
+        "duplicate_conflict_check": "passed"
+      }
+    },
+    {
+      "name": "phms_line_try_canonical_commit",
+      "result": {
+        "ok": true,
+        "records": [
+          {
+            "ok": true,
+            "status": "scheduled",
+            "candidate_id": "91bac54a-6db0-43ff-a7f7-0a3948fd9d91",
+            "resource_type": "appointment",
+            "appointment_id": "e52f71e8-7806-406c-ba74-85bc37591a78",
+            "historical_record": false,
+            "idempotent_replay": false,
+            "recurring_care_plan": {
+              "ok": true,
+              "reason": "not_recurring_care",
+              "synced": false
+            }
+          }
+        ],
+        "batch_id": "63995ce7-e807-4e22-b64f-cad37c539cb9",
+        "committed": true,
+        "pilot_gate": {
+          "mode": "pilot",
+          "reason": "pilot_scope_allowed",
+          "allowed": true,
+          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "operation": "commit",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "resources": [
+            "appointment"
+          ],
+          "max_people": 10,
+          "max_records": 500,
+          "active_people": 1,
+          "current_records": 6,
+          "requested_records": 1
+        },
+        "session_id": "5315f545-04f3-478d-9b45-c341a8125f02",
+        "resource_group": "clinical",
+        "resource_counts": {
+          "medications": 0,
+          "appointments": 1,
+          "health_measurements": 0
+        },
+        "canonical_commit": true,
+        "idempotent_replay": false,
+        "storage_promotion_required": false,
+        "temporary_source_asset_count": 0
+      }
+    },
+    {
+      "name": "phms_start_line_structured_text_intake",
+      "result": {
+        "ok": true,
+        "raw_text": "ข้อมูลสังเคราะห์ checkup",
+        "bucket_id": null,
+        "byte_size": null,
+        "mime_type": null,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "6dfb71a5-59e7-40aa-8956-7fa1b08cc067",
+        "candidates": [
+          {
+            "id": "7c6bc307-02ad-442d-a194-f97ec56531c4",
+            "ordinal": 1,
+            "conflict_data": {
+              "warnings": [],
+              "checked_at": "2026-10-23T07:57:34.678+00:00",
+              "person_mismatch": false,
+              "blocking_conflicts": [],
+              "duplicate_detected": false
+            },
+            "review_status": "needs_review",
+            "candidate_type": "appointment",
+            "confidence_data": {
+              "provider": "line_structured_manual",
+              "human_entered": true,
+              "quality_score": 1,
+              "classification_confidence": 1
+            },
+            "normalized_data": {
+              "title": "ทดสอบ checkup",
+              "source_text": "ข้อมูลสังเคราะห์ checkup",
+              "hospital_name": "สถานพยาบาลทดสอบ",
+              "appointment_at": "2027-01-05T10:00:00+07:00",
+              "extraction_mode": "line_structured_manual",
+              "appointment_type": "checkup"
+            },
+            "validation_data": {
+              "warnings": [],
+              "validated_at": "2026-10-23T07:57:34.678+00:00",
+              "blocking_errors": []
+            },
+            "fingerprint_sha256": "d67d41e6f0ff2dfd8378840b064d926aa850cb83636229048e41c545ef5bbdba",
+            "reconciliation_data": {
+              "checked_at": "2026-10-23T07:57:34.678+00:00",
+              "match_count": 0,
+              "fingerprint_sha256": "d67d41e6f0ff2dfd8378840b064d926aa850cb83636229048e41c545ef5bbdba"
+            }
+          }
+        ],
+        "session_id": "d9e7102f-6892-47ba-b85c-cb3d59d3588d",
+        "can_confirm": true,
+        "object_name": null,
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "6dfb71a5-59e",
+        "document_type": "appointment",
+        "session_status": "review",
+        "candidate_count": 1,
+        "checksum_sha256": null,
+        "person_required": false,
+        "raw_text_length": 24,
+        "canonical_commit": false,
+        "storage_asset_id": null,
+        "extraction_status": "completed",
+        "person_mismatch_count": 0,
+        "source_duplicate_file": false,
+        "blocking_conflict_count": 0,
+        "blocking_candidate_count": 0,
+        "classification_confidence": 1,
+        "duplicate_candidate_count": 0,
+        "source_sha256_person_mismatch": false
+      }
+    },
+    {
+      "name": "phms_finalize_line_intake_review",
+      "result": {
+        "ok": true,
+        "decision": "confirm",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "6dfb71a5-59e7-40aa-8956-7fa1b08cc067",
+        "next_stage": "12J",
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "6dfb71a5-59e",
+        "document_type": "appointment",
+        "session_status": "confirmed",
+        "candidate_count": 1,
+        "canonical_commit": false,
+        "idempotent_replay": false,
+        "duplicate_conflict_check": "passed"
+      }
+    },
+    {
+      "name": "phms_line_try_canonical_commit",
+      "result": {
+        "ok": true,
+        "records": [
+          {
+            "ok": true,
+            "status": "scheduled",
+            "candidate_id": "7c6bc307-02ad-442d-a194-f97ec56531c4",
+            "resource_type": "appointment",
+            "appointment_id": "d968d2ba-db4d-4e2f-9be9-5f231d70175f",
+            "historical_record": false,
+            "idempotent_replay": false,
+            "recurring_care_plan": {
+              "ok": true,
+              "status": "draft",
+              "synced": true,
+              "plan_id": "ce3fc73b-be9a-4200-92df-0c24af5d0fd7",
+              "plan_type": "routine_checkup",
+              "next_due_on": null,
+              "interval_months": null,
+              "reminders_enabled": false
+            }
+          }
+        ],
+        "batch_id": "3e162279-a49d-4968-ba92-fc5c745c8584",
+        "committed": true,
+        "pilot_gate": {
+          "mode": "pilot",
+          "reason": "pilot_scope_allowed",
+          "allowed": true,
+          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "operation": "commit",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "resources": [
+            "appointment"
+          ],
+          "max_people": 10,
+          "max_records": 500,
+          "active_people": 1,
+          "current_records": 7,
+          "requested_records": 1
+        },
+        "session_id": "d9e7102f-6892-47ba-b85c-cb3d59d3588d",
+        "resource_group": "clinical",
+        "resource_counts": {
+          "medications": 0,
+          "appointments": 1,
+          "health_measurements": 0
+        },
+        "canonical_commit": true,
+        "idempotent_replay": false,
+        "storage_promotion_required": false,
+        "temporary_source_asset_count": 0
+      }
+    },
+    {
+      "name": "phms_start_line_structured_text_intake",
+      "result": {
+        "ok": true,
+        "raw_text": "ข้อมูลสังเคราะห์ vaccination",
+        "bucket_id": null,
+        "byte_size": null,
+        "mime_type": null,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "199b619e-1c4f-4ee3-9964-7a4d7422143d",
+        "candidates": [
+          {
+            "id": "2ccbacad-5e2c-4726-94b8-516fda357a54",
+            "ordinal": 1,
+            "conflict_data": {
+              "warnings": [],
+              "checked_at": "2026-10-23T07:57:34.727+00:00",
+              "person_mismatch": false,
+              "blocking_conflicts": [],
+              "duplicate_detected": false
+            },
+            "review_status": "needs_review",
+            "candidate_type": "appointment",
+            "confidence_data": {
+              "provider": "line_structured_manual",
+              "human_entered": true,
+              "quality_score": 1,
+              "classification_confidence": 1
+            },
+            "normalized_data": {
+              "title": "ทดสอบ vaccination",
+              "source_text": "ข้อมูลสังเคราะห์ vaccination",
+              "hospital_name": "สถานพยาบาลทดสอบ",
+              "appointment_at": "2027-01-06T10:00:00+07:00",
+              "extraction_mode": "line_structured_manual",
+              "appointment_type": "vaccination"
+            },
+            "validation_data": {
+              "warnings": [],
+              "validated_at": "2026-10-23T07:57:34.727+00:00",
+              "blocking_errors": []
+            },
+            "fingerprint_sha256": "bba170e3d246b4a1cb1f13e8cded71934cea0856945e862d7243a1aaec53d4b5",
+            "reconciliation_data": {
+              "checked_at": "2026-10-23T07:57:34.727+00:00",
+              "match_count": 0,
+              "fingerprint_sha256": "bba170e3d246b4a1cb1f13e8cded71934cea0856945e862d7243a1aaec53d4b5"
+            }
+          }
+        ],
+        "session_id": "ae8858f9-89be-4395-9e72-6f9f80335529",
+        "can_confirm": true,
+        "object_name": null,
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "199b619e-1c4",
+        "document_type": "appointment",
+        "session_status": "review",
+        "candidate_count": 1,
+        "checksum_sha256": null,
+        "person_required": false,
+        "raw_text_length": 28,
+        "canonical_commit": false,
+        "storage_asset_id": null,
+        "extraction_status": "completed",
+        "person_mismatch_count": 0,
+        "source_duplicate_file": false,
+        "blocking_conflict_count": 0,
+        "blocking_candidate_count": 0,
+        "classification_confidence": 1,
+        "duplicate_candidate_count": 0,
+        "source_sha256_person_mismatch": false
+      }
+    },
+    {
+      "name": "phms_finalize_line_intake_review",
+      "result": {
+        "ok": true,
+        "decision": "confirm",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "199b619e-1c4f-4ee3-9964-7a4d7422143d",
+        "next_stage": "12J",
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "199b619e-1c4",
+        "document_type": "appointment",
+        "session_status": "confirmed",
+        "candidate_count": 1,
+        "canonical_commit": false,
+        "idempotent_replay": false,
+        "duplicate_conflict_check": "passed"
+      }
+    },
+    {
+      "name": "phms_line_try_canonical_commit",
+      "result": {
+        "ok": true,
+        "records": [
+          {
+            "ok": true,
+            "status": "scheduled",
+            "candidate_id": "2ccbacad-5e2c-4726-94b8-516fda357a54",
+            "resource_type": "appointment",
+            "appointment_id": "39aa6e2d-2ea1-4a94-beb8-97ea4e63c9d0",
+            "historical_record": false,
+            "idempotent_replay": false,
+            "recurring_care_plan": {
+              "ok": true,
+              "status": "draft",
+              "synced": true,
+              "plan_id": "86907a55-8a10-418c-8a9d-a947a18c278b",
+              "plan_type": "vaccination",
+              "next_due_on": null,
+              "interval_months": null,
+              "reminders_enabled": false
+            }
+          }
+        ],
+        "batch_id": "8eadd1f1-bf72-4c8f-8ac1-46c62c8eb7fd",
+        "committed": true,
+        "pilot_gate": {
+          "mode": "pilot",
+          "reason": "pilot_scope_allowed",
+          "allowed": true,
+          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "operation": "commit",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "resources": [
+            "appointment"
+          ],
+          "max_people": 10,
+          "max_records": 500,
+          "active_people": 1,
+          "current_records": 8,
+          "requested_records": 1
+        },
+        "session_id": "ae8858f9-89be-4395-9e72-6f9f80335529",
+        "resource_group": "clinical",
+        "resource_counts": {
+          "medications": 0,
+          "appointments": 1,
+          "health_measurements": 0
+        },
+        "canonical_commit": true,
+        "idempotent_replay": false,
+        "storage_promotion_required": false,
+        "temporary_source_asset_count": 0
+      }
+    },
+    {
+      "name": "phms_start_line_structured_text_intake",
+      "result": {
+        "ok": true,
+        "raw_text": "ข้อมูลสังเคราะห์ other",
+        "bucket_id": null,
+        "byte_size": null,
+        "mime_type": null,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "35a028c9-a4d0-42f4-b547-bb801d3e36c8",
+        "candidates": [
+          {
+            "id": "96dde228-d229-48f4-9c97-6cdf5376ed13",
+            "ordinal": 1,
+            "conflict_data": {
+              "warnings": [],
+              "checked_at": "2026-10-23T07:57:34.766+00:00",
+              "person_mismatch": false,
+              "blocking_conflicts": [],
+              "duplicate_detected": false
+            },
+            "review_status": "needs_review",
+            "candidate_type": "appointment",
+            "confidence_data": {
+              "provider": "line_structured_manual",
+              "human_entered": true,
+              "quality_score": 1,
+              "classification_confidence": 1
+            },
+            "normalized_data": {
+              "title": "ทดสอบ other",
+              "source_text": "ข้อมูลสังเคราะห์ other",
+              "hospital_name": "สถานพยาบาลทดสอบ",
+              "appointment_at": "2027-01-07T10:00:00+07:00",
+              "extraction_mode": "line_structured_manual",
+              "appointment_type": "other"
+            },
+            "validation_data": {
+              "warnings": [],
+              "validated_at": "2026-10-23T07:57:34.766+00:00",
+              "blocking_errors": []
+            },
+            "fingerprint_sha256": "4a06aab45316b5f863ccb18b21c7b57cbedf28825d90b8b961f0a2477d9d83ae",
+            "reconciliation_data": {
+              "checked_at": "2026-10-23T07:57:34.766+00:00",
+              "match_count": 0,
+              "fingerprint_sha256": "4a06aab45316b5f863ccb18b21c7b57cbedf28825d90b8b961f0a2477d9d83ae"
+            }
+          }
+        ],
+        "session_id": "83ca4c6e-f7ef-4c78-b597-ee1f9145688e",
+        "can_confirm": true,
+        "object_name": null,
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "35a028c9-a4d",
+        "document_type": "appointment",
+        "session_status": "review",
+        "candidate_count": 1,
+        "checksum_sha256": null,
+        "person_required": false,
+        "raw_text_length": 22,
+        "canonical_commit": false,
+        "storage_asset_id": null,
+        "extraction_status": "completed",
+        "person_mismatch_count": 0,
+        "source_duplicate_file": false,
+        "blocking_conflict_count": 0,
+        "blocking_candidate_count": 0,
+        "classification_confidence": 1,
+        "duplicate_candidate_count": 0,
+        "source_sha256_person_mismatch": false
+      }
+    },
+    {
+      "name": "phms_finalize_line_intake_review",
+      "result": {
+        "ok": true,
+        "decision": "confirm",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "35a028c9-a4d0-42f4-b547-bb801d3e36c8",
+        "next_stage": "12J",
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "35a028c9-a4d",
+        "document_type": "appointment",
+        "session_status": "confirmed",
+        "candidate_count": 1,
+        "canonical_commit": false,
+        "idempotent_replay": false,
+        "duplicate_conflict_check": "passed"
+      }
+    },
+    {
+      "name": "phms_line_try_canonical_commit",
+      "result": {
+        "ok": true,
+        "records": [
+          {
+            "ok": true,
+            "status": "scheduled",
+            "candidate_id": "96dde228-d229-48f4-9c97-6cdf5376ed13",
+            "resource_type": "appointment",
+            "appointment_id": "a471071b-dff4-4fb0-b031-da8f180dd499",
+            "historical_record": false,
+            "idempotent_replay": false,
+            "recurring_care_plan": {
+              "ok": true,
+              "reason": "not_recurring_care",
+              "synced": false
+            }
+          }
+        ],
+        "batch_id": "52672a4d-2f03-445e-bfe5-985dbe9c7afa",
+        "committed": true,
+        "pilot_gate": {
+          "mode": "pilot",
+          "reason": "pilot_scope_allowed",
+          "allowed": true,
+          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "operation": "commit",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "resources": [
+            "appointment"
+          ],
+          "max_people": 10,
+          "max_records": 500,
+          "active_people": 1,
+          "current_records": 9,
+          "requested_records": 1
+        },
+        "session_id": "83ca4c6e-f7ef-4c78-b597-ee1f9145688e",
+        "resource_group": "clinical",
+        "resource_counts": {
+          "medications": 0,
+          "appointments": 1,
+          "health_measurements": 0
+        },
+        "canonical_commit": true,
+        "idempotent_replay": false,
+        "storage_promotion_required": false,
+        "temporary_source_asset_count": 0
+      }
+    },
+    {
+      "name": "phms_diagnostic_add_procedure",
+      "result": {
+        "ok": true,
+        "item_id": "182da76b-732f-4fa0-90fe-8199dba06f8b",
+        "duplicate": false
+      }
+    },
+    {
+      "name": "phms_diagnostic_add_procedure",
+      "result": {
+        "ok": true,
+        "item_id": "182da76b-732f-4fa0-90fe-8199dba06f8b",
+        "duplicate": true
+      }
+    },
+    {
+      "name": "phms_diagnostic_add_procedure",
+      "result": {
+        "ok": true,
+        "item_id": "d6a09385-9e63-47aa-81ca-16f5cf9292f8",
+        "duplicate": false
+      }
+    },
+    {
+      "name": "phms_diagnostic_add_procedure",
+      "result": {
+        "ok": true,
+        "item_id": "d6a09385-9e63-47aa-81ca-16f5cf9292f8",
+        "duplicate": true
+      }
+    },
+    {
+      "name": "phms_med_v23_refill_create",
+      "result": {
+        "ok": true,
+        "duplicate": false,
+        "item_count": 2,
+        "appointment_id": "65ba9498-ac71-4ea6-91f3-d12ea0f8655a"
+      }
+    },
+    {
+      "name": "phms_med_v23_refill_create",
+      "result": {
+        "ok": true,
+        "duplicate": true,
+        "appointment_id": "65ba9498-ac71-4ea6-91f3-d12ea0f8655a"
+      }
+    },
+    {
+      "name": "phms_med_v23_refill_detail",
+      "result": {
+        "ok": true,
+        "items": [
+          {
+            "id": "a73e6c60-bd1c-4d4b-83c9-0e4e8f6f0be2",
+            "notes": null,
+            "status": "PLANNED",
+            "dispense_id": null,
+            "expected_unit": "เม็ด",
+            "medication_id": "50000000-0000-4000-8000-000000000002",
+            "received_unit": null,
+            "expected_quantity": 60,
+            "received_quantity": null,
+            "person_medication_id": "60000000-0000-4000-8000-000000000002"
+          },
+          {
+            "id": "b4ddfb40-f52e-44e9-82ed-31a1d4b527ae",
+            "notes": null,
+            "status": "PLANNED",
+            "dispense_id": null,
+            "expected_unit": "เม็ด",
+            "medication_id": "50000000-0000-4000-8000-000000000001",
+            "received_unit": null,
+            "expected_quantity": 30,
+            "received_quantity": null,
+            "person_medication_id": "60000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "status": "planned",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "hospital_name": "สถานพยาบาลทดสอบ",
+        "appointment_at": "2027-02-01T03:00:00+00:00",
+        "appointment_id": "65ba9498-ac71-4ea6-91f3-d12ea0f8655a",
+        "location_detail": "จุดรับยาทดสอบ",
+        "preparation_notes": null
+      }
+    },
+    {
+      "name": "phms_start_line_structured_text_intake",
+      "result": {
+        "ok": true,
+        "raw_text": "นัดตรวจสังเคราะห์",
+        "bucket_id": null,
+        "byte_size": null,
+        "mime_type": null,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "5e16a14a-afa1-4ab9-aaf6-0d65efff15c9",
+        "candidates": [
+          {
+            "id": "c8b7e232-511c-40d7-9c30-3aec7b0a839c",
+            "ordinal": 1,
+            "conflict_data": {
+              "warnings": [],
+              "checked_at": "2026-10-23T07:57:34.867+00:00",
+              "person_mismatch": false,
+              "blocking_conflicts": [],
+              "duplicate_detected": false
+            },
+            "review_status": "needs_review",
+            "candidate_type": "appointment",
+            "confidence_data": {
+              "provider": "line_structured_manual",
+              "human_entered": true,
+              "quality_score": 1,
+              "classification_confidence": 1
+            },
+            "normalized_data": {
+              "title": "ตรวจสองรายการสังเคราะห์",
+              "source_text": "นัดตรวจสังเคราะห์",
+              "hospital_name": "สถานพยาบาลทดสอบ",
+              "appointment_at": "2027-03-01T10:00:00+07:00",
+              "extraction_mode": "line_structured_manual",
+              "appointment_type": "investigation",
+              "diagnostic_procedures": [
+                {
+                  "code": "VF_24_2",
+                  "name": "ลานสายตา VF 24-2"
+                },
+                {
+                  "code": "OCT_RNFL",
+                  "name": "จอประสาทตา OCT RNFL"
+                }
+              ]
+            },
+            "validation_data": {
+              "warnings": [],
+              "validated_at": "2026-10-23T07:57:34.867+00:00",
+              "blocking_errors": []
+            },
+            "fingerprint_sha256": "73a09c508894bbbf767555705a3dd476d038db748ee2cfff282dd8f34ba2bfb4",
+            "reconciliation_data": {
+              "checked_at": "2026-10-23T07:57:34.867+00:00",
+              "match_count": 0,
+              "fingerprint_sha256": "73a09c508894bbbf767555705a3dd476d038db748ee2cfff282dd8f34ba2bfb4"
+            }
+          }
+        ],
+        "session_id": "ee83fe04-fd53-4297-9b11-54112c3d04ac",
+        "can_confirm": true,
+        "object_name": null,
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "5e16a14a-afa",
+        "document_type": "appointment",
+        "session_status": "review",
+        "candidate_count": 1,
+        "checksum_sha256": null,
+        "person_required": false,
+        "raw_text_length": 17,
+        "canonical_commit": false,
+        "storage_asset_id": null,
+        "extraction_status": "completed",
+        "person_mismatch_count": 0,
+        "source_duplicate_file": false,
+        "blocking_conflict_count": 0,
+        "blocking_candidate_count": 0,
+        "classification_confidence": 1,
+        "duplicate_candidate_count": 0,
+        "source_sha256_person_mismatch": false
+      }
+    },
+    {
+      "name": "phms_finalize_line_intake_review",
+      "result": {
+        "ok": true,
+        "decision": "confirm",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "source_id": "5e16a14a-afa1-4ab9-aaf6-0d65efff15c9",
+        "next_stage": "12J",
+        "person_name": "สมาชิกทดสอบ A",
+        "source_code": "5e16a14a-afa",
+        "document_type": "appointment",
+        "session_status": "confirmed",
+        "candidate_count": 1,
+        "canonical_commit": false,
+        "idempotent_replay": false,
+        "duplicate_conflict_check": "passed"
+      }
+    },
+    {
+      "name": "phms_line_try_canonical_commit",
+      "result": {
+        "ok": true,
+        "records": [
+          {
+            "ok": true,
+            "status": "scheduled",
+            "candidate_id": "c8b7e232-511c-40d7-9c30-3aec7b0a839c",
+            "resource_type": "appointment",
+            "appointment_id": "01e4d393-3cc9-4e00-9fea-48cd4e90aaa0",
+            "historical_record": false,
+            "idempotent_replay": false,
+            "recurring_care_plan": {
+              "ok": true,
+              "reason": "not_recurring_care",
+              "synced": false
+            }
+          }
+        ],
+        "batch_id": "5f499b13-c2d8-4bb1-9340-fb6de11684a5",
+        "committed": true,
+        "pilot_gate": {
+          "mode": "pilot",
+          "reason": "pilot_scope_allowed",
+          "allowed": true,
+          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "operation": "commit",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "resources": [
+            "appointment"
+          ],
+          "max_people": 10,
+          "max_records": 500,
+          "active_people": 1,
+          "current_records": 11,
+          "requested_records": 1
+        },
+        "session_id": "ee83fe04-fd53-4297-9b11-54112c3d04ac",
+        "resource_group": "clinical",
+        "resource_counts": {
+          "medications": 0,
+          "appointments": 1,
+          "health_measurements": 0
+        },
+        "canonical_commit": true,
+        "idempotent_replay": false,
+        "storage_promotion_required": false,
+        "temporary_source_asset_count": 0
+      }
+    },
+    {
+      "name": "phms_line_appointment_update_v3",
+      "result": {
+        "ok": true,
+        "item": {
+          "id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+          "note": null,
+          "title": "ชื่อแก้ไขสังเคราะห์",
+          "status": "scheduled",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "arrived_at": null,
+          "care_topic": null,
+          "created_at": "2026-10-23T07:57:34.348+00:00",
+          "created_by": "10000000-0000-4000-8000-000000000001",
+          "deleted_at": null,
+          "department": null,
+          "next_steps": null,
+          "no_show_at": null,
+          "updated_at": "2026-10-23T07:57:34.91+00:00",
+          "visit_mode": null,
+          "doctor_name": null,
+          "hospital_hn": null,
+          "hospital_vn": null,
+          "cancelled_at": null,
+          "clinician_id": null,
+          "completed_at": null,
+          "encounter_id": null,
+          "walk_in_note": null,
+          "cancel_reason": null,
+          "contact_email": null,
+          "contact_phone": null,
+          "coverage_type": null,
+          "followup_kind": null,
+          "hospital_name": "สถานพยาบาลทดสอบ",
+          "appointment_at": "2026-12-21T04:30:00+00:00",
+          "reference_note": null,
+          "walk_in_reason": null,
+          "location_detail": null,
+          "organization_id": "641e2763-9035-44a9-9354-ed4026bfcbed",
+          "service_unit_id": null,
+          "appointment_type": "new_case",
+          "family_person_id": "40000000-0000-4000-8000-000000000001",
+          "visit_time_known": true,
+          "diagnosis_summary": null,
+          "followup_required": null,
+          "preparation_notes": "นำใบนัดมาด้วย",
+          "treatment_summary": null,
+          "external_reference": null,
+          "last_change_reason": "ทดสอบเลื่อนนัด",
+          "planned_visit_date": null,
+          "source_document_id": null,
+          "visit_outcome_notes": null,
+          "arrival_lead_minutes": 0,
+          "followup_recorded_at": null,
+          "referral_source_kind": null,
+          "test_results_summary": null,
+          "treatment_episode_id": null,
+          "medication_plan_notes": null,
+          "walk_in_doctor_status": null,
+          "assignee_ack_days_before": 7,
+          "followup_interval_months": null,
+          "reminder_offsets_minutes": [
+            10080,
+            4320,
+            1440
+          ],
+          "followup_of_appointment_id": null,
+          "preventive_interval_months": null,
+          "post_visit_followup_minutes": 0,
+          "referral_from_appointment_id": null,
+          "early_visit_of_appointment_id": null,
+          "post_visit_followup_time_local": "20:00:00",
+          "investigation_of_appointment_id": null,
+          "rescheduled_from_appointment_id": null
+        },
+        "updated": true,
+        "record_id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+        "record_code": "125b88c9-f93",
+        "schedule_changed": true
+      }
+    },
+    {
+      "name": "phms_line_appointment_add_task",
+      "result": {
+        "ok": true,
+        "task": {
+          "id": "12865ef1-5eff-4494-8feb-73c198529151",
+          "note": null,
+          "title": "นำเอกสารสังเคราะห์",
+          "due_at": null,
+          "status": "pending",
+          "task_type": "document",
+          "created_at": "2026-10-23T07:57:34.95+00:00",
+          "created_by": "10000000-0000-4000-8000-000000000001",
+          "source_key": null,
+          "updated_at": "2026-10-23T07:57:34.95+00:00",
+          "instruction": null,
+          "completed_at": null,
+          "completed_by": null,
+          "appointment_id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+          "source_document_id": null,
+          "source_document_link_id": null,
+          "related_health_measurement_id": null
+        },
+        "task_code": "12865ef1-5ef",
+        "appointment_code": "125b88c9-f93"
+      }
+    },
+    {
+      "name": "phms_line_appointment_set_reminders",
+      "result": {
+        "ok": true,
+        "sync": {
+          "cancelled": 0,
+          "post_visit_upserted": 0,
+          "calendar_user_upserted": 0,
+          "calendar_group_seed_upserted": 0
+        },
+        "record_code": "125b88c9-f93",
+        "reminder_offsets_minutes": [
+          1440,
+          60
+        ],
+        "post_visit_followup_minutes": 0,
+        "post_visit_followup_time_local": null
+      }
+    },
+    {
+      "name": "phms_line_create_walkin_plan_v3",
+      "result": {
+        "ok": true,
+        "duplicate": false,
+        "record_id": "df976b83-01fe-4626-a5b4-3c37f7410279",
+        "visit_mode": "walk_in",
+        "record_code": "df976b83-01f",
+        "appointment_type": "other",
+        "visit_time_known": false,
+        "planned_visit_date": "2027-07-01"
+      }
+    },
+    {
+      "name": "phms_line_create_walkin_plan_v3",
+      "result": {
+        "ok": true,
+        "duplicate": true,
+        "record_id": "df976b83-01fe-4626-a5b4-3c37f7410279",
+        "record_code": "df976b83-01f",
+        "visit_time_known": false,
+        "planned_visit_date": "2027-07-01"
+      }
+    },
+    {
+      "name": "phms_line_appointment_link_existing_asset",
+      "result": {
+        "ok": true,
+        "reused": false,
+        "link_id": "fff5dc4e-ead1-44fa-986e-abdfe21f64ed",
+        "link_kind": "source",
+        "usage_relation": "origin",
+        "appointment_code": "125b88c9-f93",
+        "storage_asset_id": "70000000-0000-4000-8000-000000000001",
+        "origin_appointment_code": "125b88c9-f93"
+      }
+    },
+    {
+      "name": "phms_line_appointment_link_existing_asset",
+      "result": {
+        "ok": true,
+        "reused": false,
+        "link_id": "fff5dc4e-ead1-44fa-986e-abdfe21f64ed",
+        "link_kind": "source",
+        "usage_relation": "origin",
+        "appointment_code": "125b88c9-f93",
+        "storage_asset_id": "70000000-0000-4000-8000-000000000001",
+        "origin_appointment_code": "125b88c9-f93"
+      }
+    },
+    {
+      "name": "phms_line_save_appointment_wizard_draft",
+      "result": {
+        "ok": true,
+        "draft_key": "80000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "name": "phms_clear_line_conversation_state",
+      "result": null
+    },
+    {
+      "name": "phms_line_get_appointment_wizard_draft",
+      "result": {
+        "ok": true,
+        "draft": {
+          "guided": true,
+          "partial": {
+            "date": "2027-09-01",
+            "time": "10:00",
+            "hospital_name": "สถานพยาบาลทดสอบ",
+            "appointment_type": "follow_up"
+          },
+          "draft_key": "80000000-0000-4000-8000-000000000001",
+          "draft_person_id": "20000000-0000-4000-8000-000000000001",
+          "person_confirmed": false
+        }
+      }
+    },
+    {
+      "name": "phms_line_appointment_cancel",
+      "result": {
+        "ok": true,
+        "item": {
+          "id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+          "note": null,
+          "title": "ชื่อแก้ไขสังเคราะห์",
+          "status": "cancelled",
+          "family_id": "30000000-0000-4000-8000-000000000001",
+          "person_id": "20000000-0000-4000-8000-000000000001",
+          "arrived_at": null,
+          "care_topic": null,
+          "created_at": "2026-10-23T07:57:34.348+00:00",
+          "created_by": "10000000-0000-4000-8000-000000000001",
+          "deleted_at": null,
+          "department": null,
+          "next_steps": null,
+          "no_show_at": null,
+          "updated_at": "2026-10-23T07:57:35.082+00:00",
+          "visit_mode": null,
+          "doctor_name": null,
+          "hospital_hn": null,
+          "hospital_vn": null,
+          "cancelled_at": "2026-10-23T07:57:35.082+00:00",
+          "clinician_id": null,
+          "completed_at": null,
+          "encounter_id": null,
+          "walk_in_note": null,
+          "cancel_reason": "ทดสอบยกเลิก",
+          "contact_email": null,
+          "contact_phone": null,
+          "coverage_type": null,
+          "followup_kind": null,
+          "hospital_name": "สถานพยาบาลทดสอบ",
+          "appointment_at": "2026-12-21T04:30:00+00:00",
+          "reference_note": null,
+          "walk_in_reason": null,
+          "location_detail": null,
+          "organization_id": "641e2763-9035-44a9-9354-ed4026bfcbed",
+          "service_unit_id": null,
+          "appointment_type": "new_case",
+          "family_person_id": "40000000-0000-4000-8000-000000000001",
+          "visit_time_known": true,
+          "diagnosis_summary": null,
+          "followup_required": null,
+          "preparation_notes": "นำใบนัดมาด้วย",
+          "treatment_summary": null,
+          "external_reference": null,
+          "last_change_reason": "ทดสอบยกเลิก",
+          "planned_visit_date": null,
+          "source_document_id": null,
+          "visit_outcome_notes": null,
+          "arrival_lead_minutes": 0,
+          "followup_recorded_at": null,
+          "referral_source_kind": null,
+          "test_results_summary": null,
+          "treatment_episode_id": null,
+          "medication_plan_notes": null,
+          "walk_in_doctor_status": null,
+          "assignee_ack_days_before": 7,
+          "followup_interval_months": null,
+          "reminder_offsets_minutes": [
+            1440,
+            60
+          ],
+          "followup_of_appointment_id": null,
+          "preventive_interval_months": null,
+          "post_visit_followup_minutes": 0,
+          "referral_from_appointment_id": null,
+          "early_visit_of_appointment_id": null,
+          "post_visit_followup_time_local": null,
+          "investigation_of_appointment_id": null,
+          "rescheduled_from_appointment_id": null
+        },
+        "reason": "ทดสอบยกเลิก",
+        "status": "cancelled",
+        "record_code": "125b88c9-f93"
+      }
+    }
+  ]
+}

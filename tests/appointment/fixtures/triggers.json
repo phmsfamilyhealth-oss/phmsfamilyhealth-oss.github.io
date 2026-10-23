@@ -1,0 +1,236 @@
+[
+  {
+    "schema": "public",
+    "table_name": "profiles",
+    "tgname": "phms_guard_truncate",
+    "ddl": "CREATE TRIGGER phms_guard_truncate BEFORE TRUNCATE ON public.profiles FOR EACH STATEMENT EXECUTE FUNCTION private.phms_guard_truncate()"
+  },
+  {
+    "schema": "public",
+    "table_name": "profiles",
+    "tgname": "trg_profiles_create_default_user_context",
+    "ddl": "CREATE TRIGGER trg_profiles_create_default_user_context AFTER INSERT ON public.profiles FOR EACH ROW EXECUTE FUNCTION private.phms_create_default_user_context()"
+  },
+  {
+    "schema": "public",
+    "table_name": "families",
+    "tgname": "on_family_created",
+    "ddl": "CREATE TRIGGER on_family_created AFTER INSERT ON public.families FOR EACH ROW EXECUTE FUNCTION private.handle_new_family_owner()"
+  },
+  {
+    "schema": "public",
+    "table_name": "families",
+    "tgname": "phms_guard_truncate",
+    "ddl": "CREATE TRIGGER phms_guard_truncate BEFORE TRUNCATE ON public.families FOR EACH STATEMENT EXECUTE FUNCTION private.phms_guard_truncate()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointment_reminders",
+    "tgname": "phms_guard_truncate",
+    "ddl": "CREATE TRIGGER phms_guard_truncate BEFORE TRUNCATE ON public.appointment_reminders FOR EACH STATEMENT EXECUTE FUNCTION private.phms_guard_truncate()"
+  },
+  {
+    "schema": "public",
+    "table_name": "line_identities",
+    "tgname": "phms_guard_truncate",
+    "ddl": "CREATE TRIGGER phms_guard_truncate BEFORE TRUNCATE ON public.line_identities FOR EACH STATEMENT EXECUTE FUNCTION private.phms_guard_truncate()"
+  },
+  {
+    "schema": "public",
+    "table_name": "line_identities",
+    "tgname": "trg_00_sync_line_identity_account",
+    "ddl": "CREATE TRIGGER trg_00_sync_line_identity_account BEFORE INSERT OR UPDATE OF user_id, account_id ON public.line_identities FOR EACH ROW EXECUTE FUNCTION private.phms_sync_line_identity_account()"
+  },
+  {
+    "schema": "public",
+    "table_name": "line_identities",
+    "tgname": "trg_line_identity_rich_menu_sync",
+    "ddl": "CREATE TRIGGER trg_line_identity_rich_menu_sync AFTER INSERT OR UPDATE OF onboarding_status, is_active, user_id, line_user_id ON public.line_identities FOR EACH ROW WHEN ((new.is_active IS TRUE)) EXECUTE FUNCTION private.queue_line_rich_menu_sync()"
+  },
+  {
+    "schema": "public",
+    "table_name": "line_identities",
+    "tgname": "trg_sync_link_completion_from_line",
+    "ddl": "CREATE TRIGGER trg_sync_link_completion_from_line AFTER INSERT OR UPDATE OF user_id, is_active ON public.line_identities FOR EACH ROW EXECUTE FUNCTION private.trg_sync_link_completion_from_line()"
+  },
+  {
+    "schema": "public",
+    "table_name": "persons",
+    "tgname": "notify_person_profile_change",
+    "ddl": "CREATE TRIGGER notify_person_profile_change AFTER UPDATE OF display_name, first_name, last_name, date_of_birth, sex ON public.persons FOR EACH ROW EXECUTE FUNCTION private.notify_linked_person_record_change('person_profile_changed', '👤 รายละเอียดของคุณมีการเปลี่ยนแปลง')"
+  },
+  {
+    "schema": "public",
+    "table_name": "persons",
+    "tgname": "phms_apply_pending_family_person_setup",
+    "ddl": "CREATE TRIGGER phms_apply_pending_family_person_setup AFTER INSERT OR UPDATE OF linked_user_id ON public.persons FOR EACH ROW EXECUTE FUNCTION private.apply_pending_family_person_setup()"
+  },
+  {
+    "schema": "public",
+    "table_name": "persons",
+    "tgname": "phms_guard_truncate",
+    "ddl": "CREATE TRIGGER phms_guard_truncate BEFORE TRUNCATE ON public.persons FOR EACH STATEMENT EXECUTE FUNCTION private.phms_guard_truncate()"
+  },
+  {
+    "schema": "public",
+    "table_name": "persons",
+    "tgname": "sync_linked_person_display_name",
+    "ddl": "CREATE TRIGGER sync_linked_person_display_name AFTER INSERT OR UPDATE OF display_name, linked_user_id ON public.persons FOR EACH ROW EXECUTE FUNCTION private.sync_linked_person_display_name()"
+  },
+  {
+    "schema": "public",
+    "table_name": "persons",
+    "tgname": "trg_00_sync_person_account",
+    "ddl": "CREATE TRIGGER trg_00_sync_person_account BEFORE INSERT OR UPDATE OF linked_user_id, linked_account_id ON public.persons FOR EACH ROW EXECUTE FUNCTION private.phms_sync_person_account()"
+  },
+  {
+    "schema": "public",
+    "table_name": "persons",
+    "tgname": "trg_guard_person_linked_user_id",
+    "ddl": "CREATE TRIGGER trg_guard_person_linked_user_id BEFORE UPDATE OF linked_user_id ON public.persons FOR EACH ROW EXECUTE FUNCTION private.guard_person_linked_user_id()"
+  },
+  {
+    "schema": "public",
+    "table_name": "persons",
+    "tgname": "trg_sync_link_completion_from_person",
+    "ddl": "CREATE TRIGGER trg_sync_link_completion_from_person AFTER INSERT OR UPDATE OF linked_user_id, status ON public.persons FOR EACH ROW EXECUTE FUNCTION private.trg_sync_link_completion_from_person()"
+  },
+  {
+    "schema": "public",
+    "table_name": "family_persons",
+    "tgname": "auto_assign_primary_caregiver",
+    "ddl": "CREATE TRIGGER auto_assign_primary_caregiver AFTER INSERT ON public.family_persons FOR EACH ROW EXECUTE FUNCTION private.auto_assign_primary_caregiver()"
+  },
+  {
+    "schema": "public",
+    "table_name": "family_persons",
+    "tgname": "phms_guard_truncate",
+    "ddl": "CREATE TRIGGER phms_guard_truncate BEFORE TRUNCATE ON public.family_persons FOR EACH STATEMENT EXECUTE FUNCTION private.phms_guard_truncate()"
+  },
+  {
+    "schema": "public",
+    "table_name": "data_intake_drafts",
+    "tgname": "phms_guard_truncate",
+    "ddl": "CREATE TRIGGER phms_guard_truncate BEFORE TRUNCATE ON public.data_intake_drafts FOR EACH STATEMENT EXECUTE FUNCTION private.phms_guard_truncate()"
+  },
+  {
+    "schema": "public",
+    "table_name": "data_intake_candidates",
+    "tgname": "trg_phms_enforce_client_ocr_quality",
+    "ddl": "CREATE TRIGGER trg_phms_enforce_client_ocr_quality BEFORE INSERT OR UPDATE OF confidence_data, validation_data, person_id, review_status ON public.data_intake_candidates FOR EACH ROW EXECUTE FUNCTION phms_enforce_client_ocr_quality()"
+  },
+  {
+    "schema": "public",
+    "table_name": "data_intake_candidates",
+    "tgname": "trg_phms_intake_candidate_fingerprint",
+    "ddl": "CREATE TRIGGER trg_phms_intake_candidate_fingerprint BEFORE INSERT OR UPDATE OF candidate_type, normalized_data ON public.data_intake_candidates FOR EACH ROW EXECUTE FUNCTION private.phms_set_intake_candidate_fingerprint()"
+  },
+  {
+    "schema": "public",
+    "table_name": "data_intake_candidates",
+    "tgname": "trg_phms_reconcile_intake_candidate",
+    "ddl": "CREATE TRIGGER trg_phms_reconcile_intake_candidate AFTER INSERT OR UPDATE OF person_id, candidate_type, normalized_data, fingerprint_sha256 ON public.data_intake_candidates FOR EACH ROW WHEN ((pg_trigger_depth() < 1)) EXECUTE FUNCTION private.phms_reconcile_intake_candidate_trigger()"
+  },
+  {
+    "schema": "public",
+    "table_name": "data_intake_candidates",
+    "tgname": "trg_phms_validate_appointment_candidate_required_fields",
+    "ddl": "CREATE TRIGGER trg_phms_validate_appointment_candidate_required_fields BEFORE INSERT OR UPDATE OF normalized_data, candidate_type, validation_data ON public.data_intake_candidates FOR EACH ROW EXECUTE FUNCTION private.phms_validate_appointment_candidate_required_fields()"
+  },
+  {
+    "schema": "public",
+    "table_name": "data_intake_sources",
+    "tgname": "trg_phms_inherit_intake_restart_intent",
+    "ddl": "CREATE TRIGGER trg_phms_inherit_intake_restart_intent BEFORE INSERT ON public.data_intake_sources FOR EACH ROW EXECUTE FUNCTION private.phms_inherit_intake_restart_intent()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "notify_appointment_owner_change",
+    "ddl": "CREATE TRIGGER notify_appointment_owner_change AFTER INSERT OR UPDATE ON public.appointments FOR EACH ROW WHEN ((COALESCE(current_setting('phms.wound_series_insert'::text, true), 'off'::text) <> 'on'::text)) EXECUTE FUNCTION private.notify_linked_person_record_change('appointment_changed', '📅 นัดหมายของคุณมีการเปลี่ยนแปลง')"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "phms_appointment_slip_on_insert",
+    "ddl": "CREATE TRIGGER phms_appointment_slip_on_insert AFTER INSERT ON public.appointments FOR EACH ROW EXECUTE FUNCTION phms_appointment_slip_task_insert_trigger()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "phms_audit_change",
+    "ddl": "CREATE TRIGGER phms_audit_change AFTER INSERT OR DELETE OR UPDATE ON public.appointments FOR EACH ROW EXECUTE FUNCTION phms_audit_row_change()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "phms_guard_truncate",
+    "ddl": "CREATE TRIGGER phms_guard_truncate BEFORE TRUNCATE ON public.appointments FOR EACH STATEMENT EXECUTE FUNCTION private.phms_guard_truncate()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "phms_recycle_appointments_trg",
+    "ddl": "CREATE TRIGGER phms_recycle_appointments_trg AFTER UPDATE ON public.appointments FOR EACH ROW EXECUTE FUNCTION private.phms_recycle_capture_trigger()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "trg_normalize_appointment_department",
+    "ddl": "CREATE TRIGGER trg_normalize_appointment_department BEFORE INSERT OR UPDATE OF department ON public.appointments FOR EACH ROW EXECUTE FUNCTION private.phms_normalize_appointment_department_trg()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "trg_normalize_appointment_hospital",
+    "ddl": "CREATE TRIGGER trg_normalize_appointment_hospital BEFORE INSERT OR UPDATE OF hospital_name, organization_id, person_id, hospital_hn ON public.appointments FOR EACH ROW EXECUTE FUNCTION private.phms_normalize_appointment_hospital_trg()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "trg_phms_mark_walkin_time_known",
+    "ddl": "CREATE TRIGGER trg_phms_mark_walkin_time_known BEFORE UPDATE OF appointment_at ON public.appointments FOR EACH ROW EXECUTE FUNCTION private.phms_mark_walkin_time_known()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "trg_phms_sanitize_appointment_preparation",
+    "ddl": "CREATE TRIGGER trg_phms_sanitize_appointment_preparation BEFORE INSERT OR UPDATE OF preparation_notes ON public.appointments FOR EACH ROW EXECUTE FUNCTION private.phms_sanitize_appointment_preparation_trigger()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "trg_phms_sync_appointment_followup_link",
+    "ddl": "CREATE TRIGGER trg_phms_sync_appointment_followup_link AFTER INSERT OR UPDATE OF followup_of_appointment_id ON public.appointments FOR EACH ROW EXECUTE FUNCTION private.phms_sync_appointment_followup_link_trg()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "trg_phms_sync_appointment_preparation_tasks",
+    "ddl": "CREATE TRIGGER trg_phms_sync_appointment_preparation_tasks AFTER INSERT OR UPDATE OF preparation_notes ON public.appointments FOR EACH ROW EXECUTE FUNCTION private.phms_sync_appointment_preparation_tasks()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "trg_phms_sync_encounter_from_appointment",
+    "ddl": "CREATE TRIGGER trg_phms_sync_encounter_from_appointment AFTER INSERT OR UPDATE OF status, completed_at, visit_outcome_notes, arrived_at, appointment_at ON public.appointments FOR EACH ROW WHEN ((new.status = 'completed'::text)) EXECUTE FUNCTION private.phms_sync_encounter_from_appointment()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "zz_phms_appointment_master_guard",
+    "ddl": "CREATE TRIGGER zz_phms_appointment_master_guard BEFORE INSERT OR UPDATE OF organization_id, hospital_name, department, location_detail, contact_phone, contact_email ON public.appointments FOR EACH ROW EXECUTE FUNCTION private.phms_appointment_master_guard_trg()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "zz_phms_learn_appointment_confirmation",
+    "ddl": "CREATE TRIGGER zz_phms_learn_appointment_confirmation AFTER INSERT OR UPDATE OF organization_id, service_unit_id, department, doctor_name, coverage_type, arrival_lead_minutes, care_topic, location_detail, contact_phone, contact_email ON public.appointments FOR EACH ROW EXECUTE FUNCTION private.phms_learn_appointment_confirmation_trg()"
+  },
+  {
+    "schema": "public",
+    "table_name": "appointments",
+    "tgname": "zz_phms_sync_appointment_hospital_vn",
+    "ddl": "CREATE TRIGGER zz_phms_sync_appointment_hospital_vn AFTER INSERT OR UPDATE OF hospital_vn, organization_id, hospital_name ON public.appointments FOR EACH ROW EXECUTE FUNCTION private.phms_sync_appointment_hospital_vn_trg()"
+  }
+]

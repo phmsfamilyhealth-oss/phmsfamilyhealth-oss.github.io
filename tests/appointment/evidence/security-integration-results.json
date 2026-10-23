@@ -1,0 +1,14 @@
+{
+  "results": [
+    {
+      "role": "anon",
+      "unauthorizedRead": "permission denied"
+    },
+    {
+      "role": "authenticated",
+      "unauthorizedRead": "permission denied"
+    }
+  ],
+  "policies": 175,
+  "productionData": false
+}

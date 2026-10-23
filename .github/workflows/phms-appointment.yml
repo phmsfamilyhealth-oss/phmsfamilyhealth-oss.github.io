@@ -1,0 +1,26 @@
+name: PHMS appointment integration
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  appointment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.19.0'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install pinned Deno
+        run: |
+          curl -fsSL https://github.com/denoland/deno/releases/download/v2.9.8/deno-x86_64-unknown-linux-gnu.zip -o /tmp/phms-deno.zip
+          unzip /tmp/phms-deno.zip -d /tmp/phms-deno
+          printf '%s\n' '368bca08999e02c6911b8f248167b582276b1f547db5712b6e736d7eda1dbda7  /tmp/phms-deno/deno' | sha256sum -c
+      - name: Deno type check
+        run: /tmp/phms-deno/deno check supabase/functions/line-webhook/index.ts supabase/functions/line-webhook-router/index.ts
+      - name: Isolated PostgreSQL integration and router regression
+        run: npm run test:appointment
