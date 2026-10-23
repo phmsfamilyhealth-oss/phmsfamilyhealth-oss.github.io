@@ -5078,7 +5078,8 @@ if(await routeAppointmentLinkManager(cmd,uid,event.replyToken,token,u,k))continu
 if(await routeAppointmentPreviousChain(cmd,uid,event.replyToken,token,u,k))continue;
 if(await routeAppointmentNotificationSettings(cmd,uid,event.replyToken,token,u,k))continue;
 if(await routeAppointmentManualNotify(cmd,uid,event.replyToken,token,u,k))continue;
-if(await routeAppointmentCreateConfirm(cmd,uid,event.replyToken,token,u,k))continue;
+// Canonical intake confirmation belongs to core: one validator, transaction and readback path.
+if(/^ยืนยันรับเข้า\s+#?[0-9a-fA-F-]{8,36}$/.test(cmd)){forward.push(event);continue;}
 if(await routeAppointmentAssigneePicker(cmd,uid,event.replyToken,token,u,k))continue;
 if(await routeSavedFinance(cmd,uid,event.replyToken,token,u,k))continue;
 if(await routeAppointmentFinanceReview(cmd,String(isPostback?(event.postback?.data??""):(event.message?.text??"")),uid,event.replyToken,token,u,k))continue;

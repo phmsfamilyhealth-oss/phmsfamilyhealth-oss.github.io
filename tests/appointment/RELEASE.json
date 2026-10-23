@@ -1,0 +1,22 @@
+{
+  "status": "GATED_RELEASE_CANDIDATE",
+  "zip": "PHMS-Appointment-Repair-Candidate.zip",
+  "production_base": {
+    "line-webhook": 1335,
+    "line-webhook-router": 211
+  },
+  "runtime_source_sha256": "cde96b378f746d0b653a92cedcc6bff80aad5531cb260de6098fc23b3c59de62",
+  "router_source_sha256": "53bef55e56e4430a667534406d3f247011ee77afdc60a37cca4b74f1b37ada97",
+  "database_tests": 14,
+  "runtime_events": 16,
+  "real_device_uat": false,
+  "general_rollout_enabled": false,
+  "schema_origin": "catalog metadata only; no production row data",
+  "test_environment": "PGlite PostgreSQL 17.5 WASM in private process memory",
+  "platform_limitations": [
+    "Supabase HTTP/Storage services and LINE delivery simulated at transport; application RPC/constraints/triggers execute in PostgreSQL",
+    "Test-only crypto adapters use core SHA256 and generated UUID bytes; cryptographic entropy not validated",
+    "No real-device LINE layout/593px certification",
+    "Refill receipt/container/expense end-to-end not certified in this suite"
+  ]
+}

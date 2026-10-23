@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@electric-sql/pglite": "0.3.14",
+    "openai": "4.104.0",
+    "supabase": "2.121.0"
+  },
+  "private": true,
+  "scripts": {
+    "test:appointment": "node tests/appointment/run.mjs"
+  }
+}
