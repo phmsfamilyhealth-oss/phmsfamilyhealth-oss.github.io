@@ -1,0 +1,19 @@
+{
+  "name": "phms-smart-health-intake",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.11",
+    "@supabase/functions-js": "2.118.0",
+    "deno": "2.9.6",
+    "supabase": "2.121.0"
+  }
+}
