@@ -6996,7 +6996,7 @@ function appointmentTimeOnlyLabel(v:any){
   const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(d);
   const p:any={};for(const x of parts)p[x.type]=x.value;
   const h=Number(p.hour),mi=Number(p.minute);
-  return String(h)+':'+pad2(mi)+' น. ('+appointmentNaturalTimeLabel(h,mi)+')'
+  return pad2(h)+':'+pad2(mi)+' น. ('+appointmentNaturalTimeLabel(h,mi)+')'
  }catch{return raw}
 }
 function appointmentSortTimestamp(v:any){
@@ -12027,7 +12027,7 @@ async function personDashboardMessages(u:string,k:string,id:string,title='👤 �
     {type:'text',text:'📅 นัดหมาย',weight:'bold',size:'lg',color:'#85571D'},
     {type:'text',text:'มี '+String(ap.count??0)+' นัดที่กำลังจะมาถึง',size:'xs',color:'#777777',margin:'xs'}
    ]},
-   body:{type:'box',layout:'vertical',spacing:'xs',paddingAll:'12px',contents:aimPersonSummaryRows('appointments',ap)}, // PHMS_APPOINTMENT_SUMMARY_ADAPTIVE_LAYOUT_V1
+   body:{type:'box',layout:'vertical',spacing:'xs',paddingAll:'12px',justifyContent:'flex-start',contents:aimPersonSummaryRows('appointments',ap)}, // PHMS_APPOINTMENT_SUMMARY_TOP_ALIGNED_V2
    footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'10px',contents:[
     ...(Number(ap.count??ap.items?.length??0)>0?[{type:'button',color:'#AD762A',style:'primary',height:'md',action:{type:'postback',label:'📅 ดูนัดทั้งหมด',data:'รายการนัดของคนนี้ทุกช่วงเวลา 0'}}]:[]),
     ...(access?.appointments?.create===true?[{type:'button',style:'primary',color:'#866337',height:'md',action:{type:'postback',label:'＋ เพิ่มนัด',data:'เพิ่มนัด'}}]:[])
