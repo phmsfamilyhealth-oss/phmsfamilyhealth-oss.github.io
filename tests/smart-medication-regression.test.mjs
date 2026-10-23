@@ -24,3 +24,9 @@ test('eye-drop ratio retains numerator and denominator without oral meal default
 test('ambiguous clock and symbolic periods, duplicate clocks and overflowing numbers fail review',()=>{
  for(const change of [{time:'เช้า 08:00'},{time:'08:00,08:00'},{strength_value:'9'.repeat(400)},{dose_value:'9'.repeat(400)}])assert.ok(validateMedication(normalizeMedication({...base,...change})).length);
 });
+
+test('warnings cannot substitute directions and actual eye/PRN instructions survive standard readback',()=>{
+ assert.ok(validateMedication(normalizeMedication({...base,instructions:'',warnings:'อาจง่วง',route:'รับประทาน'})).includes('วิธีใช้ตามฉลาก'));
+ assert.match(normalizeMedication({...base,administration_site:'ตาซ้าย'}).instructions,/บริเวณใช้ยา: ตาซ้าย/);
+ assert.match(normalizeMedication({...base,frequency:'ตามอาการ',prn_condition:'เมื่อปวดตามฉลาก',time:''}).instructions,/ใช้เมื่อ: เมื่อปวดตามฉลาก/);
+});

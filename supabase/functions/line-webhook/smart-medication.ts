@@ -78,7 +78,11 @@ export function normalizeMedication(values:Record<string,any>):MedicationDraft{
  const ratio=d.strength_unit.match(/^(mg|mcg|IU)\/(\d+(?:\.\d+)?)?\s*mL$/);
  if(ratio){d.strength_denominator_value=Number(ratio[2]||1);d.strength_denominator_unit='mL';d.concentration_text=d.strength_value+' '+ratio[1]+'/'+d.strength_denominator_value+' mL'}
  const date=String(values.start_date||'');if(/^\d{4}-\d{2}-\d{2}$/.test(date)&&!isNaN(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date)d.start_date=date;
- if(d.warnings)d.instructions=[d.instructions,'คำเตือน: '+d.warnings].filter(Boolean).join('\n');
+ if(d.instructions){
+  if(d.administration_site&&!d.instructions.includes(d.administration_site))d.instructions+='\nบริเวณใช้ยา: '+d.administration_site;
+  if(d.prn_condition&&!d.instructions.includes(d.prn_condition))d.instructions+='\nใช้เมื่อ: '+d.prn_condition;
+  if(d.warnings)d.instructions+='\nคำเตือน: '+d.warnings;
+ }
  // Retain all entered values, including unreadable data, for review and correction.
  return d;
 }

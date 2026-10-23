@@ -3,7 +3,7 @@ SET statement_timeout='90s';
 DO $guard$ BEGIN
  IF EXISTS(SELECT 1 FROM (VALUES ('public','phms_line_crud_list_v2','12b23da107a530eae8d384d726cdd757'),
 ('public','phms_get_line_conversation_state','ea7ff03311e66b71b8333ff0d1a7ee2c'),
-('public','phms_finalize_line_intake_review','fe69b3c4cf1a77deae9f03d32afdfa06'),
+('public','phms_finalize_line_intake_review','7c7eb829a9f232099dcfb09046130e10'),
 ('private','phms_commit_medication_candidate','725c4c2f5758b0e12714cc71ebe440d6'),
 ('public','phms_line_crud_list','5d90e85811d97cdc59c678576ddb3365'),
 ('public','phms_line_crud_detail','1a4cc1884a7cd97e5c9f96379e5a198d'),
@@ -555,7 +555,7 @@ begin
     );
   end if;
 
-  if v_session.status='confirmed' then
+  if v_session.status in ('confirmed','committed') then
     return jsonb_build_object(
       'ok',true,'idempotent_replay',true,'decision','confirm',
       'source_id',v_source.id,'source_code',substr(v_source.id::text,1,12),

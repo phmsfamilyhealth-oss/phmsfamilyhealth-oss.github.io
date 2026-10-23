@@ -1318,6 +1318,7 @@ function phmsFlexInputPrompt(text:any):boolean{
 function phmsDefaultFlexFromText(message:any):any{
  // Copyable medication templates must remain a real LINE Text Message.
  if(message?.type==='text'&&message.text===medicationTemplate())return message;
+ if(message?.type==='text'&&String(message.text||'').startsWith('【เจ้าของนัด】\nนัดของ:'))return message;
  if(!message||message.type!=='text'||phmsFlexInputPrompt(message.text))return message;
  const raw=(String(message.text||'').replace(/\\n/g,'\n')).trim()||'ไม่มีข้อมูล';
  const lines=raw.split(/\n/).filter((x:string)=>x.trim().length).slice(0,35);
@@ -2818,7 +2819,7 @@ async function phmsBlockLimitedAppointmentDetail(rt:string,u:string,k:string,id:
  }catch{return false}
 }
 
-const hint='\n\n💡 กดปุ่มด้านล่างได้เลย หรือครั้งต่อไปกดจาก “เมนูอิ่มอุ่น” ก็ได้';const homeQ=[act('💊 ยา','ยา'),act('📅 นัด','นัดหมาย'),act('🩺 สุขภาพ','สุขภาพ'),act('📄 เอกสาร','เอกสาร'),act('📁 รูปและเอกสาร','รูปและเอกสาร'),act('👨‍👩‍👧 ครอบครัว','ครอบครัว'),act('👤 ข้อมูลของฉัน','ใช้ข้อมูลของฉัน')];async function state(u:string,k:string,id:string,key:string,data:any={},ttl?:number){await rpc(u,k,'phms_set_line_conversation_state',{p_line_user_id:id,p_state_key:key,p_state_data:data,p_ttl_minutes:ttl??(/^(?:smart_medication(?:_field)?|crud_add_(?:medication|appointment|health)|phms_add_(?:menu|field|review))$/.test(key)?1440:30)})}async function clear(u:string,k:string,id:string){try{await rpc(u,k,'phms_clear_line_conversation_state',{p_line_user_id:id})}catch{}}async function getState(u:string,k:string,id:string){try{return one(await rpc(u,k,'phms_get_line_conversation_state',{p_line_user_id:id}))}catch{return null}}
+const hint='\n\n💡 กดปุ่มด้านล่างได้เลย หรือครั้งต่อไปกดจาก “เมนูอิ่มอุ่น” ก็ได้';const homeQ=[act('💊 ยา','ยา'),act('📅 นัด','นัดหมาย'),act('🩺 สุขภาพ','สุขภาพ'),act('📄 เอกสาร','เอกสาร'),act('📁 รูปและเอกสาร','รูปและเอกสาร'),act('👨‍👩‍👧 ครอบครัว','ครอบครัว'),act('👤 ข้อมูลของฉัน','ใช้ข้อมูลของฉัน')];async function state(u:string,k:string,id:string,key:string,data:any={},ttlMinutes?:number){await rpc(u,k,'phms_set_line_conversation_state',{p_line_user_id:id,p_state_key:key,p_state_data:data,p_ttl_minutes:ttlMinutes??(/^(?:smart_medication(?:_field)?|crud_add_(?:medication|appointment|health)|phms_add_(?:menu|field|review))$/.test(key)?1440:30)})}async function clear(u:string,k:string,id:string){try{await rpc(u,k,'phms_clear_line_conversation_state',{p_line_user_id:id})}catch{}}async function getState(u:string,k:string,id:string){try{return one(await rpc(u,k,'phms_get_line_conversation_state',{p_line_user_id:id}))}catch{return null}}
 function phmsYesNo(v:any){
  const s=String(v||'').trim().toLowerCase();
  if(['ใช่','yes','y','true','1','เปิด','ให้','รับ'].includes(s))return true;
@@ -3370,7 +3371,7 @@ function phmsActionableAlertRow(a:any,showHint=false){
 async function replyHomeAllAlerts(rt:string,u:string,k:string,id:string,t:string,page=0){
  const items=await phmsActionableHomeAlerts(u,k,id),size=7,offset=Math.max(0,Math.floor(page))*size;
  if(!items.length){await reply(rt,'🔔 ตอนนี้ไม่มีเรื่องที่ต้องติดตาม',t,[pb('🏡 หน้าเริ่มต้น','กลับหน้าเริ่มต้น')]);return}
- const rows=items.slice(offset,offset+size).map(a=>phmsActionableAlertRow(a));
+ const rows=items.slice(offset,offset+size).map(x=>phmsActionableAlertRow(x));
  const nav:any[]=[];
  if(offset>0)nav.push({type:'button',action:{type:'postback',label:'⬅️ ก่อนหน้า',data:'ดูเรื่องสำคัญทั้งหมด '+String(Math.max(0,page-1))}});
  if(offset+size<items.length)nav.push({type:'button',action:{type:'postback',label:'➡️ ถัดไป',data:'ดูเรื่องสำคัญทั้งหมด '+String(page+1)}});
@@ -4420,9 +4421,8 @@ async function replyHealthEditMenu(rt:string,t:string,item:any,recordCode:string
  ]}};
  await replyMessages(rt,t,[flex])
 }
-type MedicationPartial = Record<string,any>;
-
 type AppointmentPartial={
+ diagnostic_procedures?:{code:string,name:string}[],
   referral_from_appointment_id?:string,referral_source_kind?:string,investigation_of_appointment_id?:string,reference_note?:string,
  date?:string,time?:string,title?:string,hospital_name?:string,department?:string,
  doctor_name?:string,note?:string,location_detail?:string,contact_phone?:string,contact_email?:string,
@@ -4823,6 +4823,7 @@ function appointmentPayload(p:AppointmentPartial,raw:string){
    contact_email:p.contact_email||undefined,
    coverage_type:p.coverage_type||undefined,
    preparation_notes:p.preparation_notes||undefined,
+   diagnostic_procedures:p.diagnostic_procedures||undefined,
    hospital_hn:p.hospital_hn||undefined,
    hospital_vn:p.hospital_vn||undefined,
    arrival_lead_minutes:p.arrival_lead_minutes??undefined,
@@ -5879,6 +5880,7 @@ function appointmentSummary(p:any,personName:string,sourceCode?:string){
    '\n⏱️ ควรมาถึงก่อน: '+(Number(p.arrival_lead_minutes||0)>0?String(p.arrival_lead_minutes)+' นาที':'—')+
    '\n🏷️ สถานะ: '+appointmentStatusLabel(p.status||'scheduled')+
    '\n🪪 สิทธิรักษา: '+String(p.coverage_type||'—')+
+   (p.diagnostic_procedures?.length?'\n🔬 รายการตรวจ: '+p.diagnostic_procedures.map((v:any)=>v.name).join(', '):'')+
    '\n🧾 เตรียมตัว: '+String(p.preparation_notes||'—')+
    '\n📝 หมายเหตุ: '+String(p.note||'—');
  if(sourceCode)x+='\n\n⚠️ ตรวจอีกครั้งก่อนยืนยัน';
@@ -6078,14 +6080,14 @@ function phmsApptOption(label:string,command:string,explain:string){
   {type:'text',text:explain,wrap:true,size:'xs',color:'#667085',margin:'xs'}
  ]}
 }
-function phmsApptPickerCard(title:string,sub:string,options:any[],back=false){
+function phmsApptPickerCard(title:string,sub:string,options:any[],back=false,backData='เลือกประเภทนัดใหม่'){
  return {type:'flex',altText:title,contents:{type:'bubble',size:'kilo',
-  header:{type:'box',layout:'vertical',paddingAll:'14px',backgroundColor:'#F7F9FC',contents:[
+  header:{type:'box',layout:'vertical',paddingAll:'14px',backgroundColor:PHMS_CATEGORY_THEME.appointments.background,contents:[
    {type:'text',text:title,size:'lg',weight:'bold',color:'#34465D',wrap:true},
    {type:'text',text:sub,size:'sm',color:'#667085',wrap:true,margin:'sm'}]},
   body:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'12px',contents:options},
   footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'12px',contents:[
-   ...(back?[{type:'button',style:'primary',action:{type:'postback',label:'↩️ กลับเลือกแบบ',data:'เลือกประเภทนัดใหม่'}}]:[]),
+   ...(back?[{type:'button',style:'primary',action:{type:'postback',label:'↩️ ย้อนกลับ',data:backData}}]:[]),
    {type:'button',style:'primary',action:{type:'postback',label:'❌ ยกเลิกเพิ่มนัด',data:'ยกเลิกเพิ่มนัด'}}]}}}
 }
 /* PHMS_SELECTED_PERSON_APPOINTMENT_CONTEXT_FIX: use existing selected person; no repeat selection. */
@@ -6117,15 +6119,17 @@ async function replyAppointmentTypePicker(rt:string,u:string,k:string,id:string,
   }catch(err){console.error('reschedule_picker_permission',String(err))}
  }
  const items=[
-  phmsApptOption('🆕 นัดใหม่','เลือกหมวดนัด ใหม่','พบหมอหรือรับการรักษา'),
-  phmsApptOption('💊 รับยาเดิม','phms_refill_begin','นัดไปรับยาที่เคยบันทึกไว้'),
-  phmsApptOption('🔁 ติดตามรักษา','เลือกหมวดนัด เดิม','ตรวจโรคประจำตัว หรือติดตามอาการ'),
-  phmsApptOption('🩺 ตรวจ/วัคซีน','เลือกหมวดนัด ประจำ','ตรวจตามรอบ หรือฉีดวัคซีน'),
-  phmsApptOption('📋 อื่น ๆ','เลือกหมวดนัด อื่น','บริการอื่น หรือใบส่งตัวจากที่อื่น'),
-  ...(hist.hasAny&&canReschedule?[phmsApptOption('📆 เลื่อนนัด','เลือกเลื่อนนัดเดิม','เปลี่ยนวันหรือเวลา ไม่เพิ่มนัดซ้ำ')]:[])
+  phmsApptOption('🩺 พบแพทย์ / รักษา','เลือกหมวดนัด ใหม่','พบหมอครั้งแรก หรือทำหัตถการ'),
+  phmsApptOption('🔁 ติดตามรักษา','เลือกประเภทนัด follow_up','ติดตามอาการ โรคประจำตัว หรือฟังผล'),
+  phmsApptOption('🔬 ตรวจเพิ่มเติม','เลือกประเภทนัด investigation','ตรวจได้แม้ยังไม่มีนัดต้นทางในระบบ'),
+  phmsApptOption('💊 รับยาเดิม','phms_refill_begin','เลือกยาจากระบบยาเดิม'),
+  phmsApptOption('💉 ตรวจ / วัคซีน','เลือกหมวดนัด ประจำ','ตรวจสุขภาพหรือฉีดวัคซีน'),
+  phmsApptOption('📤 ส่งต่อ','เลือกประเภทนัด referral','มีนัดเดิมหรือใบส่งต่อจากภายนอก'),
+  phmsApptOption('🚶 Walk-in','เลือกวอล์กอิน','วางแผนจะไป หรือบันทึกที่ไปมาแล้ว'),
+  phmsApptOption('📋 อื่น ๆ','เลือกประเภทนัด other','บริการอื่นตามที่ระบุจริง')
  ];
  // No unactionable status warning in primary picker.
- await replyMessages(rt,t,[phmsApptPickerCard('🏷️ เลือกแบบนัด','นัดของ '+String(personName||'ผู้ใช้'),items)])
+ await replyMessages(rt,t,[{type:'flex',altText:'🏷️ เลือกแบบนัด',contents:{type:'carousel',contents:[0,4].map((i:number)=>phmsApptPickerCard('🏷️ นัดเพื่ออะไร','นัดของ '+String(personName||'ผู้ใช้')+' • '+(i/4+1)+'/2',items.slice(i,i+4),true,'กลับยืนยันเจ้าของนัด').contents)}}])
 }
 async function replyAppointmentTypeSubPicker(rt:string,u:string,k:string,id:string,t:string,group:string){
  const hist=await phmsAppointmentHistoryPresence(u,k,id);
@@ -6169,38 +6173,67 @@ async function replyAppointmentSourceChoice(rt:string,u:string,k:string,id:strin
  ])
 }
 
+/* PHMS_APPOINTMENT_CREATION_RUNTIME_REPAIR_V1 */
+async function replyNewAppointmentCard(rt:string,u:string,k:string,id:string,t:string){
+ const st=await getState(u,k,id);
+ if(st?.state_data?.guided===true){await replyAppointmentGuidedStep(rt,u,k,id,t);return}
+ await replyAppointmentCreateSelectMenu(rt,u,k,id,t)
+}
+async function replyAppointmentGuidedStep(rt:string,u:string,k:string,id:string,t:string){
+ const st=await getState(u,k,id),p=st?.state_data?.partial||{},owner=await appointmentActivePersonName(u,k,id);
+ if(!st?.state_data?.person_confirmed){
+  await reply(rt,'👤 นัดของใคร\n\nบุคคลที่เลือก: '+owner,t,[pb('✅ นัดของคนนี้','ยืนยันเจ้าของเริ่มนัด'),pb('👥 เลือกคนใหม่','เปลี่ยนเจ้าของนัดก่อนบันทึก 0'),pb('📂 ร่างที่เก็บไว้','ร่างนัดของคนนี้'),pb('↩️ กลับนัดหมาย','นัดหมายบุคคลปัจจุบัน')]);return
+ }
+ if(!p.appointment_type){await replyAppointmentTypePicker(rt,u,k,id,t,owner);return}
+ if(p.appointment_type==='investigation'&&!st.state_data.diagnostic_checked){await replyAppointmentDiagnosticPicker(rt,u,k,id,t);return}
+ if(!p.hospital_name){await replyAppointmentCreateFieldChoices(rt,u,k,id,t,'hospital_name');return}
+ if(!st.state_data.department_checked){await replyAppointmentCreateFieldChoices(rt,u,k,id,t,'department');return}
+ if(!st.state_data.doctor_checked){await replyAppointmentCreateFieldChoices(rt,u,k,id,t,'doctor_name');return}
+ if(!p.date||!p.time){
+  await reply(rt,'📅 ไปวันไหน\n\nนัดของ '+owner+'\n🏥 '+p.hospital_name,t,[{type:'action',action:{type:'datetimepicker',label:'📅 เลือกวันและเวลา',data:'ตั้งวันเวลานัดใหม่',mode:'datetime'}},...(p.visit_mode==='walk_in'?[pb('🕐 ยังไม่รู้เวลา','เลือกวันเวลาวอล์กอิน')]:[]),pb('↩️ แก้สถานที่','เลือกค่านัดใหม่ hospital_name')]);return
+ }
+ if(p.arrival_lead_minutes===undefined){await replyAppointmentCreateFieldChoices(rt,u,k,id,t,'arrival_lead_minutes');return}
+ if(!st.state_data.preparation_checked){
+  await reply(rt,'📋 ต้องเตรียมอะไร\n\nระบุเฉพาะคำแนะนำที่โรงพยาบาลหรือแพทย์แจ้ง',t,[pb('✍️ ระบุสิ่งที่ต้องเตรียม','พิมพ์เตรียมก่อนสร้างนัด'),pb('✅ ไม่มี / ข้าม','ข้ามเตรียมก่อนสร้างนัด'),pb('↩️ เปลี่ยนเวลาไปถึง','เลือกค่านัดใหม่ arrival_lead_minutes')]);return
+ }
+ await reply(rt,'✅ พร้อมตรวจทานนัด\n\n👤 '+owner+'\n🏷️ '+appointmentTypeLabel(p.appointment_type)+'\n🏥 '+p.hospital_name+'\n📅 '+p.date+' '+p.time,t,[pb('✅ ตรวจทานก่อนบันทึก','ตรวจทานนัดใหม่'),pb('✏️ แก้รายละเอียด','เมนูแก้ร่างนัดใหม่'),pb('💾 เก็บร่างไว้ก่อน','เก็บร่างนัด'),pb('↩️ สิ่งที่ต้องเตรียม','เตรียมก่อนสร้างนัด')])
+}
+const PHMS_APPOINTMENT_DIAGNOSTIC_OPTIONS=[
+ {code:'VF_24_2',name:'ลานสายตา VF 24-2'},{code:'OCT_RNFL',name:'จอประสาทตา OCT RNFL'},
+ {code:'ECG',name:'คลื่นไฟฟ้าหัวใจ ECG'},{code:'XRAY',name:'เอกซเรย์ X-ray'},
+ {code:'BLOOD',name:'ตรวจเลือด'},{code:'URINE',name:'ตรวจปัสสาวะ'},
+ {code:'MRI',name:'MRI'},{code:'CT',name:'CT'},{code:'ULTRASOUND',name:'อัลตราซาวด์'}
+];
+async function replyAppointmentDiagnosticPicker(rt:string,u:string,k:string,id:string,t:string){
+ const st=await getState(u,k,id),chosen=st?.state_data?.partial?.diagnostic_procedures||[];
+ const cards=[];
+ for(let i=0;i<PHMS_APPOINTMENT_DIAGNOSTIC_OPTIONS.length;i+=3){
+  const options=PHMS_APPOINTMENT_DIAGNOSTIC_OPTIONS.slice(i,i+3).map(x=>phmsApptOption((chosen.some((v:any)=>v.code===x.code)?'✅ ':'＋ ')+x.name,'เลือกรายการตรวจ '+x.code,'กดอีกครั้งเพื่อนำออก'));
+  options.push(phmsApptOption('✅ เลือกครบแล้ว','ยืนยันรายการตรวจนัดใหม่','เลือกแล้ว '+chosen.length+' รายการ'));
+  cards.push(phmsApptPickerCard('🔬 ตรวจอะไรบ้าง','เลือกได้หลายรายการ • '+(i/3+1)+'/3',options,true).contents)
+ }
+ await replyMessages(rt,t,[{type:'flex',altText:'🔬 เลือกรายการตรวจ',contents:{type:'carousel',contents:cards}}])
+}
 async function replyAppointmentCreateSelectMenu(rt:string,u:string,k:string,id:string,t:string){
  const st=await getState(u,k,id),p=st?.state_data?.partial||{};
- const picked=[
-  p?.appointment_type?'🏷️ '+appointmentTypeLabel(p.appointment_type):'',
-  p?.visit_mode==='walk_in'?'🚶 Walk-in'+(p.walk_in_reason==='queue_full'?' • คิวเต็ม':''):'',
-  p?.followup_kind==='chronic_routine'?'🩺 โรคประจำตัว'+(p.followup_interval_months?' • ทุก '+p.followup_interval_months+' เดือน':''):'',
-  ['checkup','vaccination'].includes(String(p?.appointment_type||''))&&p?.preventive_interval_months?'🔁 รอบถัดไป • ทุก '+p.preventive_interval_months+' เดือน':'',
-  p?.date&&p?.time?'📆 '+appointmentDateOnlyLabel(p.date+'T'+p.time+':00+07:00')+' '+p.time:'',
-  p?.hospital_name?'🏥 '+phmsHospitalShortLabel(p.hospital_name):'',
-  p?.department?'🏢 '+String(p.department):'',
-  p?.doctor_name?'👨‍⚕️ '+String(p.doctor_name):'',
-  p?.care_topic?'🧭 '+String(p.care_topic):'',
-  p?.status?'📋 '+appointmentStatusLabel(p.status):'',
-   p?.coverage_type?'🪪 '+String(p.coverage_type):''
- ].filter(Boolean);
- const q:any[]=[
-  ...(p?.visit_mode==='walk_in'?[pb('📆 เลือกวันเวลา','เลือกวันเวลาวอล์กอิน')]:[{type:'action',action:{type:'datetimepicker',label:'📆 วันและเวลา',data:'ตั้งวันเวลานัดใหม่',mode:'datetime'}}]),
-  pb('🏥 โรงพยาบาล','เลือกค่านัดใหม่ hospital_name'),
-  pb('🧾 พิมพ์ตามแบบ','เทมเพลตเพิ่มนัด'),
-  pb('⚙️ แก้ข้อมูลอื่น','ข้อมูลเพิ่มเติมนัดใหม่'),
-  pb('❌ ยกเลิกเพิ่มนัด','ยกเลิกเพิ่มนัด')
+ const owner=await appointmentActivePersonName(u,k,id);
+ const options=[
+  phmsApptOption('🏥 โรงพยาบาล','เลือกค่านัดใหม่ hospital_name',String(p.hospital_name||'เลือกสถานที่ที่จะไป')),
+  phmsApptOption('🏢 แผนก / จุดบริการ','เลือกค่านัดใหม่ department',String(p.department||'เลือกหรือกรอกตามใบนัด')),
+  {type:'box',layout:'vertical',contents:[{type:'button',style:'primary',action:{type:'datetimepicker',label:'📅 วันและเวลา',data:'ตั้งวันเวลานัดใหม่',mode:'datetime'}},{type:'text',text:p.date?p.date+' '+String(p.time||'ยังไม่ทราบเวลา'):'เลือกวันและเวลาจากปฏิทิน',size:'16px',wrap:true}]},
+  phmsApptOption('⏱️ เวลาไปถึง','เลือกค่านัดใหม่ arrival_lead_minutes','ก่อนนัด '+String(p.arrival_lead_minutes||0)+' นาที'),
+  phmsApptOption('📋 เตรียมก่อนนัด','เตรียมก่อนสร้างนัด',p.preparation_notes?'มีข้อมูลที่ระบุไว้แล้ว':'ระบุตามคำสั่งโรงพยาบาล หรือข้ามได้'),
+  phmsApptOption('✅ ตรวจทาน','ตรวจทานนัดใหม่','ตรวจชื่อและรายละเอียดก่อนบันทึก'),
+  phmsApptOption('⚙️ ข้อมูลอื่น','ข้อมูลเพิ่มเติมนัดใหม่','แพทย์ เรื่องที่รักษา และสิทธิรักษา'),
+  phmsApptOption('💾 เก็บร่างไว้ก่อน','เก็บร่างนัด','ยังไม่สร้างนัดจริง')
  ];
- await reply(rt,
-  '🎛️ ข้อมูลนัดที่เลือกแล้ว\\n'+
-  (picked.length?picked.join('\\n'):'ยังไม่ระบุข้อมูล')+
-  '\\n\\nเลือกวันเวลา โรงพยาบาล หรือพิมพ์ข้อมูลตามแบบได้เลย ไม่ต้องเลือกประเภทนัดซ้ำ',
-  t,q
- )
+ const cards=[];
+ for(let i=0;i<options.length;i+=4)cards.push(phmsApptPickerCard('📅 เพิ่มนัดของ '+owner,appointmentTypeLabel(p.appointment_type||'')+' • '+(i/4+1)+'/2',options.slice(i,i+4),true).contents);
+ await replyMessages(rt,t,[{type:'flex',altText:'📅 เพิ่มนัดของ '+owner,contents:{type:'carousel',contents:cards}}])
 }
 async function replyAppointmentCreateFieldChoices(rt:string,u:string,k:string,id:string,t:string,field:string){
  const st=await getState(u,k,id),p=st?.state_data?.partial||{};
- const back=pb('↩️ เลือกข้อมูลอื่น','เลือกข้อมูลนัดใหม่');
+ const back=pb('↩️ ย้อนกลับ',field==='hospital_name'?'เลือกประเภทนัดใหม่':field==='department'?'เลือกค่านัดใหม่ hospital_name':field==='doctor_name'?'เลือกค่านัดใหม่ department':field==='arrival_lead_minutes'?'แก้วันเวลาร่างนัด':'เลือกข้อมูลนัดใหม่');
  const keep=String(p?.appointment_type||'')==='follow_up'&&
   ['hospital_name','department','doctor_name','care_topic','coverage_type'].includes(field)&&
   String(p?.[field]||'').trim()?pb('✅ ใช้ค่าเดิม','คงค่านัดติดตาม '+field):null;
@@ -6253,7 +6286,8 @@ async function replyAppointmentCreateFieldChoices(rt:string,u:string,k:string,id
   (icon+' '+String(x?.short_label||x?.value||'เลือก')).slice(0,20),
   'ตั้งค่านัดใหม่ '+field+' '+encodeURIComponent(String(x?.value||''))
  ))];
- q.push(pb('✍️ พิมพ์ค่าอื่น','พิมพ์ค่านัดใหม่ '+field),back);
+ if(['department','doctor_name'].includes(field))q.push(pb('✅ ไม่ระบุ / ข้าม','ข้ามช่องนัดใหม่ '+field));
+ q.push(pb('✍️ พิมพ์ค่าอื่น','พิมพ์ค่านัดใหม่ '+field),pb('💾 เก็บร่างไว้ก่อน','เก็บร่างนัด'),back);
  await reply(rt,
   icon+' เลือก'+fieldLabel+'\n\n'+
   (rows.length?'รายการที่เคยใช้หรือมีอยู่ในฐานกลาง':'ยังไม่มีรายการเดิมให้เลือก')+
@@ -6405,6 +6439,7 @@ function medNameFromText(text:string){
  s=s.replace(/^(?:ชื่อยา)\s*(?:เป็น|คือ|:|=)?\s*/i,'').trim();
  return s
 }
+type MedicationPartial={generic_name?:string,medication_name?:string,name?:string,strength_unit?:string,dosage_form?:string,dose_unit?:string,dose_text?:string,frequency_type?:string,frequency_unit?:string,meal_relation?:string,route?:string,instructions?:string,start_date?:string,end_date?:string,indication?:string,notes?:string,status?:string,strength_value?:number,dose_value?:number,frequency_value?:number,time_of_day?:string[],exact_times?:string[]};
 function parseMedicationFreeText(text:string):MedicationPartial{
  const raw=String(text||'').replace(/[“”"]/g,' ').replace(/\s+/g,' ').trim();
  const out:MedicationPartial={};
@@ -6700,6 +6735,55 @@ async function emitMedicationDraft(e:any,u:string,k:string,id:string,t:string,pa
 }
 
 
+/* PHMS_APPOINTMENT_DRAFT_RUNTIME_REPAIR_V1: shared text/picker review path. */
+function phmsAppointmentDateTimeValid(date:any,time:any){
+ const d=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})$/),h=String(time||'').match(/^(\d{2}):(\d{2})$/);
+ return !!d&&!!h&&validYmd(Number(d[1]),Number(d[2]),Number(d[3]))&&Number(h[1])<24&&Number(h[2])<60
+}
+async function emitAppointmentDraft(e:any,u:string,k:string,id:string,t:string,partial:AppointmentPartial,rawText:string,oldSourceCode:string|null=null,personConfirmed=false){
+ const current=await getState(u,k,id),merged={...(partial||{})};
+ const owner=await appointmentActivePersonName(u,k,id);
+ const identity=one(await rpc(u,k,'phms_resolve_line_command_context',{p_line_user_id:id,p_resource:'appointments',p_action:'create',p_require_person:true,p_required_scope:'any'}));
+ if(current?.state_data?.draft_person_id&&current.state_data.draft_person_id!==identity?.target_person_id){
+  await state(u,k,id,'crud_add_appointment',{guided:true,person_confirmed:false,partial:{},draft_person_id:identity?.target_person_id});
+  await replyNewAppointmentCard(e.replyToken,u,k,id,t);return
+ }
+ const access=await appointmentEffectiveAccess(u,k,id);
+ if(!access.create){await replyAppointmentAccessDeniedCard(e.replyToken,u,k,id,t,'ยังไม่มีสิทธิ์เพิ่มนัดให้บุคคลนี้');return}
+ const evidence=await appointmentPersonCheck(u,k,id,rawText,owner);
+ if(!personConfirmed){
+  await state(u,k,id,'crud_add_appointment_person_confirm',{...(current?.state_data||{}),partial:merged,raw_text:rawText,old_source_code:oldSourceCode,selected_person_name:owner,person_confirmed:false});
+  await reply(e.replyToken,'👤 ยืนยันเจ้าของนัด\n\nนัดนี้เป็นของ '+owner+(evidence&&evidence.current_matches!==true?'\nชื่อในข้อความไม่ตรงกับคนที่เลือก กรุณาตรวจสอบก่อน':''),t,[pb('✅ ใช่ คนนี้','ยืนยันคนนี้สำหรับนัด'),pb('👥 เลือกคนใหม่','เปลี่ยนเจ้าของนัดก่อนบันทึก 0'),pb('↩️ กลับนัดหมาย','นัดหมาย')]);return
+ }
+ if(!merged.appointment_type||!merged.hospital_name||!phmsAppointmentDateTimeValid(merged.date,merged.time)){
+  await state(u,k,id,'crud_add_appointment',{...(current?.state_data||{}),partial:merged,raw_text:rawText,old_source_code:oldSourceCode,person_confirmed:true,pick_field:null});
+  if(!merged.appointment_type)await replyAppointmentTypePicker(e.replyToken,u,k,id,t,owner);
+  else await replyNewAppointmentCard(e.replyToken,u,k,id,t);
+  return
+ }
+ const payload=appointmentPayload(merged,rawText);
+ const raw=rawText.trim()||appointmentAddTemplateText(owner,merged);
+ const eventKey=String(e.message?.id||e.webhookEventId||'');
+ if(!eventKey)throw new Error('appointment_event_id_required');
+ const rr=one(await rpc(u,k,'phms_start_line_structured_text_intake',{p_line_user_id:id,p_line_message_id:eventKey,p_resource:'appointment',p_raw_text:raw,p_normalized_data:payload}));
+ const code=String(rr?.source_code||'');
+ if(!code)throw new Error('appointment_draft_source_required');
+ const review=intakeReviewMessage(rr);
+ if(Number(rr?.blocking_conflict_count||0)>0||review.needsPersonResolution){await reply(e.replyToken,review.text,t,review.q);return}
+ await state(u,k,id,'crud_review_appointment_draft',{partial:merged,raw_text:raw,payload,source_code:code,person_name:String(rr.person_name||owner),person_confirmed:true});
+ await reply(e.replyToken,appointmentSummary(payload,String(rr.person_name||owner),code),t,[pb('✅ ยืนยันบันทึก','ยืนยันรับเข้า '+code),pb('✏️ แก้ข้อมูล','แก้รายละเอียดนัด '+code),pb('❌ ยกเลิก','ยกเลิกรับเข้า '+code)]);
+ if(oldSourceCode&&oldSourceCode!==code){
+  try{await rpc(u,k,'phms_finalize_line_intake_review',{p_line_user_id:id,p_source_code:oldSourceCode,p_decision:'cancel'})}catch(err){console.error('appointment_previous_draft_cancel_failed',String(err))}
+ }
+}
+async function pushAppointmentReview(target:string,t:string,payload:any,personName:string,sourceCode:string,pushMode=false){
+ const q=[pb('✅ ยืนยันบันทึก','ยืนยันรับเข้า '+sourceCode),pb('✏️ แก้ข้อมูล','แก้รายละเอียดนัด '+sourceCode),pb('❌ ยกเลิก','ยกเลิกรับเข้า '+sourceCode)];
+ if(pushMode)await push(target,appointmentSummary(payload,personName,sourceCode),t,q);
+ else await reply(target,appointmentSummary(payload,personName,sourceCode),t,q)
+}
+async function pushAppointmentMissingCard(target:string,t:string,payload:any,personName:string,missing:string[],cancelData:string){
+ await push(target,'📅 นัดของ '+personName+'\n\nยังขาด '+missing.join(' และ '),t,[pb('📅 เลือกข้อมูล','เลือกข้อมูลนัดใหม่'),pb('❌ ยกเลิก',cancelData)])
+}
 async function emitImageBoundAppointmentDraft(
  e:any,u:string,k:string,id:string,t:string,
  sourceCode:string,partial:AppointmentPartial,rawText:string
@@ -6717,7 +6801,7 @@ async function emitImageBoundAppointmentDraft(
  const missing:string[]=[];if(!merged.date)missing.push('วันนัด');if(!merged.time)missing.push('เวลานัด');
  if(missing.length){
    await state(u,k,id,'intake_manual_appointment',{source_code:sourceCode,partial:merged,raw_text:rawText});
-   await pushAppointmentMissingCard(e.replyToken,t,merged,currentPerson,missing,'ยกเลิกรับเข้า '+sourceCode);
+   await pushAppointmentMissingCard(id,t,merged,currentPerson,missing,'ยกเลิกรับเข้า '+sourceCode);
    return
  }
  try{await rpc(u,k,'phms_prepare_line_manual_fallback',{p_line_user_id:id,p_source_code:sourceCode,p_reason:'manual_appointment_from_image'})}catch(err){
@@ -6739,50 +6823,14 @@ async function emitImageBoundAppointmentDraft(
    person_name:String(rr?.person_name||currentPerson),person_confirmed:true,
    image_bound:true
  });
- await pushAppointmentReview(e.replyToken,t,payload,String(rr?.person_name||currentPerson),codeRef,true)
-}
-
-/* Restore missing runtime helpers referenced by v1335; all writes retain existing RPC authorization. */
-async function syncAppointmentOwnerContext(u:string,k:string,id:string,recordCode:string){
- return one(await rpc(u,k,'phms_restore_line_appointment_owner_context',{p_line_user_id:id,p_record_code:recordCode}));
-}
-async function replyNewAppointmentCard(rt:string,u:string,k:string,id:string,t:string){
- const current=await getState(u,k,id);
- if(current?.state_data?.partial?.appointment_type)await replyAppointmentCreateSelectMenu(rt,u,k,id,t);
- else await replyAppointmentTypePicker(rt,u,k,id,t,await appointmentActivePersonName(u,k,id));
-}
-async function pushAppointmentMissingCard(rt:string,t:string,p:any,personName:string,missing:string[],cancelData:string){
- await reply(rt,'📅 เพิ่มข้อมูลนัดของ '+personName+'\n\nยังขาด: '+missing.join(' / ')+'\nเลือกแก้ข้อมูลหรือส่งเทมเพลตที่เติมแล้วกลับมาได้',t,[pb('✏️ เลือกข้อมูล','เลือกข้อมูลนัดใหม่'),pb('🧾 เทมเพลต','เทมเพลตเพิ่มนัด'),pb('❌ ยกเลิก',cancelData)]);
-}
-async function pushAppointmentReview(rt:string,t:string,p:any,personName:string,sourceCode:string,_personConfirmed=true){
- await reply(rt,appointmentSummary(p,personName,sourceCode),t,[pb('✅ ยืนยันบันทึก','ยืนยันรับเข้า '+sourceCode),pb('✏️ แก้รายละเอียด','แก้รายละเอียดนัด '+sourceCode),pb('❌ ยกเลิก','ยกเลิกรับเข้า '+sourceCode)]);
-}
-async function emitAppointmentDraft(e:any,u:string,k:string,id:string,t:string,partial:AppointmentPartial,rawText:string,oldSourceCode:string|null=null,personConfirmed=false){
- const p=await enrichAppointmentDoctor(u,k,id,{...partial});
- const auth=one(await rpc(u,k,'phms_resolve_line_command_context',{p_line_user_id:id,p_resource:'appointments',p_action:'create',p_require_person:true,p_required_scope:'any'}));
- if(auth?.context_ready!==true||auth?.permission_granted!==true)throw new Error('appointment_create_permission_denied');
- const who=String(auth.target_person_name||'บุคคลที่เลือก');
- await state(u,k,id,'crud_add_appointment',{partial:p,raw_text:rawText,old_source_code:oldSourceCode,person_confirmed:personConfirmed});
- if(!p.appointment_type){await replyAppointmentTypePicker(e.replyToken,u,k,id,t,who);return}
- const missing:string[]=[];if(!p.date)missing.push('วันนัด');if(!p.time)missing.push('เวลานัด');if(!p.title)missing.push('นัดเพื่อ');if(!p.hospital_name)missing.push('โรงพยาบาล');
- if(missing.length){await pushAppointmentMissingCard(e.replyToken,t,p,who,missing,'ยกเลิกเพิ่มนัด');return}
- const payload=appointmentPayload(p,rawText);
- let result:any;
- if(oldSourceCode){result=one(await rpc(u,k,'phms_record_line_manual_structured_extraction',{p_line_user_id:id,p_source_code:oldSourceCode,p_document_type:'appointment',p_manual_text:rawText,p_normalized_data:payload}))}
- else {result=one(await rpc(u,k,'phms_start_line_structured_text_intake',{p_line_user_id:id,p_line_message_id:String(e.webhookEventId||e.message?.id||crypto.randomUUID()),p_resource:'appointment',p_raw_text:rawText,p_normalized_data:payload}))}
- const review=intakeReviewMessage(result);
- if(Number(result?.blocking_conflict_count||0)>0||review.needsPersonResolution){await reply(e.replyToken,review.text,t,review.q);return}
- const code=String(result?.source_code||oldSourceCode||'');if(!code)throw new Error('appointment_source_missing');
- await state(u,k,id,'crud_review_appointment_draft',{partial:p,payload,raw_text:rawText,source_code:code,person_name:who,person_confirmed:true});
- await pushAppointmentReview(e.replyToken,t,payload,who,code,true);
+ await pushAppointmentReview(id,t,payload,String(rr?.person_name||currentPerson),codeRef,true)
 }
 
 function crudKindLabel(k:string){return ({medication:'ยา',appointment:'นัด',health:'สุขภาพ',document:'เอกสาร'} as any)[k]||k}
 function crudViewCmd(k:string,code:string){return 'ดู'+crudKindLabel(k)+' '+code}
 function crudBackCmd(k:string){return k==='medication'?'ยา':k==='appointment'?'นัดหมาย':k==='health'?'สุขภาพ':'เอกสาร'}
-function crudLine(k:string,x:any){
+function crudLine(k:string,x:any,who='บุคคลที่เลือก'){
  const code=String(x.code||'').slice(0,12);
- const who=String(x.person_name||'บุคคลที่เลือก');
  if(k==='medication'){
   const strength=[x.strength_value,x.strength_unit].filter(Boolean).join(' ');
   return '• #'+code+' '+String(x.name||x.generic_name||'ยา')+(strength?' '+strength:'')+' · '+String(x.status||'-')
@@ -8207,7 +8255,7 @@ function appointmentPrevisitTrendLabel(v:any){
  const x=String(v||'');
  return ({new:'อาการใหม่',stable:'คงเดิม',better:'ดีขึ้น',worse:'แย่ลง',fluctuating:'เป็น ๆ หาย ๆ'} as any)[x]||''
 }
-function parseAppointmentPrevisitSymptomText(text:string){
+function parseAppointmentPrevisitSymptomText(text:string):{symptom_text:string,onset_text:string,severity:number|null|undefined,trend:string|undefined,associated_symptoms:string,actions_taken:string,note:string,severity_dimension?:string,functional_impact?:number|null}{
  const raw=String(text||'').trim(),x=parsePhmsTemplate(raw);
  const pick=(...keys:string[])=>{for(const k of keys){const v=String(x?.[k]??'').trim();if(v&&v!=='-'&&v!=='—')return v}return ''};
  let symptom=pick('อาการ','อาการผิดปกติ','อาการหลัก');
@@ -9964,6 +10012,9 @@ function appointmentAccessRequestTime(v:any){
  if(!v)return '';
  try{return crudDate(v)}catch{return String(v)}
 }
+async function syncAppointmentOwnerContext(u:string,k:string,id:string,recordCode:string){
+ return one(await rpc(u,k,'phms_restore_line_appointment_owner_context',{p_line_user_id:id,p_record_code:recordCode}))
+}
 async function appointmentEffectiveAccess(u:string,k:string,id:string){
  let d:any=null;
  try{d=one(await rpc(u,k,'phms_get_line_person_dashboard',{p_line_user_id:id}))?.access?.appointments||null}catch{}
@@ -10449,7 +10500,7 @@ async function page(u:string,k:string,id:string,key:string,title:string,resource
   const data=one(await rpc(u,k,'phms_line_crud_list',{p_line_user_id:id,p_resource:resource,p_limit:8}));
   const who=String(data?.person_name||r?.target_person_name||await name(u,k,id));
   const items=Array.isArray(data?.items)?data.items:[];
-  const lines=items.map((x:any)=>crudLine(resource,x));
+  const lines=items.map((x:any)=>crudLine(resource,x,who));
   const addText=resource==='medication'?'เพิ่มยา':resource==='appointment'?'เพิ่มนัด':resource==='health'?'เพิ่มสุขภาพ':'เพิ่มเอกสาร';
   const q:any[]=[act('➕ '+addText,addText)];
   for(const x of items.slice(0,7)){
@@ -10923,7 +10974,7 @@ async function galleryPage(rt:string,u:string,k:string,id:string,t:string,catego
 const MEDIA_MAX_BYTES=10*1024*1024;
 function cleanFilename(v:any){const s=String(v??'').replace(/[\\u0000-\\u001f\\u007f]/g,'').trim();return s?s.slice(0,255):null}
 function hex(b:Uint8Array){return Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function sha256(b:Uint8Array){return hex(new Uint8Array(await crypto.subtle.digest('SHA-256',new Uint8Array(b))))}
+async function sha256(b:Uint8Array){return hex(new Uint8Array(await crypto.subtle.digest('SHA-256',new Uint8Array(b).buffer)))}
 function mediaType(b:Uint8Array){
  if(b.length>=3&&b[0]===0xff&&b[1]===0xd8&&b[2]===0xff)return {mime:'image/jpeg',ext:'jpg'};
  if(b.length>=8&&b[0]===0x89&&b[1]===0x50&&b[2]===0x4e&&b[3]===0x47&&b[4]===0x0d&&b[5]===0x0a&&b[6]===0x1a&&b[7]===0x0a)return {mime:'image/png',ext:'png'};
@@ -10933,13 +10984,13 @@ function mediaType(b:Uint8Array){
 }
 async function uploadPersonPhoto(u:string,k:string,path:string,bytes:Uint8Array,mime:string){
  const url=u+'/storage/v1/object/phms-person-photos/'+path.split('/').map(encodeURIComponent).join('/');
- const r=await fetch(url,{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'content-type':mime,'x-upsert':'false'},body:new Uint8Array(bytes)});
+ const r=await fetch(url,{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'content-type':mime,'x-upsert':'false'},body:new Uint8Array(bytes).buffer});
  if(!r.ok)throw new Error('person_photo_upload_failed:'+r.status+':'+await r.text());
  return true
 }
 async function uploadTemp(u:string,k:string,path:string,bytes:Uint8Array,mime:string,bucket='phms-intake-temp'){
  const url=u+'/storage/v1/object/'+bucket+'/'+path.split('/').map(encodeURIComponent).join('/');
- const r=await fetch(url,{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'content-type':mime,'x-upsert':'false'},body:new Uint8Array(bytes)});
+ const r=await fetch(url,{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'content-type':mime,'x-upsert':'false'},body:new Uint8Array(bytes).buffer});
  if(!r.ok&&r.status!==400)throw new Error('storage_upload_failed:'+r.status+':'+await r.text());
  return {ok:r.ok,status:r.status}
 }
@@ -11105,7 +11156,7 @@ async function replySelfAccessDirectory(rt:string,u:string,k:string,id:string,t:
  const fm=one(await rpc(u,k,'phms_prepare_line_family_management',{p_line_user_id:id}));
  if(fm?.flow_state!=='ready')throw new Error('self_access_family_context_not_ready');
  const out=one(await rpc(u,k,'phms_list_line_self_viewers',{p_line_user_id:id}));
- const ov=one(await rpc(u,k,'phms_get_line_active_person_access_overview',{p_line_user_id:id}));
+ const ov=out?.caregiver_overview||{};
  const canManagePermissions=fm?.can_manage_permissions===true||out?.self_manage===true;
  let myNotify:any={any_access:false,all_enabled:false};
  try{
@@ -11182,7 +11233,7 @@ async function replySelfViewerManage(rt:string,u:string,k:string,id:string,t:str
  const fm=one(await rpc(u,k,'phms_prepare_line_family_management',{p_line_user_id:id}));
  if(fm?.flow_state!=='ready')throw new Error('self_access_family_context_not_ready');
  const out=one(await rpc(u,k,'phms_list_line_self_viewers',{p_line_user_id:id}));
- const ov=one(await rpc(u,k,'phms_get_line_active_person_access_overview',{p_line_user_id:id}));
+ const ov=out?.caregiver_overview||{};
  const canManage=out?.self_manage===true;
  const rows=Array.isArray(out?.items)?out.items:[];
  const candidates=rows.filter((m:any)=>{
@@ -15702,17 +15753,39 @@ Deno.serve(async req=>{if(req.method!=='POST')return new Response('method_not_al
 try{const rl=await rateLimit(u,k,'line_core_user',String(id),90,60);if(rl?.allowed===false){await reply(e.replyToken,'⚠️ ส่งคำสั่งถี่เกินไป รอสักครู่สักครู่แล้วลองใหม่',t);continue}}catch(err){console.error('core_rate_limit',String(err));return new Response('rate_limit_unavailable',{status:503})}
 if(e.type==='message'&&e.message.type!=='text'){try{await handleLineMedia(e,u,k,id,t)}catch(err){const msg=String((err as any)?.message??err);console.error('line_media_intake',msg);if(msg.includes('file_too_large'))await replyOrPush(e.replyToken,id,'⚠️ ไฟล์ใหญ่เกิน 10 MB ช่วยเลือกไฟล์ที่เล็กกว่านี้',t);else if(msg.includes('unsupported_media_type'))await replyOrPush(e.replyToken,id,'⚠️ ตอนนี้รองรับ JPEG, PNG, WebP และ PDF เท่านั้น',t);else await replyOrPush(e.replyToken,id,'⚠️ ยังเก็บรูปหรือไฟล์นี้ไม่ได้ ลองส่งใหม่อีกครั้ง',t,[act('🏡 หน้าเริ่มต้น','กลับหน้าเริ่มต้น')])}continue}/* PHMS_FAMILY_NAV_TRACE_V1: no personal identifiers in navigation telemetry. */
 let c=e.type==='postback'?String(e.postback?.data||'').trim():String(e.message?.text||'').trim();
-/* PHMS_APPOINTMENT_ADD_POSTBACK_PRIORITY_V1330: navigation must not be consumed by a previous conversational state. */
-if(sourceType==='user'&&id&&e.replyToken&&e.type==='postback'&&c==='เพิ่มนัด'){
+/* Draft storage reuses the same normalized draft and canonical review/commit path. */
+if(sourceType==='user'&&(c==='เก็บร่างนัด'||c==='ร่างนัดของคนนี้'||/^เปิดร่างนัด [0-9a-f-]{36}$/i.test(c))){
  try{
-  const personName=await appointmentActivePersonName(u,k,id);
-  await replyAppointmentTypePicker(e.replyToken,u,k,id,t,personName);
-  try{await state(u,k,id,'crud_add_appointment',{person_confirmed:true})}catch(err){console.error('appointment_add_state_write_failed',String(err))}
- }catch(err){
-  console.error('appointment_add_picker_failed',String(err));
-  await reply(e.replyToken,'⚠️ ยังเปิดหน้าเพิ่มนัดไม่ได้ กรุณาลองอีกครั้ง',t,[pb('📅 เพิ่มนัด','เพิ่มนัด'),pb('👤 ภาพรวมบุคคล','ภาพรวมบุคคล')]);
- }
- continue;
+  if(c==='เก็บร่างนัด'){
+   const draft=await getState(u,k,id);
+   if(!['crud_add_appointment','crud_add_appointment_person_confirm'].includes(String(draft?.state_key||'')))throw new Error('appointment_draft_required');
+   const data={...(draft.state_data||{}),draft_key:draft.state_data?.draft_key||crypto.randomUUID()};
+   await rpc(u,k,'phms_line_save_appointment_wizard_draft',{p_line_user_id:id,p_key:data.draft_key,p_payload:data});
+   await state(u,k,id,'crud_add_appointment',data);
+   await reply(e.replyToken,'💾 เก็บร่างนัดไว้แล้ว\n\nยังไม่สร้างนัดจริง กลับมาแก้ร่างได้ภายใน 30 วัน',t,[pb('✏️ ทำร่างต่อ','กลับหน้าเพิ่มนัดใหม่'),pb('📂 ดูร่างที่เก็บ','ร่างนัดของคนนี้'),pb('↩️ นัดหมาย','นัดหมาย')]);
+  }else if(c==='ร่างนัดของคนนี้'){
+   const list=one(await rpc(u,k,'phms_line_get_appointment_wizard_draft',{p_line_user_id:id,p_key:null}));
+   await reply(e.replyToken,'📂 ร่างนัดของบุคคลนี้\n\n'+(list?.items?.length?'เลือกร่างที่ต้องการทำต่อ':'ยังไม่มีร่างที่เก็บไว้'),t,[...(list?.items||[]).map((x:any)=>pb('✏️ '+String(x.label).slice(0,15),'เปิดร่างนัด '+x.id)),pb('↩️ เพิ่มนัด','เพิ่มนัด')]);
+  }else{
+   const loaded=one(await rpc(u,k,'phms_line_get_appointment_wizard_draft',{p_line_user_id:id,p_key:c.split(' ')[1]}));
+   await state(u,k,id,'crud_add_appointment',{...loaded.draft,guided:true,person_confirmed:false});
+   await replyNewAppointmentCard(e.replyToken,u,k,id,t);
+  }
+ }catch(err){console.error('appointment_draft_storage',String(err));await reply(e.replyToken,'⚠️ ยังเปิดหรือเก็บร่างนี้ไม่ได้ ตรวจสิทธิ์และบุคคลที่เลือกอีกครั้ง',t,[pb('↩️ นัดหมาย','นัดหมาย')])}
+ continue
+}
+/* PHMS_APPOINTMENT_ADD_POSTBACK_PRIORITY_V1330: navigation must not be consumed by a previous conversational state. */
+if(sourceType==='user'&&id&&e.replyToken&&/^(?:[＋+]\s*)?เพิ่มนัด$/.test(c)){
+ try{
+  const access=await appointmentEffectiveAccess(u,k,id);
+  if(!access.create){await replyAppointmentAccessDeniedCard(e.replyToken,u,k,id,t,'ยังไม่มีสิทธิ์เพิ่มนัดให้บุคคลนี้');continue}
+  const context=one(await rpc(u,k,'phms_resolve_line_command_context',{p_line_user_id:id,p_resource:'appointments',p_action:'create',p_require_person:true,p_required_scope:'any'}));
+  const gate=one(await rpc(u,k,'phms_line_appointment_wizard_enabled',{p_line_user_id:id}));
+  await state(u,k,id,'crud_add_appointment',{person_confirmed:false,guided:gate===true,draft_key:crypto.randomUUID(),draft_person_id:context?.target_person_id,partial:{}});
+  if(gate===true)await replyNewAppointmentCard(e.replyToken,u,k,id,t);
+  else await replyAppointmentTypePicker(e.replyToken,u,k,id,t,await appointmentActivePersonName(u,k,id));
+ }catch(err){console.error('appointment_add_start_failed',String(err));await reply(e.replyToken,'⚠️ ยังเปิดหน้าเพิ่มนัดไม่ได้ กรุณาเลือกบุคคลแล้วลองอีกครั้ง',t,[pb('↩️ นัดหมาย','นัดหมาย')])}
+ continue
 }
 
 /* PHMS_REFILL_SLICE1_LIVE_V1 */
@@ -17685,7 +17758,7 @@ if(accessTemplate){
  continue
 }
 
-const templateNavBypass=e.type==='postback';
+const templateNavBypass=e.type==='postback'&&!/^(?:บันทึก|ยืนยัน|ตั้งค่า|เทมเพลต)/.test(c);
 if(st?.state_key==='family_person_access_template_edit'&&!templateNavBypass){
  if(['ยกเลิก','❌ ยกเลิก','สิทธิ์สมาชิก'].includes(c)){await clear(u,k,id);await reply(e.replyToken,'ยกเลิกแล้ว',t,[pb('🛡️ บทบาทและสิทธิ์','สิทธิ์สมาชิก')]);continue}
  try{
@@ -17768,7 +17841,7 @@ if(c==='แก้สิทธิ์รายคนของฉัน'){
  try{
   const fm=one(await rpc(u,k,'phms_prepare_line_family_management',{p_line_user_id:id}));
   const out=one(await rpc(u,k,'phms_list_line_self_viewers',{p_line_user_id:id}));
- const ov=one(await rpc(u,k,'phms_get_line_active_person_access_overview',{p_line_user_id:id}));
+ const ov=out?.caregiver_overview||{};
   if(!(fm?.can_manage_permissions===true||out?.self_manage===true)){await replySelfAccessDirectory(e.replyToken,u,k,id,t);continue}
   if(out?.person_code)await rpc(u,k,'phms_select_line_context_person',{p_line_user_id:id,p_selection_code:String(out.person_code)});
   await replyActivePersonPermissionMembers(e.replyToken,u,k,id,t)
@@ -21149,7 +21222,7 @@ if(caregiverStatusCmd){
 if(c==='เพิ่มคนดูข้อมูลของฉัน'){
  try{
   const out=one(await rpc(u,k,'phms_list_line_self_viewers',{p_line_user_id:id}));
- const ov=one(await rpc(u,k,'phms_get_line_active_person_access_overview',{p_line_user_id:id}));
+ const ov=out?.caregiver_overview||{};
   const pc=String(out?.person_code||'');
   if(!pc)throw new Error('self_person_code_missing');
   await rpc(u,k,'phms_select_line_context_person',{p_line_user_id:id,p_selection_code:pc});
@@ -21446,13 +21519,8 @@ if(st?.state_key==='crud_add_appointment_person_confirm'){
    try{
      await rpc(u,k,'phms_select_line_context_family',{p_line_user_id:id,p_selection_code:ownerSelect[1]});
      const picked=one(await rpc(u,k,'phms_select_line_context_person',{p_line_user_id:id,p_selection_code:ownerSelect[2]}));
-     await emitAppointmentDraft(
-       e,u,k,id,t,
-       st?.state_data?.partial||{},
-       String(st?.state_data?.raw_text||''),
-       st?.state_data?.old_source_code||null,
-       false
-     );
+     await state(u,k,id,'crud_add_appointment',{partial:{},person_confirmed:false,pick_field:null});
+     await replyAppointmentTypePicker(e.replyToken,u,k,id,t,await appointmentActivePersonName(u,k,id));
    }catch(err){
      console.error('appointment_owner_before_save_select',String(err));
      await reply(e.replyToken,'⚠️ เลือกเจ้าของนัดคนนี้ไม่ได้ หรือตอนนี้ยังไม่มีสิทธิ์เพิ่มนัดให้',t,[pb('👥 เลือกใหม่','เปลี่ยนเจ้าของนัดก่อนบันทึก 0'),pb('❌ ยกเลิก','นัดหมาย')])
@@ -21463,14 +21531,8 @@ if(st?.state_key==='crud_add_appointment_person_confirm'){
    const selectionCode=String(c.slice(11).split(' แล้ว')[0]||'').trim();
    try{
      const p=one(await rpc(u,k,'phms_select_line_context_person',{p_line_user_id:id,p_selection_code:selectionCode}));
-     await reply(e.replyToken,'✅ เปลี่ยนเป็น “'+String(p?.person_display_name||'คนที่เลือก')+'” แล้ว\nกำลังตรวจ Draft นัดกับคนนี้ต่อ...',t);
-     await emitAppointmentDraft(
-       e,u,k,id,t,
-       st?.state_data?.partial||{},
-       String(st?.state_data?.raw_text||''),
-       st?.state_data?.old_source_code||null,
-       false
-     );
+     await state(u,k,id,'crud_add_appointment',{partial:{},person_confirmed:false,pick_field:null});
+     await replyAppointmentTypePicker(e.replyToken,u,k,id,t,await appointmentActivePersonName(u,k,id));
    }catch(err){
      console.error('appointment_person_select',String(err));
      await reply(e.replyToken,'⚠️ เลือกคนนี้ไม่ได้ ช่วยเลือกใหม่',t,[act('👥 เลือกใหม่','คนในครอบครัว'),act('❌ ยกเลิก','นัดหมาย')]);
@@ -21710,6 +21772,35 @@ if(st?.state_key==='crud_add_appointment'&&c==='แก้ข้อมูลน�
  continue
 }
 if(st?.state_key==='crud_add_appointment'){
+ if(c==='กลับยืนยันเจ้าของนัด'){await state(u,k,id,'crud_add_appointment',{...(st.state_data||{}),person_confirmed:false});await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue}
+ if(c==='แก้วันเวลาร่างนัด'){await reply(e.replyToken,'📅 เลือกวันและเวลาใหม่',t,[{type:'action',action:{type:'datetimepicker',label:'📅 วันและเวลา',data:'ตั้งวันเวลานัดใหม่',mode:'datetime'}},pb('↩️ เลือกแพทย์','เลือกค่านัดใหม่ doctor_name')]);continue}
+ const diagnosticPick=c.match(/^เลือกรายการตรวจ ([A-Z0-9_]+)$/);
+ if(diagnosticPick){
+  const option=PHMS_APPOINTMENT_DIAGNOSTIC_OPTIONS.find(x=>x.code===diagnosticPick[1]);
+  if(!option||st.state_data?.partial?.appointment_type!=='investigation'){await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue}
+  const selected=st.state_data?.partial?.diagnostic_procedures||[],exists=selected.some((x:any)=>x.code===option.code);
+  await state(u,k,id,'crud_add_appointment',{...(st.state_data||{}),partial:{...(st.state_data?.partial||{}),diagnostic_procedures:exists?selected.filter((x:any)=>x.code!==option.code):[...selected,option]}});
+  await replyAppointmentDiagnosticPicker(e.replyToken,u,k,id,t);continue
+ }
+ if(c==='ยืนยันรายการตรวจนัดใหม่'){await state(u,k,id,'crud_add_appointment',{...(st.state_data||{}),diagnostic_checked:true});await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue}
+ if(c==='ยืนยันเจ้าของเริ่มนัด'){
+  await state(u,k,id,'crud_add_appointment',{...(st.state_data||{}),person_confirmed:true});
+  await replyAppointmentTypePicker(e.replyToken,u,k,id,t,await appointmentActivePersonName(u,k,id));continue
+ }
+ if(c==='เมนูแก้ร่างนัดใหม่'){await replyAppointmentCreateSelectMenu(e.replyToken,u,k,id,t);continue}
+ const skipField=c.match(/^ข้ามช่องนัดใหม่ (department|doctor_name)$/);
+ if(skipField){await state(u,k,id,'crud_add_appointment',{...(st.state_data||{}),[skipField[1]==='department'?'department_checked':'doctor_checked']:true,pick_field:null});await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue}
+ if(c==='ข้ามเตรียมก่อนสร้างนัด'){await state(u,k,id,'crud_add_appointment',{...(st.state_data||{}),preparation_checked:true,pick_field:null});await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue}
+ if(c==='เตรียมก่อนสร้างนัด'){
+  await reply(e.replyToken,'📋 เตรียมก่อนนัด\n\nกรอกเฉพาะที่โรงพยาบาลหรือแพทย์ระบุ หากไม่มีให้ข้ามได้',t,[pb('✍️ ระบุคำแนะนำ','พิมพ์เตรียมก่อนสร้างนัด'),pb('✅ ไม่มี / ข้าม','เลือกข้อมูลนัดใหม่'),pb('↩️ กลับ','เลือกข้อมูลนัดใหม่')]);continue
+ }
+ if(c==='พิมพ์เตรียมก่อนสร้างนัด'){
+  await state(u,k,id,'crud_add_appointment',{...(st.state_data||{}),pick_field:'preparation_notes'});
+  await reply(e.replyToken,'✍️ พิมพ์สิ่งที่ต้องเตรียมตามใบนัดได้เลย',t,[pb('↩️ กลับ','เลือกข้อมูลนัดใหม่')]);continue
+ }
+ if(c==='ตรวจทานนัดใหม่'){
+  await emitAppointmentDraft(e,u,k,id,t,st.state_data?.partial||{},String(st.state_data?.raw_text||''),st.state_data?.old_source_code||null,st.state_data?.person_confirmed===true);continue
+ }
  if(/(?:^|\n)\s*หมายเหตุ(?:เฉพาะ)?ผู้ดูแล\s*[:：=]\s*\S/.test(c)){
    await reply(e.replyToken,'🔒 หมายเหตุผู้ดูแลต้องเพิ่มแยกหลังบันทึกนัดในแชตส่วนตัว เพื่อไม่ให้ข้อความลับเข้าไปในเอกสารนัดทั่วไป',t,[pb('🧾 พิมพ์ตามแบบ','เทมเพลตเพิ่มนัด'),pb('❌ ยกเลิก','ยกเลิกเพิ่มนัด')]);
    continue
@@ -21731,7 +21822,7 @@ if(st?.state_key==='crud_add_appointment'){
  if(statusChoice){
   const part:any={...(st?.state_data?.partial||{}),status:statusChoice[1]};
   await state(u,k,id,'crud_add_appointment',{...(st?.state_data||{}),partial:part});
-  await replyAppointmentCreateSelectMenu(e.replyToken,u,k,id,t);continue
+  await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue
  }
  if(c==='เลือกวันเวลาวอล์กอิน'){
   await reply(e.replyToken,'🚶 Walk-in\n\nเลือกวันที่จะไป หรือเลือกวันและเวลาถ้าทราบแล้ว',t,[
@@ -21752,7 +21843,7 @@ if(st?.state_key==='crud_add_appointment'){
   if(z.visit_mode!=='walk_in'||!/^\d{4}-\d{2}-\d{2}$/.test(String(z.date||''))){
    await reply(e.replyToken,'⚠️ กรุณาเลือกวันก่อน',t,[pb('📆 เลือกวัน','เลือกวันเวลาวอล์กอิน')]);continue
   }
-  await state(u,k,id,'crud_add_appointment',{...(st?.state_data||{}),walkin_dateonly_awaiting_confirmation:true});
+  await state(u,k,id,'crud_add_appointment',{...(st?.state_data||{}),walkin_dateonly_awaiting_confirmation:true,draft_key:st.state_data?.draft_key||crypto.randomUUID()});
   await reply(e.replyToken,'📋 ตรวจแผน Walk-in\n\n📆 วัน: '+z.date+'\n🕐 เวลา: ยังไม่ทราบ\n🏥 โรงพยาบาล: '+(z.hospital_name||'ยังไม่ระบุ')+'\n🩺 ไปเพื่อ: '+(z.title||z.care_topic||'พบแพทย์')+'\n\nยังไม่ใช่คิวนัดที่โรงพยาบาลยืนยัน',t,[
    pb('✅ บันทึกแผน','ยืนยันแผน Walk-in'),pb('✏️ แก้ก่อน','เลือกข้อมูลนัดใหม่'),pb('❌ ยกเลิก','ยกเลิกเพิ่มนัด')]);continue
  }
@@ -21762,13 +21853,8 @@ if(st?.state_key==='crud_add_appointment'){
    await reply(e.replyToken,'⚠️ กรุณาตรวจแผนก่อนบันทึก',t,[pb('↩️ กลับ','เลือกข้อมูลนัดใหม่')]);continue
   }
   try{
-   const saved=one(await rpc(u,k,'phms_line_create_walkin_plan',{
-    p_line_user_id:id,p_visit_date:z.date,p_appointment_type:z.appointment_type==='walk_in'?'other':(z.appointment_type||'other'),
-    p_title:z.title||z.care_topic||'วางแผนไปโรงพยาบาล',p_hospital_name:z.hospital_name||null,
-    p_department:z.department||null,p_doctor_name:z.doctor_name||null,p_care_topic:z.care_topic||null,
-    p_walk_in_reason:z.walk_in_reason||null,
-    p_followup_kind:z.appointment_type==='follow_up'?(z.followup_kind||'general'):null,
-    p_followup_interval_months:z.appointment_type==='follow_up'?(z.followup_interval_months||null):null
+   const saved=one(await rpc(u,k,'phms_line_create_walkin_plan_v3',{
+    p_line_user_id:id,p_key:String(st.state_data?.draft_key||''),p_payload:{...z,appointment_type:z.appointment_type==='walk_in'?'other':(z.appointment_type||'other')}
    }));
    if(!saved?.ok)throw Error('walkin_plan_not_saved');
    await clear(u,k,id);
@@ -21813,14 +21899,14 @@ if(st?.state_key==='crud_add_appointment'){
    pb('🩺 รพ.ให้มา','ตั้งเหตุผลวอล์กอิน hospital_advised'),
    pb('🚶 ไม่ได้จอง','ตั้งเหตุผลวอล์กอิน no_booking'),
    pb('📋 อื่น ๆ','ตั้งเหตุผลวอล์กอิน other')]);
-  else await replyAppointmentCreateSelectMenu(e.replyToken,u,k,id,t);
+  else await replyNewAppointmentCard(e.replyToken,u,k,id,t);
   continue
  }
  const reasonChoice=c.match(/^ตั้งเหตุผลวอล์กอิน (queue_full|hospital_advised|no_booking|other)$/);
  if(reasonChoice){
   const partial:any={...(st?.state_data?.partial||{}),visit_mode:'walk_in',walk_in_reason:reasonChoice[1]};
   await state(u,k,id,'crud_add_appointment',{...(st?.state_data||{}),partial});
-  await replyAppointmentCreateSelectMenu(e.replyToken,u,k,id,t);continue
+  await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue
  }
  if(c==='เลือกติดตามโรคประจำตัว'||c==='เลือกชนิดติดตาม'){
   if(c==='เลือกติดตามโรคประจำตัว'){
@@ -21890,12 +21976,6 @@ if(st?.state_key==='crud_add_appointment'){
  const typePick=c.match(/^เลือกประเภทนัด\s+(new_case|follow_up|referral|investigation|procedure|checkup|vaccination|walk_in|other)$/);
  if(typePick){
   const type=String(typePick[1]);
-  if(['referral','investigation'].includes(type)){
-   const hist=await phmsAppointmentHistoryPresence(u,k,id);
-   if(!hist.hasAny){
-    await replyAppointmentTypePicker(e.replyToken,u,k,id,t,await appointmentActivePersonName(u,k,id));continue
-   }
-  }
   const p:any={...(st?.state_data?.partial||{}),appointment_type:type};
   const routineTopics:any={checkup:'ตรวจสุขภาพตามรอบ',vaccination:'ฉีดวัคซีนตามรอบ'};
   if(routineTopics[type]&&(!p.care_topic||Object.values(routineTopics).includes(p.care_topic)))p.care_topic=routineTopics[type];
@@ -21922,7 +22002,7 @@ if(st?.state_key==='crud_add_appointment'){
    await rpc(u,k,'phms_select_line_context_family',{p_line_user_id:id,p_selection_code:ownerSelect[1]});
    const picked=one(await rpc(u,k,'phms_select_line_context_person',{p_line_user_id:id,p_selection_code:ownerSelect[2]}));
    const t0=String(st?.state_data?.partial?.appointment_type||'');
-    await state(u,k,id,'crud_add_appointment',{...(st?.state_data||{}),partial:t0?{appointment_type:t0}:{},person_confirmed:true,pick_field:null,old_source_code:null,source_record_code:null});
+    await state(u,k,id,'crud_add_appointment',{guided:st?.state_data?.guided===true,partial:t0?{appointment_type:t0}:{},person_confirmed:true,pick_field:null,draft_person_id:picked?.person_id||null});
    if(st?.state_data?.partial?.appointment_type)await replyNewAppointmentCard(e.replyToken,u,k,id,t);
    else await replyAppointmentTypePicker(e.replyToken,u,k,id,t,String(picked?.person_display_name||await appointmentActivePersonName(u,k,id)));
   }catch(err){
@@ -21937,7 +22017,7 @@ if(st?.state_key==='crud_add_appointment'){
   for(const name of ['followup_of_appointment_id','referral_from_appointment_id','referral_source_kind','investigation_of_appointment_id'])delete p[name];
   if(c==='แหล่งนัดใหม่จากภายนอก'&&p.appointment_type==='referral')p.referral_source_kind='external_referral';
   await state(u,k,id,'crud_add_appointment',{...(st?.state_data||{}),partial:p,source_record_code:null});
-  await reply(e.replyToken,appointmentTemplatePromptText(await appointmentActivePersonName(u,k,id),p),t,[pb('🎛️ เลือกข้อมูล','เลือกข้อมูลนัดใหม่'),pb('❌ ยกเลิกเพิ่มนัด','ยกเลิกเพิ่มนัด')]);continue
+  await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue
  }
  if(c==='ใช้ข้อมูลต้นทางแล้ว'){
   await reply(e.replyToken,'✅ ใช้ข้อมูลจากนัดเดิมแล้ว\n\nกรอกวัน เวลา และนัดเพื่อของครั้งใหม่\nตัวอย่าง:\nวัน: 20 ต.ค. 2569\nเวลา: 10:30\nนัดเพื่อ: ติดตามอาการ',t,[
@@ -21979,9 +22059,9 @@ if(st?.state_key==='crud_add_appointment'){
     pb('❌ ยกเลิก','ยกเลิกเพิ่มนัด')
    ]);continue
   }
-  if(c==='นัดติดตามเปลี่ยน'){await replyAppointmentCreateSelectMenu(e.replyToken,u,k,id,t);continue}
+  if(c==='นัดติดตามเปลี่ยน'){await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue}
   const keepField=c.match(/^คงค่านัดติดตาม\s+(hospital_name|department|doctor_name|care_topic|coverage_type)$/);
-  if(keepField){await replyAppointmentCreateSelectMenu(e.replyToken,u,k,id,t);continue}
+  if(keepField){await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue}
   if(c==='กลับหน้าเพิ่มนัดใหม่'){await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue}
   if(c==='ใช้ข้อมูลนัดเดิม'){
    try{await replyAppointmentReuseMenu(e.replyToken,u,k,id,t)}
@@ -22057,15 +22137,16 @@ if(st?.state_key==='crud_add_appointment'){
   ]);continue
  }
  if(c==='เลือกข้อมูลนัดใหม่'){
-  await replyAppointmentCreateSelectMenu(e.replyToken,u,k,id,t);continue
+  await state(u,k,id,'crud_add_appointment',{...(st.state_data||{}),pick_field:null});
+  await replyNewAppointmentCard(e.replyToken,u,k,id,t);continue
  }
  if(c==='ตั้งวันเวลานัดใหม่'&&e.type==='postback'){
   const dt=String(e.postback?.params?.datetime||'');
-  const m=dt.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
-  if(m){
+  const m=dt.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/);
+  if(m&&phmsAppointmentDateTimeValid(m[1],m[2])){
    const partial={...(st?.state_data?.partial||{}),date:m[1],time:m[2]};
    await state(u,k,id,'crud_add_appointment',{...(st?.state_data||{}),partial});
-   await replyAppointmentCreateSelectMenu(e.replyToken,u,k,id,t);
+   await replyNewAppointmentCard(e.replyToken,u,k,id,t);
   }else await reply(e.replyToken,'⚠️ ยังไม่ได้เลือกวันและเวลา',t,[pb('↩️ เลือกข้อมูล','เลือกข้อมูลนัดใหม่')]);
   continue
  }
@@ -22092,10 +22173,10 @@ if(st?.state_key==='crud_add_appointment'){
    }else if(field==='doctor_name'){
     delete partial.clinician_id;delete partial.autofill_review;delete partial.autofill_applied
    }
-   await state(u,k,id,'crud_add_appointment',{...(st?.state_data||{}),partial,pick_field:null});
+   await state(u,k,id,'crud_add_appointment',{...(st?.state_data||{}),partial,pick_field:null,...(field==='department'?{department_checked:true}:field==='doctor_name'?{doctor_checked:true}:field==='preparation_notes'?{preparation_checked:true}:{})});
    if(field==='hospital_name')await replyAppointmentCreateFieldChoices(e.replyToken,u,k,id,t,'department');
    else if(field==='department')await replyAppointmentCreateFieldChoices(e.replyToken,u,k,id,t,'doctor_name');
-   else await replyAppointmentCreateSelectMenu(e.replyToken,u,k,id,t);
+   else await replyNewAppointmentCard(e.replyToken,u,k,id,t);
   }catch(err){console.error('appointment_create_set_field',String(err));await reply(e.replyToken,'⚠️ ค่านี้ยังใช้ไม่ได้',t,[pb('↩️ เลือกใหม่','เลือกข้อมูลนัดใหม่')])}
   continue
  }
@@ -22110,20 +22191,15 @@ if(st?.state_key==='crud_add_appointment'){
    }else if(field==='doctor_name'){
     delete partial.clinician_id;delete partial.autofill_review;delete partial.autofill_applied
    }
-   await state(u,k,id,'crud_add_appointment',{...(st?.state_data||{}),partial,pick_field:null});
-   await replyAppointmentCreateSelectMenu(e.replyToken,u,k,id,t);
+   await state(u,k,id,'crud_add_appointment',{...(st?.state_data||{}),partial,pick_field:null,...(field==='department'?{department_checked:true}:field==='doctor_name'?{doctor_checked:true}:field==='preparation_notes'?{preparation_checked:true}:{})});
+   await replyNewAppointmentCard(e.replyToken,u,k,id,t);
   }catch(err){await reply(e.replyToken,'⚠️ ค่านี้ยังอ่านไม่ได้ ลองใหม่หรือกลับไปเลือกจากรายการ',t,[pb('↩️ เลือกข้อมูล','เลือกข้อมูลนัดใหม่')])}
   continue
  }
  if(c==='เทมเพลตเพิ่มนัด'||c==='ใช้เทมเพลตนัด'){
-  const owner=await appointmentActivePersonName(u,k,id);
-  const partial=st?.state_data?.partial||{};
-  const linked=['follow_up','referral','investigation'].includes(String(partial.appointment_type||''));
-  await reply(e.replyToken,appointmentTemplatePromptText(owner,partial),t,[
-   pb('❌ ยกเลิกเพิ่มนัด','ยกเลิกเพิ่มนัด'),
-   ...(linked?[pb('🔗 เลือกนัดเก่า','ใช้ข้อมูลนัดเดิม'),pb('⏳ ไว้เลือกทีหลัง','แหล่งนัดใหม่ไว้ทีหลัง')]:[]),
-   pb('↩️ กลับเพิ่มนัด','กลับหน้าเพิ่มนัดใหม่')
-  ]);continue
+  const owner=await appointmentActivePersonName(u,k,id),p=st?.state_data?.partial||{};
+  const sample={...p,date:p.date||addBangkokDays(7),time:p.time||'10:00',title:p.title||'พบแพทย์ตามใบนัด',hospital_name:p.hospital_name||'ชื่อโรงพยาบาลตามใบนัด'};
+  await replyMessages(e.replyToken,t,[phmsApptPickerCard('🧾 กรอกหลายช่อง','คัดลอกข้อความถัดไป แล้วแก้ตัวอย่างตามใบนัดจริง',[phmsApptOption('↩️ กลับกรอกทีละขั้น','กลับหน้าเพิ่มนัดใหม่','ข้อมูลที่เลือกไว้ยังอยู่')]),{type:'text',text:appointmentAddTemplateText(owner,sample)}]);continue
  }
  if(c==='ใช้ข้อมูลที่กรอก ไม่เชื่อม'){
   await emitAppointmentDraft(e,u,k,id,t,st?.state_data?.partial||{},String(st?.state_data?.raw_text||''),st?.state_data?.old_source_code||null,st?.state_data?.person_confirmed===true);
@@ -22756,7 +22832,8 @@ if(ic){
           if(sourceLinked)try{await rpc(u,k,'phms_line_appointment_mark_slip_attached',{p_line_user_id:id,p_record_code:apptCode})}catch{}
         }catch(err){console.error('appointment_source_asset_link',String(err))}
         let saved:any=null;try{saved=one(await rpc(u,k,'phms_line_appointment_workspace',{p_line_user_id:id,p_record_code:apptCode}))}catch{}
-        const savedStatus=String(saved?.item?.status||'scheduled');
+        if(!saved?.record_id||!saved?.item)throw new Error('appointment_saved_readback_required');
+        const savedStatus=String(saved.item.status||'scheduled');
         const savedType=String(saved?.item?.appointment_type||'other');
          let savedSource:any={};
          if(['follow_up','referral','investigation'].includes(savedType)){
@@ -22773,7 +22850,7 @@ if(ic){
           '\n\n👤 นัดของ: '+String(rr?.person_name||saved?.person_name||'-')+
           '\n🏷️ ประเภทนัด: '+appointmentTypeDisplay(savedType)+
           '\n✅ สถานะ: '+appointmentStatusLabel(savedStatus)+
-          (historical?'':'\n⏰ การเตือนนัด: 7 วัน + 3 วัน + 1 วันก่อนนัด • บันทึกหลังนัด 20:00 น. ของวันนัด')+
+          (historical?'':'\n⏰ การเตือนนัด: '+appointmentReminderDisplayLabel(saved.item.reminder_offsets_minutes,saved.item.post_visit_followup_minutes,saved.item.post_visit_followup_time_local))+
           (sourceLinked?'\n📎 รูป/ไฟล์ต้นทางถูกผูกกับนัดแล้ว':historical?'':'\n📎 ยังไม่ได้แนบรูปใบนัด')+
           (recurringPlan?.synced===true
             ?('\n🔁 แผนตามรอบ: บันทึกแล้ว'+
