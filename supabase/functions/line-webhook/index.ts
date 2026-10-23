@@ -1,6 +1,6 @@
-import { medicationTemplate } from './smart-medication.ts';
+import { medicationTemplate, medicationScheduleLabel } from './smart-medication.ts';
 import { handleSmartMedication } from './smart-medication-runtime.ts';
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+// Standard Deno globals are provided by the Supabase Edge Runtime.
 
 /* PHMS_LINE_PAID_SEND_SAFETY_V1 */
 async function phmsPaidLineSendStatus(u?:string,k?:string){
@@ -625,7 +625,7 @@ function phmsApplyDarkFlexButtonPalette(m:any){
    }
    // Rose cards use the same muted-red family for normal view/add/navigation actions.
    // Keep real destructive, confirmation and back actions on their safety colors.
-   const special=theme==='rose'&&semantic!=='danger'&&semantic!=='confirm'&&semantic!=='back'?[]:phmsMutedSpecialPalette(semantic);
+   const special=theme==='rose'&&semantic!=='danger'&&semantic!=='confirm'?[]:phmsMutedSpecialPalette(semantic);
    let color='';
    if(special.length){
     // Reserved red/green always override card theme, regardless of label icon/navigation.
@@ -2244,7 +2244,10 @@ async function replyMessages(rt:string,t:string,messages:any[]){
   const backAction=(action:any):boolean=>{
    if(!action)return false;
    const command=String(action.data??action.text??'').trim();
-   // Pagination controls are not parent navigation; prefer a semantic parent command.\n   if(/^(?:รายการสุขภาพหน้า|รายการนัด|รายการยา|รายการเอกสารหน้า|รายการค่าใช้จ่ายหน้า)\\s+\\d+/u.test(command))return false;\n   if(/^(?:⬅|➡)/u.test(String(action.label||''))&&/(?:ก่อนหน้า|ถัดไป)/u.test(String(action.label||'')))return false;\n   return command==='กลับภาพรวมบุคคล'||phmsIsBackAction(action)||/^(?:↪|↩|🔙)/u.test(String(action.label||''));
+   // Pagination controls are not parent navigation; prefer a semantic parent command.
+   if(/^(?:รายการสุขภาพหน้า|รายการนัด|รายการยา|รายการเอกสารหน้า|รายการค่าใช้จ่ายหน้า)\s+\d+/u.test(command))return false;
+   if(/^(?:⬅|➡)/u.test(String(action.label||''))&&/(?:ก่อนหน้า|ถัดไป)/u.test(String(action.label||'')))return false;
+   return command==='กลับภาพรวมบุคคล'||phmsIsBackAction(action)||/^(?:↪|↩|🔙)/u.test(String(action.label||''));
   };
   const removeBack=(node:any,level=0):void=>{
    if(level>20||!node||!Array.isArray(node.contents))return;
@@ -2448,8 +2451,8 @@ async function replyMessages(rt:string,t:string,messages:any[]){
    };
    const original=footer.contents;
    const overflow=original.filter(isOverflow);
-   const back=original.filter(n=>!isOverflow(n)&&isParent(n));
-   const normal=original.filter(n=>!isOverflow(n)&&!isParent(n));
+   const back=original.filter((n:any)=>!isOverflow(n)&&isParent(n));
+   const normal=original.filter((n:any)=>!isOverflow(n)&&!isParent(n));
    if(i===0)footer.contents=[...normal,...overflow,...back.slice(0,1)];
    else footer.contents=[...normal,...overflow];
    if(i===0&&back.length>1)console.warn('phms_nav_duplicate_back_removed',String(msg.altText||'').slice(0,70),back.length);
@@ -2815,7 +2818,7 @@ async function phmsBlockLimitedAppointmentDetail(rt:string,u:string,k:string,id:
  }catch{return false}
 }
 
-const hint='\n\n💡 กดปุ่มด้านล่างได้เลย หรือครั้งต่อไปกดจาก “เมนูอิ่มอุ่น” ก็ได้';const homeQ=[act('💊 ยา','ยา'),act('📅 นัด','นัดหมาย'),act('🩺 สุขภาพ','สุขภาพ'),act('📄 เอกสาร','เอกสาร'),act('📁 รูปและเอกสาร','รูปและเอกสาร'),act('👨‍👩‍👧 ครอบครัว','ครอบครัว'),act('👤 ข้อมูลของฉัน','ใช้ข้อมูลของฉัน')];async function state(u:string,k:string,id:string,key:string,data:any={}){await rpc(u,k,'phms_set_line_conversation_state',{p_line_user_id:id,p_state_key:key,p_state_data:data,p_ttl_minutes:/^(?:smart_medication(?:_field)?|crud_add_(?:medication|appointment|health)|phms_add_(?:menu|field|review))$/.test(key)?1440:30})}async function clear(u:string,k:string,id:string){try{await rpc(u,k,'phms_clear_line_conversation_state',{p_line_user_id:id})}catch{}}async function getState(u:string,k:string,id:string){try{return one(await rpc(u,k,'phms_get_line_conversation_state',{p_line_user_id:id}))}catch{return null}}
+const hint='\n\n💡 กดปุ่มด้านล่างได้เลย หรือครั้งต่อไปกดจาก “เมนูอิ่มอุ่น” ก็ได้';const homeQ=[act('💊 ยา','ยา'),act('📅 นัด','นัดหมาย'),act('🩺 สุขภาพ','สุขภาพ'),act('📄 เอกสาร','เอกสาร'),act('📁 รูปและเอกสาร','รูปและเอกสาร'),act('👨‍👩‍👧 ครอบครัว','ครอบครัว'),act('👤 ข้อมูลของฉัน','ใช้ข้อมูลของฉัน')];async function state(u:string,k:string,id:string,key:string,data:any={},ttl?:number){await rpc(u,k,'phms_set_line_conversation_state',{p_line_user_id:id,p_state_key:key,p_state_data:data,p_ttl_minutes:ttl??(/^(?:smart_medication(?:_field)?|crud_add_(?:medication|appointment|health)|phms_add_(?:menu|field|review))$/.test(key)?1440:30)})}async function clear(u:string,k:string,id:string){try{await rpc(u,k,'phms_clear_line_conversation_state',{p_line_user_id:id})}catch{}}async function getState(u:string,k:string,id:string){try{return one(await rpc(u,k,'phms_get_line_conversation_state',{p_line_user_id:id}))}catch{return null}}
 function phmsYesNo(v:any){
  const s=String(v||'').trim().toLowerCase();
  if(['ใช่','yes','y','true','1','เปิด','ให้','รับ'].includes(s))return true;
@@ -3367,7 +3370,7 @@ function phmsActionableAlertRow(a:any,showHint=false){
 async function replyHomeAllAlerts(rt:string,u:string,k:string,id:string,t:string,page=0){
  const items=await phmsActionableHomeAlerts(u,k,id),size=7,offset=Math.max(0,Math.floor(page))*size;
  if(!items.length){await reply(rt,'🔔 ตอนนี้ไม่มีเรื่องที่ต้องติดตาม',t,[pb('🏡 หน้าเริ่มต้น','กลับหน้าเริ่มต้น')]);return}
- const rows=items.slice(offset,offset+size).map(phmsActionableAlertRow);
+ const rows=items.slice(offset,offset+size).map(a=>phmsActionableAlertRow(a));
  const nav:any[]=[];
  if(offset>0)nav.push({type:'button',action:{type:'postback',label:'⬅️ ก่อนหน้า',data:'ดูเรื่องสำคัญทั้งหมด '+String(Math.max(0,page-1))}});
  if(offset+size<items.length)nav.push({type:'button',action:{type:'postback',label:'➡️ ถัดไป',data:'ดูเรื่องสำคัญทั้งหมด '+String(page+1)}});
@@ -4417,6 +4420,8 @@ async function replyHealthEditMenu(rt:string,t:string,item:any,recordCode:string
  ]}};
  await replyMessages(rt,t,[flex])
 }
+type MedicationPartial = Record<string,any>;
+
 type AppointmentPartial={
   referral_from_appointment_id?:string,referral_source_kind?:string,investigation_of_appointment_id?:string,reference_note?:string,
  date?:string,time?:string,title?:string,hospital_name?:string,department?:string,
@@ -5901,11 +5906,12 @@ function appointmentCardCompactRow(icon:string,label:string,value:any,extra=''){
   {type:'box',layout:'vertical',flex:8,contents:appointmentCardValueFlex(value,extra)}
  ]}
 }
-function appointmentDoctorCompactRow(doctor:any){const r=appointmentCardCompactRow(appointmentDoctorEmoji(doctor),'หมอ',appointmentDoctorShortLabel(doctor));const value=r.contents?.[2]?.contents?.[0];if(value){value.maxLines=1;value.wrap=true}return r}
+function appointmentDoctorCompactRow(doctor:any){const r=appointmentCardCompactRow(appointmentDoctorEmoji(doctor),'หมอ',appointmentDoctorShortLabel(doctor));const value:any=r.contents?.[2]?.contents?.[0];if(value){value.maxLines=1;value.wrap=true}return r}
 function appointmentDoctorShortLabel(v:any){
  return appointmentDoctorLabel(v);
 }
-function appointmentFormRow(icon:string,label:string,value:any){
+function appointmentFormRow(icon:string,label:string,value?:any){
+ if(arguments.length===2){value=label;label=icon;icon='📋'}
  return {type:'box',layout:'horizontal',spacing:'sm',contents:[
   {type:'text',text:icon,size:'sm',flex:1},
   {type:'box',layout:'vertical',flex:8,contents:[
@@ -6567,6 +6573,7 @@ function medicationDoseLabel(p:any){
  return [p?.dose_value,p?.dose_unit].filter(x=>x!==undefined&&x!==null&&x!=='').join(' ')||'—'
 }
 function medicationFrequencyLabel(p:any){
+ if(p?.schedule_kind&&p.schedule_kind!=='legacy')return medicationScheduleLabel(p);
  if(p?.frequency_type==='times_per_day'&&p?.frequency_value)return 'วันละ '+p.frequency_value+' ครั้ง';
  if(p?.frequency_type==='interval'&&p?.frequency_value)return 'ทุก '+p.frequency_value+' ชั่วโมง';
  return '—'
@@ -6643,7 +6650,26 @@ async function loadMedicationDraftByCode(u:string,k:string,id:string,sourceCode:
  const review=one(await rpc(u,k,'phms_get_line_intake_review_source',{p_line_user_id:id,p_source_id:String(rows[0].id)}));
  const cand=Array.isArray(review?.candidates)?review.candidates.find((x:any)=>x?.candidate_type==='medication'):null;
  if(!cand)throw new Error('medication_candidate_not_found');
- return {source_id:String(rows[0].id),source_code:String(review?.source_code||codeRef),raw_text:String(rows[0].raw_text||review?.raw_text||''),partial:{...(cand.normalized_data||{})},person_name:String(review?.person_name||'')}
+ return {person_id:String(review?.person_id||''),session_status:String(review?.session_status||''),source_id:String(rows[0].id),source_code:String(review?.source_code||codeRef),raw_text:String(rows[0].raw_text||review?.raw_text||''),partial:{...(cand.normalized_data||{})},person_name:String(review?.person_name||'')}
+}
+async function medicationNameOptions(u:string,k:string,key:string,values:any):Promise<string[]>{
+ const fallback=key==='brand_name'?['ไม่ทราบ','ไม่มี']:['Gabapentin','Ergocalciferol (Vitamin D2)','Paracetamol'];
+ try{
+  const column=key==='brand_name'?'brand_name':'generic_name';
+  const filter=key==='brand_name'&&values?.generic_name?'&generic_name=eq.'+encodeURIComponent(values.generic_name):'';
+  const r=await fetch(u+'/rest/v1/medication_master?deleted_at=is.null&status=eq.active&select='+column+filter+'&limit=100&order='+column+'.asc',{headers:H(k)});
+  if(!r.ok)return fallback;const rows=await r.json();
+  return [...new Set([...(Array.isArray(rows)?rows:[]).map((x:any)=>String(x?.[column]||'').trim()).filter(Boolean),...fallback])];
+ }catch{return fallback}
+}
+async function smartMedicationEnabled(u:string,k:string,id:string){
+ try{
+  const actor=one(await rpc(u,k,'phms_resolve_line_command_context',{p_line_user_id:id,p_resource:'medications',p_action:'create',p_require_person:true,p_required_scope:'any'}));
+  if(actor?.permission_granted!==true||actor?.context_ready!==true)return false;
+  const r=await fetch(u+'/rest/v1/phms_runtime_environment?singleton=eq.true&select=medication_smart_intake_release_state,medication_smart_intake_test_actor_ids&limit=1',{headers:H(k)});
+  if(!r.ok)return false;const gate=(await r.json())?.[0];
+  return gate?.medication_smart_intake_release_state==='general'||(gate?.medication_smart_intake_release_state==='test_only'&&Array.isArray(gate.medication_smart_intake_test_actor_ids)&&gate.medication_smart_intake_test_actor_ids.includes(actor.user_id));
+ }catch{return false}
 }
 async function emitMedicationDraft(e:any,u:string,k:string,id:string,t:string,partial:MedicationPartial,rawText:string,oldSourceCode:string|null=null){
  const merged={...(partial||{})} as any;
@@ -6691,7 +6717,7 @@ async function emitImageBoundAppointmentDraft(
  const missing:string[]=[];if(!merged.date)missing.push('วันนัด');if(!merged.time)missing.push('เวลานัด');
  if(missing.length){
    await state(u,k,id,'intake_manual_appointment',{source_code:sourceCode,partial:merged,raw_text:rawText});
-   await pushAppointmentMissingCard(id,t,merged,currentPerson,missing,'ยกเลิกรับเข้า '+sourceCode);
+   await pushAppointmentMissingCard(e.replyToken,t,merged,currentPerson,missing,'ยกเลิกรับเข้า '+sourceCode);
    return
  }
  try{await rpc(u,k,'phms_prepare_line_manual_fallback',{p_line_user_id:id,p_source_code:sourceCode,p_reason:'manual_appointment_from_image'})}catch(err){
@@ -6713,7 +6739,42 @@ async function emitImageBoundAppointmentDraft(
    person_name:String(rr?.person_name||currentPerson),person_confirmed:true,
    image_bound:true
  });
- await pushAppointmentReview(id,t,payload,String(rr?.person_name||currentPerson),codeRef,true)
+ await pushAppointmentReview(e.replyToken,t,payload,String(rr?.person_name||currentPerson),codeRef,true)
+}
+
+/* Restore missing runtime helpers referenced by v1335; all writes retain existing RPC authorization. */
+async function syncAppointmentOwnerContext(u:string,k:string,id:string,recordCode:string){
+ return one(await rpc(u,k,'phms_restore_line_appointment_owner_context',{p_line_user_id:id,p_record_code:recordCode}));
+}
+async function replyNewAppointmentCard(rt:string,u:string,k:string,id:string,t:string){
+ const current=await getState(u,k,id);
+ if(current?.state_data?.partial?.appointment_type)await replyAppointmentCreateSelectMenu(rt,u,k,id,t);
+ else await replyAppointmentTypePicker(rt,u,k,id,t,await appointmentActivePersonName(u,k,id));
+}
+async function pushAppointmentMissingCard(rt:string,t:string,p:any,personName:string,missing:string[],cancelData:string){
+ await reply(rt,'📅 เพิ่มข้อมูลนัดของ '+personName+'\n\nยังขาด: '+missing.join(' / ')+'\nเลือกแก้ข้อมูลหรือส่งเทมเพลตที่เติมแล้วกลับมาได้',t,[pb('✏️ เลือกข้อมูล','เลือกข้อมูลนัดใหม่'),pb('🧾 เทมเพลต','เทมเพลตเพิ่มนัด'),pb('❌ ยกเลิก',cancelData)]);
+}
+async function pushAppointmentReview(rt:string,t:string,p:any,personName:string,sourceCode:string,_personConfirmed=true){
+ await reply(rt,appointmentSummary(p,personName,sourceCode),t,[pb('✅ ยืนยันบันทึก','ยืนยันรับเข้า '+sourceCode),pb('✏️ แก้รายละเอียด','แก้รายละเอียดนัด '+sourceCode),pb('❌ ยกเลิก','ยกเลิกรับเข้า '+sourceCode)]);
+}
+async function emitAppointmentDraft(e:any,u:string,k:string,id:string,t:string,partial:AppointmentPartial,rawText:string,oldSourceCode:string|null=null,personConfirmed=false){
+ const p=await enrichAppointmentDoctor(u,k,id,{...partial});
+ const auth=one(await rpc(u,k,'phms_resolve_line_command_context',{p_line_user_id:id,p_resource:'appointments',p_action:'create',p_require_person:true,p_required_scope:'any'}));
+ if(auth?.context_ready!==true||auth?.permission_granted!==true)throw new Error('appointment_create_permission_denied');
+ const who=String(auth.target_person_name||'บุคคลที่เลือก');
+ await state(u,k,id,'crud_add_appointment',{partial:p,raw_text:rawText,old_source_code:oldSourceCode,person_confirmed:personConfirmed});
+ if(!p.appointment_type){await replyAppointmentTypePicker(e.replyToken,u,k,id,t,who);return}
+ const missing:string[]=[];if(!p.date)missing.push('วันนัด');if(!p.time)missing.push('เวลานัด');if(!p.title)missing.push('นัดเพื่อ');if(!p.hospital_name)missing.push('โรงพยาบาล');
+ if(missing.length){await pushAppointmentMissingCard(e.replyToken,t,p,who,missing,'ยกเลิกเพิ่มนัด');return}
+ const payload=appointmentPayload(p,rawText);
+ let result:any;
+ if(oldSourceCode){result=one(await rpc(u,k,'phms_record_line_manual_structured_extraction',{p_line_user_id:id,p_source_code:oldSourceCode,p_document_type:'appointment',p_manual_text:rawText,p_normalized_data:payload}))}
+ else {result=one(await rpc(u,k,'phms_start_line_structured_text_intake',{p_line_user_id:id,p_line_message_id:String(e.webhookEventId||e.message?.id||crypto.randomUUID()),p_resource:'appointment',p_raw_text:rawText,p_normalized_data:payload}))}
+ const review=intakeReviewMessage(result);
+ if(Number(result?.blocking_conflict_count||0)>0||review.needsPersonResolution){await reply(e.replyToken,review.text,t,review.q);return}
+ const code=String(result?.source_code||oldSourceCode||'');if(!code)throw new Error('appointment_source_missing');
+ await state(u,k,id,'crud_review_appointment_draft',{partial:p,payload,raw_text:rawText,source_code:code,person_name:who,person_confirmed:true});
+ await pushAppointmentReview(e.replyToken,t,payload,who,code,true);
 }
 
 function crudKindLabel(k:string){return ({medication:'ยา',appointment:'นัด',health:'สุขภาพ',document:'เอกสาร'} as any)[k]||k}
@@ -6721,6 +6782,7 @@ function crudViewCmd(k:string,code:string){return 'ดู'+crudKindLabel(k)+' '+
 function crudBackCmd(k:string){return k==='medication'?'ยา':k==='appointment'?'นัดหมาย':k==='health'?'สุขภาพ':'เอกสาร'}
 function crudLine(k:string,x:any){
  const code=String(x.code||'').slice(0,12);
+ const who=String(x.person_name||'บุคคลที่เลือก');
  if(k==='medication'){
   const strength=[x.strength_value,x.strength_unit].filter(Boolean).join(' ');
   return '• #'+code+' '+String(x.name||x.generic_name||'ยา')+(strength?' '+strength:'')+' · '+String(x.status||'-')
@@ -10861,7 +10923,7 @@ async function galleryPage(rt:string,u:string,k:string,id:string,t:string,catego
 const MEDIA_MAX_BYTES=10*1024*1024;
 function cleanFilename(v:any){const s=String(v??'').replace(/[\\u0000-\\u001f\\u007f]/g,'').trim();return s?s.slice(0,255):null}
 function hex(b:Uint8Array){return Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function sha256(b:Uint8Array){return hex(new Uint8Array(await crypto.subtle.digest('SHA-256',b)))}
+async function sha256(b:Uint8Array){return hex(new Uint8Array(await crypto.subtle.digest('SHA-256',new Uint8Array(b))))}
 function mediaType(b:Uint8Array){
  if(b.length>=3&&b[0]===0xff&&b[1]===0xd8&&b[2]===0xff)return {mime:'image/jpeg',ext:'jpg'};
  if(b.length>=8&&b[0]===0x89&&b[1]===0x50&&b[2]===0x4e&&b[3]===0x47&&b[4]===0x0d&&b[5]===0x0a&&b[6]===0x1a&&b[7]===0x0a)return {mime:'image/png',ext:'png'};
@@ -10871,13 +10933,13 @@ function mediaType(b:Uint8Array){
 }
 async function uploadPersonPhoto(u:string,k:string,path:string,bytes:Uint8Array,mime:string){
  const url=u+'/storage/v1/object/phms-person-photos/'+path.split('/').map(encodeURIComponent).join('/');
- const r=await fetch(url,{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'content-type':mime,'x-upsert':'false'},body:bytes});
+ const r=await fetch(url,{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'content-type':mime,'x-upsert':'false'},body:new Uint8Array(bytes)});
  if(!r.ok)throw new Error('person_photo_upload_failed:'+r.status+':'+await r.text());
  return true
 }
 async function uploadTemp(u:string,k:string,path:string,bytes:Uint8Array,mime:string,bucket='phms-intake-temp'){
  const url=u+'/storage/v1/object/'+bucket+'/'+path.split('/').map(encodeURIComponent).join('/');
- const r=await fetch(url,{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'content-type':mime,'x-upsert':'false'},body:bytes});
+ const r=await fetch(url,{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'content-type':mime,'x-upsert':'false'},body:new Uint8Array(bytes)});
  if(!r.ok&&r.status!==400)throw new Error('storage_upload_failed:'+r.status+':'+await r.text());
  return {ok:r.ok,status:r.status}
 }
@@ -11043,6 +11105,7 @@ async function replySelfAccessDirectory(rt:string,u:string,k:string,id:string,t:
  const fm=one(await rpc(u,k,'phms_prepare_line_family_management',{p_line_user_id:id}));
  if(fm?.flow_state!=='ready')throw new Error('self_access_family_context_not_ready');
  const out=one(await rpc(u,k,'phms_list_line_self_viewers',{p_line_user_id:id}));
+ const ov=one(await rpc(u,k,'phms_get_line_active_person_access_overview',{p_line_user_id:id}));
  const canManagePermissions=fm?.can_manage_permissions===true||out?.self_manage===true;
  let myNotify:any={any_access:false,all_enabled:false};
  try{
@@ -11119,6 +11182,7 @@ async function replySelfViewerManage(rt:string,u:string,k:string,id:string,t:str
  const fm=one(await rpc(u,k,'phms_prepare_line_family_management',{p_line_user_id:id}));
  if(fm?.flow_state!=='ready')throw new Error('self_access_family_context_not_ready');
  const out=one(await rpc(u,k,'phms_list_line_self_viewers',{p_line_user_id:id}));
+ const ov=one(await rpc(u,k,'phms_get_line_active_person_access_overview',{p_line_user_id:id}));
  const canManage=out?.self_manage===true;
  const rows=Array.isArray(out?.items)?out.items:[];
  const candidates=rows.filter((m:any)=>{
@@ -11337,7 +11401,7 @@ function normalizePersonProfileSex(v:string){
 function parsePersonProfileTemplate(text:string){
  const map:any={
   'ชื่อที่ฉันใช้เรียกตัวเอง':'display_name','ชื่อที่แสดงของฉัน':'display_name','ชื่อที่แสดงสำหรับฉัน':'display_name','ชื่อที่ใช้เรียก':'display_name','ชื่อเรียก':'display_name',
-  'ชื่อในบ้าน':'nickname','ชื่อในบ้าน':'nickname','ชื่อเล่น':'nickname',
+  'ชื่อในบ้าน':'nickname','ชื่อเล่น':'nickname',
   'ชื่อจริง':'first_name','ชื่อ':'first_name',
   'นามสกุล':'last_name',
   'วันเกิด':'date_of_birth','วันที่เกิด':'date_of_birth',
@@ -13774,7 +13838,7 @@ async function phmsRoutePrivateGroupSetup(
   try{
    const ss=one(await rpc(u,k,'phms_line_group_settings',{p_line_user_id:lineUserId,p_line_group_id:m[1]}));
    const row=(Array.isArray(ss?.people)?ss.people:[]).find((x:any)=>
-    String(x?.person_code||'').toLowerCase().startsWith(m[2].toLowerCase())
+    String(x?.person_code||'').toLowerCase().startsWith(String(m?.[2]||'').toLowerCase())
    );
    if(!row)throw new Error('scope_person_not_found');
    const enabled=!(row?.[m[3]]===true);
@@ -13877,7 +13941,7 @@ async function phmsRoutePrivateGroupSetup(
   try{
    const s=one(await rpc(u,k,'phms_line_group_settings',{p_line_user_id:lineUserId,p_line_group_id:m[1]}));
    const row=(Array.isArray(s?.people)?s.people:[]).find((x:any)=>
-    String(x?.person_code||'').toLowerCase().startsWith(m[3].toLowerCase())
+    String(x?.person_code||'').toLowerCase().startsWith(String(m?.[3]||'').toLowerCase())
    );
    if(!row)throw new Error('scope_person_not_found');
    await rpc(u,k,'phms_line_group_toggle_query_scope',{
@@ -13960,7 +14024,7 @@ async function phmsRoutePrivateGroupSetup(
     p_line_user_id:lineUserId,p_family_code:m[1]
    }));
    const row=(Array.isArray(w?.members)?w.members:[]).find((x:any)=>
-    String(x?.user_code||'').toLowerCase().startsWith(m[2].toLowerCase())
+    String(x?.user_code||'').toLowerCase().startsWith(String(m?.[2]||'').toLowerCase())
    );
    if(!row||row?.is_manager===true)throw new Error('request_permission_member_invalid');
    await rpc(u,k,'phms_line_group_set_request_permission',{
@@ -14290,7 +14354,7 @@ async function phmsRouteAppointmentNotificationSettings(c:string,rt:string,u:str
  m=c.match(/^สลับผู้รับเตือน\s+#?([0-9a-fA-F-]{8,36})\s+([0-9a-fA-F-]{8,36})$/i);
  if(m){try{
   const w=one(await rpc(u,k,'phms_line_appointment_notification_workspace',{p_line_user_id:lineUserId,p_record_code:m[1]}));
-  const row=(Array.isArray(w?.users)?w.users:[]).find((x:any)=>String(x?.user_code||'').toLowerCase().startsWith(m[2].toLowerCase()));
+  const row=(Array.isArray(w?.users)?w.users:[]).find((x:any)=>String(x?.user_code||'').toLowerCase().startsWith(String(m?.[2]||'').toLowerCase()));
   if(!row)throw new Error('notification_user_not_found');
   await rpc(u,k,'phms_line_appointment_set_notification_user_target',{
    p_line_user_id:lineUserId,p_record_code:m[1],p_user_code:m[2],p_enabled:!(row?.selected===true)
@@ -14304,7 +14368,7 @@ async function phmsRouteAppointmentNotificationSettings(c:string,rt:string,u:str
  m=c.match(/^สลับกลุ่มเตือน\s+#?([0-9a-fA-F-]{8,36})\s+([0-9a-fA-F-]{8,36})$/i);
  if(m){try{
   const w=one(await rpc(u,k,'phms_line_appointment_notification_workspace',{p_line_user_id:lineUserId,p_record_code:m[1]}));
-  const row=(Array.isArray(w?.groups)?w.groups:[]).find((x:any)=>String(x?.channel_code||'').toLowerCase().startsWith(m[2].toLowerCase()));
+  const row=(Array.isArray(w?.groups)?w.groups:[]).find((x:any)=>String(x?.channel_code||'').toLowerCase().startsWith(String(m?.[2]||'').toLowerCase()));
   if(!row)throw new Error('notification_group_not_found');
   await rpc(u,k,'phms_line_appointment_set_group_channel_target',{
    p_line_user_id:lineUserId,p_record_code:m[1],p_channel_code:m[2],p_enabled:!(row?.selected===true)
@@ -16871,7 +16935,7 @@ if(e.type==='postback'&&c==='เปิดข้อมูลของฉัน'){
  continue
 }
 const st=await getState(u,k,id);
-if(await handleSmartMedication({e,u,k,id,t,c,st,state,clear,rpc,one,replyMessages,name,loadMedicationDraftByCode,theme:PHMS_CATEGORY_THEME.medications}))continue;
+if(await handleSmartMedication({e,u,k,id,t,c,st,state,clear,rpc,one,replyMessages,name,loadMedicationDraftByCode,theme:PHMS_CATEGORY_THEME.medications,smartMedicationEnabled,medicationNameOptions}))continue;
 
 if(e.type==='postback'&&String(st?.state_key||'')==='crud_edit_appointment_record_field'){
  const fld=String(st?.state_data?.edit_field||'');
@@ -17078,7 +17142,7 @@ if(st?.state_key==='appointment_previsit_symptom_add'){
   await replyAppointmentEarlyVisitFlow(e.replyToken,u,k,id,t,code,'date','symptoms');continue
  }
  try{
-  const p=parseAppointmentPrevisitSymptomText(c);
+  const p:any=parseAppointmentPrevisitSymptomText(c);
   if(!String(p.symptom_text||'').trim())throw new Error('symptom_required');
   const w=one(await rpc(u,k,'phms_line_appointment_workspace',{p_line_user_id:id,p_record_code:code}))||{};
   const symptom=String(p.symptom_text||'');
@@ -17621,6 +17685,7 @@ if(accessTemplate){
  continue
 }
 
+const templateNavBypass=e.type==='postback';
 if(st?.state_key==='family_person_access_template_edit'&&!templateNavBypass){
  if(['ยกเลิก','❌ ยกเลิก','สิทธิ์สมาชิก'].includes(c)){await clear(u,k,id);await reply(e.replyToken,'ยกเลิกแล้ว',t,[pb('🛡️ บทบาทและสิทธิ์','สิทธิ์สมาชิก')]);continue}
  try{
@@ -17703,6 +17768,7 @@ if(c==='แก้สิทธิ์รายคนของฉัน'){
  try{
   const fm=one(await rpc(u,k,'phms_prepare_line_family_management',{p_line_user_id:id}));
   const out=one(await rpc(u,k,'phms_list_line_self_viewers',{p_line_user_id:id}));
+ const ov=one(await rpc(u,k,'phms_get_line_active_person_access_overview',{p_line_user_id:id}));
   if(!(fm?.can_manage_permissions===true||out?.self_manage===true)){await replySelfAccessDirectory(e.replyToken,u,k,id,t);continue}
   if(out?.person_code)await rpc(u,k,'phms_select_line_context_person',{p_line_user_id:id,p_selection_code:String(out.person_code)});
   await replyActivePersonPermissionMembers(e.replyToken,u,k,id,t)
@@ -21083,6 +21149,7 @@ if(caregiverStatusCmd){
 if(c==='เพิ่มคนดูข้อมูลของฉัน'){
  try{
   const out=one(await rpc(u,k,'phms_list_line_self_viewers',{p_line_user_id:id}));
+ const ov=one(await rpc(u,k,'phms_get_line_active_person_access_overview',{p_line_user_id:id}));
   const pc=String(out?.person_code||'');
   if(!pc)throw new Error('self_person_code_missing');
   await rpc(u,k,'phms_select_line_context_person',{p_line_user_id:id,p_selection_code:pc});

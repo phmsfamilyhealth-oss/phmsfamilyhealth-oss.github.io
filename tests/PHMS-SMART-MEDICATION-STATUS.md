@@ -1,34 +1,24 @@
-# PHMS v2.3 medication intake candidate — NOT RELEASE READY
+# PHMS v2.3 smart medication intake — automated verification
 
-Production baseline read on 2026-10-22: `line-webhook` v1335 ACTIVE, SHA-256 `5e8c644ab3526874f2c9910f71dbe34f990f38d67969c8a62eba08ee1b8f6768` (Supabase bundle identifier).
-No production deployment or database schema changes were made by this patch.
+Candidate verification on 2026-10-23; production baseline remains line-webhook v1335 until release gates pass.
 
-## Implemented candidate
+- Shared normalized schema, validators, picker/review and atomic canonical commit for both input modes. Copyable example is a separate LINE Text Message; unchanged example cannot commit.
+- Structured daily, weekdays, rolling days/weeks, hourly, bedtime and PRN schedules persist in regimens, verified order versions, dose rules and scheduled doses. Weekday and rolling-day semantics are distinct. Existing legacy regimens retain legacy scheduling.
+- Failed commit retains source/person/draft; edit and retry are supported. Database confirmation and commit roll back together. Stable source identity prevents duplicate writes; atomic input comparison rejects stale confirmation.
+- New release gate defaults to test_only with no allowlisted actors. No production test patient data or paid messages were created. General availability requires authorized real-device LINE UAT.
 
-- Separate explanatory Flex card and copyable LINE Text Message; an explicit exemption prevents the global Flex-first renderer from converting the template back into a bubble.
-- Shared normalized medication draft schema for structured text and field entry, including generic/brand, numeric strength/unit, form, dose/unit, frequency, weekdays, times, food relation, instructions, warnings, start date, notes and eye side.
-- Standard choices plus typed values, editable draft review, missing/ambiguous field validation, example guard, explicit confirmation and existing PHMS authorization/intake/canonical gates.
-- Reply-based review avoids dependence on chargeable Push, whose configured test window has expired.
-- Person context binding and authorized candidate readback before confirmation. No new tables, RPCs or registries.
-- Existing global presentation pipeline continues to apply category design tokens, navigation, action budgets and payload formatting.
+## Automated evidence
 
-## Verification performed
+- Deno 2.9.6 strict type check: entire runtime and both local imports pass.
+- Deno actual handler execution: GET 405, unsigned POST 401, correctly signed empty-event POST 200. No outbound API calls in these smoke tests.
+- Node parser/validator/routing/presentation regressions: 25 passed. Actual PHMS presentation pipeline preserves Text template and review actions; structural LINE payload budgets checked. LINE API server validation/delivery still requires live authorized credentials.
+- Database integration: 29 passed on PostgreSQL 17.5 through PGlite. Restores schema-only metadata: 212 tables, 714 functions, 188 triggers, 1,218 constraints, 175 RLS policies, 340 indexes and 13 views; restore exceptions: none. No patient rows copied. Synthetic actors/persons are local only.
+- Actual database RPC paths tested for both input modes, JSONB draft readback, Vitamin D2 Friday versus rolling 7 days, multiple weekdays/times, every 2 weeks, every 2 days, every 8 hours, Gabapentin bedtime, eye-drop ratios, PRN, incomplete data, failed commit/edit/retry, response lost after commit, stale review, expired state, service RPC ACLs, RLS, legacy daily scheduling, daily cron, deduplicated weekly notification queue and Refill create/detail/idempotency/foreign-owner denial.
+- PGlite supplies real PostgreSQL semantics; local crypto wrappers use PostgreSQL SHA-256 and random UUID bytes. Native Supabase extensions and live PostgREST/LINE delivery are not represented as passed end-to-end tests.
+- Standalone deno compile completed type-check/transpilation but executable packaging was blocked by Connection refused downloading dl.deno.land denort. CI runs strict check, all tests and standalone compile on Ubuntu. A missing successful CI result remains a release gate.
 
-`node --test tests/smart-medication.test.mjs`: 19 passed, 0 failed.
+## Release safeguards
 
-Includes Gabapentin 100 mg capsule/bedtime, Vitamin D2 weekly/IU/weekday, ophthalmic drops/eye side, incomplete values, invalid numeric units/dates/times, conflicting duplicate fields, identical normalization for both modes, example replay, mocked draft/review/explicit commit, denied authorization, changed person, blocked commit, expired buttons, and actual full runtime presentation pipeline preserving copyable text and action postbacks.
+Migration checks hashes of every replaced production function and aborts on source drift; lock timeout 5 seconds. No existing medication instructions are backfilled or changed. Release test-only gate is independent of existing real/test-data and paid-send gates.
 
-Full runtime and imported modules parsed/transformed with Node 24 TypeScript support. This is syntax verification, not a Deno type-check or Supabase compilation result.
-
-Production read-only authorization negative check: an unknown synthetic identity is rejected by `phms_resolve_line_command_context` with `line_identity_not_found` before any intake is created.
-
-## Release blockers and remaining work
-
-1. The inspected `private.phms_commit_medication_candidate` persists `medication_regimens`, but not weekday schedules. Weekly input is normalized/reviewed and explicitly blocked from canonical activation in this candidate. Complete the existing canonical order/schedule integration and verify schedule readback before releasing. Do not encode weekly schedules as daily orders or silently bury weekdays in a note.
-2. Production `allow_test_data=false`, `allow_destructive_changes=false`; 128 existing medication UI UAT cases are `NOT_RUN`. No test patient records were inserted and no gate flags were changed.
-3. No live LINE reply token or verified test conversation was available. No message was sent to any real user. LINE API payload validation and real end-to-end delivery remain unverified.
-4. Deno/Supabase compilation, full regression, database positive authorization/readback, production deployment/readback and real LINE UAT remain outstanding.
-5. Confirmed-but-uncommitted sessions can be retried through existing gates. The current database finalizer disallows cancellation of confirmed sessions; editing after a blocked commit needs an explicit supported transition before release.
-6. Existing production advisers include security/performance findings; those pre-existing findings were inspected but not modified in this scoped patch.
-
-Do not describe this candidate as COMPLETE, deployed, or ready for production use. All successful canonical commit tests in the automated suite are mocks, not clinical database writes.
+Production deployment/readback and authorized LINE real-device UAT must be recorded before claiming COMPLETE. This file records pre-release automated evidence only.

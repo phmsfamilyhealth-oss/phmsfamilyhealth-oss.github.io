@@ -1,31 +1,8 @@
-phms_final_back_order_v5 {"screen":"🧾 กรอกหลายช่อง","buttons":[],"back":-1}
-phms_final_back_order_v5 {"screen":"💊 เลือกช่องยา","buttons":["✏️ ชื่อสามัญ","🔍 ชื่อการค้า"],"back":-1}
-(node:13) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
-(Use `node --trace-warnings ...` to show where the warning was created)
-✔ copyable template has all fields and remains an uncommittable example (11.736028ms)
-✔ both input modes produce the same normalized draft (1.660626ms)
-✔ Gabapentin complete fixture validates, with explicit bedtime and food relation (0.327162ms)
-✔ requested natural Gabapentin text creates partial values without inventing frequency (0.924498ms)
-✔ Vitamin D2 weekly keeps IU, weekday and exact time (0.636289ms)
-✔ weekly without weekday is blocked (0.294821ms)
-✔ eye drops require side, drops and food not applicable (0.542184ms)
-✔ incomplete/ambiguous input stays invalid (0.468045ms)
-✔ invalid number, units, dates, time and frequency mismatch are rejected (0.704237ms)
-✔ template sends separate Flex and Text, never creates intake (2.025799ms)
-✔ template returned unchanged creates review with no save action (2.270736ms)
-✔ text → normalized draft → review → explicit confirm → authorized intake/commit (1.515334ms)
-✔ single field choice uses same normalized draft and review (6.131547ms)
-✔ missing fields cannot confirm or create active medication (0.669001ms)
-✔ authorization denied and person changed fail closed (0.555779ms)
-✔ database gate blocks commit without claiming success or clearing draft (0.688909ms)
-✔ weekly canonical schedule gap fails closed and retains draft (0.456643ms)
-✔ expired postback cannot save and non-medication navigation is untouched (0.159428ms)
-✔ full runtime syntax and final outbound template survive global Flex conversion (455.385346ms)
-ℹ tests 19
-ℹ suites 0
-ℹ pass 19
-ℹ fail 0
-ℹ cancelled 0
-ℹ skipped 0
-ℹ todo 0
-ℹ duration_ms 825.539938
+Automated verification 2026-10-23
+Node regression: 25 passed, 0 failed
+PostgreSQL 17.5 integration: 29 passed, 0 failed
+Deno 2.9.6 full runtime strict check: PASS
+Actual Deno HTTP smoke: GET405 / unsigned POST401 / signed empty POST200
+Standalone executable packaging: BLOCKED downloading denort (network Connection refused); CI required
+LINE real-device UAT: NOT RUN; general availability gate remains closed
+No production patient test rows or messages created
