@@ -1,5 +1,24 @@
 -- Candidate only. Apply first to an isolated copy of the PHMS schema.
 -- Reuse the canonical measurement register, intake sessions/actions and document store.
+-- Fail-closed pilot controls live in the existing runtime configuration.
+alter table public.phms_runtime_environment
+ add column if not exists health_smart_intake_release_state text not null default 'off'
+  check (health_smart_intake_release_state in ('off','pilot','general')),
+ add column if not exists health_smart_intake_test_actor_ids uuid[] not null default '{}';
+create or replace function public.phms_smart_health_access(p_line_user_id text) returns jsonb
+language plpgsql security invoker set search_path='' as $$
+declare mode text; actors uuid[]; actor uuid;
+begin
+ select e.health_smart_intake_release_state,e.health_smart_intake_test_actor_ids into mode,actors
+ from public.phms_runtime_environment e where e.singleton=true;
+ if coalesce(mode,'off')='off' then return jsonb_build_object('allowed',false,'mode','off');end if;
+ select r.user_id into strict actor from private.resolve_line_user_for_service(p_line_user_id) r;
+ return jsonb_build_object('allowed',actor is not null and (mode='general' or actor=any(actors)),'mode',mode);
+exception when no_data_found then return jsonb_build_object('allowed',false,'mode','off');
+end $$;
+revoke all on function public.phms_smart_health_access(text) from public,anon,authenticated;
+grant execute on function public.phms_smart_health_access(text) to service_role;
+
 alter table public.health_measurements
  add column if not exists intake_session_id uuid references public.data_intake_sessions(id),
  add column if not exists reading_key uuid,
@@ -67,6 +86,7 @@ create or replace function public.phms_smart_health(p_line_user_id text,p_action
 language plpgsql security invoker set search_path='' as $$
 declare ctx record; s public.data_intake_sessions%rowtype; r jsonb; sid uuid; result jsonb; rev integer; aid uuid; did uuid; old_id uuid; points jsonb; action_permission text;
 begin
+ if coalesce((public.phms_smart_health_access(p_line_user_id)->>'allowed')::boolean,false) is not true then raise exception 'smart_health_release_not_authorized';end if;
  action_permission:=case when p_action in ('history','evidence_read','evidence_list','read') then 'view' else 'create' end;
  select * into strict ctx from private.phms_line_crud_context(p_line_user_id,'health',action_permission);
  if p_action='history' then
@@ -98,13 +118,17 @@ begin
  end if;
  if s.status not in ('collecting','review') then raise exception 'session_locked';end if;
  rev:=coalesce((s.context_snapshot->>'revision')::integer,0);
- if p_action='wizard' and p_payload->>'event_id' is not null and s.context_snapshot->>'last_event_id'=p_payload->>'event_id' then return jsonb_build_object('session',to_jsonb(s),'duplicate',true);end if;
+ if p_action='wizard' and p_payload->>'event_id' is not null and (s.context_snapshot->>'last_event_id'=p_payload->>'event_id' or coalesce(s.context_snapshot->'processed_event_ids','[]'::jsonb)?(p_payload->>'event_id')) then return jsonb_build_object('session',to_jsonb(s),'duplicate',true);end if;
  if p_action in ('wizard','save','review','commit','evidence') and (p_payload->>'revision')::integer is distinct from rev then raise exception 'stale_revision';end if;
  if p_action='cancel' then
   update public.data_intake_sessions set status='cancelled',updated_at=now() where id=s.id;
  elsif p_action='wizard' then
   if jsonb_typeof(p_payload->'wizard') is distinct from 'object' or length((p_payload->'wizard')::text)>262144 then raise exception 'invalid_wizard';end if;
   update public.data_intake_sessions set status='collecting',context_snapshot=context_snapshot||jsonb_build_object('wizard',p_payload->'wizard','revision',rev+1,'review_revision',null,'last_event_id',p_payload->>'event_id'),updated_at=now() where id=s.id;
+  if p_payload->>'event_id' is not null then
+   update public.data_intake_sessions set context_snapshot=context_snapshot||jsonb_build_object('processed_event_ids',
+    (select coalesce(jsonb_agg(x.value order by x.ordinality),'[]'::jsonb) from jsonb_array_elements(coalesce(context_snapshot->'processed_event_ids','[]'::jsonb)||jsonb_build_array(p_payload->>'event_id')) with ordinality x where x.ordinality>greatest(0,jsonb_array_length(coalesce(context_snapshot->'processed_event_ids','[]'::jsonb))+1-512))) where id=s.id;
+  end if;
  elsif p_action='save' then
   perform private.phms_health_check_readings(p_payload->'readings');
   update public.data_intake_sessions set status='collecting',context_snapshot=context_snapshot||jsonb_build_object('draft',p_payload->'readings','revision',rev+1,'review_revision',null),updated_at=now() where id=s.id;
@@ -166,13 +190,16 @@ grant execute on function private.phms_health_check_readings(jsonb) to service_r
 
 -- Existing edit/delete routes must retain a before/after trail for smart measurements too.
 create or replace function private.phms_health_revision_audit() returns trigger
-language plpgsql security invoker set search_path='' as $$
+-- An UPDATE has already passed health_measurements RLS. The trigger can only
+-- append the actual OLD/NEW row to the service-only audit register; it cannot
+-- be invoked as an ordinary function or change the measurement identity.
+language plpgsql security definer set search_path='' as $$
 begin
  if old.intake_session_id is not null then
   if tg_op='DELETE' then raise exception 'measurement_delete_requires_soft_delete';end if;
   if new.person_id is distinct from old.person_id or new.intake_session_id is distinct from old.intake_session_id or new.reading_key is distinct from old.reading_key then raise exception 'measurement_owner_immutable';end if;
   insert into public.data_intake_actions(session_id,actor_user_id,action,before_data,after_data,reason)
-   values(old.intake_session_id,null,'edit',to_jsonb(old),to_jsonb(new),'existing_route_measurement_revision; db_role='||current_user);
+   values(old.intake_session_id,auth.uid(),'edit',to_jsonb(old),to_jsonb(new),'existing_route_measurement_revision; db_role='||current_setting('role',true));
  end if;
  if tg_op='DELETE' then return old;end if;
  return new;

@@ -1,6 +1,6 @@
 import {METRICS,PRESETS,CONTEXT,numberInput,convert,validateReading,validateSession,newReading,labelReading,healthCard,trendCard,type Reading,type Metric} from './smart-health.ts';
 type Ports={rpc:(name:string,p:Record<string,unknown>)=>Promise<any>;getState:()=>Promise<any>;state:(key:string,data:any)=>Promise<void>;clear:()=>Promise<void>;send:(messages:any[])=>Promise<void>;people:()=>Promise<any[]>;select:(person:any)=>Promise<void>;self:()=>Promise<void>;upload:(path:string,bytes:Uint8Array,mime:string)=>Promise<void>;remove:(path:string)=>Promise<void>;sign:(bucket:string,path:string)=>Promise<string>;media:(e:any)=>Promise<{bytes:Uint8Array;mime:string;ext:string}>};
-type Wizard={step:string;selected:Metric[];readings:Reading[];index:number;field?:string;unit?:string;pending?:Reading;contextIndex?:number;quick?:boolean;page?:number;past?:any[]};
+type Wizard={step:string;selected:Metric[];readings:Reading[];index:number;field?:string;unit?:string;pending?:Reading;contextIndex?:number;quick?:boolean;quickHRSource?:string;page?:number;past?:any[]};
 const starts=new Set(['เพิ่มสุขภาพ','เริ่มเลือกช่องสุขภาพ','เริ่มพิมพ์เพิ่มสุขภาพ','รายการช่องสุขภาพ','phms_health_start']);
 const scalarUnits:Partial<Record<Metric,string[]>>={DTX:['mg/dL','mmol/L'],Temp:['°C','°F'],Weight:['kg','lb'],Height:['cm','in']};
 const sourceFor=(type:Metric)=>({BP:'bp_monitor',SpO2:'oximeter',DTX:'glucose_meter',Temp:'thermometer',Weight:'scale',Height:'tape',HR:'manual',RR:'manual'}[type]);
@@ -9,10 +9,11 @@ export async function handleSmartHealth(e:any,p:Ports):Promise<boolean>{
  const command=e.type==='postback'?String(e.postback?.data||''):String(e.message?.text||'');
  const prev=await p.getState();
  const initial=starts.has(command)||command==='phms_health_people';
+ const resume=command==='phms_health_resume';
  const match=command.match(/^phms_health ([a-f0-9-]{36}) (\d+) (.*)$/);
  const owner=command.match(/^phms_health_owner (self|\d+)$/);
- if(!initial&&!owner&&!match&&prev?.state_key!=='phms_smart_health')return false;
- if(!initial&&!owner&&!match&&(e.type==='postback'||/^(?:ยา|ยาของฉัน|นัดหมาย|เพิ่มนัด|เอกสาร|ครอบครัว|สุขภาพ|ภาพรวมบุคคล|กลับหน้าเริ่มต้น)$/.test(command))){if(prev?.state_key==='phms_smart_health')await p.clear();return false;}
+ if(!initial&&!owner&&!match&&!resume&&prev?.state_key!=='phms_smart_health')return false;
+ if(!initial&&!owner&&!match&&!resume&&(e.type==='postback'||/^(?:ยา|ยาของฉัน|นัดหมาย|เพิ่มนัด|เอกสาร|ครอบครัว|สุขภาพ|ภาพรวมบุคคล|กลับหน้าเริ่มต้น)$/.test(command))){if(prev?.state_key==='phms_smart_health')await p.clear();return false;}
  const call=(action:string,sid:string|null,payload:any={})=>p.rpc('phms_smart_health',{p_line_user_id:e.source.userId,p_action:action,p_session_id:sid,p_payload:payload});
  const send=(title:string,lines:string[],actions:{label:string;data:string}[]=[],back='สุขภาพ')=>p.send([healthCard(title,lines,actions,back)]);
  if(initial){const people=await p.people();await p.state('phms_health_owner',{people});await send('🩺 บันทึกสุขภาพให้ใคร?',[],[{label:'👤 ตัวฉัน',data:'phms_health_owner self'},...people.map((x,i)=>({label:String(x.display_name||'บุคคล'),data:'phms_health_owner '+i}))]);return true;}
@@ -28,7 +29,7 @@ export async function handleSmartHealth(e:any,p:Ports):Promise<boolean>{
  const data=(action:string)=>'phms_health '+sid+' '+rev+' '+action;
  const act=(label:string,action:string)=>({label,data:data(action)});
  const eventId=String(e.webhookEventId||e.message?.id||'');let mutation=0;
- const redelivery=!!eventId&&String(s.context_snapshot.last_event_id||'').startsWith(eventId+':');
+ const redelivery=!!eventId&&[...(s.context_snapshot.processed_event_ids||[]),String(s.context_snapshot.last_event_id||'')].some(x=>String(x).startsWith(eventId+':'));
  const before=structuredClone({...w,past:undefined});let historySaved=false;
  const persist=async()=>{if(!historySaved&&!redelivery&&match?.[3]!=='back'){w.past=[...(w.past||[]),before].slice(-5);historySaved=true;}response=await call('wizard',sid,{revision:rev,wizard:w,event_id:eventId?eventId+':'+mutation++:null});s=response.session;rev=Number(s.context_snapshot.revision);};
  const contexts=()=>Object.entries(CONTEXT[w.pending!.type]||{});
@@ -37,7 +38,7 @@ export async function handleSmartHealth(e:any,p:Ports):Promise<boolean>{
  const accept=()=>{w.readings.push(w.pending!);nextReading();};
  if(match&&Number(match[2])!==rev){await send('🩺 หน้าจอนี้มีข้อมูลใหม่แล้ว',['กดเปิดร่างล่าสุดเพื่อทำต่อ'],[act('เปิดร่างล่าสุด','resume')]);return true;}
  if(s.status==='committed'&&!/^(history |daily |graph |evidence |photos$)/.test(match?.[3]||'')){await send('✅ บันทึกแล้ว',['รายการอยู่ในประวัติสุขภาพ'],[act('📊 ดู 7 วัน','history 7'),act('📊 ดู 30 วัน','history 30'),act('📊 ดู 90 วัน','history 90'),{label:'＋ บันทึกอีกครั้ง',data:'phms_health_start'}]);return true;}
- const action=redelivery?'resume':match?.[3]||'';
+ const action=redelivery||resume?'resume':match?.[3]||'';
  if(action.startsWith('daily ')){
   const page=Number(action.split(' ')[1]);if(!Number.isInteger(page)||page<0)throw Error('หน้าประวัติไม่ถูกต้อง');
   const d=await call('history',null,{days:90});
@@ -71,7 +72,8 @@ export async function handleSmartHealth(e:any,p:Ports):Promise<boolean>{
  }
  if(action==='back'){const past=[...(w.past||[])],old=past.pop();if(old){w={...old,past};if(w.step==='confirm')w.step='review';await persist();}else{await send('🩺 ร่างสุขภาพ',['เลือกทำต่อหรือออกจากร่าง'],[act('ทำต่อ','resume'),act('ยกเลิกการกรอก','cancel')]);return true;}}
  else if(action.startsWith('preset ')){const key=action.split(' ')[1];if(key!=='custom'&&!PRESETS[key])throw Error('ชุดค่าวัดไม่ถูกต้อง');w={step:key==='custom'?'custom':'number',selected:PRESETS[key]?[...PRESETS[key]]:[],readings:[],index:0,past:w.past};await persist();}
- else if(action==='quick'){w.quick=true;w.step='quick';await persist();}
+ else if(action==='quick'){w.quick=true;w.step=w.selected.includes('HR')?'quick_hr_source':'quick';await persist();}
+ else if(action.startsWith('quick_hr_source ')){const device=action.slice(16);if(!['bp_monitor','oximeter','manual'].includes(device))throw Error('แหล่งข้อมูลไม่ถูกต้อง');w.quickHRSource=device;w.step='quick';await persist();}
  else if(action.startsWith('toggle ')){const type=action.split(' ')[1] as Metric;if(!METRICS[type])throw Error('ชนิดไม่ถูกต้อง');w.selected=w.selected.includes(type)?w.selected.filter(x=>x!==type):[...w.selected,type];await persist();}
  else if(action==='chosen'){if(!w.selected.length)throw Error('เลือกอย่างน้อยหนึ่งค่า');w.step='number';w.index=0;await persist();}
  else if(action.startsWith('unit ')){const u=action.slice(5);if(!w.pending||!scalarUnits[w.pending.type]?.includes(u))throw Error('หน่วยไม่ถูกต้อง');w.unit=u;await persist();}
@@ -105,7 +107,7 @@ export async function handleSmartHealth(e:any,p:Ports):Promise<boolean>{
   if(s.context_snapshot.last_event_id===String(e.webhookEventId||e.message.id))return true;
   if(w.step==='quick'){
    const nums=command.trim().split(/\s+/);const fields=w.selected.flatMap(type=>type==='BP'?['SYS','DIA']:[type]);if(nums.length!==fields.length)throw Error('จำนวนตัวเลขต้องตรงกับช่องที่แสดง');
-   let i=0;w.readings=w.selected.map(type=>{const r=newReading(type,new Date().toISOString(),sourceFor(type));if(type==='BP'){r.systolic=numberInput(nums[i++]);r.diastolic=numberInput(nums[i++]);}else r.value=numberInput(nums[i++]);return r;});
+   let i=0;w.readings=w.selected.map(type=>{const r=newReading(type,new Date().toISOString(),type==='HR'?(w.quickHRSource||'manual'):sourceFor(type));if(type==='BP'){r.systolic=numberInput(nums[i++]);r.diastolic=numberInput(nums[i++]);}else r.value=numberInput(nums[i++]);return r;});
    validateSession(w.readings);w.step='photo';await persist();
   }else if(w.step==='time_input'){
    if(!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(command))throw Error('ใช้รูปแบบ 2026-10-22 08:30 ปี ค.ศ.');
@@ -129,13 +131,15 @@ export async function handleSmartHealth(e:any,p:Ports):Promise<boolean>{
  else if(w.step==='context'){const entry=contexts()[w.contextIndex||0];await send('บริบท '+METRICS[w.pending!.type].label,[labelReading(w.pending!)],[...entry[1].map((x,i)=>act(x,'ctx '+i)),act('ไม่ระบุ','ctx skip')],back);}
  else if(w.step==='photo')await send('📷 แนบรูปเครื่องวัด',['ส่งรูปในแชตนี้ได้เลย','รูปไม่ชัดก็เก็บเป็นหลักฐานได้ โดยกรอกตัวเลขเอง'],[act('ไปต่อ / ไม่มีรูป','photo_done'),...(w.readings.some(x=>x.type==='BP')?[act('วัด BP รอบถัดไป','repeat_bp')]:[])],back);
  else if(w.step==='quick')await send('⚡ กรอกเฉพาะตัวเลข',[w.selected.flatMap(x=>x==='BP'?['SYS','DIA']:[x+' '+METRICS[x].unit]).join(' → '),'ส่งตัวเลขตามลำดับ คั่นด้วยเว้นวรรค'],[],back);
+ else if(w.step==='quick_hr_source')await send('ชีพจรในชุดนี้อ่านจากไหน?',[],[act('เครื่องความดัน','quick_hr_source bp_monitor'),act('เครื่องปลายนิ้ว','quick_hr_source oximeter'),act('นับเอง / แหล่งอื่น','quick_hr_source manual')],back);
  else if(w.step==='time')await send('🕒 เวลาที่วัด',[ 'ระบุเวลาที่อ่านค่าจากเครื่อง'],[act('วัดตอนนี้','time_now'),act('เลือกวันเวลาเดิม','time_old')],back);
  else if(w.step==='time_input')await send('🕒 วันเวลาวัด',['พิมพ์วันที่ ค.ศ. และเวลาไทย','ตัวอย่าง 2026-10-22 08:30'],[],back);
  else if(w.step==='edit')await send('แก้ค่าวัด',[],w.readings.map((r,i)=>act(labelReading(r),'edit '+i)),back);
  else if(['review','confirm'].includes(w.step)){
-  const lines=['เจ้าของข้อมูล: '+s.context_snapshot.person_label,...w.readings.map(labelReading),'เวลาวัด: '+new Date(w.readings[0]?.measured_at).toLocaleString('th-TH',{timeZone:'Asia/Bangkok'})];
-  // Chunk the review so every reading remains visible before confirmation.
-  const cards=[];for(let i=0;i<lines.length;i+=6)cards.push(healthCard('✅ ตรวจทาน',lines.slice(i,i+6),i+6>=lines.length?[act('แก้ค่าวัด','edit'),act(w.step==='confirm'?'💾 ยืนยันบันทึก':'ตรวจข้อมูลครบแล้ว',w.step==='confirm'?'commit':'review')]:[],back));await p.send(cards);
+  const deviceLabels:Record<string,string>={bp_monitor:'เครื่องความดัน',oximeter:'เครื่องปลายนิ้ว',manual:'นับเอง / แหล่งอื่น',glucose_meter:'เครื่องน้ำตาล',thermometer:'เครื่องวัดอุณหภูมิ',scale:'เครื่องชั่ง',tape:'วัดส่วนสูง'};
+  const cards=w.readings.map(r=>healthCard('🔎 '+METRICS[r.type].label,[String(s.context_snapshot.person_label),labelReading(r),'เวลาวัด: '+new Date(r.measured_at).toLocaleString('th-TH',{timeZone:'Asia/Bangkok'}),'แหล่ง: '+deviceLabels[r.device],...Object.values(r.context)],[],back).contents);
+  cards.push(healthCard('✅ ตรวจทานครบแล้ว?',['เจ้าของข้อมูล: '+s.context_snapshot.person_label,'ทั้งหมด '+w.readings.length+' ค่าวัด','เลื่อนดูค่า เวลา แหล่ง และบริบททุกใบก่อนบันทึก'],[act('แก้ค่าวัด','edit'),act(w.step==='confirm'?'💾 ยืนยันบันทึก':'ตรวจข้อมูลครบแล้ว',w.step==='confirm'?'commit':'review')],back).contents);
+  await p.send([{type:'flex',altText:'✅ ตรวจทานค่าวัด',contents:{type:'carousel',contents:cards}}]);
  }
  return true;
 }

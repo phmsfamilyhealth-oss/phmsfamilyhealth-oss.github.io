@@ -8,9 +8,9 @@ if(source.includes('PHMS_SMART_HEALTH_RUNTIME_V1'))throw Error('Smart Health alr
 const anchor="if(e.type==='message'&&e.message.type!=='text'){try{await handleLineMedia(e,u,k,id,t)}";
 if(source.split(anchor).length!==2)throw Error('Production media dispatch changed; automatic patch refused');
 const hook=`/* PHMS_SMART_HEALTH_RUNTIME_V1
- Allowlist-only pilot. An empty allowlist preserves all existing production routes.
+ Pilot controlled by the existing database runtime configuration.
  Gate stays closed until isolated integration, production permissions and device UAT pass. */
-if(sourceType==='user'&&id&&e.replyToken&&String(Deno.env.get('PHMS_SMART_HEALTH_ALLOWED_LINE_IDS')||'').split(',').map(s=>s.trim()).filter(Boolean).includes(id)){
+if(sourceType==='user'&&id&&e.replyToken&&await phmsSmartHealthEnabled(u,k,id)){
  try{
   const handled=await handleSmartHealth(e,{
    rpc:async(n:string,p:any)=>one(await rpc(u,k,n,p)),
@@ -27,11 +27,11 @@ if(sourceType==='user'&&id&&e.replyToken&&String(Deno.env.get('PHMS_SMART_HEALTH
   if(handled)continue;
  }catch(err){
   console.error('smart_health_runtime',String(err));
-  await replyMessages(e.replyToken,t,[healthCard('🩺 ยังทำรายการนี้ไม่ได้',['ร่างเดิมยังอยู่ กรุณาเปิดร่างล่าสุดเพื่อตรวจข้อมูลก่อนทำต่อ'],[{label:'เปิดเพิ่มสุขภาพ',data:'phms_health_start'}])]);continue;
+  await replyMessages(e.replyToken,t,[healthCard('🩺 ยังทำรายการนี้ไม่ได้',['ร่างเดิมยังอยู่ กรุณาเปิดร่างล่าสุดเพื่อตรวจข้อมูลก่อนทำต่อ'],[{label:'เปิดร่างล่าสุด',data:'phms_health_resume'}])]);continue;
  }
 }
 `;
-source="import {handleSmartHealth} from './smart-health-runtime.ts';\nimport {healthCard} from './smart-health.ts';\n"+source.replace(anchor,hook+anchor);
+source="import {handleSmartHealth} from './smart-health-runtime.ts';\nimport {healthCard} from './smart-health.ts';\nasync function phmsSmartHealthEnabled(u:string,k:string,id:string):Promise<boolean>{try{return one(await rpc(u,k,'phms_smart_health_access',{p_line_user_id:id}))?.allowed===true}catch(err){console.error('smart_health_gate_unavailable');return false}}\n"+source.replace(anchor,hook+anchor);
 await fs.mkdir('supabase/functions/line-webhook',{recursive:true});
 await fs.writeFile('supabase/functions/line-webhook/index.ts',source);
-console.log(JSON.stringify({input:path.resolve(input),base_sha256:createHash('sha256').update(await fs.readFile(input)).digest('hex'),output:'supabase/functions/line-webhook/index.ts',rollout:'disabled unless exact LINE ID allowlisted'}));
+console.log(JSON.stringify({input:path.resolve(input),base_sha256:createHash('sha256').update(await fs.readFile(input)).digest('hex'),output:'supabase/functions/line-webhook/index.ts',rollout:'database gate defaults off; pilot requires verified actor UUID'}));

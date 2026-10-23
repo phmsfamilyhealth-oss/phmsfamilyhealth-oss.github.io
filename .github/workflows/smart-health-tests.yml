@@ -20,4 +20,4 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - run: npx deno check supabase/functions/line-webhook/smart-health-runtime.ts
+      - run: npx deno check --config deno-check.json supabase/functions/line-webhook/index.ts
