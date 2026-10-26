@@ -19,3 +19,5 @@ for(const x of JSON.parse(fs.readFileSync('tests/appointment/fixtures/triggers.j
 fs.writeFileSync('tests/appointment/evidence/bootstrap-results.json',JSON.stringify({applied,errors},null,2));
 console.log(JSON.stringify({applied,errors:errors.length,examples:errors.slice(0,8)}));
 
+
+if(errors.length)throw Error("Schema bootstrap failed: "+JSON.stringify(errors));

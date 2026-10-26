@@ -1,5 +1,5 @@
 {
-  "passed": 14,
+  "passed": 16,
   "engine": [
     {
       "version": "PostgreSQL 17.5 on aarch64-unknown-linux-gnu, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit"
@@ -16,14 +16,14 @@
         "byte_size": null,
         "mime_type": null,
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "359ce2cf-9a69-4009-b7bf-0501212f8257",
+        "source_id": "8bc72e24-d46b-49f2-a06f-dbb23c1f3783",
         "candidates": [
           {
-            "id": "8d52703e-75ee-412a-9fa2-a115c9e96268",
+            "id": "b26085f0-35cb-41d7-aac1-1f69349d99c6",
             "ordinal": 1,
             "conflict_data": {
               "warnings": [],
-              "checked_at": "2026-10-23T07:57:34.274+00:00",
+              "checked_at": "2026-10-26T12:57:59.724+00:00",
               "person_mismatch": false,
               "blocking_conflicts": [],
               "duplicate_detected": false
@@ -47,22 +47,22 @@
             },
             "validation_data": {
               "warnings": [],
-              "validated_at": "2026-10-23T07:57:34.274+00:00",
+              "validated_at": "2026-10-26T12:57:59.724+00:00",
               "blocking_errors": []
             },
             "fingerprint_sha256": "bd6227000d816f22685c782b92ec00a13758c221c970f29607fc4e49ac188dba",
             "reconciliation_data": {
-              "checked_at": "2026-10-23T07:57:34.274+00:00",
+              "checked_at": "2026-10-26T12:57:59.724+00:00",
               "match_count": 0,
               "fingerprint_sha256": "bd6227000d816f22685c782b92ec00a13758c221c970f29607fc4e49ac188dba"
             }
           }
         ],
-        "session_id": "be6138a2-87de-4114-bac2-f42f8f0751a2",
+        "session_id": "8122cbd2-5a36-4041-a8b2-97f7d7bc94ce",
         "can_confirm": true,
         "object_name": null,
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "359ce2cf-9a6",
+        "source_code": "8bc72e24-d46",
         "document_type": "appointment",
         "session_status": "review",
         "candidate_count": 1,
@@ -87,10 +87,10 @@
         "ok": true,
         "decision": "confirm",
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "359ce2cf-9a69-4009-b7bf-0501212f8257",
+        "source_id": "8bc72e24-d46b-49f2-a06f-dbb23c1f3783",
         "next_stage": "12J",
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "359ce2cf-9a6",
+        "source_code": "8bc72e24-d46",
         "document_type": "appointment",
         "session_status": "confirmed",
         "candidate_count": 1,
@@ -107,9 +107,9 @@
           {
             "ok": true,
             "status": "scheduled",
-            "candidate_id": "8d52703e-75ee-412a-9fa2-a115c9e96268",
+            "candidate_id": "b26085f0-35cb-41d7-aac1-1f69349d99c6",
             "resource_type": "appointment",
-            "appointment_id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+            "appointment_id": "6b2a0c5f-0405-4d50-86da-a9b84065b515",
             "historical_record": false,
             "idempotent_replay": false,
             "recurring_care_plan": {
@@ -119,13 +119,13 @@
             }
           }
         ],
-        "batch_id": "be667f54-ffa7-4ee5-8670-af37f00fea7c",
+        "batch_id": "82c590b3-fba1-4ae3-a958-7a855517e97f",
         "committed": true,
         "pilot_gate": {
           "mode": "pilot",
           "reason": "pilot_scope_allowed",
           "allowed": true,
-          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "ends_at": "2026-10-27T12:57:59.691+00:00",
           "family_id": "30000000-0000-4000-8000-000000000001",
           "operation": "commit",
           "person_id": "20000000-0000-4000-8000-000000000001",
@@ -138,7 +138,7 @@
           "current_records": 2,
           "requested_records": 1
         },
-        "session_id": "be6138a2-87de-4114-bac2-f42f8f0751a2",
+        "session_id": "8122cbd2-5a36-4041-a8b2-97f7d7bc94ce",
         "resource_group": "clinical",
         "resource_counts": {
           "medications": 0,
@@ -156,8 +156,8 @@
       "result": {
         "ok": true,
         "decision": "confirm",
-        "source_id": "359ce2cf-9a69-4009-b7bf-0501212f8257",
-        "source_code": "359ce2cf-9a6",
+        "source_id": "8bc72e24-d46b-49f2-a06f-dbb23c1f3783",
+        "source_code": "8bc72e24-d46",
         "session_status": "confirmed",
         "canonical_commit": false,
         "idempotent_replay": true
@@ -171,9 +171,9 @@
           {
             "ok": true,
             "status": "scheduled",
-            "candidate_id": "8d52703e-75ee-412a-9fa2-a115c9e96268",
+            "candidate_id": "b26085f0-35cb-41d7-aac1-1f69349d99c6",
             "resource_type": "appointment",
-            "appointment_id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+            "appointment_id": "6b2a0c5f-0405-4d50-86da-a9b84065b515",
             "historical_record": false,
             "idempotent_replay": false,
             "recurring_care_plan": {
@@ -183,13 +183,13 @@
             }
           }
         ],
-        "batch_id": "be667f54-ffa7-4ee5-8670-af37f00fea7c",
+        "batch_id": "82c590b3-fba1-4ae3-a958-7a855517e97f",
         "committed": true,
         "pilot_gate": {
           "mode": "pilot",
           "reason": "pilot_scope_allowed",
           "allowed": true,
-          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "ends_at": "2026-10-27T12:57:59.691+00:00",
           "family_id": "30000000-0000-4000-8000-000000000001",
           "operation": "commit",
           "person_id": "20000000-0000-4000-8000-000000000001",
@@ -202,7 +202,7 @@
           "current_records": 3,
           "requested_records": 1
         },
-        "session_id": "be6138a2-87de-4114-bac2-f42f8f0751a2",
+        "session_id": "8122cbd2-5a36-4041-a8b2-97f7d7bc94ce",
         "resource_group": "clinical",
         "resource_counts": {
           "medications": 0,
@@ -220,19 +220,19 @@
       "result": {
         "ok": true,
         "item": {
-          "id": "125b88c9-f93d-499e-96c0-123ea807bac7",
-          "code": "125b88c9-f93",
+          "id": "6b2a0c5f-0405-4d50-86da-a9b84065b515",
+          "code": "6b2a0c5f-040",
           "title": "นัดสังเคราะห์ตรวจระบบ",
           "status": "scheduled",
           "resource": "appointment",
           "family_id": "30000000-0000-4000-8000-000000000001",
           "person_id": "20000000-0000-4000-8000-000000000001",
-          "created_at": "2026-10-23T07:57:34.348+00:00",
+          "created_at": "2026-10-26T12:57:59.776+00:00",
           "created_by": "10000000-0000-4000-8000-000000000001",
-          "updated_at": "2026-10-23T07:57:34.348+00:00",
+          "updated_at": "2026-10-26T12:57:59.776+00:00",
           "hospital_name": "สถานพยาบาลทดสอบ",
           "appointment_at": "2026-12-20T03:00:00+00:00",
-          "organization_id": "641e2763-9035-44a9-9354-ed4026bfcbed",
+          "organization_id": "47b2192b-4a4b-4c03-af48-1d0b130c4695",
           "appointment_type": "new_case",
           "family_person_id": "40000000-0000-4000-8000-000000000001",
           "visit_time_known": true,
@@ -249,15 +249,15 @@
         },
         "tasks": [
           {
-            "id": "7b554bf5-9823-4899-a72e-48ca9c86da85",
-            "code": "7b554bf5-982",
+            "id": "3c2db3cb-b650-41c4-8105-50db70fdb927",
+            "code": "3c2db3cb-b65",
             "title": "📄 เอาใบนัดไปด้วย",
             "status": "pending",
             "task_type": "document"
           },
           {
-            "id": "4f0a6438-01da-4786-9c73-c8853e63043c",
-            "code": "4f0a6438-01d",
+            "id": "ea3307fb-606d-4d9f-9dbe-e31d20bf871c",
+            "code": "ea3307fb-606",
             "title": "นำใบนัดมาด้วย",
             "status": "pending",
             "task_type": "other"
@@ -273,10 +273,10 @@
         "assignees": [],
         "documents": [],
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "record_id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+        "record_id": "6b2a0c5f-0405-4d50-86da-a9b84065b515",
         "reminders": [],
         "person_name": "ไม่ระบุชื่อ",
-        "record_code": "125b88c9-f93",
+        "record_code": "6b2a0c5f-040",
         "acknowledgements": [],
         "linked_resources": []
       }
@@ -290,14 +290,14 @@
         "byte_size": null,
         "mime_type": null,
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "d1a2a0a5-5280-4283-8046-44d19e46fa9a",
+        "source_id": "d0f88dc9-29cf-435e-a71d-000079e57843",
         "candidates": [
           {
-            "id": "6ae5a165-f4cf-4394-853a-01bc2f931511",
+            "id": "faf48b92-7dfa-4711-bbe4-88c78832e5de",
             "ordinal": 1,
             "conflict_data": {
               "warnings": [],
-              "checked_at": "2026-10-23T07:57:34.483+00:00",
+              "checked_at": "2026-10-26T12:57:59.946+00:00",
               "person_mismatch": false,
               "blocking_conflicts": [],
               "duplicate_detected": false
@@ -320,22 +320,22 @@
             },
             "validation_data": {
               "warnings": [],
-              "validated_at": "2026-10-23T07:57:34.483+00:00",
+              "validated_at": "2026-10-26T12:57:59.946+00:00",
               "blocking_errors": []
             },
             "fingerprint_sha256": "7201297637ff3bc5765cb8118e650b7ba80e2133a6cf4f6ab0f0aa5894eb5edc",
             "reconciliation_data": {
-              "checked_at": "2026-10-23T07:57:34.483+00:00",
+              "checked_at": "2026-10-26T12:57:59.946+00:00",
               "match_count": 0,
               "fingerprint_sha256": "7201297637ff3bc5765cb8118e650b7ba80e2133a6cf4f6ab0f0aa5894eb5edc"
             }
           }
         ],
-        "session_id": "b830c93d-dd3f-42bf-af9c-8564b6c3c63b",
+        "session_id": "7eb8e238-8f5e-4c51-86fb-a0f12ad936cb",
         "can_confirm": true,
         "object_name": null,
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "d1a2a0a5-528",
+        "source_code": "d0f88dc9-29c",
         "document_type": "appointment",
         "session_status": "review",
         "candidate_count": 1,
@@ -360,10 +360,10 @@
         "ok": true,
         "decision": "confirm",
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "d1a2a0a5-5280-4283-8046-44d19e46fa9a",
+        "source_id": "d0f88dc9-29cf-435e-a71d-000079e57843",
         "next_stage": "12J",
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "d1a2a0a5-528",
+        "source_code": "d0f88dc9-29c",
         "document_type": "appointment",
         "session_status": "confirmed",
         "candidate_count": 1,
@@ -380,9 +380,9 @@
           {
             "ok": true,
             "status": "scheduled",
-            "candidate_id": "6ae5a165-f4cf-4394-853a-01bc2f931511",
+            "candidate_id": "faf48b92-7dfa-4711-bbe4-88c78832e5de",
             "resource_type": "appointment",
-            "appointment_id": "a2b311d9-71db-4c9e-9914-d1e3425d768a",
+            "appointment_id": "f3f3cbc7-b7df-489d-ac37-b8a777c3fe90",
             "historical_record": false,
             "idempotent_replay": false,
             "recurring_care_plan": {
@@ -392,13 +392,13 @@
             }
           }
         ],
-        "batch_id": "893d9dbc-6b40-4b20-868f-ff81b859d0e8",
+        "batch_id": "8113a568-5c64-48c4-84f3-05c1fe6cf5ff",
         "committed": true,
         "pilot_gate": {
           "mode": "pilot",
           "reason": "pilot_scope_allowed",
           "allowed": true,
-          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "ends_at": "2026-10-27T12:57:59.691+00:00",
           "family_id": "30000000-0000-4000-8000-000000000001",
           "operation": "commit",
           "person_id": "20000000-0000-4000-8000-000000000001",
@@ -411,7 +411,7 @@
           "current_records": 3,
           "requested_records": 1
         },
-        "session_id": "b830c93d-dd3f-42bf-af9c-8564b6c3c63b",
+        "session_id": "7eb8e238-8f5e-4c51-86fb-a0f12ad936cb",
         "resource_group": "clinical",
         "resource_counts": {
           "medications": 0,
@@ -433,14 +433,14 @@
         "byte_size": null,
         "mime_type": null,
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "f45f11ce-934e-41eb-a73d-ac14743f7127",
+        "source_id": "95280a4b-505c-4212-9976-0e5df35c3b05",
         "candidates": [
           {
-            "id": "a2540b2e-9ab5-4b75-a3c4-033897d22291",
+            "id": "0b952580-33bb-4c92-9637-d1734ad59a5a",
             "ordinal": 1,
             "conflict_data": {
               "warnings": [],
-              "checked_at": "2026-10-23T07:57:34.532+00:00",
+              "checked_at": "2026-10-26T12:57:59.996+00:00",
               "person_mismatch": false,
               "blocking_conflicts": [],
               "duplicate_detected": false
@@ -463,22 +463,22 @@
             },
             "validation_data": {
               "warnings": [],
-              "validated_at": "2026-10-23T07:57:34.532+00:00",
+              "validated_at": "2026-10-26T12:57:59.996+00:00",
               "blocking_errors": []
             },
             "fingerprint_sha256": "1339f0b4e31633efa1d94809f5a03d7e094c3235b4ebcb3017d5202e4bfd5fed",
             "reconciliation_data": {
-              "checked_at": "2026-10-23T07:57:34.532+00:00",
+              "checked_at": "2026-10-26T12:57:59.996+00:00",
               "match_count": 0,
               "fingerprint_sha256": "1339f0b4e31633efa1d94809f5a03d7e094c3235b4ebcb3017d5202e4bfd5fed"
             }
           }
         ],
-        "session_id": "5196fef9-f710-4606-a2e2-127b8e54ff18",
+        "session_id": "dbf9653e-769f-4d90-802d-028641a06a73",
         "can_confirm": true,
         "object_name": null,
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "f45f11ce-934",
+        "source_code": "95280a4b-505",
         "document_type": "appointment",
         "session_status": "review",
         "candidate_count": 1,
@@ -503,10 +503,10 @@
         "ok": true,
         "decision": "confirm",
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "f45f11ce-934e-41eb-a73d-ac14743f7127",
+        "source_id": "95280a4b-505c-4212-9976-0e5df35c3b05",
         "next_stage": "12J",
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "f45f11ce-934",
+        "source_code": "95280a4b-505",
         "document_type": "appointment",
         "session_status": "confirmed",
         "candidate_count": 1,
@@ -523,9 +523,9 @@
           {
             "ok": true,
             "status": "scheduled",
-            "candidate_id": "a2540b2e-9ab5-4b75-a3c4-033897d22291",
+            "candidate_id": "0b952580-33bb-4c92-9637-d1734ad59a5a",
             "resource_type": "appointment",
-            "appointment_id": "009f2f7a-87dc-4a2b-8fa2-23193f8e822e",
+            "appointment_id": "b53e13e2-623a-4810-839e-ed2aff034f07",
             "historical_record": false,
             "idempotent_replay": false,
             "recurring_care_plan": {
@@ -535,13 +535,13 @@
             }
           }
         ],
-        "batch_id": "89111431-b75b-44a0-a9d6-c704379b71bf",
+        "batch_id": "3850e256-90ac-4260-8a60-e04eacc8cfab",
         "committed": true,
         "pilot_gate": {
           "mode": "pilot",
           "reason": "pilot_scope_allowed",
           "allowed": true,
-          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "ends_at": "2026-10-27T12:57:59.691+00:00",
           "family_id": "30000000-0000-4000-8000-000000000001",
           "operation": "commit",
           "person_id": "20000000-0000-4000-8000-000000000001",
@@ -554,7 +554,7 @@
           "current_records": 4,
           "requested_records": 1
         },
-        "session_id": "5196fef9-f710-4606-a2e2-127b8e54ff18",
+        "session_id": "dbf9653e-769f-4d90-802d-028641a06a73",
         "resource_group": "clinical",
         "resource_counts": {
           "medications": 0,
@@ -576,14 +576,14 @@
         "byte_size": null,
         "mime_type": null,
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "914e0cfc-18af-4c1d-8d76-ba56b630ca83",
+        "source_id": "d09cc1d6-d71f-422f-b572-147355d3a5e4",
         "candidates": [
           {
-            "id": "c9aa526f-7ade-495d-98d0-3e1f2581f9f1",
+            "id": "77da2f12-02c3-4555-a109-57af92632e8d",
             "ordinal": 1,
             "conflict_data": {
               "warnings": [],
-              "checked_at": "2026-10-23T07:57:34.585+00:00",
+              "checked_at": "2026-10-26T12:58:00.062+00:00",
               "person_mismatch": false,
               "blocking_conflicts": [],
               "duplicate_detected": false
@@ -606,22 +606,22 @@
             },
             "validation_data": {
               "warnings": [],
-              "validated_at": "2026-10-23T07:57:34.585+00:00",
+              "validated_at": "2026-10-26T12:58:00.062+00:00",
               "blocking_errors": []
             },
             "fingerprint_sha256": "3e016b8ad399466d0cb06a77b19f2540533e29145256e70880d9da422600dff5",
             "reconciliation_data": {
-              "checked_at": "2026-10-23T07:57:34.585+00:00",
+              "checked_at": "2026-10-26T12:58:00.062+00:00",
               "match_count": 0,
               "fingerprint_sha256": "3e016b8ad399466d0cb06a77b19f2540533e29145256e70880d9da422600dff5"
             }
           }
         ],
-        "session_id": "6d146718-3988-4000-bf35-4aec1f4c044a",
+        "session_id": "05f5def0-1357-4839-8f14-184901c4e389",
         "can_confirm": true,
         "object_name": null,
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "914e0cfc-18a",
+        "source_code": "d09cc1d6-d71",
         "document_type": "appointment",
         "session_status": "review",
         "candidate_count": 1,
@@ -646,10 +646,10 @@
         "ok": true,
         "decision": "confirm",
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "914e0cfc-18af-4c1d-8d76-ba56b630ca83",
+        "source_id": "d09cc1d6-d71f-422f-b572-147355d3a5e4",
         "next_stage": "12J",
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "914e0cfc-18a",
+        "source_code": "d09cc1d6-d71",
         "document_type": "appointment",
         "session_status": "confirmed",
         "candidate_count": 1,
@@ -666,9 +666,9 @@
           {
             "ok": true,
             "status": "scheduled",
-            "candidate_id": "c9aa526f-7ade-495d-98d0-3e1f2581f9f1",
+            "candidate_id": "77da2f12-02c3-4555-a109-57af92632e8d",
             "resource_type": "appointment",
-            "appointment_id": "8a8b8abb-e161-4385-bc8f-b369575dc6a6",
+            "appointment_id": "8eee4360-ff05-4fd7-8d42-99686bcd9c0b",
             "historical_record": false,
             "idempotent_replay": false,
             "recurring_care_plan": {
@@ -678,13 +678,13 @@
             }
           }
         ],
-        "batch_id": "b8a52a4d-a48a-41e9-a9de-aebe077d7dbe",
+        "batch_id": "cd8dbcb9-a636-499f-a572-f4161b432b09",
         "committed": true,
         "pilot_gate": {
           "mode": "pilot",
           "reason": "pilot_scope_allowed",
           "allowed": true,
-          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "ends_at": "2026-10-27T12:57:59.691+00:00",
           "family_id": "30000000-0000-4000-8000-000000000001",
           "operation": "commit",
           "person_id": "20000000-0000-4000-8000-000000000001",
@@ -697,7 +697,7 @@
           "current_records": 5,
           "requested_records": 1
         },
-        "session_id": "6d146718-3988-4000-bf35-4aec1f4c044a",
+        "session_id": "05f5def0-1357-4839-8f14-184901c4e389",
         "resource_group": "clinical",
         "resource_counts": {
           "medications": 0,
@@ -719,14 +719,14 @@
         "byte_size": null,
         "mime_type": null,
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "f9bc7e97-2707-4a87-8a91-6cca2693257d",
+        "source_id": "6b813b80-9e41-4c6a-9008-1b84dc3a47f9",
         "candidates": [
           {
-            "id": "91bac54a-6db0-43ff-a7f7-0a3948fd9d91",
+            "id": "132376f8-94b2-4389-9ce8-b8d3cb3254ed",
             "ordinal": 1,
             "conflict_data": {
               "warnings": [],
-              "checked_at": "2026-10-23T07:57:34.632+00:00",
+              "checked_at": "2026-10-26T12:58:00.106+00:00",
               "person_mismatch": false,
               "blocking_conflicts": [],
               "duplicate_detected": false
@@ -749,22 +749,22 @@
             },
             "validation_data": {
               "warnings": [],
-              "validated_at": "2026-10-23T07:57:34.632+00:00",
+              "validated_at": "2026-10-26T12:58:00.106+00:00",
               "blocking_errors": []
             },
             "fingerprint_sha256": "117ba374654fe5868616e10cd1b5cc7169154caf5a2b87359b53d3f7b20dc4b9",
             "reconciliation_data": {
-              "checked_at": "2026-10-23T07:57:34.632+00:00",
+              "checked_at": "2026-10-26T12:58:00.106+00:00",
               "match_count": 0,
               "fingerprint_sha256": "117ba374654fe5868616e10cd1b5cc7169154caf5a2b87359b53d3f7b20dc4b9"
             }
           }
         ],
-        "session_id": "5315f545-04f3-478d-9b45-c341a8125f02",
+        "session_id": "dcf86098-e27c-4f36-b9af-3f2f648dac47",
         "can_confirm": true,
         "object_name": null,
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "f9bc7e97-270",
+        "source_code": "6b813b80-9e4",
         "document_type": "appointment",
         "session_status": "review",
         "candidate_count": 1,
@@ -789,10 +789,10 @@
         "ok": true,
         "decision": "confirm",
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "f9bc7e97-2707-4a87-8a91-6cca2693257d",
+        "source_id": "6b813b80-9e41-4c6a-9008-1b84dc3a47f9",
         "next_stage": "12J",
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "f9bc7e97-270",
+        "source_code": "6b813b80-9e4",
         "document_type": "appointment",
         "session_status": "confirmed",
         "candidate_count": 1,
@@ -809,9 +809,9 @@
           {
             "ok": true,
             "status": "scheduled",
-            "candidate_id": "91bac54a-6db0-43ff-a7f7-0a3948fd9d91",
+            "candidate_id": "132376f8-94b2-4389-9ce8-b8d3cb3254ed",
             "resource_type": "appointment",
-            "appointment_id": "e52f71e8-7806-406c-ba74-85bc37591a78",
+            "appointment_id": "4fa22c64-f592-43d0-b099-fab0c7e8cedb",
             "historical_record": false,
             "idempotent_replay": false,
             "recurring_care_plan": {
@@ -821,13 +821,13 @@
             }
           }
         ],
-        "batch_id": "63995ce7-e807-4e22-b64f-cad37c539cb9",
+        "batch_id": "64da23c9-b8e8-4f53-89e1-5873e9a1f098",
         "committed": true,
         "pilot_gate": {
           "mode": "pilot",
           "reason": "pilot_scope_allowed",
           "allowed": true,
-          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "ends_at": "2026-10-27T12:57:59.691+00:00",
           "family_id": "30000000-0000-4000-8000-000000000001",
           "operation": "commit",
           "person_id": "20000000-0000-4000-8000-000000000001",
@@ -840,7 +840,7 @@
           "current_records": 6,
           "requested_records": 1
         },
-        "session_id": "5315f545-04f3-478d-9b45-c341a8125f02",
+        "session_id": "dcf86098-e27c-4f36-b9af-3f2f648dac47",
         "resource_group": "clinical",
         "resource_counts": {
           "medications": 0,
@@ -862,14 +862,14 @@
         "byte_size": null,
         "mime_type": null,
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "6dfb71a5-59e7-40aa-8956-7fa1b08cc067",
+        "source_id": "61132dbb-0532-411f-ad2b-3aa06c119d0b",
         "candidates": [
           {
-            "id": "7c6bc307-02ad-442d-a194-f97ec56531c4",
+            "id": "2a93455a-3979-484c-adff-e3210a976d9b",
             "ordinal": 1,
             "conflict_data": {
               "warnings": [],
-              "checked_at": "2026-10-23T07:57:34.678+00:00",
+              "checked_at": "2026-10-26T12:58:00.152+00:00",
               "person_mismatch": false,
               "blocking_conflicts": [],
               "duplicate_detected": false
@@ -892,22 +892,22 @@
             },
             "validation_data": {
               "warnings": [],
-              "validated_at": "2026-10-23T07:57:34.678+00:00",
+              "validated_at": "2026-10-26T12:58:00.152+00:00",
               "blocking_errors": []
             },
             "fingerprint_sha256": "d67d41e6f0ff2dfd8378840b064d926aa850cb83636229048e41c545ef5bbdba",
             "reconciliation_data": {
-              "checked_at": "2026-10-23T07:57:34.678+00:00",
+              "checked_at": "2026-10-26T12:58:00.152+00:00",
               "match_count": 0,
               "fingerprint_sha256": "d67d41e6f0ff2dfd8378840b064d926aa850cb83636229048e41c545ef5bbdba"
             }
           }
         ],
-        "session_id": "d9e7102f-6892-47ba-b85c-cb3d59d3588d",
+        "session_id": "05d86aae-a6d0-45bc-b987-cb97ee66e284",
         "can_confirm": true,
         "object_name": null,
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "6dfb71a5-59e",
+        "source_code": "61132dbb-053",
         "document_type": "appointment",
         "session_status": "review",
         "candidate_count": 1,
@@ -932,10 +932,10 @@
         "ok": true,
         "decision": "confirm",
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "6dfb71a5-59e7-40aa-8956-7fa1b08cc067",
+        "source_id": "61132dbb-0532-411f-ad2b-3aa06c119d0b",
         "next_stage": "12J",
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "6dfb71a5-59e",
+        "source_code": "61132dbb-053",
         "document_type": "appointment",
         "session_status": "confirmed",
         "candidate_count": 1,
@@ -952,16 +952,16 @@
           {
             "ok": true,
             "status": "scheduled",
-            "candidate_id": "7c6bc307-02ad-442d-a194-f97ec56531c4",
+            "candidate_id": "2a93455a-3979-484c-adff-e3210a976d9b",
             "resource_type": "appointment",
-            "appointment_id": "d968d2ba-db4d-4e2f-9be9-5f231d70175f",
+            "appointment_id": "9f00a6e2-a475-4589-8516-30baae196dc2",
             "historical_record": false,
             "idempotent_replay": false,
             "recurring_care_plan": {
               "ok": true,
               "status": "draft",
               "synced": true,
-              "plan_id": "ce3fc73b-be9a-4200-92df-0c24af5d0fd7",
+              "plan_id": "5dfb33d3-207b-4055-978f-160f25ac09e8",
               "plan_type": "routine_checkup",
               "next_due_on": null,
               "interval_months": null,
@@ -969,13 +969,13 @@
             }
           }
         ],
-        "batch_id": "3e162279-a49d-4968-ba92-fc5c745c8584",
+        "batch_id": "a360cf9e-969f-4a43-bf88-e2e4d70f7cb7",
         "committed": true,
         "pilot_gate": {
           "mode": "pilot",
           "reason": "pilot_scope_allowed",
           "allowed": true,
-          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "ends_at": "2026-10-27T12:57:59.691+00:00",
           "family_id": "30000000-0000-4000-8000-000000000001",
           "operation": "commit",
           "person_id": "20000000-0000-4000-8000-000000000001",
@@ -988,7 +988,7 @@
           "current_records": 7,
           "requested_records": 1
         },
-        "session_id": "d9e7102f-6892-47ba-b85c-cb3d59d3588d",
+        "session_id": "05d86aae-a6d0-45bc-b987-cb97ee66e284",
         "resource_group": "clinical",
         "resource_counts": {
           "medications": 0,
@@ -1010,14 +1010,14 @@
         "byte_size": null,
         "mime_type": null,
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "199b619e-1c4f-4ee3-9964-7a4d7422143d",
+        "source_id": "78cc9435-645c-43d5-9b5f-d30277e849b5",
         "candidates": [
           {
-            "id": "2ccbacad-5e2c-4726-94b8-516fda357a54",
+            "id": "23a90167-d166-45f6-9f23-9acc5cd7f6d6",
             "ordinal": 1,
             "conflict_data": {
               "warnings": [],
-              "checked_at": "2026-10-23T07:57:34.727+00:00",
+              "checked_at": "2026-10-26T12:58:00.199+00:00",
               "person_mismatch": false,
               "blocking_conflicts": [],
               "duplicate_detected": false
@@ -1040,22 +1040,22 @@
             },
             "validation_data": {
               "warnings": [],
-              "validated_at": "2026-10-23T07:57:34.727+00:00",
+              "validated_at": "2026-10-26T12:58:00.199+00:00",
               "blocking_errors": []
             },
             "fingerprint_sha256": "bba170e3d246b4a1cb1f13e8cded71934cea0856945e862d7243a1aaec53d4b5",
             "reconciliation_data": {
-              "checked_at": "2026-10-23T07:57:34.727+00:00",
+              "checked_at": "2026-10-26T12:58:00.199+00:00",
               "match_count": 0,
               "fingerprint_sha256": "bba170e3d246b4a1cb1f13e8cded71934cea0856945e862d7243a1aaec53d4b5"
             }
           }
         ],
-        "session_id": "ae8858f9-89be-4395-9e72-6f9f80335529",
+        "session_id": "27bf19ab-4dba-4fda-a547-bf53d7067557",
         "can_confirm": true,
         "object_name": null,
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "199b619e-1c4",
+        "source_code": "78cc9435-645",
         "document_type": "appointment",
         "session_status": "review",
         "candidate_count": 1,
@@ -1080,10 +1080,10 @@
         "ok": true,
         "decision": "confirm",
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "199b619e-1c4f-4ee3-9964-7a4d7422143d",
+        "source_id": "78cc9435-645c-43d5-9b5f-d30277e849b5",
         "next_stage": "12J",
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "199b619e-1c4",
+        "source_code": "78cc9435-645",
         "document_type": "appointment",
         "session_status": "confirmed",
         "candidate_count": 1,
@@ -1100,16 +1100,16 @@
           {
             "ok": true,
             "status": "scheduled",
-            "candidate_id": "2ccbacad-5e2c-4726-94b8-516fda357a54",
+            "candidate_id": "23a90167-d166-45f6-9f23-9acc5cd7f6d6",
             "resource_type": "appointment",
-            "appointment_id": "39aa6e2d-2ea1-4a94-beb8-97ea4e63c9d0",
+            "appointment_id": "6e8cf3b5-8d20-4fe5-8f22-ca2752f09d92",
             "historical_record": false,
             "idempotent_replay": false,
             "recurring_care_plan": {
               "ok": true,
               "status": "draft",
               "synced": true,
-              "plan_id": "86907a55-8a10-418c-8a9d-a947a18c278b",
+              "plan_id": "dda86b41-e323-4256-a4c4-149c0083ab41",
               "plan_type": "vaccination",
               "next_due_on": null,
               "interval_months": null,
@@ -1117,13 +1117,13 @@
             }
           }
         ],
-        "batch_id": "8eadd1f1-bf72-4c8f-8ac1-46c62c8eb7fd",
+        "batch_id": "3500e70b-b397-4a5d-a312-5a2ff141bd93",
         "committed": true,
         "pilot_gate": {
           "mode": "pilot",
           "reason": "pilot_scope_allowed",
           "allowed": true,
-          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "ends_at": "2026-10-27T12:57:59.691+00:00",
           "family_id": "30000000-0000-4000-8000-000000000001",
           "operation": "commit",
           "person_id": "20000000-0000-4000-8000-000000000001",
@@ -1136,7 +1136,7 @@
           "current_records": 8,
           "requested_records": 1
         },
-        "session_id": "ae8858f9-89be-4395-9e72-6f9f80335529",
+        "session_id": "27bf19ab-4dba-4fda-a547-bf53d7067557",
         "resource_group": "clinical",
         "resource_counts": {
           "medications": 0,
@@ -1158,14 +1158,14 @@
         "byte_size": null,
         "mime_type": null,
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "35a028c9-a4d0-42f4-b547-bb801d3e36c8",
+        "source_id": "5ab3bb94-b0b1-4794-ad52-1c414c382cd6",
         "candidates": [
           {
-            "id": "96dde228-d229-48f4-9c97-6cdf5376ed13",
+            "id": "ea72cc68-2e9c-40bb-89f3-8ca13d96ca9a",
             "ordinal": 1,
             "conflict_data": {
               "warnings": [],
-              "checked_at": "2026-10-23T07:57:34.766+00:00",
+              "checked_at": "2026-10-26T12:58:00.24+00:00",
               "person_mismatch": false,
               "blocking_conflicts": [],
               "duplicate_detected": false
@@ -1188,22 +1188,22 @@
             },
             "validation_data": {
               "warnings": [],
-              "validated_at": "2026-10-23T07:57:34.766+00:00",
+              "validated_at": "2026-10-26T12:58:00.24+00:00",
               "blocking_errors": []
             },
             "fingerprint_sha256": "4a06aab45316b5f863ccb18b21c7b57cbedf28825d90b8b961f0a2477d9d83ae",
             "reconciliation_data": {
-              "checked_at": "2026-10-23T07:57:34.766+00:00",
+              "checked_at": "2026-10-26T12:58:00.24+00:00",
               "match_count": 0,
               "fingerprint_sha256": "4a06aab45316b5f863ccb18b21c7b57cbedf28825d90b8b961f0a2477d9d83ae"
             }
           }
         ],
-        "session_id": "83ca4c6e-f7ef-4c78-b597-ee1f9145688e",
+        "session_id": "0bec4124-3f3b-4927-b6ba-d2722fab53bd",
         "can_confirm": true,
         "object_name": null,
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "35a028c9-a4d",
+        "source_code": "5ab3bb94-b0b",
         "document_type": "appointment",
         "session_status": "review",
         "candidate_count": 1,
@@ -1228,10 +1228,10 @@
         "ok": true,
         "decision": "confirm",
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "35a028c9-a4d0-42f4-b547-bb801d3e36c8",
+        "source_id": "5ab3bb94-b0b1-4794-ad52-1c414c382cd6",
         "next_stage": "12J",
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "35a028c9-a4d",
+        "source_code": "5ab3bb94-b0b",
         "document_type": "appointment",
         "session_status": "confirmed",
         "candidate_count": 1,
@@ -1248,9 +1248,9 @@
           {
             "ok": true,
             "status": "scheduled",
-            "candidate_id": "96dde228-d229-48f4-9c97-6cdf5376ed13",
+            "candidate_id": "ea72cc68-2e9c-40bb-89f3-8ca13d96ca9a",
             "resource_type": "appointment",
-            "appointment_id": "a471071b-dff4-4fb0-b031-da8f180dd499",
+            "appointment_id": "25fea520-d92c-4156-8bbe-9c04b59d967f",
             "historical_record": false,
             "idempotent_replay": false,
             "recurring_care_plan": {
@@ -1260,13 +1260,13 @@
             }
           }
         ],
-        "batch_id": "52672a4d-2f03-445e-bfe5-985dbe9c7afa",
+        "batch_id": "cdf0ab98-934d-4f47-b1ac-0c96ed4785a0",
         "committed": true,
         "pilot_gate": {
           "mode": "pilot",
           "reason": "pilot_scope_allowed",
           "allowed": true,
-          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "ends_at": "2026-10-27T12:57:59.691+00:00",
           "family_id": "30000000-0000-4000-8000-000000000001",
           "operation": "commit",
           "person_id": "20000000-0000-4000-8000-000000000001",
@@ -1279,7 +1279,7 @@
           "current_records": 9,
           "requested_records": 1
         },
-        "session_id": "83ca4c6e-f7ef-4c78-b597-ee1f9145688e",
+        "session_id": "0bec4124-3f3b-4927-b6ba-d2722fab53bd",
         "resource_group": "clinical",
         "resource_counts": {
           "medications": 0,
@@ -1296,7 +1296,7 @@
       "name": "phms_diagnostic_add_procedure",
       "result": {
         "ok": true,
-        "item_id": "182da76b-732f-4fa0-90fe-8199dba06f8b",
+        "item_id": "0fc6cb13-6871-4678-a492-87c9f02fc4a3",
         "duplicate": false
       }
     },
@@ -1304,7 +1304,7 @@
       "name": "phms_diagnostic_add_procedure",
       "result": {
         "ok": true,
-        "item_id": "182da76b-732f-4fa0-90fe-8199dba06f8b",
+        "item_id": "0fc6cb13-6871-4678-a492-87c9f02fc4a3",
         "duplicate": true
       }
     },
@@ -1312,7 +1312,7 @@
       "name": "phms_diagnostic_add_procedure",
       "result": {
         "ok": true,
-        "item_id": "d6a09385-9e63-47aa-81ca-16f5cf9292f8",
+        "item_id": "16b48e8c-38fc-4761-9d41-9f2227719ae9",
         "duplicate": false
       }
     },
@@ -1320,7 +1320,7 @@
       "name": "phms_diagnostic_add_procedure",
       "result": {
         "ok": true,
-        "item_id": "d6a09385-9e63-47aa-81ca-16f5cf9292f8",
+        "item_id": "16b48e8c-38fc-4761-9d41-9f2227719ae9",
         "duplicate": true
       }
     },
@@ -1330,7 +1330,7 @@
         "ok": true,
         "duplicate": false,
         "item_count": 2,
-        "appointment_id": "65ba9498-ac71-4ea6-91f3-d12ea0f8655a"
+        "appointment_id": "950f8fe1-113b-4b6f-a096-ca86a1b0e73e"
       }
     },
     {
@@ -1338,7 +1338,7 @@
       "result": {
         "ok": true,
         "duplicate": true,
-        "appointment_id": "65ba9498-ac71-4ea6-91f3-d12ea0f8655a"
+        "appointment_id": "950f8fe1-113b-4b6f-a096-ca86a1b0e73e"
       }
     },
     {
@@ -1347,19 +1347,7 @@
         "ok": true,
         "items": [
           {
-            "id": "a73e6c60-bd1c-4d4b-83c9-0e4e8f6f0be2",
-            "notes": null,
-            "status": "PLANNED",
-            "dispense_id": null,
-            "expected_unit": "เม็ด",
-            "medication_id": "50000000-0000-4000-8000-000000000002",
-            "received_unit": null,
-            "expected_quantity": 60,
-            "received_quantity": null,
-            "person_medication_id": "60000000-0000-4000-8000-000000000002"
-          },
-          {
-            "id": "b4ddfb40-f52e-44e9-82ed-31a1d4b527ae",
+            "id": "65bbd776-fa6c-424b-b00d-d24497330f3c",
             "notes": null,
             "status": "PLANNED",
             "dispense_id": null,
@@ -1369,13 +1357,25 @@
             "expected_quantity": 30,
             "received_quantity": null,
             "person_medication_id": "60000000-0000-4000-8000-000000000001"
+          },
+          {
+            "id": "6669d66e-3454-4cb4-8722-a53ad167ea4a",
+            "notes": null,
+            "status": "PLANNED",
+            "dispense_id": null,
+            "expected_unit": "เม็ด",
+            "medication_id": "50000000-0000-4000-8000-000000000002",
+            "received_unit": null,
+            "expected_quantity": 60,
+            "received_quantity": null,
+            "person_medication_id": "60000000-0000-4000-8000-000000000002"
           }
         ],
         "status": "planned",
         "person_id": "20000000-0000-4000-8000-000000000001",
         "hospital_name": "สถานพยาบาลทดสอบ",
         "appointment_at": "2027-02-01T03:00:00+00:00",
-        "appointment_id": "65ba9498-ac71-4ea6-91f3-d12ea0f8655a",
+        "appointment_id": "950f8fe1-113b-4b6f-a096-ca86a1b0e73e",
         "location_detail": "จุดรับยาทดสอบ",
         "preparation_notes": null
       }
@@ -1389,14 +1389,14 @@
         "byte_size": null,
         "mime_type": null,
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "5e16a14a-afa1-4ab9-aaf6-0d65efff15c9",
+        "source_id": "73fe57a4-bf2b-4398-8502-6d467e1318af",
         "candidates": [
           {
-            "id": "c8b7e232-511c-40d7-9c30-3aec7b0a839c",
+            "id": "182e02ce-71d6-4da6-98cb-e57a1b7f2f5b",
             "ordinal": 1,
             "conflict_data": {
               "warnings": [],
-              "checked_at": "2026-10-23T07:57:34.867+00:00",
+              "checked_at": "2026-10-26T12:58:00.361+00:00",
               "person_mismatch": false,
               "blocking_conflicts": [],
               "duplicate_detected": false
@@ -1429,22 +1429,22 @@
             },
             "validation_data": {
               "warnings": [],
-              "validated_at": "2026-10-23T07:57:34.867+00:00",
+              "validated_at": "2026-10-26T12:58:00.361+00:00",
               "blocking_errors": []
             },
             "fingerprint_sha256": "73a09c508894bbbf767555705a3dd476d038db748ee2cfff282dd8f34ba2bfb4",
             "reconciliation_data": {
-              "checked_at": "2026-10-23T07:57:34.867+00:00",
+              "checked_at": "2026-10-26T12:58:00.361+00:00",
               "match_count": 0,
               "fingerprint_sha256": "73a09c508894bbbf767555705a3dd476d038db748ee2cfff282dd8f34ba2bfb4"
             }
           }
         ],
-        "session_id": "ee83fe04-fd53-4297-9b11-54112c3d04ac",
+        "session_id": "bdb7531d-29a9-4654-8f37-121462723845",
         "can_confirm": true,
         "object_name": null,
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "5e16a14a-afa",
+        "source_code": "73fe57a4-bf2",
         "document_type": "appointment",
         "session_status": "review",
         "candidate_count": 1,
@@ -1469,10 +1469,10 @@
         "ok": true,
         "decision": "confirm",
         "person_id": "20000000-0000-4000-8000-000000000001",
-        "source_id": "5e16a14a-afa1-4ab9-aaf6-0d65efff15c9",
+        "source_id": "73fe57a4-bf2b-4398-8502-6d467e1318af",
         "next_stage": "12J",
         "person_name": "สมาชิกทดสอบ A",
-        "source_code": "5e16a14a-afa",
+        "source_code": "73fe57a4-bf2",
         "document_type": "appointment",
         "session_status": "confirmed",
         "candidate_count": 1,
@@ -1489,9 +1489,9 @@
           {
             "ok": true,
             "status": "scheduled",
-            "candidate_id": "c8b7e232-511c-40d7-9c30-3aec7b0a839c",
+            "candidate_id": "182e02ce-71d6-4da6-98cb-e57a1b7f2f5b",
             "resource_type": "appointment",
-            "appointment_id": "01e4d393-3cc9-4e00-9fea-48cd4e90aaa0",
+            "appointment_id": "fc6a27f8-162d-4378-abca-4d0eec9d3eeb",
             "historical_record": false,
             "idempotent_replay": false,
             "recurring_care_plan": {
@@ -1501,13 +1501,13 @@
             }
           }
         ],
-        "batch_id": "5f499b13-c2d8-4bb1-9340-fb6de11684a5",
+        "batch_id": "fd949ece-3954-44e4-b1ba-cfddcfd5fac5",
         "committed": true,
         "pilot_gate": {
           "mode": "pilot",
           "reason": "pilot_scope_allowed",
           "allowed": true,
-          "ends_at": "2026-10-24T07:57:34.253+00:00",
+          "ends_at": "2026-10-27T12:57:59.691+00:00",
           "family_id": "30000000-0000-4000-8000-000000000001",
           "operation": "commit",
           "person_id": "20000000-0000-4000-8000-000000000001",
@@ -1520,7 +1520,7 @@
           "current_records": 11,
           "requested_records": 1
         },
-        "session_id": "ee83fe04-fd53-4297-9b11-54112c3d04ac",
+        "session_id": "bdb7531d-29a9-4654-8f37-121462723845",
         "resource_group": "clinical",
         "resource_counts": {
           "medications": 0,
@@ -1538,7 +1538,7 @@
       "result": {
         "ok": true,
         "item": {
-          "id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+          "id": "6b2a0c5f-0405-4d50-86da-a9b84065b515",
           "note": null,
           "title": "ชื่อแก้ไขสังเคราะห์",
           "status": "scheduled",
@@ -1546,13 +1546,13 @@
           "person_id": "20000000-0000-4000-8000-000000000001",
           "arrived_at": null,
           "care_topic": null,
-          "created_at": "2026-10-23T07:57:34.348+00:00",
+          "created_at": "2026-10-26T12:57:59.776+00:00",
           "created_by": "10000000-0000-4000-8000-000000000001",
           "deleted_at": null,
           "department": null,
           "next_steps": null,
           "no_show_at": null,
-          "updated_at": "2026-10-23T07:57:34.91+00:00",
+          "updated_at": "2026-10-26T12:58:00.405+00:00",
           "visit_mode": null,
           "doctor_name": null,
           "hospital_hn": null,
@@ -1572,7 +1572,7 @@
           "reference_note": null,
           "walk_in_reason": null,
           "location_detail": null,
-          "organization_id": "641e2763-9035-44a9-9354-ed4026bfcbed",
+          "organization_id": "47b2192b-4a4b-4c03-af48-1d0b130c4695",
           "service_unit_id": null,
           "appointment_type": "new_case",
           "family_person_id": "40000000-0000-4000-8000-000000000001",
@@ -1610,8 +1610,8 @@
           "rescheduled_from_appointment_id": null
         },
         "updated": true,
-        "record_id": "125b88c9-f93d-499e-96c0-123ea807bac7",
-        "record_code": "125b88c9-f93",
+        "record_id": "6b2a0c5f-0405-4d50-86da-a9b84065b515",
+        "record_code": "6b2a0c5f-040",
         "schedule_changed": true
       }
     },
@@ -1620,26 +1620,26 @@
       "result": {
         "ok": true,
         "task": {
-          "id": "12865ef1-5eff-4494-8feb-73c198529151",
+          "id": "d59f7e33-bb07-4306-9f00-22cac1b1eaef",
           "note": null,
           "title": "นำเอกสารสังเคราะห์",
           "due_at": null,
           "status": "pending",
           "task_type": "document",
-          "created_at": "2026-10-23T07:57:34.95+00:00",
+          "created_at": "2026-10-26T12:58:00.451+00:00",
           "created_by": "10000000-0000-4000-8000-000000000001",
           "source_key": null,
-          "updated_at": "2026-10-23T07:57:34.95+00:00",
+          "updated_at": "2026-10-26T12:58:00.451+00:00",
           "instruction": null,
           "completed_at": null,
           "completed_by": null,
-          "appointment_id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+          "appointment_id": "6b2a0c5f-0405-4d50-86da-a9b84065b515",
           "source_document_id": null,
           "source_document_link_id": null,
           "related_health_measurement_id": null
         },
-        "task_code": "12865ef1-5ef",
-        "appointment_code": "125b88c9-f93"
+        "task_code": "d59f7e33-bb0",
+        "appointment_code": "6b2a0c5f-040"
       }
     },
     {
@@ -1652,7 +1652,7 @@
           "calendar_user_upserted": 0,
           "calendar_group_seed_upserted": 0
         },
-        "record_code": "125b88c9-f93",
+        "record_code": "6b2a0c5f-040",
         "reminder_offsets_minutes": [
           1440,
           60
@@ -1666,9 +1666,9 @@
       "result": {
         "ok": true,
         "duplicate": false,
-        "record_id": "df976b83-01fe-4626-a5b4-3c37f7410279",
+        "record_id": "3d92594d-d336-48dd-8430-5d8ec136447e",
         "visit_mode": "walk_in",
-        "record_code": "df976b83-01f",
+        "record_code": "3d92594d-d33",
         "appointment_type": "other",
         "visit_time_known": false,
         "planned_visit_date": "2027-07-01"
@@ -1679,8 +1679,8 @@
       "result": {
         "ok": true,
         "duplicate": true,
-        "record_id": "df976b83-01fe-4626-a5b4-3c37f7410279",
-        "record_code": "df976b83-01f",
+        "record_id": "3d92594d-d336-48dd-8430-5d8ec136447e",
+        "record_code": "3d92594d-d33",
         "visit_time_known": false,
         "planned_visit_date": "2027-07-01"
       }
@@ -1690,12 +1690,12 @@
       "result": {
         "ok": true,
         "reused": false,
-        "link_id": "fff5dc4e-ead1-44fa-986e-abdfe21f64ed",
+        "link_id": "323942ea-ba33-4d4e-821f-5d684216c44d",
         "link_kind": "source",
         "usage_relation": "origin",
-        "appointment_code": "125b88c9-f93",
+        "appointment_code": "6b2a0c5f-040",
         "storage_asset_id": "70000000-0000-4000-8000-000000000001",
-        "origin_appointment_code": "125b88c9-f93"
+        "origin_appointment_code": "6b2a0c5f-040"
       }
     },
     {
@@ -1703,12 +1703,12 @@
       "result": {
         "ok": true,
         "reused": false,
-        "link_id": "fff5dc4e-ead1-44fa-986e-abdfe21f64ed",
+        "link_id": "323942ea-ba33-4d4e-821f-5d684216c44d",
         "link_kind": "source",
         "usage_relation": "origin",
-        "appointment_code": "125b88c9-f93",
+        "appointment_code": "6b2a0c5f-040",
         "storage_asset_id": "70000000-0000-4000-8000-000000000001",
-        "origin_appointment_code": "125b88c9-f93"
+        "origin_appointment_code": "6b2a0c5f-040"
       }
     },
     {
@@ -1745,7 +1745,7 @@
       "result": {
         "ok": true,
         "item": {
-          "id": "125b88c9-f93d-499e-96c0-123ea807bac7",
+          "id": "6b2a0c5f-0405-4d50-86da-a9b84065b515",
           "note": null,
           "title": "ชื่อแก้ไขสังเคราะห์",
           "status": "cancelled",
@@ -1753,18 +1753,18 @@
           "person_id": "20000000-0000-4000-8000-000000000001",
           "arrived_at": null,
           "care_topic": null,
-          "created_at": "2026-10-23T07:57:34.348+00:00",
+          "created_at": "2026-10-26T12:57:59.776+00:00",
           "created_by": "10000000-0000-4000-8000-000000000001",
           "deleted_at": null,
           "department": null,
           "next_steps": null,
           "no_show_at": null,
-          "updated_at": "2026-10-23T07:57:35.082+00:00",
+          "updated_at": "2026-10-26T12:58:00.603+00:00",
           "visit_mode": null,
           "doctor_name": null,
           "hospital_hn": null,
           "hospital_vn": null,
-          "cancelled_at": "2026-10-23T07:57:35.082+00:00",
+          "cancelled_at": "2026-10-26T12:58:00.603+00:00",
           "clinician_id": null,
           "completed_at": null,
           "encounter_id": null,
@@ -1779,7 +1779,7 @@
           "reference_note": null,
           "walk_in_reason": null,
           "location_detail": null,
-          "organization_id": "641e2763-9035-44a9-9354-ed4026bfcbed",
+          "organization_id": "47b2192b-4a4b-4c03-af48-1d0b130c4695",
           "service_unit_id": null,
           "appointment_type": "new_case",
           "family_person_id": "40000000-0000-4000-8000-000000000001",
@@ -1817,7 +1817,323 @@
         },
         "reason": "ทดสอบยกเลิก",
         "status": "cancelled",
-        "record_code": "125b88c9-f93"
+        "record_code": "6b2a0c5f-040"
+      }
+    },
+    {
+      "name": "phms_med_v23_refill_create",
+      "result": {
+        "ok": true,
+        "duplicate": false,
+        "item_count": 2,
+        "appointment_id": "8048f450-32c9-4514-b315-e4667849c502"
+      }
+    },
+    {
+      "name": "phms_med_v23_refill_detail",
+      "result": {
+        "ok": true,
+        "items": [
+          {
+            "id": "9a2f6268-9282-4c5f-afc6-ef5900bdb208",
+            "notes": null,
+            "status": "PLANNED",
+            "dispense_id": null,
+            "expected_unit": "tablet",
+            "medication_id": "50000000-0000-4000-8000-000000000001",
+            "received_unit": null,
+            "expected_quantity": 30,
+            "received_quantity": null,
+            "person_medication_id": "60000000-0000-4000-8000-000000000001"
+          },
+          {
+            "id": "abbd3b30-5c9d-42b1-8f7f-344a5db43e3e",
+            "notes": null,
+            "status": "PLANNED",
+            "dispense_id": null,
+            "expected_unit": "tablet",
+            "medication_id": "50000000-0000-4000-8000-000000000002",
+            "received_unit": null,
+            "expected_quantity": 30,
+            "received_quantity": null,
+            "person_medication_id": "60000000-0000-4000-8000-000000000002"
+          }
+        ],
+        "status": "planned",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "hospital_name": "ทดสอบรับยา",
+        "appointment_at": "2027-02-01T03:00:00+00:00",
+        "appointment_id": "8048f450-32c9-4514-b315-e4667849c502",
+        "location_detail": "ห้องยา",
+        "preparation_notes": null
+      }
+    },
+    {
+      "name": "phms_line_refill_receive",
+      "result": {
+        "ok": true,
+        "items": [
+          {
+            "unit": "tablet",
+            "stock": {
+              "ok": true,
+              "duplicate": false,
+              "expiry_status": "reported",
+              "transaction_id": "ff30f2f8-3fa8-420c-a044-5d89e4a45e87",
+              "stock_container_id": "7695bf1e-ed42-44e4-83d9-667e3360927f",
+              "clinical_verification": "not_inferred"
+            },
+            "status": "RECEIVED",
+            "item_id": "9a2f6268-9282-4c5f-afc6-ef5900bdb208",
+            "quantity": 30,
+            "expense_id": "82ffc522-7a50-4a3a-959d-dda2980932ae",
+            "dispense_id": "24b4ab78-f0e5-4d07-8101-11d73703e656"
+          },
+          {
+            "unit": "tablet",
+            "stock": {
+              "ok": true,
+              "duplicate": false,
+              "expiry_status": "reported",
+              "transaction_id": "623e792a-a845-4761-a57c-5c23bc7fea85",
+              "stock_container_id": "79a83e10-571b-45ad-ac66-266ad096265c",
+              "clinical_verification": "not_inferred"
+            },
+            "status": "PARTIALLY_RECEIVED",
+            "item_id": "abbd3b30-5c9d-42b1-8f7f-344a5db43e3e",
+            "quantity": 10,
+            "expense_id": null,
+            "dispense_id": "f53ecbcc-4646-4ba6-8cf3-dde6a65c5b39"
+          }
+        ],
+        "duplicate": false,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "appointment_id": "8048f450-32c9-4514-b315-e4667849c502"
+      }
+    },
+    {
+      "name": "phms_line_refill_receive",
+      "result": {
+        "ok": true,
+        "items": [
+          {
+            "unit": "tablet",
+            "stock": {
+              "ok": true,
+              "duplicate": false,
+              "expiry_status": "reported",
+              "transaction_id": "ff30f2f8-3fa8-420c-a044-5d89e4a45e87",
+              "stock_container_id": "7695bf1e-ed42-44e4-83d9-667e3360927f",
+              "clinical_verification": "not_inferred"
+            },
+            "status": "RECEIVED",
+            "item_id": "9a2f6268-9282-4c5f-afc6-ef5900bdb208",
+            "quantity": 30,
+            "expense_id": "82ffc522-7a50-4a3a-959d-dda2980932ae",
+            "dispense_id": "24b4ab78-f0e5-4d07-8101-11d73703e656"
+          },
+          {
+            "unit": "tablet",
+            "stock": {
+              "ok": true,
+              "duplicate": false,
+              "expiry_status": "reported",
+              "transaction_id": "623e792a-a845-4761-a57c-5c23bc7fea85",
+              "stock_container_id": "79a83e10-571b-45ad-ac66-266ad096265c",
+              "clinical_verification": "not_inferred"
+            },
+            "status": "PARTIALLY_RECEIVED",
+            "item_id": "abbd3b30-5c9d-42b1-8f7f-344a5db43e3e",
+            "quantity": 10,
+            "expense_id": null,
+            "dispense_id": "f53ecbcc-4646-4ba6-8cf3-dde6a65c5b39"
+          }
+        ],
+        "duplicate": true,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "appointment_id": "8048f450-32c9-4514-b315-e4667849c502"
+      }
+    },
+    {
+      "name": "phms_med_v23_refill_detail",
+      "result": {
+        "ok": true,
+        "items": [
+          {
+            "id": "9a2f6268-9282-4c5f-afc6-ef5900bdb208",
+            "notes": null,
+            "status": "RECEIVED",
+            "dispense_id": "24b4ab78-f0e5-4d07-8101-11d73703e656",
+            "expected_unit": "tablet",
+            "medication_id": "50000000-0000-4000-8000-000000000001",
+            "received_unit": "tablet",
+            "expected_quantity": 30,
+            "received_quantity": 30,
+            "person_medication_id": "60000000-0000-4000-8000-000000000001"
+          },
+          {
+            "id": "abbd3b30-5c9d-42b1-8f7f-344a5db43e3e",
+            "notes": null,
+            "status": "PARTIALLY_RECEIVED",
+            "dispense_id": "f53ecbcc-4646-4ba6-8cf3-dde6a65c5b39",
+            "expected_unit": "tablet",
+            "medication_id": "50000000-0000-4000-8000-000000000002",
+            "received_unit": "tablet",
+            "expected_quantity": 30,
+            "received_quantity": 10,
+            "person_medication_id": "60000000-0000-4000-8000-000000000002"
+          }
+        ],
+        "status": "planned",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "hospital_name": "ทดสอบรับยา",
+        "appointment_at": "2027-02-01T03:00:00+00:00",
+        "appointment_id": "8048f450-32c9-4514-b315-e4667849c502",
+        "location_detail": "ห้องยา",
+        "preparation_notes": null
+      }
+    },
+    {
+      "name": "phms_med_v23_refill_create",
+      "result": {
+        "ok": true,
+        "duplicate": false,
+        "item_count": 1,
+        "appointment_id": "2e9f57fe-dec5-4dc5-a71b-9d8f5807b9e5"
+      }
+    },
+    {
+      "name": "phms_med_v23_refill_detail",
+      "result": {
+        "ok": true,
+        "items": [
+          {
+            "id": "c7b8b67b-6a36-43a3-a56d-a5da7176e747",
+            "notes": null,
+            "status": "PLANNED",
+            "dispense_id": null,
+            "expected_unit": null,
+            "medication_id": "50000000-0000-4000-8000-000000000001",
+            "received_unit": null,
+            "expected_quantity": null,
+            "received_quantity": null,
+            "person_medication_id": "60000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "status": "planned",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "hospital_name": "ทดสอบไม่ได้รับยา",
+        "appointment_at": "2027-02-02T03:00:00+00:00",
+        "appointment_id": "2e9f57fe-dec5-4dc5-a71b-9d8f5807b9e5",
+        "location_detail": "ห้องยา",
+        "preparation_notes": null
+      }
+    },
+    {
+      "name": "phms_line_refill_receive",
+      "result": {
+        "ok": true,
+        "items": [
+          {
+            "unit": "tablet",
+            "stock": null,
+            "status": "NOT_RECEIVED",
+            "item_id": "c7b8b67b-6a36-43a3-a56d-a5da7176e747",
+            "quantity": 0,
+            "expense_id": null,
+            "dispense_id": null
+          }
+        ],
+        "duplicate": false,
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "appointment_id": "2e9f57fe-dec5-4dc5-a71b-9d8f5807b9e5"
+      }
+    },
+    {
+      "name": "phms_med_v23_refill_create",
+      "result": {
+        "ok": true,
+        "duplicate": false,
+        "item_count": 2,
+        "appointment_id": "6ee49af6-252f-40bc-9ba7-ae5ab0efba25"
+      }
+    },
+    {
+      "name": "phms_med_v23_refill_detail",
+      "result": {
+        "ok": true,
+        "items": [
+          {
+            "id": "0cba92c4-5759-4eed-92ba-4b9c534f32d2",
+            "notes": null,
+            "status": "PLANNED",
+            "dispense_id": null,
+            "expected_unit": null,
+            "medication_id": "50000000-0000-4000-8000-000000000001",
+            "received_unit": null,
+            "expected_quantity": null,
+            "received_quantity": null,
+            "person_medication_id": "60000000-0000-4000-8000-000000000001"
+          },
+          {
+            "id": "ec6e8d8f-f48f-483b-a0c0-7c9e3936d79f",
+            "notes": null,
+            "status": "PLANNED",
+            "dispense_id": null,
+            "expected_unit": null,
+            "medication_id": "50000000-0000-4000-8000-000000000002",
+            "received_unit": null,
+            "expected_quantity": null,
+            "received_quantity": null,
+            "person_medication_id": "60000000-0000-4000-8000-000000000002"
+          }
+        ],
+        "status": "planned",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "hospital_name": "ทดสอบ rollback",
+        "appointment_at": "2027-03-01T02:00:00+00:00",
+        "appointment_id": "6ee49af6-252f-40bc-9ba7-ae5ab0efba25",
+        "location_detail": "ห้องยา",
+        "preparation_notes": null
+      }
+    },
+    {
+      "name": "phms_med_v23_refill_detail",
+      "result": {
+        "ok": true,
+        "items": [
+          {
+            "id": "0cba92c4-5759-4eed-92ba-4b9c534f32d2",
+            "notes": null,
+            "status": "PLANNED",
+            "dispense_id": null,
+            "expected_unit": null,
+            "medication_id": "50000000-0000-4000-8000-000000000001",
+            "received_unit": null,
+            "expected_quantity": null,
+            "received_quantity": null,
+            "person_medication_id": "60000000-0000-4000-8000-000000000001"
+          },
+          {
+            "id": "ec6e8d8f-f48f-483b-a0c0-7c9e3936d79f",
+            "notes": null,
+            "status": "PLANNED",
+            "dispense_id": null,
+            "expected_unit": null,
+            "medication_id": "50000000-0000-4000-8000-000000000002",
+            "received_unit": null,
+            "expected_quantity": null,
+            "received_quantity": null,
+            "person_medication_id": "60000000-0000-4000-8000-000000000002"
+          }
+        ],
+        "status": "planned",
+        "person_id": "20000000-0000-4000-8000-000000000001",
+        "hospital_name": "ทดสอบ rollback",
+        "appointment_at": "2027-03-01T02:00:00+00:00",
+        "appointment_id": "6ee49af6-252f-40bc-9ba7-ae5ab0efba25",
+        "location_detail": "ห้องยา",
+        "preparation_notes": null
       }
     }
   ]

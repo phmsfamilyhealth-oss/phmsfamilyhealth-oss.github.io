@@ -99,5 +99,40 @@ await test('cancel clears pending reminder jobs',async()=>{
 await test('unlinked LINE identity is denied',async()=>{
  await assert.rejects(()=>rpc('phms_start_line_structured_text_intake',{p_line_user_id:'SYNTHETIC_UNLINKED',p_line_message_id:'unauthorized-test',p_resource:'appointment',p_raw_text:'unauthorized',p_normalized_data:{appointment_at:'2027-01-01T10:00:00+07:00'}}),/line_identity/);
 });
+await db.exec(fs.readFileSync('supabase/migrations/20261023081608_appointment_refill_receipt.sql','utf8'));
+await db.exec(`update private.phms_appointment_release_gate set allowed_actor_ids=array['${uid}'::uuid];
+ insert into medication_stock_pools(id,family_id,assigned_person_id,pool_type,name) values('70000000-0000-4000-8000-000000000001','${family}','${person}','patient_assigned','ตู้ยาสังเคราะห์');
+ insert into medication_stock_locations(id,pool_id,name) values('71000000-0000-4000-8000-000000000001','70000000-0000-4000-8000-000000000001','ชั้นทดสอบ');`);
+await test('actual full/partial/zero receipt atomically links inventory container dispense expense and replay',async()=>{
+ const ref=await rpc('phms_med_v23_refill_create',{p_line_user_id:line,p_key:'synthetic-receipt-plan',p_at:'2027-02-01T10:00:00+07:00',p_hospital:'ทดสอบรับยา',p_location:'ห้องยา',p_items:[1,2].map(i=>({person_medication_id:'60000000-0000-4000-8000-00000000000'+i,expected_quantity:30,expected_unit:'tablet'}))});
+ const d=await rpc('phms_med_v23_refill_detail',{p_line_user_id:line,p_appointment_id:ref.appointment_id});
+ const values=d.items.map((x,i)=>({item_id:x.id,quantity:i?10:30,unit:'tablet',status:i?'PARTIALLY_RECEIVED':'RECEIVED',pool_id:'70000000-0000-4000-8000-000000000001',location_id:'71000000-0000-4000-8000-000000000001',lot:'SYNTH-RECEIPT-'+i,expiry:'2028-01-01',container:'SYNTHETIC-CONTAINER-'+i,cost:i?null:50}));
+ const args={p_line_user_id:line,p_appointment_id:ref.appointment_id,p_key:'synthetic-actual-receipt',p_items:values};
+ const result=await rpc('phms_line_refill_receive',args);assert.equal(result.items.length,2);assert.ok(result.items[0].stock.stock_container_id);assert.ok(result.items[0].expense_id);
+ const balanceBefore=await db.query('select sum(quantity) quantity from medication_inventory_transactions');
+ assert.equal((await rpc('phms_line_refill_receive',args)).duplicate,true);
+ assert.deepEqual((await db.query('select sum(quantity) quantity from medication_inventory_transactions')).rows,balanceBefore.rows);
+ assert.equal((await db.query('select count(*)::int n from medication_dispenses where id=$1',[result.items[0].dispense_id])).rows[0].n,1);
+ await assert.rejects(()=>rpc('phms_line_refill_receive',{...args,p_items:[{...values[0],quantity:90}]}),/idempotency_conflict/);
+ await assert.rejects(()=>rpc('phms_line_refill_receive',{...args,p_key:'synthetic-second-receipt'}),/not_planned/);
+ const after=await rpc('phms_med_v23_refill_detail',{p_line_user_id:line,p_appointment_id:ref.appointment_id});assert.deepEqual(after.items.map(x=>x.received_quantity).sort((a,b)=>a-b),[10,30]);
+ const zeroPlan=await rpc('phms_med_v23_refill_create',{p_line_user_id:line,p_key:'synthetic-zero-plan',p_at:'2027-02-02T10:00:00+07:00',p_hospital:'ทดสอบไม่ได้รับยา',p_location:'ห้องยา',p_items:[{person_medication_id:'60000000-0000-4000-8000-000000000001'}]});
+ const zeroItem=(await rpc('phms_med_v23_refill_detail',{p_line_user_id:line,p_appointment_id:zeroPlan.appointment_id})).items[0];
+ const z=await rpc('phms_line_refill_receive',{p_line_user_id:line,p_appointment_id:zeroPlan.appointment_id,p_key:'synthetic-zero-receipt',p_items:[{item_id:zeroItem.id,quantity:0,unit:'tablet',status:'NOT_RECEIVED'}]});assert.equal(z.items[0].stock,null);assert.equal(z.items[0].dispense_id,null);
+});
+await test('receipt gate authorization and multi-item failure roll back all writes',async()=>{
+ const ref=await rpc('phms_med_v23_refill_create',{p_line_user_id:line,p_key:'synthetic-receipt-rollback',p_at:'2027-03-01T09:00:00+07:00',p_hospital:'ทดสอบ rollback',p_location:'ห้องยา',p_items:[1,2].map(i=>({person_medication_id:'60000000-0000-4000-8000-00000000000'+i}))});
+ const d=await rpc('phms_med_v23_refill_detail',{p_line_user_id:line,p_appointment_id:ref.appointment_id});
+ const items=d.items.map((x,i)=>({item_id:x.id,quantity:5,unit:'tablet',status:'RECEIVED',pool_id:'70000000-0000-4000-8000-000000000001',location_id:i?'71000000-0000-4000-8000-000000000099':'71000000-0000-4000-8000-000000000001',container:'ROLLBACK-SYNTH-'+i,cost:40}));
+ const args={p_line_user_id:line,p_appointment_id:ref.appointment_id,p_key:'synthetic-rollback-key',p_items:items};
+ const before=(await db.query('select (select count(*) from medication_dispenses)::int dispenses,(select count(*) from medication_inventory_transactions)::int tx,(select count(*) from healthcare_expenses)::int expenses')).rows;
+ await assert.rejects(()=>rpc('phms_line_refill_receive',args),/location_not_in_pool/);
+ assert.deepEqual((await db.query('select (select count(*) from medication_dispenses)::int dispenses,(select count(*) from medication_inventory_transactions)::int tx,(select count(*) from healthcare_expenses)::int expenses')).rows,before);
+ assert.ok((await rpc('phms_med_v23_refill_detail',{p_line_user_id:line,p_appointment_id:ref.appointment_id})).items.every(x=>x.status==='PLANNED'));
+ await db.exec('update private.phms_appointment_release_gate set allowed_actor_ids=array[]::uuid[]');
+ await assert.rejects(()=>rpc('phms_line_refill_receive',args),/release_disabled/);
+ await db.exec(`update private.phms_appointment_release_gate set allowed_actor_ids=array['${uid}'::uuid]`);
+ for(const role of ['anon','authenticated'])assert.equal((await db.query("select has_function_privilege($1,'public.phms_line_refill_receive(text,uuid,text,jsonb)','execute') allowed",[role])).rows[0].allowed,false);
+});
 fs.writeFileSync('tests/appointment/evidence/integration-results.json',JSON.stringify({passed,engine:(await db.query('select version()')).rows,network:'disabled: no LINE credentials or dispatcher network',calls},null,2));
 

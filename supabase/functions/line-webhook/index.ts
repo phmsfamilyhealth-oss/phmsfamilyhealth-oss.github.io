@@ -1,4 +1,8 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { handleRefillReceipt } from './refill-receipt.ts';
+import { layoutPersonOverviewPx } from './person-overview-px-layout.ts';
+import { medicationTemplate, medicationScheduleLabel } from './smart-medication.ts';
+import { handleSmartMedication } from './smart-medication-runtime.ts';
+// Standard Deno globals are provided by the Supabase Edge Runtime.
 
 /* PHMS_LINE_PAID_SEND_SAFETY_V1 */
 async function phmsPaidLineSendStatus(u?:string,k?:string){
@@ -658,7 +662,7 @@ function phmsEnforceCardActionLimit(m:any,max=PHMS_MAX_ACTIONS_PER_CARD){
  const preserveAlt=String(m?.altText||'').trim();
  // These screens were explicitly designed earlier and are intentional exceptions
  // to the generic action-density rule.
- if(['🏡 หน้าเริ่มต้นอิ่มอุ่น','⚙️ ตั้งค่าอิ่มอุ่น'].includes(preserveAlt))return m;
+ if(['🏡 หน้าเริ่มต้นอิ่มอุ่น','⚙️ ตั้งค่าอิ่มอุ่น','📅 เพิ่มนัดหมาย','🩺 พบแพทย์ / ติดตามรักษา','🔬 ตรวจสุขภาพ / ตรวจเพิ่มเติม','💊 รับยา / นัดรับยาเดิม','📋 นัดหมายอื่น ๆ'].includes(preserveAlt))return m;
  const root=m?.contents;
  const source:any[]=root?.type==='bubble'?[root]:(root?.type==='carousel'&&Array.isArray(root.contents)?root.contents:[]);
  if(!source.length)return m;
@@ -717,14 +721,14 @@ function phmsCardEstimatedHeight(node:any,depth=0):number{
  if(node.type==='button')return String(node.height)==='sm'?40:52;
  if(node.type==='text'){
   const t=String(node.text||''),font=({xxs:12,xs:13,sm:15,md:17,lg:21,xl:24,xxl:28} as any)[String(node.size||'md')]||17;
-  const lines=t.split('\n').reduce((n:string[],l:string)=>{n.push(l);return n},[]).reduce((n,l)=>n+Math.max(1,Math.ceil(Array.from(l).length/23)),0);
+  const lines=t.split('\n').reduce((n,l)=>n+Math.max(1,Math.ceil(Array.from(l).length/(node.wrap===false?200:17))),0);
   const lineLimit=Number(node.maxLines||0);
   return Math.max(font+4,Math.min(lines,lineLimit>0?lineLimit:99)*(font+5));
  }
  if(node.type!=='box')return 24;
  const kids=Array.isArray(node.contents)?node.contents:[];
  const pad=px(node.paddingAll,0)*2+px(node.paddingTop,0)+px(node.paddingBottom,0);
- const spacing=String(node.spacing||'none')==='md'?10:String(node.spacing||'none')==='sm'?6:String(node.spacing||'none')==='xs'?4:0;
+ const spacing=/px$/.test(String(node.spacing||''))?px(node.spacing,0):String(node.spacing||'none')==='md'?10:String(node.spacing||'none')==='sm'?6:String(node.spacing||'none')==='xs'?4:0;
  const heights=kids.map((x:any)=>phmsCardEstimatedHeight(x,depth+1));
  const content=node.layout==='horizontal'?Math.max(0,...heights):heights.reduce((a:number,b:number)=>a+b,0)+spacing*Math.max(0,heights.length-1);
  return Math.max(px(node.height,0),pad+content);
@@ -751,9 +755,9 @@ function phmsSplitBy593Budget(message:any):any{
    }
   }
   const hasRemainingNotice=(card.body.contents as any[]).some((x:any)=>x?.type==='box'&&Array.isArray(x.contents)&&x.contents.some((v:any)=>v?.type==='separator')&&JSON.stringify(x).includes('📋 ดูอีก '));
-  if(cardTitle&&hasRemainingNotice){result.push(card);continue}
+  if(cardTitle&&hasRemainingNotice&&phmsCardEstimatedHeight(card.header)+phmsCardEstimatedHeight(card.body)+phmsCardEstimatedHeight(card.footer)+32<=593){result.push(card);continue}
   /* PHMS_EXPENSE_OVERVIEW_NO_ORPHAN_PAGE_V1 */
-  if(cardTitle==='💰 ค่าใช้จ่าย'&&card.body.contents.some((x:any)=>x?.type==='text'&&x.text==='สรุปค่าใช้จ่าย')){result.push(card);continue}
+  if(cardTitle==='💰 ค่าใช้จ่าย'&&card.body.contents.some((x:any)=>x?.type==='text'&&x.text==='สรุปค่าใช้จ่าย')&&phmsCardEstimatedHeight(card.header)+phmsCardEstimatedHeight(card.body)+phmsCardEstimatedHeight(card.footer)+32<=593){result.push(card);continue}
   const name=String(card.header?.contents?.find((n:any)=>n?.type==='text')?.text||'');
   if(['💊 ยา','📅 นัดหมาย','🩺 สุขภาพ','📄 เอกสาร','💰 ค่าใช้จ่าย'].includes(name)&&card.footer?.contents?.some((b:any)=>b.type==='button'&&String(b.action?.label||'').includes('ทั้งหมด'))){
     card.header.paddingAll='16px';card.header.spacing='6px';
@@ -765,11 +769,14 @@ function phmsSplitBy593Budget(message:any):any{
     }
     result.push(card);continue;
   }
+  /* PHMS_GLOBAL_593_NO_PREMATURE_SPLIT_V2 */
+  const completePx=phmsCardEstimatedHeight(card.header)+phmsCardEstimatedHeight(card.body)+phmsCardEstimatedHeight(card.footer)+24;
+  if(completePx<=593){result.push(card);continue}
   const body=card.body;
   const headerPx=phmsCardEstimatedHeight(card.header);
   const footerPx=phmsCardEstimatedHeight(card.footer);
   const reserve=headerPx+footerPx+46;
-  const capacity=Math.max(145,Math.min(440,593-reserve));
+  const capacity=Math.max(145,593-reserve);
   const bodyPadding=parseFloat(String(body.paddingAll||'0'))*2||0;
   const blocks=body.contents;
   let current:any[]=[],used=bodyPadding;
@@ -1313,7 +1320,30 @@ function phmsFlexInputPrompt(text:any):boolean{
  return /(?:กรุณา|โปรด|ช่วย)\s*(?:พิมพ์|ส่ง|ตอบ|ระบุ|ใส่|กรอก)|พิมพ์(?:จำนวน|ชื่อ|วันที่|เวลา|เลข|เหตุผล|ค่า|รายละเอียด|ข้อความ|คำตอบ)|(?:ส่ง|แนบ)(?:รูป|ภาพ|ไฟล์)|รอ(?:คำตอบ|การตอบกลับ)/u.test(s)
    && !/^(?:⚠️|❌|เกิดข้อผิดพลาด|ไม่สำเร็จ)/u.test(s);
 }
+/* PHMS_GLOBAL_COPYABLE_TEMPLATE_RULE_V1 — ALL PEOPLE / FAMILIES / CATEGORIES */
+function phmsIsCopyableTemplateText(message:any):boolean{
+ if(message?.type!=='text')return false;
+ const raw=String(message.text||'').replace(/\\n/g,'\n');
+ const lines=raw.split(/\r?\n/).map((v:string)=>v.trim()).filter(Boolean);
+ const fields=lines.filter((v:string)=>/^[^:：=\n]{2,45}\s*[:：=]\s*\S/.test(v));
+ return fields.length>=3&&(fields.length>=Math.ceil(lines.length*.42)||/เทมเพลต|ตัวอย่างเท่านั้น|【เจ้าของนัด】/.test(raw));
+}
+function phmsSeparateTemplateMessage(message:any):any[]{
+ if(message?.type!=='text')return [message];
+ const raw=String(message.text||'').replace(/\\n/g,'\n');
+ const lines=raw.split(/\r?\n/);
+ if(!/^\s*(?:[🧾📝]\s*)?เทมเพลต/u.test(lines[0]||''))return [message];
+ const firstField=lines.findIndex((v:string,i:number)=>i>0&&/^[^:：=\n]{2,45}\s*[:：=]\s*\S/.test(v.trim()));
+ if(firstField<0)return [message];
+ const intro=lines.slice(0,firstField).join('\n').trim();
+ const editable=lines.slice(firstField).join('\n').trim();
+ if(!editable)return [message];
+ return [{type:'text',text:intro+'\n\nคัดลอกข้อความถัดไป แก้ไขข้อมูลตามจริง แล้วส่งกลับในแชตนี้',...(message.quickReply?{quickReply:message.quickReply}:{})},{type:'text',text:editable}];
+}
 function phmsDefaultFlexFromText(message:any):any{
+ // Copyable medication templates must remain a real LINE Text Message.
+ if(phmsIsCopyableTemplateText(message))return message;
+ if(message?.type==='text'&&message.text===medicationTemplate())return message;
  if(message?.type==='text'&&String(message.text||'').startsWith('【เจ้าของนัด】\nนัดของ:'))return message;
  if(!message||message.type!=='text'||phmsFlexInputPrompt(message.text))return message;
  const raw=(String(message.text||'').replace(/\\n/g,'\n')).trim()||'ไม่มีข้อมูล';
@@ -1352,7 +1382,7 @@ async function reply(rt:string,text:string,t:string,q:any[]=[]){
  if(String(text||'').startsWith('⚠️')&&q.length<13)q=[...q,pb('🐞 แจ้งปัญหา','แจ้งปัญหา')];
  if(phmsGroupReplyTokens.has(rt))q=q.filter((item:any)=>!/^(?:↩️|⬅️|🔙|กลับ|ย้อนกลับ)/u.test(String(item?.action?.label||'')));
  if(q.length)m.quickReply={items:q};
- await fetch('https://api.line.me/v2/bot/message/reply',{method:'POST',headers:{Authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({replyToken:rt,messages:[phmsDualActionMessage(phmsGlobalEditPresentation(phmsDefaultFlexFromText(m)))]})})
+ await fetch('https://api.line.me/v2/bot/message/reply',{method:'POST',headers:{Authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({replyToken:rt,messages:phmsSeparateTemplateMessage(m).map((piece:any)=>phmsDualActionMessage(phmsGlobalEditPresentation(phmsDefaultFlexFromText(piece))))})})
 }
 async function replyOrPush(rt:string,to:string,text:string,t:string,q:any[]=[]){
  const m:any={type:'text',text};if(q.length)m.quickReply={items:q};
@@ -1759,8 +1789,81 @@ async function phmsLoadOverflowMenu(u:string,k:string,owner:string,menuId:string
  const rows=await response.json();
  return Array.isArray(rows?.[0]?.payload)?rows[0].payload:null;
 }
+/* PHMS_GLOBAL_CARD_593_SINGLE_AUTHORITY_V1
+ * Final outbound guard. No category/person exception. All Flex bubbles go through
+ * the same conservative height estimator AFTER all presentation mutations.
+ * Preserve text and actions; overflow becomes another carousel bubble.
+ * Never silently drop an over-budget card.
+ */
+const PHMS_GLOBAL_CARD_LAYOUT=Object.freeze({maximumPx:593,safetyPx:35,paddingPx:8,spacingPx:4});
+function phmsGlobal593Final(messages:any[]):void{
+ const cap=PHMS_GLOBAL_CARD_LAYOUT.maximumPx-PHMS_GLOBAL_CARD_LAYOUT.safetyPx;
+ const clone=(n:any)=>n===undefined?undefined:JSON.parse(JSON.stringify(n));
+ const compact=(part:any, kind:string)=>{
+  if(part?.type!=='box')return;
+  delete part.height;delete part.minHeight;delete part.flex;
+  part.paddingAll=kind==='header'?'8px':kind==='body'?'8px':'6px';
+  part.spacing='4px';
+  // Button dimensions belong to the global button contract, not the card compactor.
+ };
+ const measure=(c:any)=>phmsCardEstimatedHeight(c.header)+phmsCardEstimatedHeight(c.body)+phmsCardEstimatedHeight(c.footer)+PHMS_GLOBAL_CARD_LAYOUT.safetyPx;
+ const paginate=(bubble:any):any[]=>{
+  compact(bubble.header,'header');compact(bubble.body,'body');compact(bubble.footer,'footer');
+  // PHMS_GLOBAL_BUTTON_MD_LOCK_V1: retain standard-sized controls regardless of
+  // earlier per-screen layout rules. Only content/padding may be compacted.
+  const lockButtons=(node:any,depth=0):void=>{
+   if(!node||depth>32)return;
+   if(Array.isArray(node)){for(const child of node)lockButtons(child,depth+1);return}
+   if(typeof node!=='object')return;
+   if(node.type==='button'){node.height='md';delete node.minHeight;}
+   if(Array.isArray(node.contents))lockButtons(node.contents,depth+1);
+  };
+  lockButtons(bubble);
+  // Keep all data/actions; only remove unnecessary top-level box stretching.
+  if(measure(bubble)<=PHMS_GLOBAL_CARD_LAYOUT.maximumPx)return [bubble];
+  const body=bubble.body;
+  if(!Array.isArray(body?.contents))throw Error('phms_593_missing_body_contents');
+  const chunks:any[][]=[];let current:any[]=[];
+  const flush=()=>{if(current.length){chunks.push(current);current=[]}};
+  const allowed=(items:any[],footer:any)=>measure({...bubble,body:{...body,contents:items},footer})<=PHMS_GLOBAL_CARD_LAYOUT.maximumPx;
+  for(const entry of body.contents){
+   if(current.length&&!allowed([...current,entry],undefined))flush();
+   if(!allowed([entry],undefined))throw Error('phms_593_indivisible_content_exceeds_budget');
+   current.push(entry);
+  }
+  flush();
+  if(!chunks.length)chunks.push([]);
+  // The last page owns the original footer. Give footer dedicated page if necessary.
+  if(!allowed(chunks[chunks.length-1],bubble.footer)){
+   if(!allowed([],bubble.footer))throw Error('phms_593_footer_exceeds_budget');
+   chunks.push([]);
+  }
+  const out=chunks.map((items,i)=>({...clone(bubble),body:{...clone(body),contents:items},...(i===chunks.length-1?{footer:clone(bubble.footer)}:{footer:undefined})}));
+  for(const item of out)if(measure(item)>PHMS_GLOBAL_CARD_LAYOUT.maximumPx)throw Error('phms_593_post_pagination_over_budget');
+  return out;
+ };
+ for(const message of messages){
+  if(message?.type!=='flex')continue;
+  const root=message.contents;
+  const input=root?.type==='carousel'?root.contents:root?.type==='bubble'?[root]:[];
+  if(!Array.isArray(input)||!input.length)continue;
+  const output:any[]=[];
+  for(const bubble of input){
+   if(bubble?.type!=='bubble')throw Error('phms_593_unexpected_flex_content');
+   output.push(...paginate(bubble));
+  }
+  // LINE carousel supports a maximum of 12 bubbles. Fail closed instead of dropping data.
+  if(output.length>12)throw Error('phms_593_carousel_page_limit');
+  message.contents=output.length===1?output[0]:{type:'carousel',contents:output};
+  for(const bubble of output){
+   const pixels=measure(bubble);
+   if(pixels>PHMS_GLOBAL_CARD_LAYOUT.maximumPx)throw Error('phms_593_final_validation_failed:'+pixels);
+  }
+ }
+}
+
 async function replyMessages(rt:string,t:string,messages:any[]){
- const normalized=messages.map(original=>{ const m=phmsDefaultFlexFromText(original);
+ const normalized=messages.flatMap((original:any)=>phmsSeparateTemplateMessage(original)).map(original=>{ const m=phmsDefaultFlexFromText(original);
   const x=phmsDualActionMessage(phmsCanonicalFiveAllHeaders(phmsFiveCategoryFirstCardLayout(phmsUnifyFiveListHeadings(phmsStandardizeFiveCategoryLists(phmsGlobalEditPresentation(m))))));
   // PHMS_GLOBAL_CONTEXT_BACK_V2: use actual destination and owner, across existing/new Flex cards.
   if(x?.type==='flex'){
@@ -1954,7 +2057,7 @@ async function replyMessages(rt:string,t:string,messages:any[]){
     footer.paddingTop='8px';
    }
   }
-  phmsApplyCategoryThemeToFlex(m.contents);phmsCardHeaderType(m);phmsEnforceHeaderHeight(m);phmsOwnerSummaryHeaderContract(m);phmsPersonHeaderCanonical(m);phmsApplyFiveCategorySecondaryBackground(m);phmsEnforcePersonOverviewCenterPortrait(m);phmsRoundFlexImages(m.contents);phmsGlobalCarouselCounter(m);phmsLineFlexSchemaGuard(m)
+  phmsApplyCategoryThemeToFlex(m.contents);phmsCardHeaderType(m);phmsEnforceHeaderHeight(m);phmsOwnerSummaryHeaderContract(m);phmsPersonHeaderCanonical(m);phmsApplyFiveCategorySecondaryBackground(m);phmsEnforcePersonOverviewCenterPortrait(m);layoutPersonOverviewPx(m,phmsCardEstimatedHeight);phmsRoundFlexImages(m.contents);phmsGlobalCarouselCounter(m);phmsLineFlexSchemaGuard(m)
  }
 
  /* PHMS_FIVE_CATEGORY_CHEVRON_SECONDARY_FONT_GLOBAL_V2_7
@@ -1995,7 +2098,7 @@ async function replyMessages(rt:string,t:string,messages:any[]){
     if(node.type==='text'&&typeof node.text==='string'){
      const label=node.text.trim();
      if(/›\s*$/u.test(label)&&!/^(?:⚠️|❗|🔴|🚨)/u.test(label)){
-      node.color=colors.secondary;node.weight='bold';
+      node.color=/นัดถัดไป/u.test(label)?PHMS_FIVE_CATEGORY_SECONDARY_FONT['📅 นัดหมาย']:/สุขภาพล่าสุด/u.test(label)?PHMS_FIVE_CATEGORY_SECONDARY_FONT['🩺 สุขภาพ']:colors.secondary;node.weight='bold';
      }
     }
     for(const [k,v] of Object.entries(node))if(k!=='action'&&k!=='quickReply'&&v&&typeof v==='object')visit(v,depth+1);
@@ -2241,7 +2344,10 @@ async function replyMessages(rt:string,t:string,messages:any[]){
   const backAction=(action:any):boolean=>{
    if(!action)return false;
    const command=String(action.data??action.text??'').trim();
-   // Pagination controls are not parent navigation; prefer a semantic parent command.\n   if(/^(?:รายการสุขภาพหน้า|รายการนัด|รายการยา|รายการเอกสารหน้า|รายการค่าใช้จ่ายหน้า)\\s+\\d+/u.test(command))return false;\n   if(/^(?:⬅|➡)/u.test(String(action.label||''))&&/(?:ก่อนหน้า|ถัดไป)/u.test(String(action.label||'')))return false;\n   return command==='กลับภาพรวมบุคคล'||phmsIsBackAction(action)||/^(?:↪|↩|🔙)/u.test(String(action.label||''));
+   // Pagination controls are not parent navigation; prefer a semantic parent command.
+   if(/^(?:รายการสุขภาพหน้า|รายการนัด|รายการยา|รายการเอกสารหน้า|รายการค่าใช้จ่ายหน้า)\s+\d+/u.test(command))return false;
+   if(/^(?:⬅|➡)/u.test(String(action.label||''))&&/(?:ก่อนหน้า|ถัดไป)/u.test(String(action.label||'')))return false;
+   return command==='กลับภาพรวมบุคคล'||phmsIsBackAction(action)||/^(?:↪|↩|🔙)/u.test(String(action.label||''));
   };
   const removeBack=(node:any,level=0):void=>{
    if(level>20||!node||!Array.isArray(node.contents))return;
@@ -2323,7 +2429,7 @@ async function replyMessages(rt:string,t:string,messages:any[]){
      }else if(node.type==='text'){
       const txt=String(node.text||'').trim();
       if(node.weight==='bold'&&!/(?:⚠|❗|ฉุกเฉิน|ผิดปกติ|สำเร็จ|ล้มเหลว|ปฏิเสธ|ยกเลิก)/u.test(txt)){
-       if(/^(?:รายการยาล่าสุด|นัดถัดไป|สุขภาพล่าสุด|เอกสารล่าสุด|ค่าใช้จ่ายล่าสุด|💊|📅|🩺|📄|💰)/u.test(txt))node.color=p.primary_foreground_hex;
+       if(/(?:นัดถัดไป|สุขภาพล่าสุด)/u.test(txt) && /^(?:📅|🩺|นัดถัดไป|สุขภาพล่าสุด)/u.test(txt)){const categoryKey=/นัดถัดไป/u.test(txt)?'appointments':'health';node.color=(palette.get(categoryKey)||p).primary_foreground_hex;}else if(/^(?:รายการยาล่าสุด|เอกสารล่าสุด|ค่าใช้จ่ายล่าสุด|💊|📅|🩺|📄|💰)/u.test(txt))node.color=p.primary_foreground_hex;
       }
      }else if(node.type==='box'&&node.backgroundColor&&node.layout){
       const bg=String(node.backgroundColor).toUpperCase();
@@ -2445,8 +2551,8 @@ async function replyMessages(rt:string,t:string,messages:any[]){
    };
    const original=footer.contents;
    const overflow=original.filter(isOverflow);
-   const back=original.filter(n=>!isOverflow(n)&&isParent(n));
-   const normal=original.filter(n=>!isOverflow(n)&&!isParent(n));
+   const back=original.filter((n:any)=>!isOverflow(n)&&isParent(n));
+   const normal=original.filter((n:any)=>!isOverflow(n)&&!isParent(n));
    if(i===0)footer.contents=[...normal,...overflow,...back.slice(0,1)];
    else footer.contents=[...normal,...overflow];
    if(i===0&&back.length>1)console.warn('phms_nav_duplicate_back_removed',String(msg.altText||'').slice(0,70),back.length);
@@ -2710,6 +2816,22 @@ async function replyMessages(rt:string,t:string,messages:any[]){
    walk(bubble.body);
   }
  }
+ /* PHMS_FAMILY_SUBCATEGORY_HEADING_COLOR_FINAL_V2: heading-only, whitespace-tolerant */
+ for(const message of outbound){
+  if(message?.type!=='flex')continue;
+  const fixHeading=(node:any,depth=0):void=>{
+   if(!node||depth>36||typeof node!=='object')return;
+   if(Array.isArray(node)){for(const item of node)fixHeading(item,depth+1);return}
+   if(node.type==='text'&&node.weight==='bold'){
+    const label=String(node.text||'').replace(/[\uFE0E\uFE0F]/g,'').replace(/\s+/g,'').replace(/[›>]/g,'');
+    if(label==='📅นัดถัดไป'||label==='นัดถัดไป')node.color=PHMS_FIVE_CATEGORY_SECONDARY_FONT['📅 นัดหมาย'];
+    else if(label==='🩺สุขภาพล่าสุด'||label==='สุขภาพล่าสุด')node.color=PHMS_FIVE_CATEGORY_SECONDARY_FONT['🩺 สุขภาพ'];
+   }
+   if(Array.isArray(node.contents))fixHeading(node.contents,depth+1);
+  };
+  fixHeading(message.contents);
+ }
+ phmsGlobal593Final(outbound);
  const response=await fetch('https://api.line.me/v2/bot/message/reply',{method:'POST',headers:{Authorization:'Bearer '+t,'content-type':'application/json'},body:JSON.stringify({replyToken:rt,messages:outbound})});
  if(outbound.some((m:any)=>m?.type==='flex'&&['🏠 ครอบครัว','⚙️ ตั้งค่าบ้าน','⚙️ จัดการบ้าน','👥 บุคคลในครอบครัว'].includes(String(m.altText||''))))console.log('phms_family_reply_http_status',response.status);
  if(!response.ok){
@@ -2812,7 +2934,7 @@ async function phmsBlockLimitedAppointmentDetail(rt:string,u:string,k:string,id:
  }catch{return false}
 }
 
-const hint='\n\n💡 กดปุ่มด้านล่างได้เลย หรือครั้งต่อไปกดจาก “เมนูอิ่มอุ่น” ก็ได้';const homeQ=[act('💊 ยา','ยา'),act('📅 นัด','นัดหมาย'),act('🩺 สุขภาพ','สุขภาพ'),act('📄 เอกสาร','เอกสาร'),act('📁 รูปและเอกสาร','รูปและเอกสาร'),act('👨‍👩‍👧 ครอบครัว','ครอบครัว'),act('👤 ข้อมูลของฉัน','ใช้ข้อมูลของฉัน')];async function state(u:string,k:string,id:string,key:string,data:any={},ttlMinutes?:number){await rpc(u,k,'phms_set_line_conversation_state',{p_line_user_id:id,p_state_key:key,p_state_data:data,p_ttl_minutes:ttlMinutes??(/^(?:crud_add_(?:medication|appointment|health)|phms_add_(?:menu|field|review))$/.test(key)?1440:30)})}async function clear(u:string,k:string,id:string){try{await rpc(u,k,'phms_clear_line_conversation_state',{p_line_user_id:id})}catch{}}async function getState(u:string,k:string,id:string){try{return one(await rpc(u,k,'phms_get_line_conversation_state',{p_line_user_id:id}))}catch{return null}}
+const hint='\n\n💡 กดปุ่มด้านล่างได้เลย หรือครั้งต่อไปกดจาก “เมนูอิ่มอุ่น” ก็ได้';const homeQ=[act('💊 ยา','ยา'),act('📅 นัด','นัดหมาย'),act('🩺 สุขภาพ','สุขภาพ'),act('📄 เอกสาร','เอกสาร'),act('📁 รูปและเอกสาร','รูปและเอกสาร'),act('👨‍👩‍👧 ครอบครัว','ครอบครัว'),act('👤 ข้อมูลของฉัน','ใช้ข้อมูลของฉัน')];async function state(u:string,k:string,id:string,key:string,data:any={},ttlMinutes?:number){await rpc(u,k,'phms_set_line_conversation_state',{p_line_user_id:id,p_state_key:key,p_state_data:data,p_ttl_minutes:ttlMinutes??(/^(?:smart_medication(?:_field)?|crud_add_(?:medication|appointment|health)|phms_add_(?:menu|field|review))$/.test(key)?1440:30)})}async function clear(u:string,k:string,id:string){try{await rpc(u,k,'phms_clear_line_conversation_state',{p_line_user_id:id})}catch{}}async function getState(u:string,k:string,id:string){try{return one(await rpc(u,k,'phms_get_line_conversation_state',{p_line_user_id:id}))}catch{return null}}
 function phmsYesNo(v:any){
  const s=String(v||'').trim().toLowerCase();
  if(['ใช่','yes','y','true','1','เปิด','ให้','รับ'].includes(s))return true;
@@ -3213,7 +3335,7 @@ async function replyHelpCard(rt:string,u:string,k:string,id:string,t:string){
     {type:'text',text:'👥 คนในบ้าน — เลือกคนเพื่อดูข้อมูลตามสิทธิ์',size:'sm',color:'#344054',wrap:true},
     ...(canManage?[{type:'text',text:'⚙️ จัดการข้อมูลและบ้าน — เพิ่ม แก้ไข และตั้งค่าตามสิทธิ์',size:'sm',color:'#344054',wrap:true}]:[])
    ]},
-   footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'12px',contents:[
+   footer:{type:'box',layout:'vertical',spacing:'xs',paddingAll:'8px',contents:[
     {type:'button',height:'sm',style:'primary',color:'#3977A6',action:{type:'postback',label:linked?'🏡 หน้าเริ่มต้น':'🔐 เชื่อมบัญชี',data:linked?'กลับหน้าเริ่มต้น':'เชื่อมบัญชีนี้เลย'}}
    ]}
   },
@@ -3681,8 +3803,8 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
  let identityEnd=0;
  let statsEnd=0;
  const dense=Boolean(p?.next_appointment&&p?.latest_health);
- const sectionGap=dense?'4px':'8px';
- const cardInset=dense?'4px':'6px';
+ const sectionGap='4px';
+ const cardInset='4px';
  if(can){
   if(p?.birth_info?.age!==null&&p?.birth_info?.age!==undefined){
    body.push({type:'text',text:'🎈 อายุ '+String(p.birth_info.age)+' ปี',size:'md',color:'#344054',wrap:true,margin:'sm'})
@@ -3704,20 +3826,23 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
    body.push({type:'text',text:'ยังไม่มีข้อมูลที่บันทึก',size:'md',color:'#475569',wrap:true,margin:'xs'});
   }
   statsEnd=body.length;
+  // PHMS_FAMILY_FIXED_PREVIEW_SLOTS_V2: shared placement for all persons.
+  var familyPreviewStart=body.length;
   // Limit the preview to ONE upcoming appointment and ONE latest health entry.
   if(p?.next_appointment){
    const ap=p.next_appointment;
    const apTitle=String(ap?.title||'นัดหมาย').replace(/\s+/g,' ').trim();
    if(body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
    const familyHasBothPreviews=Boolean(p?.next_appointment&&p?.latest_health); // PHMS_FAMILY_DYNAMIC_PREVIEW_LINES_V2
-   const apBlocks:any[]=[{type:'text',text:'📅 นัดถัดไป  ›',weight:'bold',size:'md',color:PHMS_FIVE_CATEGORY_SECONDARY_FONT['📅 นัดหมาย']},{type:'text',text:apTitle||'นัดหมาย',size:'md',wrap:true,maxLines:familyHasBothPreviews?1:2,color:'#344054'}];
-   if(ap?.appointment_at)apBlocks.push({type:'text',text:crudDate(ap.appointment_at),size:'md',wrap:true,maxLines:1,color:'#475569'});
+   const apBlocks:any[]=[{type:'text',text:'📅 นัดถัดไป  ›',weight:'bold',size:'md',color:PHMS_FIVE_CATEGORY_SECONDARY_FONT['📅 นัดหมาย']},{type:'text',text:apTitle||'นัดหมาย',size:'md',wrap:true,maxLines:2,color:'#344054'}];
+   if(ap?.appointment_at){const dateTime=crudDate(ap.appointment_at);const natural=appointmentTimeOnlyLabel(ap.appointment_at).match(/\(([^)]+)\)$/)?.[1];apBlocks.push({type:'text',text:dateTime+(natural?' ('+natural+')':''),size:'md',wrap:true,maxLines:2,color:'#475569'});} // PHMS_FAMILY_APPOINTMENT_THAI_TIME_V1
    // FAMILY_APPOINTMENT_GENERIC_LINK_V1: always link to the current appointment code of THIS card's person; no hardcoded person, title, or date.
    const apCode=String(ap?.code||ap?.record_code||ap?.appointment_code||'');
    const personSelection=String(p?.selection_code||p?.person_code||'');
    const apCommand=/^[a-f0-9-]{12}$/i.test(apCode)?'เปิดนัดครอบครัว '+personSelection+' '+apCode:'เปิดนัดครอบครัว '+personSelection+' '+encodeURIComponent(apTitle.slice(0,24))+' '+encodeURIComponent(String(ap?.appointment_at||'').slice(0,25));
    body.push({type:'box',layout:'vertical',spacing:'4px',margin:sectionGap,paddingAll:cardInset,cornerRadius:'8px',contents:apBlocks,...(/^[a-f0-9-]{12}$/i.test(apCode)||/^[a-f0-9]{12}$/i.test(personSelection)?{action:{type:'postback',label:'📅 ดูนัด',data:apCommand}}:{})});
   }
+  var familyAppointmentEnd=body.length;
   if(p?.latest_health){
    const h=p.latest_health;
    const type=phmsHealthMeasurementCardTitle(h).replace(/\s+/g,' ').trim();
@@ -3731,20 +3856,21 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
    const healthPersonSelection=String(p?.selection_code||p?.person_code||'');
    const healthCommand=/^[a-f0-9]{12}$/i.test(healthCode)?'ดูสุขภาพ '+healthCode:'เปิดสุขภาพครอบครัว '+healthPersonSelection+' '+encodeURIComponent(summary.slice(0,22));
    // Adaptive 2-3 lines: preserve legibility when appointment title is unusually long.
-   const healthPreviewLines=(dense && String(p?.next_appointment?.title||'').trim().length>55)?2:3;
+   const healthPreviewLines=3; /* PHMS_FAMILY_HEALTH_PREVIEW_TWO_LINES_GLOBAL_V1 */
    const healthBlocks:any[]=[{type:'text',text:'🩺 สุขภาพล่าสุด  ›',weight:'bold',size:'md',color:PHMS_FIVE_CATEGORY_SECONDARY_FONT['🩺 สุขภาพ']},{type:'text',text:summary.replace(/\s+/g,' ')||'มีข้อมูลสุขภาพที่บันทึกไว้',size:'md',wrap:true,maxLines:healthPreviewLines,color:'#263649'}];
    body.push({type:'box',layout:'vertical',spacing:'4px',margin:sectionGap,paddingAll:cardInset,cornerRadius:'8px',contents:healthBlocks,...(/^[a-f0-9]{12}$/i.test(healthCode)||/^[a-f0-9]{12}$/i.test(healthPersonSelection)?{action:{type:'postback',label:'🩺 ดูสุขภาพ',data:healthCommand}}:{})});
   }
  }else{
   body.push({type:'text',text:'🔒 ยังไม่มีสิทธิ์ดูรายละเอียดของคนนี้',size:'md',wrap:true,color:'#475569',margin:'sm'})
  }
+ const familyHealthEnd=body.length;
  // Group content at semantic boundaries, not individual rows: distribute leftover carousel height between groups.
  const identityLimit=can?identityEnd:0;
  const statsLimit=can?statsEnd:0;
  const groups:any[]=can?[
-  ...(identityLimit>0?[{type:'box',layout:'vertical',spacing:'4px',contents:body.slice(0,identityLimit)}]:[]),
-  ...(statsLimit>identityLimit?[{type:'box',layout:'vertical',spacing:'4px',contents:body.slice(identityLimit,statsLimit)}]:[]),
-  ...(body.length>statsLimit?[{type:'box',layout:'vertical',spacing:'8px',contents:body.slice(statsLimit)}]:[])
+  ...(identityLimit>0?[{type:'box',layout:'vertical',spacing:'2px',contents:body.slice(0,identityLimit)}]:[]),
+  ...(statsLimit>identityLimit?[{type:'box',layout:'vertical',spacing:'2px',contents:body.slice(identityLimit,statsLimit)}]:[]),
+  ...((p?.next_appointment||p?.latest_health)?[{type:'box',layout:'vertical',spacing:'4px',contents:body.slice(statsLimit,familyHealthEnd)}]:[])
  ]:body;
  const personTheme=phmsPersonButtonTheme(pref?.card_color||phmsPersonCardColor(personCode));
  const footer:any[]=[];
@@ -3758,15 +3884,15 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
  }
  const photo=(can&&photoUrl)?{type:'image',url:String(photoUrl),size:'56px',aspectRatio:'1:1',aspectMode:'cover',flex:0}:null;
  return {type:'bubble',size:'kilo',
-  header:{type:'box',layout:'horizontal',backgroundColor:phmsReadablePersonHeaderColor(pref?.card_color||phmsPersonCardColor(personCode)),paddingAll:'14px',spacing:'md',alignItems:'center',contents:[
+  header:{type:'box',layout:'horizontal',backgroundColor:phmsReadablePersonHeaderColor(pref?.card_color||phmsPersonCardColor(personCode)),paddingAll:'10px',spacing:'md',alignItems:'center',contents:[
    {type:'box',layout:'vertical',flex:1,spacing:'xs',contents:[
     {type:'text',text:(pref?.is_pinned&&!p?.is_self?'📌 '+String(p?.display_name||'บุคคล'):phmsPersonDisplayName(p?.display_name)),size:'lg',weight:'bold',wrap:false,maxLines:1,color:'#263649'},
     {type:'text',text:(rel?rel+' · ':'')+String(opts?.position||1)+'/'+String(opts?.total||1),size:'sm',wrap:false,maxLines:1,color:'#475569'}
    ]},
    ...(photo?[photo]:[])
   ]},
-  body:{type:'box',layout:'vertical',paddingAll:'12px',spacing:'8px',justifyContent:groups.length>1?'space-between':'flex-start',contents:groups}, // PHMS_FAMILY_FIXED_BODY_HEIGHT_V1
-  ...(footer.length?{footer:{type:'box',layout:'vertical',paddingAll:'12px',spacing:'sm',contents:footer.slice(0,6)}}:{})
+  body:{type:'box',layout:'vertical',paddingAll:'8px',spacing:'4px',justifyContent:'flex-start',contents:groups}, // PHMS_FAMILY_FIXED_BODY_HEIGHT_V1
+  ...(footer.length?{footer:{type:'box',layout:'vertical',paddingAll:'8px',spacing:'4px',contents:footer.slice(0,6)}}:{})
  }
 }
 async function familyActorAccessContext(u:string,k:string,id:string){
@@ -6070,15 +6196,15 @@ function phmsApptOption(label:string,command:string,explain:string){
  // Elder-friendly UI: a short action label with a separate plain-language hint.
  return {type:'box',layout:'vertical',spacing:'xs',contents:[
   {type:'button',style:'primary',height:'sm',action:{type:'postback',label,data:command,displayText:label}},
-  {type:'text',text:explain,wrap:true,size:'xs',color:'#667085',margin:'xs'}
+  ...(explain?[{type:'text',text:explain,wrap:false,size:'xs',color:'#667085',margin:'none',maxLines:1}]:[])
  ]}
 }
 function phmsApptPickerCard(title:string,sub:string,options:any[],back=false,backData='เลือกประเภทนัดใหม่'){
  return {type:'flex',altText:title,contents:{type:'bubble',size:'kilo',
-  header:{type:'box',layout:'vertical',paddingAll:'14px',backgroundColor:PHMS_CATEGORY_THEME.appointments.background,contents:[
+  header:{type:'box',layout:'vertical',paddingAll:'10px',backgroundColor:PHMS_CATEGORY_THEME.appointments.background,contents:[
    {type:'text',text:title,size:'lg',weight:'bold',color:'#34465D',wrap:true},
    {type:'text',text:sub,size:'sm',color:'#667085',wrap:true,margin:'sm'}]},
-  body:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'12px',contents:options},
+  body:{type:'box',layout:'vertical',spacing:'xs',paddingAll:'8px',contents:options},
   footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'12px',contents:[
    ...(back?[{type:'button',style:'primary',action:{type:'postback',label:'↩️ ย้อนกลับ',data:backData}}]:[]),
    {type:'button',style:'primary',action:{type:'postback',label:'❌ ยกเลิกเพิ่มนัด',data:'ยกเลิกเพิ่มนัด'}}]}}}
@@ -6094,40 +6220,39 @@ async function appointmentActivePersonName(u:string,k:string,id:string):Promise<
   return 'บุคคลที่เลือก';
  }
 }
+/* PHMS_APPOINTMENT_CREATION_GLOBAL_4_GROUP_RULE_V1
+  One bubble, four broad groups, no pagination; existing appointment_type codes remain unchanged.
+  Navigation buttons are an explicit exception to the generic four-action overflow splitter.
+*/
 async function replyAppointmentTypePicker(rt:string,u:string,k:string,id:string,t:string,personName:string){
- const hist=await phmsAppointmentHistoryPresence(u,k,id);
- let canReschedule=false;
- if(hist.hasAny){
-  try{
-   const access=await appointmentEffectiveAccess(u,k,id);
-   canReschedule=access.update===true;
-   if(!canReschedule){
-    const ov=one(await rpc(u,k,'phms_line_appointment_overview',{p_line_user_id:id,p_upcoming_limit:8,p_history_limit:1}))||{};
-    for(const x of [...(Array.isArray(ov.upcoming)?ov.upcoming:[]),...(Array.isArray(ov.overdue)?ov.overdue:[])]){
-     if(!x?.code)continue;
-     const c=one(await rpc(u,k,'phms_line_record_capabilities',{p_line_user_id:id,p_resource:'appointment',p_record_code:String(x.code)}))||{};
-     if(c.can_update===true){canReschedule=true;break}
-    }
-   }
-  }catch(err){console.error('reschedule_picker_permission',String(err))}
- }
  const items=[
-  phmsApptOption('🩺 พบแพทย์ / รักษา','เลือกหมวดนัด ใหม่','พบหมอครั้งแรก หรือทำหัตถการ'),
-  phmsApptOption('🔁 ติดตามรักษา','เลือกประเภทนัด follow_up','ติดตามอาการ โรคประจำตัว หรือฟังผล'),
-  phmsApptOption('🔬 ตรวจเพิ่มเติม','เลือกประเภทนัด investigation','ตรวจได้แม้ยังไม่มีนัดต้นทางในระบบ'),
-  phmsApptOption('💊 รับยาเดิม','phms_refill_begin','เลือกยาจากระบบยาเดิม'),
-  phmsApptOption('💉 ตรวจ / วัคซีน','เลือกหมวดนัด ประจำ','ตรวจสุขภาพหรือฉีดวัคซีน'),
-  phmsApptOption('📤 ส่งต่อ','เลือกประเภทนัด referral','มีนัดเดิมหรือใบส่งต่อจากภายนอก'),
-  phmsApptOption('🚶 Walk-in','เลือกวอล์กอิน','วางแผนจะไป หรือบันทึกที่ไปมาแล้ว'),
-  phmsApptOption('📋 อื่น ๆ','เลือกประเภทนัด other','บริการอื่นตามที่ระบุจริง')
+  phmsApptOption('🩺 พบหมอ','เลือกหมวดนัด รักษา','ครั้งแรก / ติดตามรักษา'),
+  phmsApptOption('🔬 ตรวจสุขภาพ','เลือกหมวดนัด ตรวจ','ตรวจเพิ่มเติม / ฉีดวัคซีน'),
+  phmsApptOption('💊 รับยา','เลือกหมวดนัด ยา','รับยาเดิม / รับยาต่อเนื่อง'),
+  phmsApptOption('📋 นัดอื่น ๆ','เลือกหมวดนัด อื่น','ส่งต่อ / Walk-in / อื่น ๆ')
  ];
- // No unactionable status warning in primary picker.
- await replyMessages(rt,t,[{type:'flex',altText:'🏷️ เลือกแบบนัด',contents:{type:'carousel',contents:[0,4].map((i:number)=>phmsApptPickerCard('🏷️ นัดเพื่ออะไร','นัดของ '+String(personName||'ผู้ใช้')+' • '+(i/4+1)+'/2',items.slice(i,i+4),true,'กลับยืนยันเจ้าของนัด').contents)}}])
+ // Keep 4 primary choices and 2 navigation actions in exactly one LINE bubble.
+ await replyMessages(rt,t,[{...phmsApptPickerCard('📅 เพิ่มนัดหมาย','นัดของ '+String(personName||'ผู้ใช้')+' • ขั้นตอนที่ 1/8',items,true,'กลับยืนยันเจ้าของนัด'),altText:'📅 เพิ่มนัดหมาย'}])
 }
 async function replyAppointmentTypeSubPicker(rt:string,u:string,k:string,id:string,t:string,group:string){
  const hist=await phmsAppointmentHistoryPresence(u,k,id);
  let title='🏷️ เลือกประเภทนัด',items:any[]=[];
- if(group==='ใหม่'){title='🆕 นัดใหม่';items=[
+ if(group==='รักษา'){title='🩺 พบแพทย์ / ติดตามรักษา';items=[
+ phmsApptOption('🆕 พบแพทย์ครั้งแรก','เลือกประเภทนัด new_case',''),
+ phmsApptOption('🔁 ติดตามการรักษา','เลือกประเภทนัด follow_up',''),
+ phmsApptOption('🩺 ติดตามโรคประจำตัว','เลือกติดตามโรคประจำตัว',''),
+ phmsApptOption('🩹 รักษา / หัตถการ','เลือกประเภทนัด procedure','')];
+ }else if(group==='ตรวจ'){title='🔬 ตรวจสุขภาพ / ตรวจเพิ่มเติม';items=[
+ phmsApptOption('🔬 ตรวจเพิ่มเติม','เลือกประเภทนัด investigation',''),
+ phmsApptOption('🩺 ตรวจสุขภาพ','เลือกประเภทนัด checkup',''),
+ phmsApptOption('💉 ฉีดวัคซีน','เลือกประเภทนัด vaccination','')];
+ }else if(group==='ยา'){title='💊 รับยา / นัดรับยาเดิม';items=[
+ phmsApptOption('💊 นัดรับยาเดิม','phms_refill_begin','')];
+ }else if(group==='อื่น'){title='📋 นัดหมายอื่น ๆ';items=[
+ phmsApptOption('📤 ส่งต่อ','เลือกประเภทนัด referral',''),
+ phmsApptOption('🚶 Walk-in','เลือกวอล์กอิน',''),
+ phmsApptOption('📋 นัดหมายอื่น','เลือกประเภทนัด other','')];
+ }else if(group==='ใหม่'){title='🆕 นัดใหม่';items=[
   phmsApptOption('🆕 พบหมอครั้งแรก','เลือกประเภทนัด new_case','เริ่มรักษาเรื่องนี้เป็นครั้งแรก'),
   phmsApptOption('🩹 รักษา/หัตถการ','เลือกประเภทนัด procedure','ทำแผล ผ่าตัด หรือหัตถการ'),
 ];
@@ -6139,13 +6264,13 @@ async function replyAppointmentTypeSubPicker(rt:string,u:string,k:string,id:stri
  }else if(group==='ประจำ'){title='🩺 ตรวจสุขภาพ/วัคซีน';items=[
   phmsApptOption('🩺 ตรวจสุขภาพ','เลือกประเภทนัด checkup','ตรวจสุขภาพตามรอบ'),
   phmsApptOption('💉 ฉีดวัคซีน','เลือกประเภทนัด vaccination','ฉีดวัคซีนตามกำหนด')];
- }else if(group==='อื่น'){title='📋 นัดแบบอื่น';items=[
+ }else if(group==='อื่นเดิม'){title='📋 นัดแบบอื่น';items=[
   phmsApptOption('📄 ส่งต่อภายนอก','เลือกส่งต่อภายนอก','มีใบส่งตัว แต่ยังไม่มีนัดต้นทางในระบบ'),
   phmsApptOption('📋 บริการอื่น','เลือกประเภทนัด other','บริการที่ไม่ตรงกับหมวดอื่น')];
  }else{
   await replyAppointmentTypePicker(rt,u,k,id,t,await appointmentActivePersonName(u,k,id));return
  }
- await replyMessages(rt,t,[phmsApptPickerCard(title,'เลือกได้เลย',items,true)])
+ await replyMessages(rt,t,[phmsApptPickerCard(title,'ขั้นตอนที่ 2/8 • เลือกประเภทย่อย',items,true)])
 }
 async function replyAppointmentWalkinPicker(rt:string,t:string){
  await replyMessages(rt,t,[phmsApptPickerCard('🚶 ไปแบบ Walk-in','ไปโดยไม่จองคิวล่วงหน้า',[
@@ -6526,21 +6651,8 @@ function medicationEditTemplateText(p:any){
   'หมายเหตุ: '+String(p?.notes||'-')
  ].join('\n')
 }
-function medicationAddTemplateText(){
- return [
-  'ชื่อยา:',
-  'ความแรง:',
-  'รูปแบบยา:',
-  'ครั้งละ:',
-  'ความถี่:',
-  'เวลา:',
-  'สัมพันธ์อาหาร:',
-  'วิธีใช้:',
-  'เริ่มใช้:',
-  'อาการ:',
-  'หมายเหตุ:'
- ].join('\n')
-}
+function medicationAddTemplateText(){return medicationTemplate()}
+
 function medicationSingleFieldPatch(field:string,input:string,current:any){
  const raw=String(input||'').trim();
  if(!raw)throw new Error('medication_edit_value_required');
@@ -6614,6 +6726,7 @@ function medicationDoseLabel(p:any){
  return [p?.dose_value,p?.dose_unit].filter(x=>x!==undefined&&x!==null&&x!=='').join(' ')||'—'
 }
 function medicationFrequencyLabel(p:any){
+ if(p?.schedule_kind&&p.schedule_kind!=='legacy')return medicationScheduleLabel(p);
  if(p?.frequency_type==='times_per_day'&&p?.frequency_value)return 'วันละ '+p.frequency_value+' ครั้ง';
  if(p?.frequency_type==='interval'&&p?.frequency_value)return 'ทุก '+p.frequency_value+' ชั่วโมง';
  return '—'
@@ -6690,7 +6803,26 @@ async function loadMedicationDraftByCode(u:string,k:string,id:string,sourceCode:
  const review=one(await rpc(u,k,'phms_get_line_intake_review_source',{p_line_user_id:id,p_source_id:String(rows[0].id)}));
  const cand=Array.isArray(review?.candidates)?review.candidates.find((x:any)=>x?.candidate_type==='medication'):null;
  if(!cand)throw new Error('medication_candidate_not_found');
- return {source_id:String(rows[0].id),source_code:String(review?.source_code||codeRef),raw_text:String(rows[0].raw_text||review?.raw_text||''),partial:{...(cand.normalized_data||{})},person_name:String(review?.person_name||'')}
+ return {person_id:String(review?.person_id||''),session_status:String(review?.session_status||''),source_id:String(rows[0].id),source_code:String(review?.source_code||codeRef),raw_text:String(rows[0].raw_text||review?.raw_text||''),partial:{...(cand.normalized_data||{})},person_name:String(review?.person_name||'')}
+}
+async function medicationNameOptions(u:string,k:string,key:string,values:any):Promise<string[]>{
+ const fallback=key==='brand_name'?['ไม่ทราบ','ไม่มี']:['Gabapentin','Ergocalciferol (Vitamin D2)','Paracetamol'];
+ try{
+  const column=key==='brand_name'?'brand_name':'generic_name';
+  const filter=key==='brand_name'&&values?.generic_name?'&generic_name=eq.'+encodeURIComponent(values.generic_name):'';
+  const r=await fetch(u+'/rest/v1/medication_master?deleted_at=is.null&status=eq.active&select='+column+filter+'&limit=100&order='+column+'.asc',{headers:H(k)});
+  if(!r.ok)return fallback;const rows=await r.json();
+  return [...new Set([...(Array.isArray(rows)?rows:[]).map((x:any)=>String(x?.[column]||'').trim()).filter(Boolean),...fallback])];
+ }catch{return fallback}
+}
+async function smartMedicationEnabled(u:string,k:string,id:string){
+ try{
+  const actor=one(await rpc(u,k,'phms_resolve_line_command_context',{p_line_user_id:id,p_resource:'medications',p_action:'create',p_require_person:true,p_required_scope:'any'}));
+  if(actor?.permission_granted!==true||actor?.context_ready!==true)return false;
+  const r=await fetch(u+'/rest/v1/phms_runtime_environment?singleton=eq.true&select=medication_smart_intake_release_state,medication_smart_intake_test_actor_ids&limit=1',{headers:H(k)});
+  if(!r.ok)return false;const gate=(await r.json())?.[0];
+  return gate?.medication_smart_intake_release_state==='general'||(gate?.medication_smart_intake_release_state==='test_only'&&Array.isArray(gate.medication_smart_intake_test_actor_ids)&&gate.medication_smart_intake_test_actor_ids.includes(actor.user_id));
+ }catch{return false}
 }
 async function emitMedicationDraft(e:any,u:string,k:string,id:string,t:string,partial:MedicationPartial,rawText:string,oldSourceCode:string|null=null){
  const merged={...(partial||{})} as any;
@@ -8241,7 +8373,7 @@ function appointmentPrevisitTrendLabel(v:any){
  const x=String(v||'');
  return ({new:'อาการใหม่',stable:'คงเดิม',better:'ดีขึ้น',worse:'แย่ลง',fluctuating:'เป็น ๆ หาย ๆ'} as any)[x]||''
 }
-function parseAppointmentPrevisitSymptomText(text:string):{symptom_text:string,onset_text:string,severity:number|null,trend:string,associated_symptoms:string,actions_taken:string,note:string,severity_dimension?:string,functional_impact?:number|null}{
+function parseAppointmentPrevisitSymptomText(text:string):{symptom_text:string,onset_text:string,severity:number|null|undefined,trend:string|undefined,associated_symptoms:string,actions_taken:string,note:string,severity_dimension?:string,functional_impact?:number|null}{
  const raw=String(text||'').trim(),x=parsePhmsTemplate(raw);
  const pick=(...keys:string[])=>{for(const k of keys){const v=String(x?.[k]??'').trim();if(v&&v!=='-'&&v!=='—')return v}return ''};
  let symptom=pick('อาการ','อาการผิดปกติ','อาการหลัก');
@@ -11927,7 +12059,7 @@ async function personDashboardMessages(u:string,k:string,id:string,title='👤 �
    {type:'text',text:'ข้อมูลของ '+String(d?.display_name||'บุคคล').trim(),weight:'regular',size:'md',color:'#111111',wrap:true,margin:'xs'},
    
   ]},
-  body:{type:'box',layout:'vertical',height:'340px',spacing:'xs',paddingAll:'10px',contents:profileBody},
+  body:{type:'box',layout:'vertical',spacing:'0px',paddingAll:'10px',contents:profileBody},
   footer:{type:'box',layout:'vertical',spacing:'xs',paddingAll:'8px',contents:profileFooter}
  };
  /* PHMS_PERSON_OVERVIEW_SHARED_593_CONTENT_FIT_V1: all people / households.
@@ -12129,6 +12261,28 @@ async function personDashboardMessages(u:string,k:string,id:string,title='👤 �
    {type:'box',layout:'vertical',height:'12px',justifyContent:'end',contents:[rule]}
   ]};
   rows.splice(0,3,aligned);
+ }
+ /* PHMS_PERSON_DASHBOARD_593_COMPACT_GLOBAL_V3:
+    Compact the entire carousel (not only the first bubble). LINE equalizes
+    the heights of every bubble, so leaving even one tall bubble defeats a
+    593px target on the person overview. Preserve every action and data row. */
+ for(const c of cards){
+  if(c?.header?.type==='box'){
+   c.header.height='70px';
+   c.header.paddingAll='8px';c.header.paddingStart='14px';c.header.paddingEnd='12px';
+   c.header.spacing='4px';
+  }
+  if(c?.body?.type==='box'){
+   delete c.body.height;delete c.body.minHeight;delete c.body.flex;
+   c.body.paddingAll='8px';c.body.spacing='4px';
+  }
+  if(c?.footer?.type==='box'){
+   c.footer.paddingAll='6px';c.footer.spacing='4px';
+   delete c.footer.height;delete c.footer.minHeight;
+   for(const btn of c.footer.contents||[])if(btn?.type==='button'){
+    btn.height='sm';btn.margin='0px';
+   }
+  }
  }
  return {dashboard:d,messages:[{type:'flex',altText:'ภาพรวม '+String(d?.display_name||'บุคคล'),contents:{type:'carousel',contents:cards.slice(0,10)}}]};
 }
@@ -13875,7 +14029,7 @@ async function phmsRoutePrivateGroupSetup(
   try{
    const ss=one(await rpc(u,k,'phms_line_group_settings',{p_line_user_id:lineUserId,p_line_group_id:m[1]}));
    const row=(Array.isArray(ss?.people)?ss.people:[]).find((x:any)=>
-    String(x?.person_code||'').toLowerCase().startsWith(m[2].toLowerCase())
+    String(x?.person_code||'').toLowerCase().startsWith(String(m?.[2]||'').toLowerCase())
    );
    if(!row)throw new Error('scope_person_not_found');
    const enabled=!(row?.[m[3]]===true);
@@ -13978,7 +14132,7 @@ async function phmsRoutePrivateGroupSetup(
   try{
    const s=one(await rpc(u,k,'phms_line_group_settings',{p_line_user_id:lineUserId,p_line_group_id:m[1]}));
    const row=(Array.isArray(s?.people)?s.people:[]).find((x:any)=>
-    String(x?.person_code||'').toLowerCase().startsWith(m[3].toLowerCase())
+    String(x?.person_code||'').toLowerCase().startsWith(String(m?.[3]||'').toLowerCase())
    );
    if(!row)throw new Error('scope_person_not_found');
    await rpc(u,k,'phms_line_group_toggle_query_scope',{
@@ -14061,7 +14215,7 @@ async function phmsRoutePrivateGroupSetup(
     p_line_user_id:lineUserId,p_family_code:m[1]
    }));
    const row=(Array.isArray(w?.members)?w.members:[]).find((x:any)=>
-    String(x?.user_code||'').toLowerCase().startsWith(m[2].toLowerCase())
+    String(x?.user_code||'').toLowerCase().startsWith(String(m?.[2]||'').toLowerCase())
    );
    if(!row||row?.is_manager===true)throw new Error('request_permission_member_invalid');
    await rpc(u,k,'phms_line_group_set_request_permission',{
@@ -14391,7 +14545,7 @@ async function phmsRouteAppointmentNotificationSettings(c:string,rt:string,u:str
  m=c.match(/^สลับผู้รับเตือน\s+#?([0-9a-fA-F-]{8,36})\s+([0-9a-fA-F-]{8,36})$/i);
  if(m){try{
   const w=one(await rpc(u,k,'phms_line_appointment_notification_workspace',{p_line_user_id:lineUserId,p_record_code:m[1]}));
-  const row=(Array.isArray(w?.users)?w.users:[]).find((x:any)=>String(x?.user_code||'').toLowerCase().startsWith(m[2].toLowerCase()));
+  const row=(Array.isArray(w?.users)?w.users:[]).find((x:any)=>String(x?.user_code||'').toLowerCase().startsWith(String(m?.[2]||'').toLowerCase()));
   if(!row)throw new Error('notification_user_not_found');
   await rpc(u,k,'phms_line_appointment_set_notification_user_target',{
    p_line_user_id:lineUserId,p_record_code:m[1],p_user_code:m[2],p_enabled:!(row?.selected===true)
@@ -14405,7 +14559,7 @@ async function phmsRouteAppointmentNotificationSettings(c:string,rt:string,u:str
  m=c.match(/^สลับกลุ่มเตือน\s+#?([0-9a-fA-F-]{8,36})\s+([0-9a-fA-F-]{8,36})$/i);
  if(m){try{
   const w=one(await rpc(u,k,'phms_line_appointment_notification_workspace',{p_line_user_id:lineUserId,p_record_code:m[1]}));
-  const row=(Array.isArray(w?.groups)?w.groups:[]).find((x:any)=>String(x?.channel_code||'').toLowerCase().startsWith(m[2].toLowerCase()));
+  const row=(Array.isArray(w?.groups)?w.groups:[]).find((x:any)=>String(x?.channel_code||'').toLowerCase().startsWith(String(m?.[2]||'').toLowerCase()));
   if(!row)throw new Error('notification_group_not_found');
   await rpc(u,k,'phms_line_appointment_set_group_channel_target',{
    p_line_user_id:lineUserId,p_record_code:m[1],p_channel_code:m[2],p_enabled:!(row?.selected===true)
@@ -15237,9 +15391,9 @@ async function phmsAnswerGroupQuestion(rt:string,u:string,k:string,groupId:strin
 }
 
 /* PHMS REFILL SLICE 1: existing central appointment category theme, actual RPC data only. */
-function phmsRefillStepCard(title:string,lines:string[],actions:{label:string,data:string}[]){
+function phmsRefillStepCard(title:string,lines:string[],actions:{label:string,data:string,action?:any}[]){
  const theme=PHMS_CATEGORY_THEME.appointments;
- const boxes=actions.map(a=>({type:'button',style:'primary',height:'md',color:theme.color,action:{type:'postback',label:a.label,data:a.data}}));
+ const boxes=actions.map(a=>({type:'button',style:'primary',height:'md',color:theme.color,action:a.action||{type:'postback',label:a.label,data:a.data}}));
  return {type:'flex',altText:title,contents:{type:'bubble',size:'mega',header:{type:'box',layout:'vertical',backgroundColor:theme.background,paddingAll:'16px',contents:[{type:'text',text:title,size:'lg',weight:'bold',wrap:true,color:theme.color}]},body:{type:'box',layout:'vertical',spacing:'md',paddingAll:'16px',contents:lines.map(x=>({type:'text',text:x,wrap:true,size:'md',color:theme.color}))},footer:{type:'box',layout:'vertical',spacing:'md',paddingAll:'12px',contents:boxes}}};
 }
 
@@ -15777,7 +15931,8 @@ if(sourceType==='user'&&id&&e.replyToken&&/^(?:[＋+]\s*)?เพิ่มนั�
 /* PHMS_REFILL_SLICE1_LIVE_V1 */
 if(sourceType==='user'&&id&&e.replyToken){
  const prev=await getState(u,k,id);
- const isRefillCommand=c==='phms_refill_begin'||c==='phms_refill_cancel'||c==='phms_refill_confirm'||c==='phms_refill_back'||c==='phms_refill_med_done'||c==='phms_refill_med_more'||/^phms_refill_med [a-f0-9-]{36}$/.test(c)||/^phms_refill_detail [a-f0-9-]{36}$/.test(c);
+ if(await handleRefillReceipt({e,u,k,id,t,c,prev,rpc,one,state,clear,replyMessages,card:phmsRefillStepCard}))continue;
+ const isRefillCommand=c==='phms_refill_begin'||c==='phms_refill_cancel'||c==='phms_refill_confirm'||c==='phms_refill_back'||c==='phms_refill_med_done'||c==='phms_refill_med_more'||c==='phms_refill_date'||/^phms_refill_med [a-f0-9-]{36}$/.test(c)||/^phms_refill_detail [a-f0-9-]{36}$/.test(c);
  if(isRefillCommand||prev?.state_key==='phms_refill_s1'){
   try{
    const done=async(title:string,lines:string[],actions:any[]=[])=>await replyMessages(e.replyToken,t,[phmsRefillStepCard(title,lines,actions)]);
@@ -15786,22 +15941,24 @@ if(sourceType==='user'&&id&&e.replyToken){
     const opt=one(await rpc(u,k,'phms_med_v23_refill_options',{p_line_user_id:id}));
     const meds=Array.isArray(opt?.items)?opt.items:[];
     if(!meds.length){await done('💊 นัดรับยาเดิม',['ยังไม่มีรายการยาในทะเบียนของบุคคลนี้','เพิ่มข้อมูลยาในทะเบียนก่อน แล้วกลับมานัดรับยา'],[{label:'↩️ กลับ',data:'เพิ่มนัด'}]);continue;}
-    await state(u,k,id,'phms_refill_s1',{step:'med',key:crypto.randomUUID(),person:opt.person_name,meds:[]});
+    await state(u,k,id,'phms_refill_s1',{step:'med',key:crypto.randomUUID(),person:opt.person_name,person_id:opt.person_id,meds:[],expected:{}});
     await done('💊 รับยาเดิม — เลือกยา',['นัดรับยาให้ '+String(opt.person_name||'บุคคลที่เลือก'),'เลือกรายการยาที่จะรับ'],[...meds.slice(0,8).map((m:any)=>({label:String(m.name||'ยา').slice(0,18),data:'phms_refill_med '+m.person_medication_id})),{label:'↩️ กลับ',data:'phms_refill_cancel'}]);continue;
    }
    if(/^phms_refill_detail [a-f0-9-]{36}$/.test(c)){
      const d=one(await rpc(u,k,'phms_med_v23_refill_detail',{p_line_user_id:id,p_appointment_id:c.split(' ')[1]}));
-     await done('📅 รายละเอียดนัดรับยา',['โรงพยาบาล: '+String(d.hospital_name||'-'),'วันนัด: '+String(d.appointment_at||'-'),'จุดรับยา: '+String(d.location_detail||'-'),...((d.items||[]).map((x:any)=>'💊 รายการยา • '+String(x.status||'PLANNED')))], [{label:'↩️ เมนูนัด',data:'เพิ่มนัด'}]);continue;
+     await done('📅 รายละเอียดนัดรับยา',['โรงพยาบาล: '+String(d.hospital_name||'-'),'วันนัด: '+String(d.appointment_at||'-'),'จุดรับยา: '+String(d.location_detail||'-'),...((d.items||[]).map((x:any)=>'💊 รายการยา • '+String(x.status||'PLANNED')))], [...(one(await rpc(u,k,'phms_line_appointment_wizard_enabled',{p_line_user_id:id}))?[{label:'💊 บันทึกรับยาจริง',data:'refill_receive '+d.appointment_id}]:[]),{label:'↩️ เมนูนัด',data:'เพิ่มนัด'}]);continue;
    }
    const d={...(prev?.state_data||{})};
    if(!d.key)throw Error('refill_session_expired');
+   const owner=one(await rpc(u,k,'phms_med_v23_refill_options',{p_line_user_id:id}));
+   if(!d.person_id||d.person_id!==owner.person_id){await clear(u,k,id);throw Error('refill_person_changed');}
    if(/^phms_refill_med [a-f0-9-]{36}$/.test(c)){
      const opt=one(await rpc(u,k,'phms_med_v23_refill_options',{p_line_user_id:id}));
      if(!opt?.items?.some((m:any)=>m.person_medication_id===c.split(' ')[1]))throw Error('refill_medication_not_authorized');
      const chosen=c.split(' ')[1];d.meds=Array.isArray(d.meds)?d.meds:[];if(!d.meds.includes(chosen))d.meds.push(chosen);
      if(d.meds.length>40)throw Error('refill_too_many_medicines');
-     d.step='med';await state(u,k,id,'phms_refill_s1',d);
-     await done('💊 ยาที่เลือกแล้ว',['เลือกแล้ว '+d.meds.length+' รายการ','เพิ่มรายการอื่นได้ หรือกดเลือกวันนัด'],[{label:'💊 เลือกยาเพิ่ม',data:'phms_refill_med_more'},{label:'📅 เลือกวันนัด',data:'phms_refill_med_done'},{label:'❌ ยกเลิก',data:'phms_refill_cancel'}]);continue;
+     d.step='expected';d.expected_med=chosen;await state(u,k,id,'phms_refill_s1',d);
+     await done('💊 คาดว่าจะรับจำนวนเท่าไร',['ยา: '+String(opt.items.find((m:any)=>m.person_medication_id===chosen)?.name||'ยาที่เลือก'),'พิมพ์จำนวนและหน่วย เช่น 30 เม็ด','ถ้าไม่ทราบจำนวน ให้พิมพ์ ไม่ทราบ']);continue;
    }
    if(c==='phms_refill_med_more'){
      const opt=one(await rpc(u,k,'phms_med_v23_refill_options',{p_line_user_id:id}));
@@ -15812,7 +15969,11 @@ if(sourceType==='user'&&id&&e.replyToken){
    if(c==='phms_refill_med_done'){
      if(!Array.isArray(d.meds)||!d.meds.length)throw Error('refill_medication_required');
      d.step='date';await state(u,k,id,'phms_refill_s1',d);
-     await done('📅 นัดรับยาวันไหน',['พิมพ์วันและเวลา เช่น 2026-11-05 09:00','ใช้เวลาประเทศไทย (เวลาโรงพยาบาล)'],[{label:'💊 เลือกยาเพิ่ม',data:'phms_refill_med_more'}]);continue;
+     await done('📅 นัดรับยาวันไหน',['พิมพ์วันและเวลา เช่น 2026-11-05 09:00','ใช้เวลาประเทศไทย (เวลาโรงพยาบาล)'],[{label:'📅 เปิดปฏิทิน',data:'phms_refill_date',action:{type:'datetimepicker',label:'📅 เปิดปฏิทิน',data:'phms_refill_date',mode:'datetime'}},{label:'💊 เลือกยาเพิ่ม',data:'phms_refill_med_more'}]);continue;
+   }
+   if(c==='phms_refill_date'&&d.step==='date'&&e.postback?.params?.datetime){
+    const dt=String(e.postback.params.datetime);if(!/^\d{4}-\d\d-\d\dT\d\d:\d\d$/.test(dt)||!Number.isFinite(Date.parse(dt+':00+07:00')))throw Error('refill_date_invalid');
+    d.at=dt+':00+07:00';d.step='hospital';await state(u,k,id,'phms_refill_s1',d);await done('🏥 รับยาที่โรงพยาบาลไหน',['พิมพ์ชื่อโรงพยาบาลตามใบนัด']);continue;
    }
    if(c==='phms_refill_back'){
      if(d.step==='review'){d.step='location';await state(u,k,id,'phms_refill_s1',d);await done('🏥 จุดรับยา',['พิมพ์จุดรับยาที่โรงพยาบาล เช่น ห้องจ่ายยา OPD']);}
@@ -15821,12 +15982,16 @@ if(sourceType==='user'&&id&&e.replyToken){
    }
    if(c==='phms_refill_confirm'){
      if(d.step!=='review'||!Array.isArray(d.meds)||!d.meds.length||!d.at||!d.hospital)throw Error('refill_incomplete');
-     const saved=one(await rpc(u,k,'phms_med_v23_refill_create',{p_line_user_id:id,p_key:d.key,p_at:d.at,p_hospital:d.hospital,p_location:d.location||null,p_items:d.meds.map((v:string)=>({person_medication_id:v})),p_notes:null}));
+     const saved=one(await rpc(u,k,'phms_med_v23_refill_create',{p_line_user_id:id,p_key:d.key,p_at:d.at,p_hospital:d.hospital,p_location:d.location||null,p_items:d.meds.map((v:string)=>({person_medication_id:v,...(d.expected?.[v]||{})})),p_notes:d.checklist||null}));
      const detail=one(await rpc(u,k,'phms_med_v23_refill_detail',{p_line_user_id:id,p_appointment_id:saved.appointment_id}));
      await clear(u,k,id);
      await done('✅ บันทึกนัดรับยาเรียบร้อย',['โรงพยาบาล: '+String(detail.hospital_name||'-'),'วันนัด: '+String(detail.appointment_at||'-'),'รายการยา: '+String(detail.items?.length||0)+' รายการ','ยังไม่มีการเพิ่มยาลงสต็อกจากใบนัด'],[{label:'🔎 ดูรายละเอียด',data:'phms_refill_detail '+saved.appointment_id},{label:'↩️ เมนูนัด',data:'เพิ่มนัด'}]);continue;
    }
    if(e.type==='message'){
+    if(d.step==='expected'){
+     if(c!=='ไม่ทราบ'){const q=c.match(/^(\d+(?:\.\d{1,3})?)\s+(.{1,30})$/u);if(!q||Number(q[1])<=0||Number(q[1])>1000000)throw Error('refill_quantity_invalid');d.expected={...(d.expected||{}),[d.expected_med]:{expected_quantity:Number(q[1]),expected_unit:q[2]}};}
+     d.step='med';await state(u,k,id,'phms_refill_s1',d);await done('💊 ยาที่เลือกแล้ว',['เลือกแล้ว '+d.meds.length+' รายการ'],[{label:'💊 เลือกยาเพิ่ม',data:'phms_refill_med_more'},{label:'📅 เลือกวันนัด',data:'phms_refill_med_done'},{label:'❌ ยกเลิก',data:'phms_refill_cancel'}]);continue;
+    }
     if(d.step==='date'){
      const m=c.match(/^(\d{4}-\d\d-\d\d)\s+(\d\d:\d\d)$/);
      if(!m||Number.isNaN(Date.parse(m[1]+'T'+m[2]+':00+07:00')))throw Error('refill_date_invalid');
@@ -16684,7 +16849,7 @@ if(sourceType==='user'&&['เปิดครอบครัวจากหน้
 }
 
 /* PHMS_APPOINTMENT_MANAGE_ENTRY_V1: make management a real menu, not an edit shortcut. */
-const manageAppointment=c.match(/^จัดการนัดนี้\\s+([a-f0-9-]{12})$/i);
+const manageAppointment=c.match(/^จัดการนัดนี้\s+#?([a-f0-9-]{8,36})$/i);
 if(manageAppointment){
  try{
   const recordCode=manageAppointment[1];
@@ -16994,6 +17159,8 @@ if(e.type==='postback'&&c==='เปิดข้อมูลของฉัน'){
  continue
 }
 const st=await getState(u,k,id);
+if(await handleSmartMedication({e,u,k,id,t,c,st,state,clear,rpc,one,replyMessages,name,loadMedicationDraftByCode,theme:PHMS_CATEGORY_THEME.medications,smartMedicationEnabled,medicationNameOptions}))continue;
+
 if(e.type==='postback'&&String(st?.state_key||'')==='crud_edit_appointment_record_field'){
  const fld=String(st?.state_data?.edit_field||'');
  if(c==='เลือกวันนัดจากปฏิทิน'&&fld==='date'&&e.postback?.params?.date)c=String(e.postback.params.date);
@@ -17199,7 +17366,7 @@ if(st?.state_key==='appointment_previsit_symptom_add'){
   await replyAppointmentEarlyVisitFlow(e.replyToken,u,k,id,t,code,'date','symptoms');continue
  }
  try{
-  const p=parseAppointmentPrevisitSymptomText(c);
+  const p:any=parseAppointmentPrevisitSymptomText(c);
   if(!String(p.symptom_text||'').trim())throw new Error('symptom_required');
   const w=one(await rpc(u,k,'phms_line_appointment_workspace',{p_line_user_id:id,p_record_code:code}))||{};
   const symptom=String(p.symptom_text||'');
@@ -21790,7 +21957,7 @@ if(st?.state_key==='crud_add_appointment'){
    continue
   }
   if(c==='นัดหมาย'||c==='นัดหมายบุคคลปัจจุบัน'){await clear(u,k,id);await cmd(e.replyToken,u,k,id,'appointments',t);continue}
- const groupChoice=c.match(/^เลือกหมวดนัด\s+(ใหม่|เดิม|ประจำ|อื่น)$/);
+ const groupChoice=c.match(/^เลือกหมวดนัด\s+(รักษา|ตรวจ|ยา|อื่น|ใหม่|เดิม|ประจำ)$/);
  if(groupChoice){await replyAppointmentTypeSubPicker(e.replyToken,u,k,id,t,groupChoice[1]);continue}
  if(c==='เลือกสถานะนัดใหม่'){
   await reply(e.replyToken,'📋 สถานะนัดนี้เป็นแบบไหน?',t,[
@@ -23358,7 +23525,7 @@ if(c==='เริ่มส่งเอกสาร'){await reply(e.replyToken,'�
 if(c==='เพิ่มยา'){await phmsUnifiedAddEntry(e.replyToken,t,'medications');continue}
 if(c==='เทมเพลตเพิ่มยา'){
  await state(u,k,id,'crud_add_medication',{});
- await reply(e.replyToken,'🧾 เทมเพลตเพิ่มยา\n\n'+medicationAddTemplateText()+'\n\nแก้ค่าตามยาจริงแล้วส่งกลับมาได้เลย\nช่องที่ไม่มีข้อมูลลบออกได้',t,[pb('❌ ยกเลิก','ยา')]);continue
+ await replyMessages(e.replyToken,t,[{type:'text',text:'🧾 เทมเพลตเพิ่มยา\n\nคัดลอกข้อความถัดไป แก้ข้อมูลตามฉลากยาจริง แล้วส่งกลับมาในแชต\nช่องที่ไม่มีข้อมูลลบออกได้',quickReply:{items:[pb('❌ ยกเลิก','ยา')]}},{type:'text',text:medicationAddTemplateText()}]);continue
 }
 if(c==='เพิ่มนัด'){await state(u,k,id,'crud_add_appointment',{person_confirmed:true});await replyAppointmentTypePicker(e.replyToken,u,k,id,t,await appointmentActivePersonName(u,k,id));continue}
 if(c==='ประวัติอาการก่อนนัด'){
@@ -23373,7 +23540,7 @@ if(c==='ประวัติอาการก่อนนัด'){
 if(c==='เพิ่มสุขภาพ'){await phmsUnifiedAddEntry(e.replyToken,t,'health');continue}
 if(c==='เทมเพลตเพิ่มสุขภาพ'){
  await state(u,k,id,'crud_add_health',{});
- await reply(e.replyToken,'🧾 เทมเพลตเพิ่มข้อมูลสุขภาพ\n\nประเภท: น้ำหนัก\nค่า: 70\nหน่วย: kg\nบริบท: ตอนเช้า ก่อนอาหาร\nหมายเหตุ: -\n\nหรือความดัน:\nประเภท: ความดัน\nค่า: 120/80\nหน่วย: mmHg\nบริบท: นั่งพัก 5 นาที\nหมายเหตุ: -\n\nแก้ค่าตามจริงแล้วส่งกลับมาได้เลย',t,[pb('❌ ยกเลิก','สุขภาพ')]);continue}
+ await replyMessages(e.replyToken,t,[{type:'text',text:'🧾 เทมเพลตเพิ่มสุขภาพ\n\nคัดลอกข้อความถัดไป แล้วแก้ค่าตามผลตรวจจริง',quickReply:{items:[pb('❌ ยกเลิก','สุขภาพ')]}},{type:'text',text:'ประเภท: น้ำหนัก\nค่า: 70\nหน่วย: kg\nบริบท: ตอนเช้า ก่อนอาหาร\nหมายเหตุ: -'}]);continue}
 if(c==='เพิ่มค่าใช้จ่ายบุคคล'){await phmsUnifiedAddEntry(e.replyToken,t,'expenses');continue}
 if(c==='เพิ่มเอกสาร'){await phmsUnifiedAddEntry(e.replyToken,t,'documents');continue}
 if(c==='ยาของฉัน'){
@@ -23430,3 +23597,4 @@ if(['กลับหน้าเริ่มต้น','หน้าเริ่
   continue;
 }
 await reply(e.replyToken,'🛠️ ส่วนนี้กำลังพัฒนา/ตั้งค่าอยู่\n\nกดปุ่มด้านล่างเพื่อกลับไปส่วนที่พร้อมทดสอบได้เลย',t,[act('🏡 หน้าเริ่มต้น','กลับหน้าเริ่มต้น'),act('👤 ข้อมูลของฉัน','ใช้ข้อมูลของฉัน'),act('👨‍👩‍👧 ครอบครัว','ครอบครัว')])}return Response.json({ok:true})});
+

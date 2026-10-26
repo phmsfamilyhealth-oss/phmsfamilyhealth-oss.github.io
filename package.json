@@ -2,10 +2,20 @@
   "dependencies": {
     "@electric-sql/pglite": "0.3.14",
     "openai": "4.104.0",
-    "supabase": "2.121.0"
+    "supabase": "2.121.0",
+    "pg": "8.23.1"
   },
   "private": true,
   "scripts": {
-    "test:appointment": "node tests/appointment/run.mjs"
+    "test:appointment": "node tests/appointment/run.mjs",
+    "test": "node --test tests/smart-medication.test.mjs tests/smart-medication-regression.test.mjs",
+    "test:integration": "node tests/db/medication.integration.mjs",
+    "check": "deno check supabase/functions/line-webhook/index.ts",
+    "compile": "deno compile --no-code-cache --output /tmp/phms-line-runtime-check supabase/functions/line-webhook/index.ts"
+  },
+  "name": "phms-line-runtime",
+  "type": "module",
+  "devDependencies": {
+    "deno": "2.9.6"
   }
 }

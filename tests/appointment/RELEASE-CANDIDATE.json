@@ -1,0 +1,27 @@
+{
+  "status": "CANDIDATE_NOT_DEPLOYED",
+  "compared_at": "2026-10-26",
+  "pr_head": "11f7033d45b4830f8a35e6a62b6045098e33c6be",
+  "main_head": "b7b585c46b1241caa4de66a59eee272a6b27dedb",
+  "production_core": 1366,
+  "production_router": 212,
+  "public_wizard_enabled": false,
+  "allowed_test_actors": 0,
+  "candidate_migration_applied": false,
+  "tests": {
+    "database_groups": 16,
+    "signed_runtime_events": 37,
+    "medication_unit_regression": 26,
+    "medication_database": 29
+  },
+  "real_line_uat": false,
+  "storage_byte_upload": "PENDING",
+  "native_database_ci": "PENDING",
+  "candidate_files": {
+    "supabase/functions/line-webhook/smart-medication.ts": "73ca66de0eedc6044e82c6589979656b10faab0c0f03182ec8565cfca3859471",
+    "supabase/functions/line-webhook/person-overview-px-layout.ts": "29424e9e4ac049ba67ac532908ff4f58e51495cb219d68b245d1ab51f24a92b6",
+    "supabase/functions/line-webhook/index.ts": "b0c7af6bdd47a068ecfb0121125e3f23bf8aa20a85038a208712f25c995cdf11",
+    "supabase/functions/line-webhook/smart-medication-runtime.ts": "7729b61d08106fd255d71882bc669542476028bdd3526bec08b9ec2c92d06836",
+    "supabase/functions/line-webhook/refill-receipt.ts": "58d481434fee6ae16fde2fc49f7f3e587988c7290aa37b24d63b59539a5f3025"
+  }
+}
