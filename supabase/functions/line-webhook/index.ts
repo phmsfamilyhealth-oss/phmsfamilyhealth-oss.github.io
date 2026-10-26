@@ -3703,8 +3703,8 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
    {label:'📅 นัดหมาย',value:p?.appointment_count,background:'#FFF3DC',foreground:'#805617'},
    {label:'🩺 สุขภาพ',value:p?.health_count,background:'#E7F4EA',foreground:'#205F46'}
   ];
-  if(categoryCounts.some((x:any)=>x.value!=null)){
-   body.push({type:'separator',margin:sectionGap});
+  const hasCategoryTiles=categoryCounts.some((x:any)=>x.value!=null);
+  if(hasCategoryTiles){
    body.push({type:'box',layout:'horizontal',spacing:'4px',margin:'sm',contents:categoryCounts.map((x:any)=>({
     type:'box',layout:'vertical',flex:1,alignItems:'center',justifyContent:'center',
     backgroundColor:x.background,cornerRadius:'8px',paddingAll:'3px',spacing:'0px',
@@ -3714,10 +3714,8 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
      {type:'text',text:'รายการ',size:'xs',color:x.foreground,align:'center'}
     ]
    }))});
-   body.push({type:'separator',margin:sectionGap});
   }
   if(Number(p?.medication_count||0)===0&&Number(p?.appointment_count||0)===0&&Number(p?.health_count||0)===0&&[p?.medication_count,p?.appointment_count,p?.health_count].every((v:any)=>v!=null)&&!p?.next_appointment&&!p?.latest_health){
-   if(body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
    body.push({type:'text',text:'ยังไม่มีข้อมูลที่บันทึก',size:'md',color:'#475569',wrap:true,margin:'xs'});
   }
   statsEnd=body.length;
@@ -3725,7 +3723,8 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
   if(p?.next_appointment){
    const ap=p.next_appointment;
    const apTitle=String(ap?.title||'นัดหมาย').replace(/\s+/g,' ').trim();
-   if(body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
+   // Colored tiles already delimit the category summary.
+   if(!hasCategoryTiles&&body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
    const familyHasBothPreviews=Boolean(p?.next_appointment&&p?.latest_health); // PHMS_FAMILY_DYNAMIC_PREVIEW_LINES_V2
    const apBlocks:any[]=[{type:'text',text:'📅 นัดถัดไป  ›',weight:'bold',size:'md',color:PHMS_FIVE_CATEGORY_SECONDARY_FONT['📅 นัดหมาย']},{type:'text',text:apTitle||'นัดหมาย',size:'md',wrap:true,maxLines:familyHasBothPreviews?1:2,color:'#344054'}];
    if(ap?.appointment_at)apBlocks.push({type:'text',text:crudDate(ap.appointment_at),size:'md',wrap:true,maxLines:1,color:'#475569'});
@@ -3743,7 +3742,8 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
    const healthTitle=type==='ผลตรวจจากนัด'&&appointmentPurpose?'ผลตรวจจากนัด: '+appointmentPurpose:type;
    const value=h?.systolic!=null&&h?.diastolic!=null?String(h.systolic)+'/'+String(h.diastolic):String(h?.value_numeric??h?.value_text??'');
    const summary=(healthTitle+(value?' • '+value:'')+(h?.unit?' '+String(h.unit):'')).trim();
-   if(body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
+   // Keep the semantic divider only when appointment and health previews coexist.
+   if((p?.next_appointment||!hasCategoryTiles)&&body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
    const healthCode=String(h?.code||h?.record_code||h?.health_code||'');
    const healthPersonSelection=String(p?.selection_code||p?.person_code||'');
    const healthCommand=/^[a-f0-9]{12}$/i.test(healthCode)?'ดูสุขภาพ '+healthCode:'เปิดสุขภาพครอบครัว '+healthPersonSelection+' '+encodeURIComponent(summary.slice(0,22));
