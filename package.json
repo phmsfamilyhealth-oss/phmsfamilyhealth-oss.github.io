@@ -1,1 +1,25 @@
-{"name":"phms-line-runtime","private":true,"type":"module","scripts":{"test":"node --test tests/smart-medication.test.mjs tests/smart-medication-regression.test.mjs","test:integration":"node tests/db/medication.integration.mjs","check":"deno check supabase/functions/line-webhook/index.ts","compile":"deno compile --no-code-cache --output /tmp/phms-line-runtime-check supabase/functions/line-webhook/index.ts"},"devDependencies":{"@electric-sql/pglite":"0.3.14","deno":"2.9.6"}}
+{
+  "name": "phms-smart-health-intake",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:integration": "node tests/db/all.integration.mjs",
+    "check": "deno check --config deno-check.json supabase/functions/line-webhook/index.ts",
+    "compile": "deno compile --config deno-check.json --no-code-cache --output /tmp/phms-line-runtime-check supabase/functions/line-webhook/index.ts",
+    "test:health-integration": "node tests/db/health.integration.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.11",
+    "@supabase/functions-js": "2.118.0",
+    "deno": "2.9.6",
+    "openai": "4.52.5",
+    "supabase": "2.121.0"
+  },
+  "private": true
+}

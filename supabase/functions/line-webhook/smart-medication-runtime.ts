@@ -111,3 +111,4 @@ export async function handleSmartMedication(ctx:any):Promise<boolean>{
   await send('💊 ยังบันทึกยาไม่ได้',[saved.last_error],[["✏️ แก้แต่ละช่อง","sm23:menu"],["🔎 ตรวจทานร่าง","sm23:review"],["↩️ เพิ่มยา","เพิ่มยา"]]);return true;
  }
 }
+

@@ -137,3 +137,4 @@ export function medicationScheduleLabel(d:MedicationDraft):string{
  if(d.schedule_kind==='prn'||d.status==='prn')return 'เมื่อมีอาการตามคำสั่ง';
  return 'วันละ '+d.frequency_value+' ครั้ง';
 }
+
