@@ -11796,7 +11796,7 @@ const phmsPersonExtraRows=(kind:'documents'|'expenses',data:any)=>{
  const compactDelta=(v:number)=>{const abs=Math.abs(v);const amt=abs.toLocaleString('th-TH',{minimumFractionDigits:Number.isInteger(abs)?0:2,maximumFractionDigits:2});return v>0?'▲ +'+amt+' ฿':v<0?'▼ -'+amt+' ฿':'＝ 0 ฿'};
  const previousYear=verified&&data?.previous_year_paid!=null&&Number.isFinite(Number(data.previous_year_paid))?Number(data.previous_year_paid):null;
  const yearlyDelta=previousYear!==null&&data.year_paid!=null?Number(data.year_paid)-previousYear:null;
- const compare=(v:number|null,label:string)=>v===null?[]:[{type:'text',text:compactDelta(v),size:'xs',weight:'regular',color:v>0?'#B42318':v<0?'#16803D':'#667085',wrap:false},{type:'text',text:label,size:'xs',color:'#9163A3',wrap:false}];
+ const compare=(v:number|null,label:string)=>v===null?[]:[{type:'text',text:v>0?'เพิ่มขึ้น '+money(v)+' จากเดือนก่อน':v<0?'ลดลง '+money(Math.abs(v))+' จากเดือนก่อน':'เท่ากับเดือนก่อน',size:'sm',weight:'regular',color:v>0?'#B42318':v<0?'#16803D':'#667085',wrap:false,maxLines:1,margin:'sm'}];
  const out:any[]=[
  {type:'text',text:'สรุปค่าใช้จ่าย',weight:'bold',size:'md',color:'#66458A'},
  {type:'text',text:(()=>{const dt=phmsPersonCardShortThaiDate(data?.updated_at||rows[0]?.updated_at||rows[0]?.created_at);return dt?'🕒 อัปเดตล่าสุด '+dt:'🕒 ยังไม่มีวันที่อัปเดต'})(),size:'xs',color:'#667085',margin:'xs',wrap:false,maxLines:1},
@@ -11805,14 +11805,13 @@ const phmsPersonExtraRows=(kind:'documents'|'expenses',data:any)=>{
   {type:'box',layout:'vertical',flex:1,backgroundColor:'#F5EFFB',cornerRadius:'10px',paddingAll:'10px',spacing:'xs',contents:[
    {type:'text',text:'💰 รวมปีนี้  ›',size:'sm',weight:'bold',color:'#9163A3',wrap:false,action:{type:'postback',label:'💰 ปีนี้',data:'ดูค่าใช้จ่ายรายปี'}},
    {type:'text',text:verified&&data.year_paid!=null?money(data.year_paid):'ยังไม่มียอดสรุป',size:'lg',weight:'bold',color:'#66458A',wrap:true,action:{type:'postback',label:'💰 ดูรายปี',data:'ดูค่าใช้จ่ายรายปี'}},
-   ...compare(yearlyDelta,'จากปีก่อน')
   ]},
   {type:'box',layout:'vertical',flex:1,backgroundColor:'#F5EFFB',cornerRadius:'10px',paddingAll:'10px',spacing:'xs',contents:[
-   {type:'text',text:'📅 เดือนนี้  ›',size:'sm',weight:'bold',color:'#9163A3',wrap:false,action:{type:'postback',label:'📅 เดือนนี้',data:'ดูค่าใช้จ่ายรายเดือน'}},
+   {type:'text',text:'📅 รวมเดือนนี้  ›',size:'sm',weight:'bold',color:'#9163A3',wrap:false,action:{type:'postback',label:'📅 เดือนนี้',data:'ดูค่าใช้จ่ายรายเดือน'}},
    {type:'text',text:verified&&data.month_paid!=null?money(data.month_paid):'ยังไม่มียอดสรุป',size:'lg',weight:'bold',color:'#66458A',wrap:true,action:{type:'postback',label:'📅 ดูรายเดือน',data:'ดูค่าใช้จ่ายรายเดือน'}},
-   ...compare(delta,'จากเดือนก่อน')
   ]}
- ]}
+ ]},
+ ...compare(delta,'จากเดือนก่อน')
  ];
  out.push({type:'separator',margin:'sm'});
  const nowMonth=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit'}).format(new Date());
@@ -11849,7 +11848,7 @@ const phmsPersonExtraRows=(kind:'documents'|'expenses',data:any)=>{
  if(!displayRows.length)out.push({type:'text',text:'ยังไม่มีรายการที่มีค่าใช้จ่าย',size:'sm',color:'#667085',wrap:true});
  /* PHMS_EXPENSE_REMAINING_NOTICE_V1: show records not in the one-row preview; count includes unpaid records. */
  const remainingExpenses=Math.max(0,count-displayRows.length);
- if(remainingExpenses>0)out.push(phmsPersonRemainingNotice(remainingExpenses,'expenses'));
+ if(remainingExpenses>0)out.push({type:'text',text:'📋 ดูอีก '+remainingExpenses+' รายการ',size:'sm',weight:'regular',color:'#855A98',align:'start',margin:'sm',wrap:false,maxLines:1});
  return out;
  }
  if(!data)return [{type:'text',text:'ยังดึงข้อมูลเอกสารไม่ได้ ลองอีกครั้งนะ',size:'md',color:'#475569',wrap:true}];
