@@ -3706,11 +3706,11 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
    body.push({type:'separator',margin:sectionGap});
    body.push({type:'box',layout:'horizontal',spacing:'4px',margin:'sm',contents:categoryCounts.map((x:any)=>({
     type:'box',layout:'vertical',flex:1,alignItems:'center',justifyContent:'center',
-    backgroundColor:x.background,cornerRadius:'8px',paddingAll:'5px',spacing:'0px',
+    backgroundColor:x.background,cornerRadius:'8px',paddingAll:'3px',spacing:'0px',
     contents:[
-     {type:'text',text:x.label,size:'xs',weight:'bold',color:x.foreground,align:'center',wrap:false},
+     {type:'text',text:x.label,size:'sm',weight:'bold',color:x.foreground,align:'center',wrap:false},
      {type:'text',text:String(Math.max(0,Number(x.value)||0)),size:'xl',weight:'bold',color:x.foreground,align:'center'},
-     {type:'text',text:'รายการ',size:'xxs',color:x.foreground,align:'center'}
+     {type:'text',text:'รายการ',size:'xs',color:x.foreground,align:'center'}
     ]
    }))});
    body.push({type:'separator',margin:sectionGap});
@@ -3747,7 +3747,7 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
    const healthPersonSelection=String(p?.selection_code||p?.person_code||'');
    const healthCommand=/^[a-f0-9]{12}$/i.test(healthCode)?'ดูสุขภาพ '+healthCode:'เปิดสุขภาพครอบครัว '+healthPersonSelection+' '+encodeURIComponent(summary.slice(0,22));
    // Adaptive 2-3 lines: preserve legibility when appointment title is unusually long.
-   const healthPreviewLines=(dense && String(p?.next_appointment?.title||'').trim().length>55)?2:3;
+   const healthPreviewLines=1; /* PHMS_FAMILY_HEALTH_PREVIEW_COMPACT_V3 */
    const healthBlocks:any[]=[{type:'text',text:'🩺 สุขภาพล่าสุด  ›',weight:'bold',size:'md',color:PHMS_FIVE_CATEGORY_SECONDARY_FONT['🩺 สุขภาพ']},{type:'text',text:summary.replace(/\s+/g,' ')||'มีข้อมูลสุขภาพที่บันทึกไว้',size:'md',wrap:true,maxLines:healthPreviewLines,color:'#263649'}];
    body.push({type:'box',layout:'vertical',spacing:'4px',margin:sectionGap,paddingAll:cardInset,cornerRadius:'8px',contents:healthBlocks,...(/^[a-f0-9]{12}$/i.test(healthCode)||/^[a-f0-9]{12}$/i.test(healthPersonSelection)?{action:{type:'postback',label:'🩺 ดูสุขภาพ',data:healthCommand}}:{})});
   }
