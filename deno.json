@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "jsr:@supabase/functions-js/edge-runtime.d.ts": "./tests/appointment/vendor/edge-runtime.d.ts",
+    "openai": "npm:openai@4.104.0"
+  },
+  "compilerOptions": {
+    "strict": false
+  },
+  "nodeModulesDir": "manual"
+}

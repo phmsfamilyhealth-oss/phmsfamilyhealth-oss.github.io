@@ -1,3 +1,4 @@
+import { layoutPersonOverviewPx } from '../supabase/functions/line-webhook/person-overview-px-layout.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -53,7 +54,7 @@ test('full runtime syntax and final outbound template survive global Flex conver
  let sent;const base=new URL('../supabase/functions/line-webhook/',import.meta.url);
  let source=fs.readFileSync(new URL('index.ts',base),'utf8').replace(/^import .*;\s*$/gm,'');
  source=stripTypeScriptTypes(source,{mode:'transform'});
- const context=vm.createContext({console,TextEncoder,TextDecoder,URL,URLSearchParams,Request,Response,Headers,crypto,Intl,atob,btoa,setTimeout,clearTimeout,medicationTemplate,medicationScheduleLabel,handleSmartMedication,
+ const context=vm.createContext({console,TextEncoder,TextDecoder,URL,URLSearchParams,Request,Response,Headers,crypto,Intl,atob,btoa,setTimeout,clearTimeout,layoutPersonOverviewPx,medicationTemplate,medicationScheduleLabel,handleSmartMedication,
  Deno:{env:{get:()=>''},serve:()=>{}},fetch:async(url,init)=>{if(String(url).includes('api.line.me'))sent=JSON.parse(init.body);return new Response('[]',{status:200})}});
  vm.runInContext(source,context,{timeout:10000});
  const h=harness();await h.send('เทมเพลตเพิ่มยา');context.testMessages=h.payloads.at(-1);

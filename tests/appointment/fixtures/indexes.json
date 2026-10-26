@@ -1,0 +1,1055 @@
+[
+  {
+    "ddl": "CREATE INDEX idx_data_intake_drafts_submitter ON public.data_intake_drafts USING btree (submitted_by);"
+  },
+  {
+    "ddl": "CREATE INDEX oauth_auth_pending_exp_idx ON auth.oauth_authorizations USING btree (expires_at) WHERE (status = 'pending'::auth.oauth_authorization_status);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_person_claim_requests_user_status ON public.person_claim_requests USING btree (requested_user_id, status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX sessions_user_id_idx ON auth.sessions USING btree (user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_preventive_care_by_person ON public.preventive_care_plans USING btree (person_id, next_due_on) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX scim_users_updated_at_idx ON auth.scim_users USING btree (sso_provider_id, updated_at, id) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX scim_users_user_name_key ON auth.scim_users USING btree (sso_provider_id, user_name) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_person_claim_requests_person_status ON public.person_claim_requests USING btree (person_id, status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_line_identity_link_invites_user_status ON public.line_identity_link_invites USING btree (requested_user_id, status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX scim_tokens_sso_provider_id_idx ON auth.scim_tokens USING btree (sso_provider_id);"
+  },
+  {
+    "ddl": "CREATE INDEX phms_med_action_audit_context_idx ON public.phms_med_action_audit USING btree (action_context_id, event_at);"
+  },
+  {
+    "ddl": "CREATE INDEX med_admin_recorded ON public.medication_administration_events USING btree (recorded_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_preventive_care_due_active ON public.preventive_care_plans USING btree (next_due_on) WHERE (reminders_enabled AND (status = 'active'::text) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX healthcare_expenses_one_active_per_appointment_uidx ON public.healthcare_expenses USING btree (appointment_id) WHERE ((appointment_id IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX name_prefix_search ON storage.objects USING btree (name text_pattern_ops);"
+  },
+  {
+    "ddl": "CREATE INDEX person_appointment_memory_lookup_idx ON private.person_appointment_memory USING btree (person_id, organization_id, service_unit_id, confirmed_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_intake_sources_doc_type ON public.data_intake_sources USING btree (document_type);"
+  },
+  {
+    "ddl": "CREATE INDEX family_person_pending_access_target_idx ON private.family_person_pending_access USING btree (target_family_person_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX med_inv_balance_identity ON public.medication_inventory_balances USING btree (pool_id, location_id, medication_id, COALESCE(lot_id, '00000000-0000-0000-0000-000000000000'::uuid), COALESCE(container_id, '00000000-0000-0000-0000-000000000000'::uuid), COALESCE(stock_container_id, '00000000-0000-0000-0000-000000000000'::uuid), quantity_unit);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX appointment_reschedule_one_active_uidx ON private.appointment_reschedule_requests USING btree (appointment_id) WHERE (status = ANY (ARRAY['pending'::text, 'in_progress'::text]));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_person_claim_requests_invitation_token_hash ON public.person_claim_requests USING btree (invitation_token_hash) WHERE (invitation_token_hash IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX webauthn_challenges_expires_at_idx ON auth.webauthn_challenges USING btree (expires_at);"
+  },
+  {
+    "ddl": "CREATE INDEX sso_domains_sso_provider_id_idx ON auth.sso_domains USING btree (sso_provider_id);"
+  },
+  {
+    "ddl": "CREATE INDEX medication_regimens_current_idx ON public.medication_regimens USING btree (person_medication_id) WHERE (is_current AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX family_person_pending_roles_family_id_idx ON private.family_person_pending_roles USING btree (family_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_account_link_requests_expiry_open ON public.account_link_requests USING btree (expires_at) WHERE ((status = ANY (ARRAY['pending'::text, 'confirmed'::text])) AND (expires_at IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX idx_family_invite_intents_family_person ON public.family_invite_intents USING btree (family_id, family_person_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX permission_requests_target_user_idx ON public.permission_requests USING btree (target_user_id) WHERE (target_user_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_family_single_active_owner ON public.family_role_assignments USING btree (family_id) WHERE ((role = 'owner'::text) AND (status = 'active'::text));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX idx_objects_current_version ON storage.objects USING btree (bucket_id, name COLLATE \"C\") WHERE (archived_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_account_link_requests_line_identity_status ON public.account_link_requests USING btree (line_identity_id, status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX person_caregiver_user_idx ON public.person_caregiver_assignments USING btree (caregiver_user_id, status, family_person_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_phms_walk_in_date_only ON public.appointments USING btree (person_id, planned_visit_date) WHERE ((visit_mode = 'walk_in'::text) AND (visit_time_known = false) AND (appointment_at IS NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX idx_auth_code ON auth.flow_state USING btree (auth_code);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX healthcare_expenses_one_active_per_record_request_uidx ON public.healthcare_expenses USING btree (medical_record_request_id) WHERE ((medical_record_request_id IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX med_v23_one_void_per_event ON public.medication_administration_corrections USING btree (administration_event_id) WHERE (correction_type = 'void'::text);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX phms_recycle_bin_active_record_uq ON private.phms_recycle_bin USING btree (family_id, resource, record_id) WHERE (restored_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX family_notification_templates_name_uq ON public.family_notification_templates USING btree (family_id, lower(btrim(template_name))) WHERE (is_active = true);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_intake_sessions_submitter_status ON public.data_intake_sessions USING btree (submitted_by, status);"
+  },
+  {
+    "ddl": "CREATE INDEX mfa_recovery_codes_set_id_idx ON auth.mfa_recovery_codes USING btree (mfa_recovery_code_set_id);"
+  },
+  {
+    "ddl": "CREATE INDEX scim_users_deleted_at_idx ON auth.scim_users USING btree (deleted_at);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_objects_delete_markers ON storage.objects USING btree (bucket_id, name COLLATE \"C\") WHERE is_delete_marker;"
+  },
+  {
+    "ddl": "CREATE INDEX idx_appointment_reminders_recipient_user_id ON public.appointment_reminders USING btree (recipient_user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX refresh_tokens_instance_id_idx ON auth.refresh_tokens USING btree (instance_id);"
+  },
+  {
+    "ddl": "CREATE INDEX med_prep_person_date ON public.medication_preparation_sessions USING btree (person_id, start_date, end_date);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX scim_tokens_token_hash_key ON auth.scim_tokens USING btree (token_hash);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX appointment_assignees_family_person_unique ON public.appointment_assignees USING btree (appointment_id, family_person_id, assignment_role) WHERE (family_person_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX medication_containers_person_status_idx ON public.medication_containers USING btree (person_id, lifecycle_status) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_person_claim_requests_requested_from_line ON public.person_claim_requests USING btree (requested_from_line_identity_id) WHERE (requested_from_line_identity_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX vector_indexes_name_bucket_id_idx ON storage.vector_indexes USING btree (name, bucket_id);"
+  },
+  {
+    "ddl": "CREATE INDEX users_instance_id_email_idx ON auth.users USING btree (instance_id, lower((email)::text));"
+  },
+  {
+    "ddl": "CREATE INDEX idx_permission_requests_requester ON public.permission_requests USING btree (requester_user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX med_inv_balance_product ON public.medication_inventory_balances USING btree (pool_id, medication_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_health_care_tasks_assignee ON public.health_care_tasks USING btree (assigned_to_user_id, status, due_at);"
+  },
+  {
+    "ddl": "CREATE INDEX med_inv_tx_pool_at ON public.medication_inventory_transactions USING btree (pool_id, recorded_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_reschedule_family_idx ON private.appointment_reschedule_requests USING btree (family_id);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_reschedule_appointment_idx ON private.appointment_reschedule_requests USING btree (appointment_id);"
+  },
+  {
+    "ddl": "CREATE INDEX one_time_tokens_token_hash_hash_idx ON auth.one_time_tokens USING hash (token_hash);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_household_single_pending_owner_transfer ON private.household_owner_transfer_requests USING btree (family_id) WHERE (status = 'pending'::text);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX healthcare_org_identity_uq ON public.healthcare_organizations USING btree (lower(name), lower(COALESCE(branch_name, ''::text))) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX person_photos_person_idx ON public.person_photos USING btree (family_person_id, status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX appointment_document_unique_doc_idx ON public.appointment_document_links USING btree (appointment_id, medical_document_id, link_kind) WHERE (medical_document_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX sso_providers_resource_id_idx ON auth.sso_providers USING btree (lower(resource_id));"
+  },
+  {
+    "ddl": "CREATE INDEX identities_email_idx ON auth.identities USING btree (email text_pattern_ops);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_med_doses_order ON public.medication_regimen_doses USING btree (order_version_id);"
+  },
+  {
+    "ddl": "CREATE INDEX medical_documents_person_idx ON public.medical_documents USING btree (person_id, document_date DESC) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX record_provenance_record_idx ON public.record_provenance USING btree (resource_type, record_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_health_care_tasks_person ON public.health_care_tasks USING btree (family_person_id, status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX phms_storage_assets_checksum_idx ON public.phms_storage_assets USING btree (checksum_sha256) WHERE ((checksum_sha256 IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX idx_appointments_family_person_date ON public.appointments USING btree (family_id, family_person_id, appointment_at);"
+  },
+  {
+    "ddl": "CREATE INDEX healthcare_expenses_episode_idx ON public.healthcare_expenses USING btree (treatment_episode_id, expense_date) WHERE ((treatment_episode_id IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX family_notification_template_user_uq ON public.family_notification_template_targets USING btree (template_id, target_user_id) WHERE ((target_type = 'user'::text) AND (target_user_id IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX appointments_early_visit_parent_idx ON public.appointments USING btree (early_visit_of_appointment_id) WHERE ((deleted_at IS NULL) AND (early_visit_of_appointment_id IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_family_memberships_active ON public.family_memberships USING btree (family_id, user_id) WHERE (status = 'active'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX sso_providers_resource_id_pattern_idx ON auth.sso_providers USING btree (resource_id text_pattern_ops);"
+  },
+  {
+    "ddl": "CREATE INDEX treatment_episodes_family_person_idx ON public.treatment_episodes USING btree (family_id, family_person_id) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX factor_id_created_at_idx ON auth.mfa_factors USING btree (user_id, created_at);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_line_identities_account_id ON public.line_identities USING btree (account_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_intake_commit_batches_session ON public.data_intake_commit_batches USING btree (session_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_document_links_asset_appointment_idx ON public.appointment_document_links USING btree (storage_asset_id, appointment_id) WHERE (storage_asset_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_tasks_appointment_idx ON public.appointment_tasks USING btree (appointment_id, status, due_at);"
+  },
+  {
+    "ddl": "CREATE INDEX healthcare_expenses_payer_user_idx ON public.healthcare_expenses USING btree (payer_user_id) WHERE ((payer_user_id IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX med_scheduled_person_day ON public.medication_scheduled_doses USING btree (person_id, planned_date);"
+  },
+  {
+    "ddl": "CREATE INDEX sessions_oauth_client_id_idx ON auth.sessions USING btree (oauth_client_id);"
+  },
+  {
+    "ddl": "CREATE INDEX medical_record_request_items_request_idx ON public.medical_record_request_items USING btree (request_id, status, created_at);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_users_created_at_desc ON auth.users USING btree (created_at DESC);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX bname ON storage.buckets USING btree (name);"
+  },
+  {
+    "ddl": "CREATE INDEX medication_price_references_lookup ON public.medication_price_references USING btree (medication_id, effective_date DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX sessions_not_after_idx ON auth.sessions USING btree (not_after DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX phms_storage_assets_created_by_idx ON public.phms_storage_assets USING btree (created_by) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX record_provenance_source_storage_asset_idx ON public.record_provenance USING btree (source_storage_asset_id) WHERE (source_storage_asset_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX user_contexts_active_family_person_id_idx ON public.user_contexts USING btree (active_family_person_id) WHERE (active_family_person_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX one_time_tokens_user_id_token_type_key ON auth.one_time_tokens USING btree (user_id, token_type);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_intake_sessions_person ON public.data_intake_sessions USING btree (person_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_phms_secondary_person ON public.phms_line_secondary_invites USING btree (person_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX person_context_usage_user_display_idx ON public.person_context_usage USING btree (user_id, is_pinned DESC, display_order, last_used_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX family_channel_family_links_family_idx ON public.family_channel_family_links USING btree (family_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX healthcare_expense_items_cgd_item_idx ON public.healthcare_expense_items USING btree (cgd_item_code) WHERE ((deleted_at IS NULL) AND (cgd_item_code IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX oauth_clients_deleted_at_idx ON auth.oauth_clients USING btree (deleted_at);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_appointments_followup_source ON public.appointments USING btree (followup_of_appointment_id) WHERE (followup_of_appointment_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_family_role_assignments_user_id ON public.family_role_assignments USING btree (user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX phms_bug_reports_status_idx ON public.phms_bug_reports USING btree (status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_previsit_symptoms_appointment_idx ON public.appointment_previsit_symptoms USING btree (appointment_id, reported_at DESC) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_document_links_origin_appointment_idx ON public.appointment_document_links USING btree (origin_appointment_id) WHERE (origin_appointment_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_links_created_by_idx ON private.appointment_links USING btree (created_by) WHERE (created_by IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_account_auth_users_account ON public.account_auth_users USING btree (account_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_person_permissions_scope ON public.person_permissions USING btree (family_id, family_person_id, user_id, resource);"
+  },
+  {
+    "ddl": "CREATE INDEX appointments_followup_of_idx ON public.appointments USING btree (followup_of_appointment_id) WHERE (followup_of_appointment_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX healthcare_service_unit_name_active_uq ON public.healthcare_service_units USING btree (organization_id, lower(name)) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX objects_bucket_id_name_version_key ON storage.objects USING btree (bucket_id, name COLLATE \"C\", version) NULLS NOT DISTINCT;"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_family_one_active_household_role ON public.family_role_assignments USING btree (family_id, user_id) WHERE (status = 'active'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX user_contexts_active_family_id_idx ON public.user_contexts USING btree (active_family_id) WHERE (active_scope = 'family'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_notifications_family_person_id ON public.notifications USING btree (family_person_id) WHERE (family_person_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_persons_linked_account_id ON public.persons USING btree (linked_account_id) WHERE (linked_account_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_ack_appointment_idx ON public.appointment_acknowledgements USING btree (appointment_id, status);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX webauthn_credentials_credential_id_key ON auth.webauthn_credentials USING btree (credential_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_person_identifiers_lookup ON public.person_identifiers USING btree (identifier_type, identifier_value);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_permission_requests_status ON public.permission_requests USING btree (status);"
+  },
+  {
+    "ddl": "CREATE INDEX users_is_anonymous_idx ON auth.users USING btree (is_anonymous);"
+  },
+  {
+    "ddl": "CREATE INDEX medical_record_requests_person_time_idx ON public.medical_record_requests USING btree (person_id, COALESCE(requested_at, created_at) DESC) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_family_channels_family ON public.family_channels USING btree (family_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX email_change_token_new_idx ON auth.users USING btree (email_change_token_new) WHERE ((email_change_token_new)::text !~ '^[0-9 ]*$'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_person_claim_invitations_person_status ON public.person_claim_invitations USING btree (person_id, status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX family_removal_requests_family_status_idx ON private.family_removal_requests USING btree (family_id, status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_appointments_referral_source ON public.appointments USING btree (referral_from_appointment_id) WHERE (referral_from_appointment_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX oauth_consents_active_user_client_idx ON auth.oauth_consents USING btree (user_id, client_id) WHERE (revoked_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_reschedule_assigned_family_person_idx ON private.appointment_reschedule_requests USING btree (assigned_to_family_person_id) WHERE (assigned_to_family_person_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_audit_logs_family_created ON public.audit_logs USING btree (family_id, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX scim_tokens_revoked_at_idx ON auth.scim_tokens USING btree (revoked_at);"
+  },
+  {
+    "ddl": "CREATE INDEX person_change_requests_family_person_status_idx ON public.person_change_requests USING btree (family_person_id, status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX family_person_visibility_overrides_family_idx ON private.family_person_visibility_overrides USING btree (family_id, family_person_id);"
+  },
+  {
+    "ddl": "CREATE INDEX webauthn_credentials_user_id_idx ON auth.webauthn_credentials USING btree (user_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_families_family_code_ci ON public.families USING btree (upper(btrim(family_code))) WHERE ((family_code IS NOT NULL) AND (btrim(family_code) <> ''::text));"
+  },
+  {
+    "ddl": "CREATE INDEX identities_user_id_idx ON auth.identities USING btree (user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_line_group_appointment_idx ON public.appointment_line_group_targets USING btree (appointment_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_reschedule_requester_status_idx ON private.appointment_reschedule_requests USING btree (requested_by_user_id, status, updated_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_person_claim_invitations_family_status ON public.person_claim_invitations USING btree (family_id, status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX service_unit_observations_uq ON private.service_unit_observations USING btree (service_unit_id, field_name, normalized_value);"
+  },
+  {
+    "ddl": "CREATE INDEX healthcare_directory_aliases_lookup_idx ON private.healthcare_directory_aliases USING btree (entity_type, normalized_alias) WHERE is_active;"
+  },
+  {
+    "ddl": "CREATE INDEX mfa_challenge_created_at_idx ON auth.mfa_challenges USING btree (created_at DESC);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX buckets_analytics_unique_name_idx ON storage.buckets_analytics USING btree (name) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_users_name ON auth.users USING btree (((raw_user_meta_data ->> 'name'::text))) WHERE ((raw_user_meta_data ->> 'name'::text) IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX saml_relay_states_created_at_idx ON auth.saml_relay_states USING btree (created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_reschedule_family_person_idx ON private.appointment_reschedule_requests USING btree (family_person_id) WHERE (family_person_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX phase06_snapshots_person_time ON public.medication_emergency_snapshots USING btree (person_id, generated_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_links_b_active_idx ON private.appointment_links USING btree (appointment_id_b) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX family_person_visibility_overrides_viewer_idx ON private.family_person_visibility_overrides USING btree (viewer_user_id, family_person_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_person_claim_requests_open_user ON public.person_claim_requests USING btree (requested_user_id) WHERE (status = ANY (ARRAY['pending'::text, 'person_confirmed'::text, 'approved'::text]));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_person_claim_requests_open_person ON public.person_claim_requests USING btree (person_id) WHERE (status = ANY (ARRAY['pending'::text, 'person_confirmed'::text, 'approved'::text]));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX reauthentication_token_idx ON auth.users USING btree (reauthentication_token) WHERE ((reauthentication_token)::text !~ '^[0-9 ]*$'::text);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX appointment_reminders_group_seed_uq ON public.appointment_reminders USING btree (appointment_id, rule_key) WHERE ((appointment_id IS NOT NULL) AND (recipient_user_id IS NULL) AND (rule_key IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX custom_oauth_providers_enabled_idx ON auth.custom_oauth_providers USING btree (enabled);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX appointment_tasks_source_key_uidx ON public.appointment_tasks USING btree (appointment_id, source_key) WHERE (source_key IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_medical_primary_one_pending ON private.medical_primary_transfer_requests USING btree (family_person_id) WHERE (status = 'pending'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX oauth_consents_user_order_idx ON auth.oauth_consents USING btree (user_id, granted_at DESC);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX users_email_partial_key ON auth.users USING btree (email) WHERE (is_sso_user = false);"
+  },
+  {
+    "ddl": "CREATE INDEX audit_logs_resource_record_created_idx ON public.audit_logs USING btree (resource, record_id, created_at DESC) WHERE (record_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX recovery_token_idx ON auth.users USING btree (recovery_token) WHERE ((recovery_token)::text !~ '^[0-9 ]*$'::text);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_intake_reconciliation_selected ON public.data_intake_reconciliation_links USING btree (candidate_id) WHERE selected;"
+  },
+  {
+    "ddl": "CREATE INDEX medication_media_storage_asset_idx ON public.medication_media USING btree (storage_asset_id) WHERE (storage_asset_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_line_identities_onboarding_status ON public.line_identities USING btree (onboarding_status);"
+  },
+  {
+    "ddl": "CREATE INDEX phase05_safety_open ON public.medication_safety_reviews USING btree (person_id, detected_at DESC) WHERE (status = ANY (ARRAY['PENDING_REVIEW'::text, 'BLOCKED'::text, 'UNDER_REVIEW'::text]));"
+  },
+  {
+    "ddl": "CREATE INDEX idx_intake_candidates_person_type_fingerprint ON public.data_intake_candidates USING btree (person_id, candidate_type, fingerprint_sha256) WHERE (fingerprint_sha256 IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_ack_user_idx ON public.appointment_acknowledgements USING btree (user_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX medication_refill_items_appointment_idx ON public.medication_refill_items USING btree (appointment_id);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_procedure_items_appointment_idx ON public.appointment_procedure_items USING btree (appointment_id);"
+  },
+  {
+    "ddl": "CREATE INDEX health_measurements_person_time_idx ON public.health_measurements USING btree (person_id, measured_at DESC) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX family_removal_requests_pending_unique ON private.family_removal_requests USING btree (family_id, target_kind, COALESCE(family_person_id, '00000000-0000-0000-0000-000000000000'::uuid), COALESCE(target_user_id, '00000000-0000-0000-0000-000000000000'::uuid)) WHERE (status = 'pending'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_intake_candidates_session_status ON public.data_intake_candidates USING btree (session_id, review_status);"
+  },
+  {
+    "ddl": "CREATE INDEX refresh_tokens_parent_idx ON auth.refresh_tokens USING btree (parent);"
+  },
+  {
+    "ddl": "CREATE INDEX phase05_audit_entity ON public.medication_phase05_audit_events USING btree (entity_table, entity_id, recorded_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX person_notification_preferences_family_idx ON public.person_notification_preferences USING btree (family_id);"
+  },
+  {
+    "ddl": "CREATE INDEX medical_documents_storage_asset_idx ON public.medical_documents USING btree (storage_asset_id) WHERE (storage_asset_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX phase05_reactions_allergy_time ON public.allergy_reaction_events USING btree (allergy_id, occurred_at DESC);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_family_permissions_user_resource ON public.family_permissions USING btree (family_id, user_id, resource);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_line_identities_line_user_id ON public.line_identities USING btree (line_user_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX person_hospital_vn_one_per_org_uq ON public.person_identifiers USING btree (person_id, issuer_organization_id) WHERE ((identifier_type = 'hospital_vn'::text) AND (issuer_organization_id IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX idx_users_last_sign_in_at_desc ON auth.users USING btree (last_sign_in_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_health_care_tasks_family ON public.health_care_tasks USING btree (family_id, status, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX medication_master_normalized_uq ON public.medication_master USING btree (normalized_key) WHERE ((normalized_key IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX scim_users_user_name_idx ON auth.scim_users USING btree (sso_provider_id, user_name COLLATE \"C\", id) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_intake_sources_session ON public.data_intake_sources USING btree (session_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX person_appointment_memory_uq ON private.person_appointment_memory USING btree (person_id, organization_id, COALESCE(service_unit_id, '00000000-0000-0000-0000-000000000000'::uuid));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_family_channels_external ON public.family_channels USING btree (channel_type, external_channel_id) WHERE (external_channel_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX email_change_token_current_idx ON auth.users USING btree (email_change_token_current) WHERE ((email_change_token_current)::text !~ '^[0-9 ]*$'::text);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX person_identifiers_hospital_hn_org_uq ON public.person_identifiers USING btree (person_id, issuer_organization_id) WHERE ((identifier_type = 'hospital_hn'::text) AND (issuer_organization_id IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX idx_family_persons_family_id ON public.family_persons USING btree (family_id);"
+  },
+  {
+    "ddl": "CREATE INDEX phms_recycle_bin_family_person_idx ON private.phms_recycle_bin USING btree (family_id, family_person_id, trashed_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX family_channel_query_scopes_channel_idx ON public.family_channel_query_scopes USING btree (family_channel_id, enabled, resource);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_symptom_logs_appointment_idx ON public.appointment_symptom_logs USING btree (appointment_id, recorded_at DESC);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_household_admin_one_pending_resign ON private.household_admin_resignation_requests USING btree (family_id, admin_user_id) WHERE (status = 'pending'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX person_notification_preferences_user_idx ON public.person_notification_preferences USING btree (user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX phase05_decision_measurement ON public.medication_dose_decisions USING btree (measurement_id);"
+  },
+  {
+    "ddl": "CREATE INDEX refresh_tokens_updated_at_idx ON auth.refresh_tokens USING btree (updated_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX audit_logs_instance_id_idx ON auth.audit_log_entries USING btree (instance_id);"
+  },
+  {
+    "ddl": "CREATE INDEX mfa_factors_user_id_idx ON auth.mfa_factors USING btree (user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_appointments_family_person_id ON public.appointments USING btree (family_person_id);"
+  },
+  {
+    "ddl": "CREATE INDEX phase05_allergy_code_lookup ON public.allergy_substance_identifiers USING btree (coding_system, coding_code) WHERE (verification_status = 'VERIFIED'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_multipart_uploads_list ON storage.s3_multipart_uploads USING btree (bucket_id, key, created_at);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_reschedule_person_idx ON private.appointment_reschedule_requests USING btree (person_id);"
+  },
+  {
+    "ddl": "CREATE INDEX phms_med_action_contexts_expiry ON public.phms_med_action_contexts USING btree (expires_at);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_reschedule_completed_by_idx ON private.appointment_reschedule_requests USING btree (completed_by_user_id) WHERE (completed_by_user_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX scim_users_sso_provider_id_idx ON auth.scim_users USING btree (sso_provider_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_family_memberships_user_id ON public.family_memberships USING btree (user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_line_group_family_channel_idx ON public.appointment_line_group_targets USING btree (family_channel_id) WHERE (family_channel_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX refresh_tokens_session_id_revoked_idx ON auth.refresh_tokens USING btree (session_id, revoked);"
+  },
+  {
+    "ddl": "CREATE INDEX encounters_person_time_idx ON public.encounters USING btree (person_id, started_at DESC) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX saml_providers_sso_provider_id_idx ON auth.saml_providers USING btree (sso_provider_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_line_identities_user_id ON public.line_identities USING btree (user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_person_claim_requests_family_status ON public.person_claim_requests USING btree (family_id, status, created_at DESC) WHERE (family_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_family_persons_family_person ON public.family_persons USING btree (family_id, person_id);"
+  },
+  {
+    "ddl": "CREATE INDEX custom_oauth_providers_identifier_idx ON auth.custom_oauth_providers USING btree (identifier);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX record_provenance_intake_candidate_resource_uq ON public.record_provenance USING btree (source_record_id, resource_type) WHERE ((source_type = 'intake_candidate'::text) AND (source_record_id IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX family_person_view_labels_viewer_idx ON public.family_person_view_labels USING btree (viewer_user_id, family_id);"
+  },
+  {
+    "ddl": "CREATE INDEX med_admin_person_time ON public.medication_administration_events USING btree (person_id, occurred_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX medical_record_requests_episode_idx ON public.medical_record_requests USING btree (treatment_episode_id, COALESCE(requested_at, created_at) DESC) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX saml_relay_states_for_email_idx ON auth.saml_relay_states USING btree (for_email);"
+  },
+  {
+    "ddl": "CREATE INDEX user_id_created_at_idx ON auth.sessions USING btree (user_id, created_at);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX appointment_reminders_rule_uq ON public.appointment_reminders USING btree (appointment_id, recipient_user_id, rule_key) WHERE ((appointment_id IS NOT NULL) AND (recipient_user_id IS NOT NULL) AND (rule_key IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX family_person_pending_roles_configured_by_idx ON private.family_person_pending_roles USING btree (configured_by) WHERE (configured_by IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_med_order_person ON public.medication_order_versions USING btree (person_medication_id, version_no DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_assignees_appointment_idx ON public.appointment_assignees USING btree (appointment_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX person_medications_person_idx ON public.person_medications USING btree (person_id, status) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX healthcare_directory_aliases_uq ON private.healthcare_directory_aliases USING btree (entity_type, organization_id, normalized_alias);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_intake_actions_session ON public.data_intake_actions USING btree (session_id, created_at);"
+  },
+  {
+    "ddl": "CREATE INDEX family_person_pending_access_family_id_idx ON private.family_person_pending_access USING btree (family_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX line_group_link_requests_pending_uq ON public.line_group_link_requests USING btree (family_channel_id, family_id) WHERE (status = 'pending'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_oauth_client_states_created_at ON auth.oauth_client_states USING btree (created_at);"
+  },
+  {
+    "ddl": "CREATE INDEX med_preparation_checks_session_latest ON public.medication_preparation_checks USING btree (session_id, check_type, checked_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX preventive_care_plans_lookup_idx ON public.preventive_care_plans USING btree (person_id, plan_type, lower(btrim(care_item))) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX family_channel_family_links_linked_by_idx ON public.family_channel_family_links USING btree (linked_by) WHERE (linked_by IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX person_photos_one_shared_default_idx ON public.person_photos USING btree (family_person_id) WHERE ((is_person_shared_default = true) AND (status = 'active'::text));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX confirmation_token_idx ON auth.users USING btree (confirmation_token) WHERE ((confirmation_token)::text !~ '^[0-9 ]*$'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX family_person_view_preferences_viewer_idx ON private.family_person_view_preferences USING btree (viewer_user_id, pinned, sort_rank);"
+  },
+  {
+    "ddl": "CREATE INDEX medication_change_history_med_created_idx ON public.medication_change_history USING btree (person_medication_id, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX medication_expense_links_expense_item_idx ON public.medication_expense_links USING btree (expense_item_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX appointment_procedure_request_key_uniq ON public.appointment_procedure_items USING btree (appointment_id, request_key) WHERE (request_key IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX encounters_episode_idx ON public.encounters USING btree (treatment_episode_id, started_at) WHERE ((treatment_episode_id IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX phase05_ingredient_code_lookup ON public.medication_ingredient_identifiers USING btree (coding_system, coding_code) WHERE (verification_status = 'VERIFIED'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_objects_bucket_id_name_lower ON storage.objects USING btree (bucket_id, lower(name) COLLATE \"C\");"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX med_v23_one_verified_active_order ON public.medication_order_versions USING btree (person_medication_id) WHERE ((status = 'verified'::text) AND (effective_to IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX idx_appointment_reminders_appointment_id ON public.appointment_reminders USING btree (appointment_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_person_permissions_family_person ON public.person_permissions USING btree (family_person_id);"
+  },
+  {
+    "ddl": "CREATE INDEX users_instance_id_idx ON auth.users USING btree (instance_id);"
+  },
+  {
+    "ddl": "CREATE INDEX medication_master_name_idx ON public.medication_master USING btree (lower(generic_name));"
+  },
+  {
+    "ddl": "CREATE INDEX scim_users_user_id_idx ON auth.scim_users USING btree (user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_intake_candidates_person_type ON public.data_intake_candidates USING btree (person_id, candidate_type);"
+  },
+  {
+    "ddl": "CREATE INDEX med_preparation_items_session_state ON public.medication_preparation_items USING btree (session_id, state);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_family_role_owner_lookup ON public.family_role_assignments USING btree (family_id, user_id) WHERE ((role = 'owner'::text) AND (status = 'active'::text));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX data_intake_commit_batches_session_uq ON public.data_intake_commit_batches USING btree (session_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX family_notification_template_group_uq ON public.family_notification_template_targets USING btree (template_id, family_channel_id) WHERE ((target_type = 'line_group'::text) AND (family_channel_id IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX med_prep_impact_pending ON public.medication_preparation_impacts USING btree (session_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX line_identity_contexts_user_idx ON private.line_identity_contexts USING btree (user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX phase05_prn_person_time ON public.medication_prn_assessments USING btree (person_id, assessed_at DESC);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_persons_linked_user_id ON public.persons USING btree (linked_user_id) WHERE (linked_user_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX med_preparation_unique_allocation ON public.medication_preparation_items USING btree (allocation_id) WHERE ((allocation_id IS NOT NULL) AND (state <> 'REMOVED'::text));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX appointment_document_unique_asset_idx ON public.appointment_document_links USING btree (appointment_id, storage_asset_id, link_kind) WHERE (storage_asset_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX scim_users_external_id_key ON auth.scim_users USING btree (sso_provider_id, external_id) WHERE ((external_id IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_reschedule_assignee_status_idx ON private.appointment_reschedule_requests USING btree (assigned_to_user_id, status, updated_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX flow_state_created_at_idx ON auth.flow_state USING btree (created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX medication_refill_items_person_med_idx ON public.medication_refill_items USING btree (person_medication_id) WHERE (person_medication_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX med_round_exceptions_round ON public.medication_round_exceptions USING btree (round_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_users_email ON auth.users USING btree (email);"
+  },
+  {
+    "ddl": "CREATE INDEX saml_relay_states_sso_provider_id_idx ON auth.saml_relay_states USING btree (sso_provider_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX med_v23_schedule_occurrence ON public.medication_scheduled_doses USING btree (person_id, person_medication_id, planned_date, slot_key, order_version_id, occurrence_no);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX appointment_links_active_pair_uidx ON private.appointment_links USING btree (appointment_id_a, appointment_id_b) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_assignees_user_idx ON public.appointment_assignees USING btree (user_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX medical_documents_episode_idx ON public.medical_documents USING btree (treatment_episode_id, document_date) WHERE ((treatment_episode_id IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX line_group_private_handoffs_expires_idx ON public.line_group_private_handoffs USING btree (expires_at);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_user_id_auth_method ON auth.flow_state USING btree (user_id, authentication_method);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_med_source_person ON public.medication_instruction_sources USING btree (person_medication_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_notifications_recipient_status ON public.notifications USING btree (recipient_user_id, status);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX family_persons_family_id_id_uidx ON public.family_persons USING btree (family_id, id);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_reschedule_cancelled_by_idx ON private.appointment_reschedule_requests USING btree (cancelled_by_user_id) WHERE (cancelled_by_user_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_person_claim_invitations_expiry_open ON public.person_claim_invitations USING btree (expires_at) WHERE (status = 'pending'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_assignees_family_person_idx ON public.appointment_assignees USING btree (family_person_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX healthcare_expenses_payer_family_person_idx ON public.healthcare_expenses USING btree (payer_family_person_id) WHERE ((payer_family_person_id IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX idx_appointments_family_id ON public.appointments USING btree (family_id);"
+  },
+  {
+    "ddl": "CREATE INDEX med_preparation_impacts_order ON public.medication_preparation_impacts USING btree (changed_order_version_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX scim_tokens_expires_at_idx ON auth.scim_tokens USING btree (expires_at);"
+  },
+  {
+    "ddl": "CREATE INDEX person_identifiers_hospital_hn_lookup_idx ON public.person_identifiers USING btree (person_id, identifier_type, issuer_organization_id);"
+  },
+  {
+    "ddl": "CREATE INDEX treatment_episodes_person_time_idx ON public.treatment_episodes USING btree (person_id, COALESCE(started_at, created_at) DESC) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_family_role_assignments_family_id ON public.family_role_assignments USING btree (family_id);"
+  },
+  {
+    "ddl": "CREATE INDEX allergies_person_idx ON public.allergies USING btree (person_id) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_medical_primary_transfer_target ON private.medical_primary_transfer_requests USING btree (proposed_user_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_person_permissions_family_user ON public.person_permissions USING btree (family_id, user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_resource_links_appointment_idx ON public.appointment_resource_links USING btree (appointment_id, resource_type);"
+  },
+  {
+    "ddl": "CREATE INDEX healthcare_expense_items_expense_idx ON public.healthcare_expense_items USING btree (expense_id, sort_order, created_at) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX health_conditions_person_idx ON public.health_conditions USING btree (person_id) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX line_group_link_requests_family_status_idx ON public.line_group_link_requests USING btree (family_id, status, requested_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_medical_primary_user ON private.medical_primary_responsibilities USING btree (primary_user_id) WHERE (state = 'active'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_line_identities_rich_menu_id ON public.line_identities USING btree (rich_menu_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_objects_bucket_id_name ON storage.objects USING btree (bucket_id, name COLLATE \"C\");"
+  },
+  {
+    "ddl": "CREATE INDEX family_channel_family_links_channel_idx ON public.family_channel_family_links USING btree (family_channel_id, status);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX sso_domains_domain_idx ON auth.sso_domains USING btree (lower(domain));"
+  },
+  {
+    "ddl": "CREATE INDEX med_inv_stock_container_tx ON public.medication_inventory_transactions USING btree (stock_container_id, recorded_at DESC);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX data_intake_sources_line_message_id_uidx ON public.data_intake_sources USING btree (line_message_id) WHERE (line_message_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_person_claim_invitations_token_hash ON public.person_claim_invitations USING btree (invitation_token_hash);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_data_intake_drafts_status ON public.data_intake_drafts USING btree (status);"
+  },
+  {
+    "ddl": "CREATE INDEX scim_users_created_at_idx ON auth.scim_users USING btree (sso_provider_id, created_at, id) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX unique_phone_factor_per_user ON auth.mfa_factors USING btree (user_id, phone);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_family_permissions_family_user ON public.family_permissions USING btree (family_id, user_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_account_link_requests_requested_user_status ON public.account_link_requests USING btree (requested_user_id, status, created_at DESC) WHERE (requested_user_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX medical_documents_record_request_idx ON public.medical_documents USING btree (medical_record_request_id, document_date) WHERE ((medical_record_request_id IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX healthcare_organizations_external_code_active_uq ON public.healthcare_organizations USING btree (lower(external_code)) WHERE ((deleted_at IS NULL) AND (NULLIF(btrim(external_code), ''::text) IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX phms_storage_assets_person_idx ON public.phms_storage_assets USING btree (person_id) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_person_claim_invitations_open_person ON public.person_claim_invitations USING btree (person_id) WHERE (status = 'pending'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX phase05_decision_person_date ON public.medication_dose_decisions USING btree (person_id, evaluated_at DESC);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX notifications_dedupe_key_uq ON public.notifications USING btree (dedupe_key) WHERE (dedupe_key IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX custom_oauth_providers_created_at_idx ON auth.custom_oauth_providers USING btree (created_at);"
+  },
+  {
+    "ddl": "CREATE INDEX family_person_pending_access_configured_by_idx ON private.family_person_pending_access USING btree (configured_by) WHERE (configured_by IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_family_role_assignments ON public.family_role_assignments USING btree (family_id, user_id, role) WHERE (status = 'active'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_line_group_link_requests_requester_status ON public.line_group_link_requests USING btree (requested_by, status, requested_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX refresh_tokens_instance_id_user_id_idx ON auth.refresh_tokens USING btree (instance_id, user_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX phase05_decision_administration_unique ON public.medication_dose_decisions USING btree (actual_administration_id) WHERE (actual_administration_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX family_person_view_labels_family_idx ON public.family_person_view_labels USING btree (family_id, family_person_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX mfa_factors_user_friendly_name_unique ON auth.mfa_factors USING btree (friendly_name, user_id) WHERE (TRIM(BOTH FROM friendly_name) <> ''::text);"
+  },
+  {
+    "ddl": "CREATE INDEX notifications_dispatch_due_idx ON public.notifications USING btree (status, next_attempt_at, scheduled_for) WHERE ((channel = 'line'::text) AND (status = ANY (ARRAY['pending'::text, 'sending'::text])));"
+  },
+  {
+    "ddl": "CREATE INDEX medication_stock_ledger_person_time_idx ON public.medication_stock_ledger USING btree (person_id, occurred_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX appointments_episode_idx ON public.appointments USING btree (treatment_episode_id, appointment_at) WHERE ((treatment_episode_id IS NOT NULL) AND (deleted_at IS NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX idx_permission_requests_family ON public.permission_requests USING btree (family_id);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_line_login_accounts_account_id ON public.line_login_accounts USING btree (account_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX appointment_tasks_document_link_unique ON public.appointment_tasks USING btree (appointment_id, source_document_link_id) WHERE (source_document_link_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX appointments_rescheduled_from_idx ON public.appointments USING btree (rescheduled_from_appointment_id) WHERE (rescheduled_from_appointment_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX healthcare_expenses_person_date_idx ON public.healthcare_expenses USING btree (person_id, expense_date DESC) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX idx_objects_null_version ON storage.objects USING btree (bucket_id, name COLLATE \"C\") WHERE (NOT is_versioned);"
+  },
+  {
+    "ddl": "CREATE INDEX one_time_tokens_relates_to_hash_idx ON auth.one_time_tokens USING hash (relates_to);"
+  },
+  {
+    "ddl": "CREATE INDEX med_shared_auth_lookup ON public.medication_shared_usage_authorizations USING btree (pool_id, medication_id, patient_id, status);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_account_auth_users_primary ON public.account_auth_users USING btree (account_id) WHERE (is_primary = true);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_family_memberships_family_id ON public.family_memberships USING btree (family_id);"
+  },
+  {
+    "ddl": "CREATE INDEX oauth_consents_active_client_idx ON auth.oauth_consents USING btree (client_id) WHERE (revoked_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_account_link_requests_token_hash ON public.account_link_requests USING btree (verification_token_hash) WHERE (verification_token_hash IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX med_v23_lot_product_number_unique ON public.medication_lots USING btree (medication_id, lower(btrim(lot_number))) WHERE ((deleted_at IS NULL) AND (lot_number IS NOT NULL) AND (length(btrim(lot_number)) > 0));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX record_notification_user_target_uq ON public.record_notification_targets USING btree (COALESCE(record_id, intake_batch_id), target_user_id, resource) WHERE (target_type = 'user'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX med_intake_wizard_person_idx ON public.medication_intake_wizard_drafts USING btree (person_id, created_at DESC);"
+  },
+  {
+    "ddl": "CREATE INDEX webauthn_challenges_user_id_idx ON auth.webauthn_challenges USING btree (user_id);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX phase05_prn_administration_unique ON public.medication_prn_assessments USING btree (administration_event_id) WHERE (administration_event_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX uq_account_link_requests_open_per_line ON public.account_link_requests USING btree (line_identity_id) WHERE (status = ANY (ARRAY['pending'::text, 'confirmed'::text]));"
+  },
+  {
+    "ddl": "CREATE INDEX idx_family_persons_person_id ON public.family_persons USING btree (person_id);"
+  },
+  {
+    "ddl": "CREATE INDEX custom_oauth_providers_provider_type_idx ON auth.custom_oauth_providers USING btree (provider_type);"
+  },
+  {
+    "ddl": "CREATE INDEX med_inv_alloc_balance ON public.medication_stock_allocations USING btree (balance_id, status);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_person_claim_requests_expiry_open ON public.person_claim_requests USING btree (expires_at) WHERE ((status = ANY (ARRAY['pending'::text, 'person_confirmed'::text, 'approved'::text])) AND (expires_at IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE INDEX healthcare_expense_items_cgd_category_idx ON public.healthcare_expense_items USING btree (cgd_category_code) WHERE ((deleted_at IS NULL) AND (cgd_category_code IS NOT NULL));"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX record_notification_group_target_uq ON public.record_notification_targets USING btree (COALESCE(record_id, intake_batch_id), line_group_id, resource) WHERE (target_type = 'line_group'::text);"
+  },
+  {
+    "ddl": "CREATE INDEX appointment_links_a_active_idx ON private.appointment_links USING btree (appointment_id_a) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_notifications_person_id ON public.notifications USING btree (person_id) WHERE (person_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX data_intake_sources_storage_asset_idx ON public.data_intake_sources USING btree (storage_asset_id) WHERE (storage_asset_id IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_line_identities_rich_menu_key ON public.line_identities USING btree (rich_menu_key);"
+  },
+  {
+    "ddl": "CREATE INDEX scim_users_id_idx ON auth.scim_users USING btree (sso_provider_id, id) WHERE (deleted_at IS NULL);"
+  },
+  {
+    "ddl": "CREATE UNIQUE INDEX appointment_tasks_unique_source_key ON public.appointment_tasks USING btree (appointment_id, source_key) WHERE (source_key IS NOT NULL);"
+  },
+  {
+    "ddl": "CREATE INDEX idx_line_identities_linking_completed_at ON public.line_identities USING btree (linking_completed_at) WHERE (linking_completed_at IS NOT NULL);"
+  }
+]

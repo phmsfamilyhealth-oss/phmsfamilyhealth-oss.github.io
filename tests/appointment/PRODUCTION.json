@@ -1,0 +1,43 @@
+{
+  "status": "DEPLOYED_GATED_NOT_COMPLETE",
+  "verified_at": "2026-10-23T08:01:58.947Z",
+  "commit": "d8611ebac07814bc850ec201d660c7f1f689e0a0",
+  "pr": "https://github.com/phmsfamilyhealth-oss/phmsfamilyhealth-oss.github.io/pull/3",
+  "deployments": [
+    {
+      "slug": "line-webhook",
+      "version": 1336,
+      "status": "ACTIVE",
+      "sourceMatches": true
+    },
+    {
+      "slug": "line-webhook-router",
+      "version": 212,
+      "status": "ACTIVE",
+      "sourceMatches": true
+    }
+  ],
+  "migration": "appointment_recovery_release",
+  "public_wizard_enabled": false,
+  "allowed_test_actors": 0,
+  "production_draft_records": 0,
+  "anonymous_new_mutations_denied": true,
+  "source_readback_matches": true,
+  "smoke": {
+    "core_get": 405,
+    "router_get": 405
+  },
+  "boot_error_log_matches": 0,
+  "line_real_device_uat": false,
+  "remaining": [
+    "Authorized LINE test account and real-device UAT",
+    "Refill receipt -> inventory -> container -> expenses acceptance",
+    "Actual storage byte-upload and notification delivery acceptance",
+    "Visual 593px layout acceptance on LINE"
+  ],
+  "ci": {
+    "run_id": 39921807440,
+    "conclusion": "success",
+    "url": "https://github.com/phmsfamilyhealth-oss/phmsfamilyhealth-oss.github.io/actions/runs/39921807440"
+  }
+}

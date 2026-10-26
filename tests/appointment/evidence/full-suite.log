@@ -1,0 +1,35 @@
+{"applied":2574,"errors":0,"examples":[]}
+bootstrap PASS
+PASS real canonical intake -> confirm -> commit -> database readback
+PASS workspace reads real saved appointment
+PASS create each clinical appointment type without a physician or source
+PASS diagnostic VF and OCT share one appointment and retry is idempotent
+PASS multi-medication refill create and retry use existing RPC
+PASS canonical diagnostic payload commits procedures atomically
+PASS edit and reschedule update one appointment with audit
+PASS preparation checklist generates real tasks
+PASS reminder settings persist and sync
+PASS date-only Walk-in plan retries without duplicate
+RPC FAILED phms_line_appointment_link_existing_asset appointment_asset_person_mismatch PL/pgSQL function phms_line_appointment_link_existing_asset(text,text,uuid,text,text,text) line 42 at RAISE
+PASS document link retries and wrong-person attachment is rejected
+RPC FAILED phms_line_get_appointment_wizard_draft appointment_draft_expired_or_not_found PL/pgSQL function phms_line_get_appointment_wizard_draft(text,uuid) line 9 at RAISE
+PASS durable draft survives conversation clearing and expiry is enforced
+PASS cancel clears pending reminder jobs
+RPC FAILED phms_start_line_structured_text_intake line_identity_not_found PL/pgSQL function phms_resolve_line_command_context(text,text,text,boolean,text) line 13 at RAISE
+SQL statement "select *              from public.phms_resolve_line_command_context(
+    p_line_user_id,v_perm,p_action,true,'any'
+  )
+  limit 1"
+PL/pgSQL function phms_line_crud_context(text,text,text) line 9 at SQL statement
+SQL statement "select *              from private.phms_line_crud_context(p_line_user_id,v_key,'create')
+  limit 1"
+PL/pgSQL function phms_start_line_structured_text_intake(text,text,text,text,jsonb) line 24 at SQL statement
+PASS unlinked LINE identity is denied
+integration PASS
+(node:5) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+phms_final_back_order_v5 {"screen":"📅 นัดหมาย","buttons":["⚙️ จัดการนัดนี้"],"back":-1}
+{"events":16,"replies":16,"errors":[]}
+runtime-integration PASS
+[{"role":"anon","unauthorizedRead":"permission denied"},{"role":"authenticated","unauthorizedRead":"permission denied"}]
+security-integration PASS
