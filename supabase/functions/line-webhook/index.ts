@@ -3696,15 +3696,24 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
    if(p?.birth_info?.date)body.push({type:'text',text:'🎂 วันเกิด '+shortBirthThai(p.birth_info.date),size:'md',color:'#344054',wrap:true});
   }
   identityEnd=body.length;
-  const counts=[
-   ...(p?.medication_count!=null?['💊 ยา '+String(p.medication_count)]:[]),
-   ...(p?.appointment_count!=null?['📅 นัด '+String(p.appointment_count)]:[]),
-   ...(p?.health_count!=null?['🩺 สุขภาพ '+String(p.health_count)]:[])
+  // PHMS_FAMILY_CATEGORY_COUNT_CENTRAL_V2: three equal-width category tiles for every visible family member.
+  const categoryCounts:any[]=[
+   {label:'💊 ยา',value:p?.medication_count,background:'#FCECEF',foreground:'#91213D'},
+   {label:'📅 นัดหมาย',value:p?.appointment_count,background:'#FFF3DC',foreground:'#805617'},
+   {label:'🩺 สุขภาพ',value:p?.health_count,background:'#E7F4EA',foreground:'#205F46'}
   ];
-  if(counts.length){
+  if(categoryCounts.some((x:any)=>x.value!=null)){
    body.push({type:'separator',margin:sectionGap});
-   body.push({type:'text',text:counts.join(' • '),size:'sm',weight:'bold',wrap:true,margin:'sm',color:'#263649'});
-   body.push({type:'separator',margin:sectionGap})
+   body.push({type:'box',layout:'horizontal',spacing:'4px',margin:'sm',contents:categoryCounts.map((x:any)=>({
+    type:'box',layout:'vertical',flex:1,alignItems:'center',justifyContent:'center',
+    backgroundColor:x.background,cornerRadius:'8px',paddingAll:'5px',spacing:'0px',
+    contents:[
+     {type:'text',text:x.label,size:'xs',weight:'bold',color:x.foreground,align:'center',wrap:false},
+     {type:'text',text:String(Math.max(0,Number(x.value)||0)),size:'xl',weight:'bold',color:x.foreground,align:'center'},
+     {type:'text',text:'รายการ',size:'xxs',color:x.foreground,align:'center'}
+    ]
+   }))});
+   body.push({type:'separator',margin:sectionGap});
   }
   if(Number(p?.medication_count||0)===0&&Number(p?.appointment_count||0)===0&&Number(p?.health_count||0)===0&&[p?.medication_count,p?.appointment_count,p?.health_count].every((v:any)=>v!=null)&&!p?.next_appointment&&!p?.latest_health){
    if(body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
