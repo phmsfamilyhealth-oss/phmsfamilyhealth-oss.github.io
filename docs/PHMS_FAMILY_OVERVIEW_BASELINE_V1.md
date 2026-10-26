@@ -22,6 +22,12 @@ Scope: Family member directory cards and family navigation card. Applies uniform
 - Verify visually for an empty profile and a dense profile; counts 0 and 2+; long Thai text; different theme colors; small screen. Existing routing, permissions, typography and footer alignment must remain intact.
 - **Governance update alone does not change the live LINE Flex layout.** Mark production implementation complete only after the source function has been updated, compiled, regression-tested and deployed.
 
+## Amendment B — Empty-state spacing (2026-10-26)
+- For **every family and every person**, when medication, appointment and health counts are all zero and no previews exist, display `ยังไม่มีข้อมูลที่บันทึก` at **8px top margin** following the colored category count tiles.
+- Implement in the shared `personDirectoryBubble()` empty-state text element: change `margin:'xs'` to `margin:'8px'` only. Retain existing background, tile height, text color, footer, preview dividers, and permissions.
+- Do not add separators or create duplicate margin on the parent container. Verify rendered LINE Flex layout for both empty and populated family members.
+- Governance does not establish Production deployment; verify the active Supabase `line-webhook` code separately.
+
 ## Change control (mandatory)
 1. Treat the approved visual baseline as frozen. No incidental global text-size, layout, button, padding or color changes to this screen.
 2. Any future edit affecting this screen requires explicit owner approval, a before/after rendered screenshot, and regression review of dense and empty profiles.
