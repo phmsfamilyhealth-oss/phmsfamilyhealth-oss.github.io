@@ -1,5 +1,17 @@
 import fs from 'node:fs/promises';
 import {createHmac} from 'node:crypto';
+import assert from 'node:assert/strict';
+
+function validateTransport(messages){
+ assert.ok(messages.length>=1&&messages.length<=5);
+ const visit=node=>{
+  if(!node||typeof node!=='object')return;
+  if(node.type==='bubble')assert.ok(Buffer.byteLength(JSON.stringify(node))<=30000,'Flex bubble exceeds 30 KB');
+  if(node.type==='carousel')assert.ok(node.contents.length>=1&&node.contents.length<=12);
+  if(node.type==='postback'){assert.ok(Array.from(node.label||'').length<=20,'Action label exceeds 20 characters');assert.ok(node.data.length<=300);}
+  for(const value of Object.values(node))if(Array.isArray(value))value.forEach(visit);else if(value&&typeof value==='object')visit(value);
+ };messages.forEach(visit);
+}
 
 // Run the real signed webhook and all outbound Flex transforms. Only external
 // transports and the conversation-store RPC are replaced by isolated adapters.
@@ -32,7 +44,7 @@ export async function webhookHarness(db){
    throw Error('Unexpected real-webhook RPC: '+name);
   }
   if(url.includes('/rest/v1/phms_category_design_tokens'))return Response.json([]);
-  if(url==='https://api.line.me/v2/bot/message/reply'){sent=JSON.parse(init.body).messages;return Response.json({});}
+  if(url==='https://api.line.me/v2/bot/message/reply'){sent=JSON.parse(init.body).messages;validateTransport(sent);return Response.json({});}
   if(url.startsWith('https://api-data.line.me/'))return new Response(new Uint8Array([255,216,255,0,23]),{headers:{'content-type':'image/jpeg'}});
   if(url.includes('/storage/v1/object/sign/'))return Response.json({signedURL:'/object/sign/synthetic-image?token=synthetic'});
   if(url.includes('/storage/v1/object/phms-medical-sources/')&&init.method==='POST'){
