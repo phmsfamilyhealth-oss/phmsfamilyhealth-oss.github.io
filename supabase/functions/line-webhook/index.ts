@@ -743,10 +743,11 @@ function phmsSplitBy593Budget(message:any):any{
   const summaryKind=String(card.header?.contents?.find((x:any)=>x?.type==='text'&&/^(?:💊 ยา|📅 นัดหมาย|🩺 สุขภาพ|📄 เอกสาร|💰 ค่าใช้จ่าย)$/u.test(String(x.text||'')))?.text||'');
   if(summaryKind){
    if(card.header?.type==='box'){card.header.paddingAll='16px';card.header.spacing='6px'}
-   if(card.body?.type==='box'){card.body.paddingAll='16px';card.body.spacing='12px'}
+   if(card.body?.type==='box'){card.body.paddingAll='16px';card.body.spacing=summaryKind==='📅 นัดหมาย'?'6px':'12px'}
    if(card.footer?.type==='box'){card.footer.paddingAll='12px';card.footer.spacing='8px'}
    for(const block of card.body.contents){
-    if(block?.type==='separator')block.margin='10px';
+    if(block?.type==='separator')block.margin=summaryKind==='📅 นัดหมาย'?'8px':'10px';
+    if(summaryKind==='📅 นัดหมาย'&&block?.type==='text'&&String(block.text||'').startsWith('📋 ดูอีก ')){block.size='sm';block.weight='regular';block.align='start';block.margin='8px';}
     if(block?.type==='box'&&JSON.stringify(block).includes('📋 ดูอีก ')){
      block.paddingAll='12px';block.margin='16px';block.spacing='6px';
     }
@@ -11765,7 +11766,7 @@ function aimPersonSummaryRows(kind:'medications'|'appointments'|'health_data',da
   }
   if(i)rows.push({type:'separator',margin:kind==='health_data'?'sm':'md'});
   const detailPrefix=kind==='medications'?'ดูยา ':kind==='appointments'?'ดูนัด ':'ดูสุขภาพ ';
-  rows.push({type:'box',layout:'vertical',spacing:kind==='health_data'?'xs':'sm',paddingAll:kind==='health_data'?'4px':'8px',cornerRadius:'8px',contents:blocks,...(/^(?:[a-f0-9]{8}-[a-f0-9]{3}|[a-f0-9]{12})$/i.test(recordCode)?{action:{type:'postback',label:'ดูรายละเอียด',data:detailPrefix+recordCode}}:{})});
+  rows.push({type:'box',layout:'vertical',spacing:kind==='appointments'?'5px':kind==='health_data'?'xs':'sm',paddingAll:kind==='appointments'?'0px':kind==='health_data'?'4px':'8px',margin:kind==='appointments'?'8px':undefined,cornerRadius:'8px',contents:blocks,...(/^(?:[a-f0-9]{8}-[a-f0-9]{3}|[a-f0-9]{12})$/i.test(recordCode)?{action:{type:'postback',label:'ดูรายละเอียด',data:detailPrefix+recordCode}}:{})});
  }
  const count=Number(data?.count??all.length);
  /* PHMS_HEALTH_SINGLE_CARD_V3: count remains in header; do not add a health remaining-notice block or split into an otherwise empty extra card. Full records and footer actions remain available. */
@@ -11782,6 +11783,7 @@ const PHMS_PERSON_CATEGORY_HEADER_BG:Record<string,string>={
 };
 /* PHMS_FIVE_CATEGORY_REMAINING_NOTICE_V4: one shared layout and theme-based colors for all five category summaries. */
 const phmsPersonRemainingNotice=(n:number,category:string='documents')=>{
+ if(category==='appointments')return {type:'text',text:'📋 ดูอีก '+n+' รายการ',size:'sm',weight:'regular',color:'#85571D',align:'start',wrap:false,maxLines:1,margin:'8px'};
  const key=category==='health_data'?'health':category;
  const palette=(PHMS_CATEGORY_THEME as Record<string,{color:string,background:string}>)[key]||PHMS_CATEGORY_THEME.documents;
  return {type:'box',layout:'vertical',spacing:'xs',margin:'sm',contents:[
