@@ -9,7 +9,7 @@ if(testURL){
  const {default:pg}=await import('pg');
  pg.types.setTypeParser(1700,Number);
  const pool=new pg.Pool({connectionString:testURL,max:1});
- const query=(sql,params=[])=>pool.query(sql,params.map(v=>typeof v==='object'&&v!==null?JSON.stringify(v):v));
+ const query=(sql,params=[])=>pool.query(sql,params.map((v,i)=>Array.isArray(v)&&!new RegExp('p_items\\s*=>\\s*\\$'+(i+1)+'(?:\\D|$)').test(sql)?v:typeof v==='object'&&v!==null?JSON.stringify(v):v));
  database={waitReady:Promise.resolve(),query,exec:sql=>pool.query(sql),close:()=>pool.end()};
 }else database=new PGlite({extensions:{uuid_ossp}});
 export const db=database;

@@ -22,7 +22,7 @@ const fetchLocal=async(input,init={})=>{
   try{const rows=(await db.query(`select * from public.${name}(${keys.map((k,i)=>k+'=> $'+(i+1)).join(',')})`,Object.values(body))).rows;requests.push(name);const m=proc.get(name);return Response.json(m.proretset||m.typname==='record'?rows:(rows[0]?.[name]??null))}catch(e){errors.push({rpc:name,error:e.message});return Response.json({message:e.message},{status:400})}
  }
  const table=url.pathname.split('/').at(-1);if(!/^[a-z_]+$/.test(table))throw Error('Unsafe test table');
- if(table==='phms_card_overflow_menu'&&init.method==='POST'){await db.query('insert into phms_card_overflow_menu(menu_id,line_user_id,payload) values($1,$2,$3)',[body.menu_id,body.line_user_id,body.payload]);return new Response(null,{status:201});}
+ if(table==='phms_card_overflow_menu'&&init.method==='POST'){await db.query('insert into phms_card_overflow_menu(menu_id,line_user_id,payload) values($1,$2,$3)',[body.menu_id,body.line_user_id,JSON.stringify(body.payload)]);return new Response(null,{status:201});}
  if((init.method||'GET')!=='GET')throw Error('Unimplemented direct mutation '+table);
  const args=[],where=[];for(const [k,v]of url.searchParams){if(['select','limit','order','offset'].includes(k))continue;if(!/^[a-z_]+$/.test(k))throw Error('Unsafe field');const m=v.match(/^(eq|gte|like)\.(.*)$/s);if(m){args.push(m[2]==='true'?true:m[2]==='false'?false:m[2]);where.push(`${k} ${m[1]==='eq'?'=':m[1]==='gte'?'>=':'like'} $${args.length}`)}}
  return Response.json((await db.query(`select * from public.${table}${where.length?' where '+where.join(' and '):''} limit 50`,args)).rows)
