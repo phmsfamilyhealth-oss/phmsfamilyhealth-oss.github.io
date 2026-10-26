@@ -19,8 +19,15 @@ returns table(actor_user_id uuid,target_person_id uuid,target_person_name text,a
 language plpgsql security invoker as $$
 begin
  return query select c.actor_user_id,c.target_person_id,c.target_person_name,c.active_family_id,c.active_family_person_id
- from private.test_context c where c.line_user_id=p_line_user_id and p_resource='health'
+ from private.test_context c where c.line_user_id=p_line_user_id and p_resource in ('health','document')
  and case p_action when 'view' then c.can_view when 'create' then c.can_create when 'update' then c.can_update else false end;
+end $$;
+create function private.user_can_access_family_person(p_actor uuid,p_family_person uuid,p_resource text,p_action text) returns boolean
+language plpgsql stable security definer set search_path='' as $$
+begin
+ return exists(select 1 from public.family_persons fp join private.test_context c on c.target_person_id=fp.person_id
+  where fp.id=p_family_person and c.actor_user_id=p_actor and p_resource='documents'
+  and case p_action when 'view' then c.can_view when 'create' then c.can_create else false end);
 end $$;
 -- The policy predicates are imported verbatim; identity/permission resolution is
 -- synthetic so these tests never need patient accounts or production data.

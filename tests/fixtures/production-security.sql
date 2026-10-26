@@ -1,7 +1,10 @@
 -- Production FK and RLS definitions read 2026-10-23; synthetic identity helpers live in security-harness.sql.
 create table public.data_intake_candidates(id uuid primary key);
 create table public.families(id uuid primary key);
-create table public.family_persons(id uuid primary key);
+create table public.family_persons(id uuid primary key,person_id uuid,status text default 'active');
+insert into public.family_persons(id,person_id) values
+ ('55555555-5555-4555-8555-555555555555','22222222-2222-4222-8222-222222222222'),
+ ('66666666-6666-4666-8666-666666666666','33333333-3333-4333-8333-333333333333');
 create table public.persons(id uuid primary key);
 create table public.profiles(id uuid primary key);
 create table public.encounters(id uuid primary key);

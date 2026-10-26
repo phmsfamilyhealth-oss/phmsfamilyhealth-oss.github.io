@@ -1,6 +1,15 @@
 -- Candidate only. Apply first to an isolated copy of the PHMS schema.
 -- Reuse the canonical measurement register, intake sessions/actions and document store.
 -- Fail-closed pilot controls live in the existing runtime configuration.
+-- The new invoker RPC must explicitly be allowed to call the established
+-- private authorization resolver. Client roles remain unable to execute it.
+grant execute on function private.phms_line_crud_context(text,text,text) to service_role;
+-- Explicit grants for the trusted backend, since BYPASSRLS does not itself
+-- grant table privileges. Do not grant these operations to client roles.
+grant select,insert,update on public.data_intake_sessions,public.data_intake_sources,public.medical_documents to service_role;
+grant insert on public.data_intake_actions to service_role;
+grant select,insert on public.health_measurements,public.phms_storage_assets to service_role;
+grant select on public.phms_runtime_environment,storage.objects,storage.buckets to service_role;
 alter table public.phms_runtime_environment
  add column if not exists health_smart_intake_release_state text not null default 'off'
   check (health_smart_intake_release_state in ('off','pilot','general')),
@@ -84,11 +93,21 @@ end $$;
 -- LINE IDs are not credentials. This RPC is service_role only and is called after webhook signature verification.
 create or replace function public.phms_smart_health(p_line_user_id text,p_action text,p_session_id uuid default null,p_payload jsonb default '{}') returns jsonb
 language plpgsql security invoker set search_path='' as $$
-declare ctx record; s public.data_intake_sessions%rowtype; r jsonb; sid uuid; result jsonb; rev integer; aid uuid; did uuid; old_id uuid; points jsonb; action_permission text;
+declare ctx record; doc_ctx record; s public.data_intake_sessions%rowtype; r jsonb; sid uuid; result jsonb; rev integer; aid uuid; did uuid; old_id uuid; points jsonb; action_permission text;
 begin
  if coalesce((public.phms_smart_health_access(p_line_user_id)->>'allowed')::boolean,false) is not true then raise exception 'smart_health_release_not_authorized';end if;
  action_permission:=case when p_action in ('history','evidence_read','evidence_list','read') then 'view' else 'create' end;
  select * into strict ctx from private.phms_line_crud_context(p_line_user_id,'health',action_permission);
+ if p_action in ('evidence','evidence_read','evidence_list') then
+  select * into strict doc_ctx from private.phms_line_crud_context(p_line_user_id,'document',case when p_action='evidence' then 'create' else 'view' end);
+  if doc_ctx.target_person_id is distinct from ctx.target_person_id or doc_ctx.actor_user_id is distinct from ctx.actor_user_id then raise exception 'evidence_document_context_mismatch';end if;
+  -- Match the underlying document/Storage policy as well as LINE context:
+  -- personal context alone must not mint a URL around document permissions.
+  if not exists(select 1 from public.family_persons fp where fp.person_id=ctx.target_person_id and coalesce(fp.status,'active')='active'
+    and private.user_can_access_family_person(ctx.actor_user_id,fp.id,'documents',case when p_action='evidence' then 'create' else 'view' end)) then
+   raise exception 'evidence_document_permission_denied';
+  end if;
+ end if;
  if p_action='history' then
   if coalesce((p_payload->>'days')::integer,7) not in (1,7,30,90) then raise exception 'invalid_history_window';end if;
   select coalesce(jsonb_agg(to_jsonb(m) order by m.measured_at,m.id),'[]') into points from public.health_measurements m
