@@ -54,3 +54,30 @@ BEGIN
  EXCEPTION WHEN OTHERS THEN rejected:=true; END;
  IF NOT rejected THEN RAISE EXCEPTION 'release gate not enforced'; END IF;
 END $$;
+
+-- Restore gate for replay-tampering checks in isolated database.
+UPDATE private.phms_appointment_release_gate SET enabled_for_everyone=true;
+DO $$
+DECLARE rejected boolean:=false; before_count integer; after_count integer;
+BEGIN
+ SELECT count(*) INTO before_count FROM public.appointments;
+ BEGIN
+  PERFORM public.phms_v24_commit_appointment(
+   '11111111-1111-4111-8111-111111111111','55555555-5555-4555-8555-555555555555',
+   '22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333',
+   '{"family_id":"22222222-2222-4222-8222-222222222222","family_person_id":"33333333-3333-4333-8333-333333333333","person_id":"44444444-4444-4444-8444-444444444444","created_by":"11111111-1111-4111-8111-111111111111","appointment_type":"walk_in","visit_mode":"walk_in","visit_time_known":false,"status":"planned","planned_visit_date":"2026-11-03","appointment_at":null,"preparation_tasks":[{"title":"Changed"}]}'::jsonb);
+ EXCEPTION WHEN SQLSTATE 'P0001' THEN rejected:=true; END;
+ SELECT count(*) INTO after_count FROM public.appointments;
+ IF NOT rejected OR before_count<>after_count THEN RAISE EXCEPTION 'changed replay was accepted'; END IF;
+END $$;
+DO $$
+DECLARE rejected boolean:=false;
+BEGIN
+ BEGIN
+  PERFORM public.phms_v24_commit_appointment(
+   '11111111-1111-4111-8111-111111111111','88888888-8888-4888-8888-888888888888',
+   '22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333',
+   '{"family_id":"22222222-2222-4222-8222-222222222222","family_person_id":"33333333-3333-4333-8333-333333333333","person_id":"44444444-4444-4444-8444-444444444444","created_by":"11111111-1111-4111-8111-111111111111","appointment_type":"walk_in","visit_mode":"walk_in","visit_time_known":false,"status":"planned","planned_visit_date":"2026-11-03","appointment_at":null,"document_metadata":[{"name":"not-yet-linked.pdf"}]}'::jsonb);
+ EXCEPTION WHEN SQLSTATE 'P0001' THEN rejected:=true; END;
+ IF NOT rejected THEN RAISE EXCEPTION 'unsupported document was accepted'; END IF;
+END $$;
