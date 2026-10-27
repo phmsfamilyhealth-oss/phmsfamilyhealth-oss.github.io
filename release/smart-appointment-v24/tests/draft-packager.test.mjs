@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {prepareDraftForReview as pack} from '../contracts/draft-packager.mjs';
+const base={scenario:'walk_in',date:'2026-11-03',time_known:false,time:'',hospital:' รพ. ตัวอย่าง ',prep:'ใบนัด\n ยาประจำตัว '};
+test('clean checklist and preserve unknown time',()=>{let r=pack(base);assert.equal(r.ok,true);assert.equal(r.draft.time,null);assert.equal(r.draft.hospital_name,'รพ. ตัวอย่าง');assert.deepEqual(r.draft.preparation_tasks.map(x=>x.title),['ใบนัด','ยาประจำตัว']);});
+test('accept private upload metadata only',()=>{let r=pack({...base,documents:[{name:'a.pdf',type:'application/pdf',size:1024}]});assert.equal(r.ok,true);assert.deepEqual(r.draft.document_metadata,[{name:'a.pdf',type:'application/pdf',size:1024}]);});
+test('reject executable upload',()=>assert.equal(pack({...base,documents:[{name:'a.exe',type:'application/octet-stream',size:1}]}).ok,false));
+test('reject zero-length upload',()=>assert.equal(pack({...base,documents:[{name:'x.pdf',type:'application/pdf',size:0}]}).ok,false));
+test('reject oversize upload',()=>assert.equal(pack({...base,documents:[{name:'x.pdf',type:'application/pdf',size:11000000}]}).ok,false));
+test('reject more than five files',()=>assert.equal(pack({...base,documents:Array(6).fill({name:'x',type:'image/png',size:20})}).ok,false));
+test('reject excessive checklist entries',()=>assert.equal(pack({...base,prep:Array(21).fill('ยา').join('\n')}).ok,false));
+test('reject oversized checklist item',()=>assert.equal(pack({...base,prep:'x'.repeat(161)}).ok,false));
