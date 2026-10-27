@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {resolveBangkokAppointmentTime} from '../contracts/bangkok-time.mjs';import {mapAppointmentInsert} from '../contracts/supabase-appointment-row.mjs';
+test('Bangkok 09:30 resolves 02:30 UTC',()=>assert.equal(resolveBangkokAppointmentTime('2026-11-03T09:30').appointment_at,'2026-11-03T02:30:00.000Z'));
+test('midnight resolves previous UTC day',()=>assert.equal(resolveBangkokAppointmentTime('2026-11-03T00:15').appointment_at,'2026-11-02T17:15:00.000Z'));
+test('reject invalid leap day and impossible local clock',()=>{assert.equal(resolveBangkokAppointmentTime('2026-02-29T09:30').ok,false);assert.equal(resolveBangkokAppointmentTime('2026-11-03T25:30').ok,false)});
+test('map a time-known canonical visit to an actual UTC appointment_at',()=>{const c={actorId:'u',subjectId:'fperson',personId:'person',familyId:'family',appointmentType:'followup',draft:{},canonicalVisit:{visit_time_known:true,visit_mode:'scheduled',planned_visit_date:'2026-11-03',local_appointment_datetime:'2026-11-03T09:30',status:'planned'}};assert.equal(mapAppointmentInsert(c).row.appointment_at,'2026-11-03T02:30:00.000Z')});
