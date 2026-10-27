@@ -9,7 +9,7 @@ export function makePhmsWriteIdentityResolver({supabase,centralCanAccess,resolve
   const {data,error}=await supabase.from('family_persons').select('id,family_id,person_id,status').eq('id',subjectId).limit(2);
   if(error||!Array.isArray(data)||data.length!==1)return null;
   const row=data[0];
-  if(row.id!==subjectId||row.family_id!==familyId||!isUuid(row.person_id)||row.status==='inactive')return null;
+  if(row.id!==subjectId||row.family_id!==familyId||!isUuid(row.person_id)||row.status!=='active')return null;
   const appointmentType=await resolveAppointmentType(command);
   if(!['new_case','follow_up','referral','investigation','procedure','walk_in','rescheduled','other','checkup','vaccination','medication_refill'].includes(appointmentType))return null;
   return {familyPersonId:subjectId,familyId,personId:row.person_id,appointmentType};
