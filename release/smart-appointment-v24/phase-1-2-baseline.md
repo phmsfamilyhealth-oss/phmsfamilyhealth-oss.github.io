@@ -67,3 +67,10 @@ This commit only adds a documentation file on a feature branch. Rollback: revert
 - private.phms_line_crud_context: rejects unknown resources/actions; calls phms_resolve_line_command_context(..., require_context=true), checks context_ready, permission_granted and target_person_id nonnull. Trusted caller must bind LINE identity to cryptographically verified LINE token; the RPC itself accepts p_line_user_id text.
 - public.phms_line_get_appointment_wizard_draft: same create-permission context; restricts draft to actor_user_id, target_person_id and unexpired drafts; returns last five drafts if no key. Needs behavioral cross-person tests.
 - No user identity, patient records or documents were fetched in this review.
+
+## Repeatable baseline verification — 2026-10-27 (follow-up)
+- Rechecked GitHub main HEAD 1d988866dfcd9a1a97196b5fa26bbc989110f3cb, PR #12 OPEN/DRAFT, and production line-webhook ACTIVE **v1421**; Production changed independently from previously observed v1420. Never deploy earlier source without fresh comparison.
+- Executed read-only PostgreSQL assertions, **14 passed / 0 failed**; saved exact repeatable SQL at `release/smart-appointment-v24/tests/baseline_readonly.sql`.
+- Coverage: appointments/procedures/tasks/document links, three healthcare master tables, RLS flags on three canonical tables, gate disabled, allowlist empty, and browser authenticated role lacking EXECUTE on both wizard draft save and gate RPCs.
+- These are *metadata/configuration assertions only*, not full behavioral cross-family access tests, LINE token verification, transaction tests, automated CI or UAT. Phase 1 and 2 remain BLOCKED.
+- No production data, policy, storage object, Edge Function, or flag was changed by the audit. Rollback of this documentation/test-only commit: revert PR commits without database rollback.
