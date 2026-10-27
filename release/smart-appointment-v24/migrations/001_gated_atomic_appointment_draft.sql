@@ -70,6 +70,9 @@ BEGIN
   THEN RAISE EXCEPTION 'unknown_time_not_supported'; END IF;
   IF (p_appointment->>'visit_time_known')='true' AND v_time IS NULL
   THEN RAISE EXCEPTION 'time_required'; END IF;
+  -- Keep the patient's selected visit date consistent with the actual Bangkok time.
+  IF v_time IS NOT NULL AND (v_time AT TIME ZONE 'Asia/Bangkok')::date IS DISTINCT FROM v_date
+  THEN RAISE EXCEPTION 'appointment_date_time_mismatch'; END IF;
   -- JSON null and absent values must not bypass three-valued SQL comparisons.
   IF v_type IS NULL OR v_mode IS NULL OR v_status IS NULL THEN RAISE EXCEPTION 'invalid_appointment'; END IF;
   IF p_appointment ? 'preparation_tasks' AND jsonb_typeof(p_appointment->'preparation_tasks') IS DISTINCT FROM 'array' THEN RAISE EXCEPTION 'invalid_checklist'; END IF;
