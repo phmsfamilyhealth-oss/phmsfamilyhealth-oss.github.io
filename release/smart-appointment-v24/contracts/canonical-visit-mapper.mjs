@@ -15,5 +15,5 @@ export function canonicalizeVisit(draft){
  if(!validTime(time))return {ok:false,error:'invalid_time'};
  if(scenario!=='booked'&&scenario!=='walk_in'&&scenario!=='historical')return {ok:false,error:'invalid_scenario'};
  // Local wall-clock is intentionally kept unconverted; backend must interpret with Asia/Bangkok TZ.
- return {ok:true,visit:{visit_mode:scenario==='walk_in'?'walk_in':'scheduled',visit_time_known:true,planned_visit_date:draft.date,local_appointment_datetime:draft.date+'T'+time,status:scenario==='historical'?'completed':'planned'}};
+ return {ok:true,visit:{visit_mode:scenario==='walk_in'?'walk_in':'booked',visit_time_known:true,planned_visit_date:draft.date,local_appointment_datetime:draft.date+'T'+time,status:scenario==='historical'?'completed':'planned'}};
 }
