@@ -10,6 +10,8 @@ const env=name=>(Deno.env.get(name)||'').trim();
 const required=['SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','PHMS_V24_PRIVATE_DATABASE_URL','PHMS_V24_LINE_CHANNEL_ID'];
 const ready=required.every(name=>env(name));
 let handler=null;
+let isSchemaReady=null;
+
 if(ready){
  try{
   const supabase=createClient(env('SUPABASE_URL'),env('SUPABASE_SERVICE_ROLE_KEY'),{auth:{persistSession:false,autoRefreshToken:false}});
@@ -17,6 +19,12 @@ if(ready){
   // The private driver must run only on the server. The browser NEVER supplies SQL,
   // actor identity, family identity or database credentials.
   const privateQuery=async(query,args)=>({rows:await sql.unsafe(query,args)});
+  isSchemaReady=async()=>{
+   try{
+    const result=await sql`select to_regprocedure('public.phms_v24_commit_appointment(uuid,uuid,uuid,uuid,jsonb)') is not null as installed, to_regclass('private.phms_v24_appointment_operations') is not null as operations_ready`;
+    return result.length===1&&result[0].installed===true&&result[0].operations_ready===true;
+   }catch{return false;}
+  };
   const resolveAppointmentType=async command=>{
    const scenario=command?.draft?.scenario;
    if(scenario==='walk_in')return 'walk_in';
@@ -32,7 +40,7 @@ if(ready){
 }
 Deno.serve(async request=>{
  if(request.method==='OPTIONS')return json('not_enabled',403);
- if(!handler)return json('feature_not_released',404);
+ if(!handler||!isSchemaReady||await isSchemaReady()!==true)return json('feature_not_released',404);
  // Private release gate is checked by the handler; requests are never
  // allowed to bypass central PHMS permissions.
  try{return await handler(request);}catch{return json('request_failed',503);}
