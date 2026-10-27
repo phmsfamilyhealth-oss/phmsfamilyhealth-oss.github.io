@@ -12,7 +12,7 @@
 <label for="known">ทราบเวลาหรือไม่</label><select id="known"><option value="yes">ทราบเวลา</option><option value="no">ไม่ทราบเวลา</option></select>
 <div id="timebox"><label for="time">เวลา</label><input type="time" id="time"></div>
 <label for="documents">แนบรูปใบนัดหรือเอกสาร (ไม่เกิน 5 ไฟล์)</label><input type="file" id="documents" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"><p class="help" id="filehelp">ไฟล์ละไม่เกิน 10 MB — ยังไม่อัปโหลดจริง</p>
-<label for="providerOrg">เลือกจากทะเบียนโรงพยาบาล</label><select id="providerOrg" disabled><option>รอเชื่อมทะเบียนโรงพยาบาลที่ได้รับสิทธิ์</option></select><p class="help">เมื่อต่อระบบจริง จะเลือกรายชื่อที่ได้รับสิทธิ์เท่านั้น และเปลี่ยนโรงพยาบาลแล้วต้องเลือกแผนก/แพทย์ใหม่</p>\n<label for="hospital">โรงพยาบาล/สถานพยาบาล (กรอกชั่วคราว)</label><input id="hospital" maxlength="160" placeholder="พิมพ์ชื่อโรงพยาบาล">
+<label for="providerOrg">เลือกจากทะเบียนโรงพยาบาล</label><select id="providerOrg" disabled><option>รอเชื่อมทะเบียนโรงพยาบาลที่ได้รับสิทธิ์</option></select><label for="providerUnit">แผนกจากทะเบียน</label><select id="providerUnit" disabled><option>เลือกโรงพยาบาลก่อน</option></select><label for="providerClinician">แพทย์จากทะเบียน</label><select id="providerClinician" disabled><option>เลือกแผนกก่อน</option></select><p class="help">เมื่อต่อระบบจริง จะเลือกรายชื่อที่ได้รับสิทธิ์เท่านั้น และเปลี่ยนโรงพยาบาลแล้วต้องเลือกแผนก/แพทย์ใหม่</p>\n<label for="hospital">โรงพยาบาล/สถานพยาบาล (กรอกชั่วคราว)</label><input id="hospital" maxlength="160" placeholder="พิมพ์ชื่อโรงพยาบาล">
 <label for="department">แผนก/คลินิก (ถ้าทราบ)</label><input id="department" maxlength="160">
 <div id="details"><label for="prior">เลขที่นัดเดิม (เฉพาะการเลื่อนนัด)</label><input id="prior" maxlength="100" placeholder="ยังไม่เปิดการเลื่อนนัดจริง"><label for="doctor">ชื่อแพทย์ (ถ้าทราบ)</label><input id="doctor" maxlength="160">
 </div><label for="purpose">ไปพบแพทย์เรื่องอะไร</label><textarea id="purpose" maxlength="1000" rows="3"></textarea>
@@ -24,6 +24,13 @@
 </main><script type="module">
 import {validateAppointmentDraft} from '../contracts/scenario-validator.mjs';
 import {prepareDraftForReview} from '../contracts/draft-packager.mjs';
+import {providerPickerState} from '../contracts/provider-picker-state.mjs';
+// No fake catalog. A verified backend integration will invoke setAuthorizedCatalog after LINE authentication.
+let authorizedCatalog=null;
+function fillOptions(id,items,placeholder){const select=document.getElementById(id);select.replaceChildren(new Option(placeholder,''),...items.map(x=>new Option(x.label,x.value)));select.disabled=!items.length;}
+function refreshProviderPicker(){const org=document.getElementById('providerOrg').value,unit=document.getElementById('providerUnit').value,clinician=document.getElementById('providerClinician').value;const state=providerPickerState(authorizedCatalog,org,unit,clinician);fillOptions('providerOrg',state.organizations,'เลือกโรงพยาบาล');document.getElementById('providerOrg').value=state.organizationId;fillOptions('providerUnit',state.units,'เลือกแผนก');document.getElementById('providerUnit').value=state.unitId;fillOptions('providerClinician',state.clinicians,'เลือกแพทย์');document.getElementById('providerClinician').value=state.clinicianId;}
+for(const id of ['providerOrg','providerUnit'])document.getElementById(id).addEventListener('change',refreshProviderPicker);
+// Registry remains disconnected until the protected API supplies a verified, authorized catalog.
 const $=id=>document.getElementById(id), ids=['detail','scenario','date','known','time','hospital','department','doctor','purpose','prep'];
 function refresh(){ $('details').classList.toggle('hidden',$('detail').value!=='full');const unknown=$('known').value==='no';$('timebox').classList.toggle('hidden',unknown);if(unknown)$('time').value='';}
 $('known').addEventListener('change',refresh);$('detail').addEventListener('change',refresh);
