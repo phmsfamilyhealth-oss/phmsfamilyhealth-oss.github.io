@@ -14,6 +14,21 @@ CREATE TABLE private.phms_appointment_release_gate(singleton boolean PRIMARY KEY
 INSERT INTO private.phms_appointment_release_gate VALUES(true,true,'{}');
 CREATE FUNCTION private.user_can_access_family_person(uuid,uuid,text,text) RETURNS boolean LANGUAGE sql AS $$ SELECT $1='11111111-1111-4111-8111-111111111111'::uuid AND $2='33333333-3333-4333-8333-333333333333'::uuid $$;
 INSERT INTO public.family_persons VALUES('33333333-3333-4333-8333-333333333333','22222222-2222-4222-8222-222222222222','44444444-4444-4444-8444-444444444444');
+-- Emulate existing Production automatic checklist projection trigger in synthetic PostgreSQL.
+-- This catches duplicate items from both trigger and explicit migration insert.
+CREATE FUNCTION public.phms_test_preparation_projection() RETURNS trigger LANGUAGE plpgsql AS $
+BEGIN
+ IF nullif(btrim(coalesce(NEW.preparation_notes,'')),'') IS NOT NULL THEN
+  INSERT INTO public.appointment_tasks(appointment_id,task_type,title,status,created_by)
+  SELECT NEW.id,'other',btrim(line),'pending',NEW.created_by
+  FROM regexp_split_to_table(NEW.preparation_notes,E'\\n+') AS line
+  WHERE nullif(btrim(line),'') IS NOT NULL;
+ END IF;
+ RETURN NEW;
+END $;
+CREATE TRIGGER trg_phms_sync_appointment_preparation_tasks
+AFTER INSERT ON public.appointments FOR EACH ROW
+EXECUTE FUNCTION public.phms_test_preparation_projection();
 \ir ../migrations/001_gated_atomic_appointment_draft.sql
 DO $$
 DECLARE a jsonb; b jsonb; c integer; d integer;
