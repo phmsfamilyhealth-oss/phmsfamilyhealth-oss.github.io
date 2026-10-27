@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {verifiedAppointmentReadback as verify} from '../contracts/appointment-readback.mjs';
+const q={appointmentId:'a1',actorId:'u1',subjectId:'p1',familyId:'f1'};
+const row={id:'a1',family_id:'f1',family_person_id:'p1',deleted_at:null};
+const deps={centralCanAccess:async()=>true,readAuthorizedAppointment:async()=>row};
+test('matching authorized row verified',async()=>assert.equal((await verify(q,deps)).ok,true));
+test('no view permission blocks read',async()=>{let reads=0;const r=await verify(q,{...deps,centralCanAccess:async()=>false,readAuthorizedAppointment:async()=>{reads++;return row}});assert.equal(r.error,'read_permission_denied');assert.equal(reads,0)});
+test('cross-family row denied',async()=>assert.equal((await verify(q,{...deps,readAuthorizedAppointment:async()=>({...row,family_id:'other'})})).error,'readback_mismatch'));
+test('cross-person row denied',async()=>assert.equal((await verify(q,{...deps,readAuthorizedAppointment:async()=>({...row,family_person_id:'other'})})).error,'readback_mismatch'));
+test('soft-deleted row denied',async()=>assert.equal((await verify(q,{...deps,readAuthorizedAppointment:async()=>({...row,deleted_at:'2026-10-01'})})).error,'readback_mismatch'));
+test('missing row denied',async()=>assert.equal((await verify(q,{...deps,readAuthorizedAppointment:async()=>null})).error,'readback_mismatch'));
