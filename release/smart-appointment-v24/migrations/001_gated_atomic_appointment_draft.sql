@@ -1,4 +1,5 @@
 -- PHMS v2.4 draft migration. NOT APPLIED TO PRODUCTION.
+-- Live trigger compatibility (27 Oct 2026): guard against duplicate checklist rows.
 -- Install only after review, dry-run, owner release approval and identity integration.
 -- RPC callable exclusively by service_role after server verifies the LINE identity.
 BEGIN;
@@ -112,10 +113,23 @@ BEGIN
     left(p_appointment->>'doctor_name',160),left(p_appointment->>'note',1000),
     left(p_appointment->>'preparation_notes',4000)
   ) RETURNING id INTO v_id;
+  -- Production's trg_phms_sync_appointment_preparation_tasks already inserts checklist
+  -- rows from preparation_notes on appointment INSERT. A second explicit INSERT would
+  -- duplicate every checklist entry. Synthetic CI schemas do not include this trigger,
+  -- so retain explicit insertion only for schemas without the existing projection.
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_trigger
+             WHERE tgrelid='public.appointments'::regclass
+               AND tgname='trg_phms_sync_appointment_preparation_tasks'
+               AND tgenabled IN ('O','A')) THEN
+    IF EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) AS item
+               WHERE nullif(btrim(item->>'instruction'),'') IS NOT NULL)
+    THEN RAISE EXCEPTION 'checklist_instructions_not_supported_by_projection'; END IF;
+  ELSE
   FOR v_task IN SELECT value FROM jsonb_array_elements(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) LOOP
     INSERT INTO public.appointment_tasks(appointment_id,task_type,title,instruction,status,created_by)
     VALUES(v_id,'other',left(btrim(v_task->>'title'),160),left(v_task->>'instruction',1000),'pending',p_actor_user_id);
   END LOOP;
+  END IF;
   INSERT INTO private.phms_v24_appointment_operations(actor_user_id,operation_key,request_hash,appointment_id)
   VALUES(p_actor_user_id,p_operation_key,v_hash,v_id);
   RETURN jsonb_build_object('ok',true,'appointment_id',v_id,'idempotent_replay',false);
