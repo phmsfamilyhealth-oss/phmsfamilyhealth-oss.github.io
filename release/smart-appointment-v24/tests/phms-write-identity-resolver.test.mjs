@@ -6,3 +6,5 @@ test('reads trusted identity from family_persons with central create and view',a
 test('cross family identity is denied',async()=>{const resolve=makePhmsWriteIdentityResolver({supabase:db({...good,family_id:actor}),centralCanAccess:async()=>true,resolveAppointmentType:async()=> 'follow_up'});assert.equal(await resolve(actor,member,family),null)});
 test('invalid appointment type is not silently coerced',async()=>{const resolve=makePhmsWriteIdentityResolver({supabase:db(good),centralCanAccess:async()=>true,resolveAppointmentType:async()=> 'not_a_type'});assert.equal(await resolve(actor,member,family),null)});
 test('denied rights stop identity resolution',async()=>{const resolve=makePhmsWriteIdentityResolver({supabase:db(good),centralCanAccess:async()=>false,resolveAppointmentType:async()=> 'follow_up'});assert.equal(await resolve(actor,member,family),null)});
+
+test('unknown member status is rejected fail closed',async()=>{const resolve=makePhmsWriteIdentityResolver({supabase:db({...good,status:'pending'}),centralCanAccess:async()=>true,resolveAppointmentType:async()=> 'follow_up'});assert.equal(await resolve(actor,member,family),null)});
