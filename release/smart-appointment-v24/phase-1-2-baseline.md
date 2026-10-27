@@ -61,3 +61,9 @@ This commit only adds a documentation file on a feature branch. Rollback: revert
 - Verified public.phms_line_save_appointment_wizard_draft SQL: uses private.phms_line_crud_context(p_line_user_id,'appointment','create'); validates nonnull draft key, object JSON and <=65536-byte payload; performs owner/person-matched upsert in private.phms_appointment_wizard_drafts, 30-day expiry on update, and writes audit log. This is a draft RPC, NOT proof of atomic canonical appointment commit, and LINE-user-ID substitution risk at the trusted caller boundary remains subject to verification.
 - Verified phms_can_access_person is a public SQL wrapper around private.phms_can_access_person_impl; must inspect underlying implementation and privileged callers before accepting authorization.
 - Draft PR #12 must remain non-merged until review. Phase 1 and 2 STILL BLOCKED; no tests run and no rollout.
+
+## Authorization source follow-up (read-only)
+- private.phms_can_access_person_impl: rejects missing auth.uid(), null person, invalid action; requires active family_person relation and private.user_can_access_family_person(...) for requested action. This establishes source-level guards, not yet behavioral IDOR acceptance.
+- private.phms_line_crud_context: rejects unknown resources/actions; calls phms_resolve_line_command_context(..., require_context=true), checks context_ready, permission_granted and target_person_id nonnull. Trusted caller must bind LINE identity to cryptographically verified LINE token; the RPC itself accepts p_line_user_id text.
+- public.phms_line_get_appointment_wizard_draft: same create-permission context; restricts draft to actor_user_id, target_person_id and unexpired drafts; returns last five drafts if no key. Needs behavioral cross-person tests.
+- No user identity, patient records or documents were fetched in this review.
