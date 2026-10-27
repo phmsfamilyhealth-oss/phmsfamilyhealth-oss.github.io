@@ -5,6 +5,8 @@ on:
       - 'release/smart-appointment-v24/contracts/**'
       - 'release/smart-appointment-v24/tests/*.mjs'
       - '.github/workflows/phms-v24-contract.yml'
+      - 'release/smart-appointment-v24/migrations/**'
+      - 'release/smart-appointment-v24/tests/*.sql'
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,3 +21,30 @@ jobs:
           node-version: '22'
       - name: Run isolated contract tests (no service secrets)
         run: node --test release/smart-appointment-v24/tests/*.test.mjs
+
+  postgres-atomic-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test_only
+          POSTGRES_DB: phms_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: test_only
+      PGDATABASE: phms_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run real PostgreSQL migration and atomic smoke (isolated, synthetic)
+        run: psql -v ON_ERROR_STOP=1 -f release/smart-appointment-v24/tests/postgres-atomic-smoke.sql
