@@ -22,6 +22,10 @@ export async function confirmAppointment(request, adapters){
   if(await adapters.centralCanAccess(actor.userId,subject.familyPersonId,'appointments','create')!==true)
     return failure('permission_denied');
 
+  // A successful create must be readable by the same actor; do not write and then discover the actor cannot view it.
+  if(await adapters.centralCanAccess(actor.userId,subject.familyPersonId,'appointments','view')!==true)
+    return failure('read_permission_denied');
+
   const validation=validateAppointmentDraft(draft);
   if(!validation.ok) return failure('invalid_draft');
   const visit=canonicalizeVisit(draft);
