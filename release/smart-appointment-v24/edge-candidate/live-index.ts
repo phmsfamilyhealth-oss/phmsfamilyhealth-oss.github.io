@@ -7,7 +7,7 @@ import postgres from 'npm:postgres@3.4.7';
 import { makePhmsAppointmentHttpHandler } from '../contracts/phms-appointment-http-composition.mjs';
 const json=(error,status)=>new Response(JSON.stringify({ok:false,error}),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});
 const env=name=>(Deno.env.get(name)||'').trim();
-const required=['SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','PHMS_V24_PRIVATE_DATABASE_URL','PHMS_V24_LINE_CHANNEL_ID'];
+const required=['SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','PHMS_V24_PRIVATE_DATABASE_URL','PHMS_V24_LINE_CHANNEL_ID','PHMS_V24_LIFF_ORIGIN'];
 const ready=required.every(name=>env(name));
 let handler=null;
 let isSchemaReady=null;
