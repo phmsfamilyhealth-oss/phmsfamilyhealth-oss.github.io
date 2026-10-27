@@ -1,0 +1,14 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {handleAppointmentConfirm as handle} from '../contracts/confirm-http-handler.mjs';
+const body={selectedPersonCode:'p1',operationKey:'12345678-1234-4234-8234-123456789abc',draft:{scenario:'booked',date:'2026-11-03',time_known:true,time:'09:00',hospital:'Demo'}};
+const make=(value=body,headers={})=>new Request('https://example.test/confirm',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer example-verified-credential',...headers},body:JSON.stringify(value)});
+const adapters={verifyLineIdentity:async()=>({userId:'u1'}),resolvePerson:async()=>({familyId:'f1',familyPersonId:'p1'}),isReleaseEnabled:async()=>true,centralCanAccess:async()=>true,verifyProviderBinding:async()=>true,atomicCommit:async()=>({appointmentId:'a1',authorizedReadback:true})};
+test('HTTP success 201 with safe receipt',async()=>{const r=await handle(make(),adapters);assert.equal(r.status,201);assert.equal((await r.json()).appointmentId,'a1')});
+test('GET is rejected',async()=>assert.equal((await handle(new Request('https://example.test/confirm'),adapters)).status,405));
+test('missing auth header rejected',async()=>assert.equal((await handle(make(body,{authorization:''}),adapters)).status,401));
+test('bad JSON rejected',async()=>{const r=new Request('https://example.test/confirm',{method:'POST',headers:{authorization:'Bearer example-verified-credential','content-type':'application/json'},body:'{' });assert.equal((await handle(r,adapters)).status,400)});
+test('wrong content type rejected',async()=>assert.equal((await handle(make(body,{'content-type':'text/plain'}),adapters)).status,415));
+test('oversized header rejected',async()=>assert.equal((await handle(make(body,{'content-length':'40000'}),adapters)).status,413));
+test('release off hides feature',async()=>assert.equal((await handle(make(),{...adapters,isReleaseEnabled:async()=>false})).status,404));
+test('central permission denial',async()=>assert.equal((await handle(make(),{...adapters,centralCanAccess:async()=>false})).status,403));
+test('backend error gives generic 503',async()=>{const r=await handle(make(),{...adapters,verifyLineIdentity:async()=>{throw new Error('private secret must not leak')}});assert.equal(r.status,503);assert.doesNotMatch(await r.text(),/private secret/);});
+test('frontend identity cannot override verified actor',async()=>{const r=await handle(make({...body,userId:'spoofed',familyId:'other'}),{...adapters,atomicCommit:async x=>{assert.equal(x.actorId,'u1');assert.equal(x.familyId,'f1');return {appointmentId:'a1',authorizedReadback:true}}});assert.equal(r.status,201);});
