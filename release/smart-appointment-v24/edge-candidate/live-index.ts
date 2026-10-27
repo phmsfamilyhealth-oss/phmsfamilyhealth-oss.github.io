@@ -41,7 +41,7 @@ if(ready){
 // Browser access is restricted to one owner-configured HTTPS LIFF form origin.
 // Never enable wildcard CORS for a bearer-token patient-data API.
 const trustedOrigin=env('PHMS_V24_LIFF_ORIGIN');
-const originAllowed=origin=>/^https:\/\/[^/?#@]+(?::443)?$/.test(trustedOrigin)&&origin===trustedOrigin;
+const originAllowed=origin=>{try{const url=new URL(trustedOrigin);return url.protocol==='https:'&&url.origin===trustedOrigin&&url.username===''&&url.password===''&&url.pathname==='/'&&url.search===''&&url.hash===''&&origin===trustedOrigin;}catch{return false;}};
 Deno.serve(async request=>{
  const origin=request.headers.get('origin');
  if(origin&&!originAllowed(origin))return json('origin_not_allowed',403);
