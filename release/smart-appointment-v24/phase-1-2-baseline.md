@@ -52,3 +52,12 @@ Read current Edge source and related SQL bodies; write full field-by-field mappi
 
 ## Safety and rollback
 This commit only adds a documentation file on a feature branch. Rollback: revert this commit or delete the branch after preserving audit history. No patient rows, Production RPCs, Storage objects or runtime flags are modified.
+
+## Follow-up evidence — 2026-10-27
+- Rechecked main SHA 1d988866dfcd9a1a97196b5fa26bbc989110f3cb; Draft PR #12 open and GitHub mergeable=true (not release approval).
+- Retrieved actual production line-webhook v1420 function bundle (ACTIVE); entrypoint index.ts and supplementary files present. Reported runtime content checksum a5e0815ac877990f22e69d40cf23509c8e0de955b64bd0b144d522becaa5133c. Full source parity and route trace not yet verified.
+- Queried private.phms_appointment_release_gate: enabled_for_everyone=false, allowlist_count=0. This is a read-only observation; do not change without approval.
+- Verified public.phms_line_appointment_wizard_enabled SQL: gate checks enabled_for_everyone OR actor ID in allowlist, requiring an active row in line_identities; default false.
+- Verified public.phms_line_save_appointment_wizard_draft SQL: uses private.phms_line_crud_context(p_line_user_id,'appointment','create'); validates nonnull draft key, object JSON and <=65536-byte payload; performs owner/person-matched upsert in private.phms_appointment_wizard_drafts, 30-day expiry on update, and writes audit log. This is a draft RPC, NOT proof of atomic canonical appointment commit, and LINE-user-ID substitution risk at the trusted caller boundary remains subject to verification.
+- Verified phms_can_access_person is a public SQL wrapper around private.phms_can_access_person_impl; must inspect underlying implementation and privileged callers before accepting authorization.
+- Draft PR #12 must remain non-merged until review. Phase 1 and 2 STILL BLOCKED; no tests run and no rollout.
