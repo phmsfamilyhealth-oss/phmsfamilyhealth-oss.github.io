@@ -23,7 +23,7 @@ DECLARE
   v_hash text; v_task jsonb; v_task_count integer; v_unknown_key text; v_time timestamptz; v_date date; v_type text; v_mode text; v_status text;
 BEGIN
   IF p_actor_user_id IS NULL OR p_operation_key IS NULL OR p_expected_family_id IS NULL OR p_expected_family_person_id IS NULL
-    OR jsonb_typeof(p_appointment) <> 'object' THEN RAISE EXCEPTION 'invalid_request'; END IF;
+    OR p_appointment IS NULL OR jsonb_typeof(p_appointment) IS DISTINCT FROM 'object' THEN RAISE EXCEPTION 'invalid_request'; END IF;
   IF NOT EXISTS (
     SELECT 1 FROM private.phms_appointment_release_gate
     WHERE singleton = true AND (enabled_for_everyone = true OR p_actor_user_id = ANY(allowed_actor_ids))
@@ -71,7 +71,7 @@ BEGIN
   THEN RAISE EXCEPTION 'time_required'; END IF;
   -- JSON null and absent values must not bypass three-valued SQL comparisons.
   IF v_type IS NULL OR v_mode IS NULL OR v_status IS NULL THEN RAISE EXCEPTION 'invalid_appointment'; END IF;
-  IF p_appointment ? 'preparation_tasks' AND jsonb_typeof(p_appointment->'preparation_tasks') <> 'array' THEN RAISE EXCEPTION 'invalid_checklist'; END IF;
+  IF p_appointment ? 'preparation_tasks' AND jsonb_typeof(p_appointment->'preparation_tasks') IS DISTINCT FROM 'array' THEN RAISE EXCEPTION 'invalid_checklist'; END IF;
   v_task_count := CASE WHEN jsonb_typeof(p_appointment->'preparation_tasks')='array' THEN jsonb_array_length(p_appointment->'preparation_tasks') ELSE 0 END;
   IF v_task_count > 20 THEN RAISE EXCEPTION 'checklist_too_long'; END IF;
   FOR v_task IN SELECT value FROM jsonb_array_elements(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) LOOP
