@@ -4,6 +4,7 @@
 import {validateAppointmentDraft} from './scenario-validator.mjs';
 import {prepareDraftForReview} from './draft-packager.mjs';
 import {canonicalizeVisit} from './canonical-visit-mapper.mjs';
+import {verifyCanonicalVisitAgainstDatabase} from './db-constraint-gate.mjs';
 
 const failure=(code)=>({ok:false,error:code});
 export async function confirmAppointment(request, adapters){
@@ -30,6 +31,7 @@ export async function confirmAppointment(request, adapters){
   if(!validation.ok) return failure('invalid_draft');
   const visit=canonicalizeVisit(draft);
   if(!visit.ok) return failure('invalid_draft');
+  if(!verifyCanonicalVisitAgainstDatabase(visit.visit).ok) return failure('invalid_draft');
   const prepared=prepareDraftForReview(draft);
   if(!prepared.ok) return failure('invalid_draft');
   // This must resolve from server masters; NEVER trust draft provider objects.
