@@ -42,3 +42,10 @@ Read-only SQL only. **No Production writes, migrations, RLS edits, settings or d
 - **Result: FAIL (different source blobs)**. This is fresh direct v1431 evidence, not merely a stale v1427 comparison. Does not imply runtime behavior is unsafe; means `main` must not replace deployed production index without route-level reconciliation and preserving newer changes.
 - Independently executed additional nine read-only safety assertions: **9/9 PASS**; committed as `tests/phase1-2-production-gates-readonly.sql`. 32 prior structural/permission/FK checks also passed (14+10+8), no Production mutation.
 - The LINE/LIFF → backend behavior has not been run in real devices; Phase 1 source parity and Phase 2 full behavioral acceptance remain BLOCKED. This document does not waive either gate.
+
+## Production LINE router functional trace — v1431
+- Inspected live deployed `line-webhook` v1431 index.ts (1,503,411 JS string code units) read-only, no patient data loaded.
+- Exact string counts in entrypoint: `phms-v24` **0**, `LIFF` **0**, lowercase `liff` **0**, `appointment_wizard` **4**, `＋ เพิ่มนัด` **1**. Exact-string absence does **not** prove no indirect downstream LIFF routing, but no direct v2.4 integration is evidenced in this file.
+- A `＋ เพิ่มนัด` postback with `data:'เพิ่มนัด'` remains in the live person overview; the live webhook also calls `phms_line_save_appointment_wizard_draft` and replies `เก็บร่างนัดไว้แล้ว` (draft only, not canonical appointment persisted).
+- Phase 1 integration-blocker classification: **specific route-level LINE → new LIFF v2.4 handoff not established**; cannot pass end-to-end acceptance until a verified conditional branch routes the owner-only test account, preserves old routing for all others and produces scoped persisted readback. Do not replace the 1431 webhook with stale main code.
+- Follow-up acceptance: inspect concrete handlers for the `เพิ่มนัด` postback and draft RPC (not just grep); implement route in isolated branch; regression test both allowed owner and all other families; reconcile deployed v1431 source before controlled rollout.
