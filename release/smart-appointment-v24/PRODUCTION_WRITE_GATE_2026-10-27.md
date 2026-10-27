@@ -26,3 +26,10 @@
 - Live database CHECK `aim_walk_in_date_only_allowed` permits unknown-time date-only visits only for `walk_in` with planned/scheduled status; historical completed date-only is not supported without an approved schema-compatible design.
 - Unresolved actual-use dependencies: owner-approved gated database migration and recovery plan; server-only private database connectivity/credentials; configured LIFF channel/origin and trusted endpoint; restricted test actor; authenticated LINE to LIFF to persisted readback and back to LINE UAT.
 - Do not present green isolated CI as real LINE release acceptance. Do not deploy a write-capable candidate without explicit production-change authorization. No patient records were modified during these inspections.
+
+## Additional release-critical blocker — provider catalog UI is not connected (27 October 2026)
+- `prototype/index.html` initializes `authorizedCatalog=null` and does not call a verified catalog endpoint; hospital/unit/clinician picker stays disabled. Its review payload consequently has blank master identifiers.
+- `contracts/phms-persistence-security.mjs` intentionally rejects any save lacking a valid, server-verified organization UUID, even when hospital free text is filled.
+- Therefore enabling the database RPC and LIFF ID alone **cannot** make the existing form save successfully. This is a release blocker, not a cosmetic or CI issue.
+- Required next implementation: expose provider catalog strictly after verified LINE ID token + resolved member + central appointments:view permission and feature gate. Populate LIFF picker from this authorized response, refresh units/clinicians when parent choice changes, and submit matching master IDs/names. Prove unauthorized/cross-family requests cannot access the catalog. Never weaken master verification or permit free text to bypass the catalog.
+- Separately wire complete readback and LINE display; reject declarations of successful real-device UAT until a genuine device exercises full flow. Production changes still require owner release approval.
