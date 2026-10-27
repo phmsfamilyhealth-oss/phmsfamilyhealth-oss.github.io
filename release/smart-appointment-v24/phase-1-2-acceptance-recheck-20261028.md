@@ -49,3 +49,11 @@ Read-only SQL only. **No Production writes, migrations, RLS edits, settings or d
 - A `＋ เพิ่มนัด` postback with `data:'เพิ่มนัด'` remains in the live person overview; the live webhook also calls `phms_line_save_appointment_wizard_draft` and replies `เก็บร่างนัดไว้แล้ว` (draft only, not canonical appointment persisted).
 - Phase 1 integration-blocker classification: **specific route-level LINE → new LIFF v2.4 handoff not established**; cannot pass end-to-end acceptance until a verified conditional branch routes the owner-only test account, preserves old routing for all others and produces scoped persisted readback. Do not replace the 1431 webhook with stale main code.
 - Follow-up acceptance: inspect concrete handlers for the `เพิ่มนัด` postback and draft RPC (not just grep); implement route in isolated branch; regression test both allowed owner and all other families; reconcile deployed v1431 source before controlled rollout.
+
+## Exact LINE `เพิ่มนัด` runtime route confirmed (v1431)
+Read the actual v1431 `line-webhook` index.ts rather than relying on a substring count:
+- Person overview mutates postback `data:'เพิ่มนัด'` to `data:'เพิ่มนัด จากภาพรวม'` for navigation origin tracking.
+- The production command handler contains an exact branch: `if(c==='เพิ่มนัด'||c==='เพิ่มนัด จากภาพรวม')` which writes LINE conversation state `crud_add_appointment` with `person_confirmed:true` and `origin` then calls `replyAppointmentTypePicker(...)` and `continue`.
+- This existing route therefore **starts the legacy LINE appointment-type picker**, not the new v2.4 LIFF form. A separate draft-save route calls `phms_line_save_appointment_wizard_draft` and explicitly replies that no actual appointment has been created.
+- Precise Phase 1 gap is missing controlled owner-only handoff from this command to v2.4 LIFF, not merely generic source file drift. Do not replace the deployed webhook with an old `main` copy; reconcile v1431 and add conditional routing with negative tests for all other users.
+- Read-only inspection only, no new release flag or production writes.
