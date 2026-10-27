@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import {stripTypeScriptTypes} from 'node:module';
 import {medicationTemplate,medicationFieldsFromText,medicationFreeTextValues,normalizeMedication,validateMedication,MED_FIELDS,medicationScheduleLabel} from '../supabase/functions/line-webhook/smart-medication.ts';
 import {handleSmartMedication} from '../supabase/functions/line-webhook/smart-medication-runtime.ts';
+import {layoutPersonOverviewPx} from '../supabase/functions/line-webhook/person-overview-px-layout.ts';
 const complete={generic_name:'Gabapentin',brand_name:'ไม่ทราบ',strength_value:'100',strength_unit:'mg',dosage_form:'แคปซูล',dose_value:'1',dose_unit:'แคปซูล',frequency:'วันละ 1 ครั้ง',weekdays:'ไม่เกี่ยวข้อง',time:'ก่อนนอน',instructions:'รับประทานตามฉลาก',meal_relation:'ไม่สัมพันธ์กับอาหาร',warnings:'อาจง่วง',start_date:'2026-10-22',notes:'ไม่มี'};
 const raw=v=>MED_FIELDS.map(([k,label])=>label+': '+(v[k]||'')).join('\n');
 function harness(initial=null){
@@ -53,7 +54,7 @@ test('full runtime syntax and final outbound template survive global Flex conver
  let sent;const base=new URL('../supabase/functions/line-webhook/',import.meta.url);
  let source=fs.readFileSync(new URL('index.ts',base),'utf8').replace(/^import .*;\s*$/gm,'');
  source=stripTypeScriptTypes(source,{mode:'transform'});
- const context=vm.createContext({console,TextEncoder,TextDecoder,URL,URLSearchParams,Request,Response,Headers,crypto,Intl,atob,btoa,setTimeout,clearTimeout,medicationTemplate,medicationScheduleLabel,handleSmartMedication,
+ const context=vm.createContext({console,TextEncoder,TextDecoder,URL,URLSearchParams,Request,Response,Headers,crypto,Intl,atob,btoa,setTimeout,clearTimeout,medicationTemplate,medicationScheduleLabel,handleSmartMedication,layoutPersonOverviewPx,
  Deno:{env:{get:()=>''},serve:()=>{}},fetch:async(url,init)=>{if(String(url).includes('api.line.me'))sent=JSON.parse(init.body);return new Response('[]',{status:200})}});
  vm.runInContext(source,context,{timeout:10000});
  const h=harness();await h.send('เทมเพลตเพิ่มยา');context.testMessages=h.payloads.at(-1);
