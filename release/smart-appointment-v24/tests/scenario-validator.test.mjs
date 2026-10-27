@@ -6,7 +6,7 @@ const base={scenario:'booked',date:'2026-11-03',time_known:true,time:'09:30',org
 const check=(name,change,expected)=>test(name,()=>{const r=validate({...base,...change});assert.equal(r.ok,expected,JSON.stringify(r))});
 check('confirmed booking valid',{},true);
 check('walkin no time valid',{scenario:'walk_in',time_known:false,time:null,status:'planned'},true);
-check('historical dated visit valid in draft only',{scenario:'historical',time_known:false,time:null,status:'completed'},true);
+check('historical unknown-time rejected until DB support',{scenario:'historical',time_known:false,time:null,status:'completed'},false);
 check('booked without time rejected',{time_known:false,time:null},false);
 check('unknown-time with time entered rejected',{scenario:'walk_in',time_known:false,time:'09:00'},false);
 check('invalid date rejected',{date:'2026-02-30'},false);
