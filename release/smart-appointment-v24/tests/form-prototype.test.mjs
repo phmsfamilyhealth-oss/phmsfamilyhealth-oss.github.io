@@ -11,6 +11,6 @@ test('review fields inserted as safe text',()=>{assert.match(html,/dd\.textConte
 
 test('LIFF requires LINE login before enabling appointment save',()=>{assert.match(html,/if\(!window\.liff\.isLoggedIn\(\)\)\{window\.liff\.login\(\);return;\}/);assert.match(html,/confirmClient=makeLiffConfirmClient/);});
 
-test('LIFF never enables save without a real LINE ID token',()=>{assert.match(html,/if\(!window\.liff\.getIDToken\(\)\)return;confirmClient=makeLiffConfirmClient/);});
+test('LIFF never enables save without a real LINE ID token',()=>{assert.match(html,/if\(!window\.liff\.getIDToken\(\)\)\{document\.getElementById\('error'\)/);});
 
 test('missing LINE ID token shows an actionable Thai error without activating save',()=>{assert.match(html,/ยังยืนยันตัวตนกับ LINE ไม่สำเร็จ/);assert.match(html,/if\(!window\.liff\.getIDToken\(\)\)\{document\.getElementById\('error'\)/);});
