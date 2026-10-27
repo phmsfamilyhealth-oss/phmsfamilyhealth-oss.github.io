@@ -10,3 +10,5 @@ test('date-only scenario and previous history selectable',()=>{assert.match(html
 test('review fields inserted as safe text',()=>{assert.match(html,/dd\.textContent=/);assert.doesNotMatch(html,/innerHTML\s*=/);});
 
 test('LIFF requires LINE login before enabling appointment save',()=>{assert.match(html,/if\(!window\.liff\.isLoggedIn\(\)\)\{window\.liff\.login\(\);return;\}/);assert.match(html,/confirmClient=makeLiffConfirmClient/);});
+
+test('LIFF never enables save without a real LINE ID token',()=>{assert.match(html,/if\(!window\.liff\.getIDToken\(\)\)return;confirmClient=makeLiffConfirmClient/);});
