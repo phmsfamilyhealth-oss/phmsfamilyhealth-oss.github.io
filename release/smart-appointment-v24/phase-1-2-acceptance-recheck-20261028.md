@@ -34,3 +34,11 @@ Executed exact committed SQL files against project `buxvdlfrikpwdscdlcfd`; obser
 
 ## Production change/rollback
 Read-only SQL only. **No Production writes, migrations, RLS edits, settings or deployments.** Roll back evidence-only GitHub change by reverting this commit. Branch remains PR #12 draft.
+
+## Direct live webhook source parity measurement (28 October 2026)
+- Retrieved ACTIVE Supabase `line-webhook` **v1431** `index.ts` (1,503,411 UTF-16 code units; 1,953,083 UTF-8 bytes).
+- Computed Git blob SHA-1 from live file bytes using `sha1('blob '+utf8_byte_length+'\\0'+utf8_content)` (the `\\0` in this text describes the single zero byte used as separator): **`1ff78d322d26861d8bede715f1169e278290b6b8`**.
+- GitHub `main` `supabase/functions/line-webhook/index.ts` blob SHA from Contents API: **`0f04bd67667bf12a4d00c6b3cf2cd1d547939eca`**.
+- **Result: FAIL (different source blobs)**. This is fresh direct v1431 evidence, not merely a stale v1427 comparison. Does not imply runtime behavior is unsafe; means `main` must not replace deployed production index without route-level reconciliation and preserving newer changes.
+- Independently executed additional nine read-only safety assertions: **9/9 PASS**; committed as `tests/phase1-2-production-gates-readonly.sql`. 32 prior structural/permission/FK checks also passed (14+10+8), no Production mutation.
+- The LINE/LIFF → backend behavior has not been run in real devices; Phase 1 source parity and Phase 2 full behavioral acceptance remain BLOCKED. This document does not waive either gate.
