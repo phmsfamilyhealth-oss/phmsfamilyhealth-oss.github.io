@@ -11,9 +11,12 @@ export function prepareDraftForReview(raw) {
   if(docs.length>5) return {ok:false,errors:['too_many_documents']};
   if(docs.some(f => !f || !['application/pdf','image/jpeg','image/png','image/webp'].includes(f.type) || !Number.isFinite(f.size) || f.size<=0 || f.size>10*1024*1024))
     return {ok:false,errors:['invalid_document']};
+  const selection=raw.provider_selection;
+  if(selection!==undefined&&(selection===null||typeof selection!=='object'||Array.isArray(selection)||!['organizationId','unitId','clinicianId'].every(k=>selection[k]===undefined||typeof selection[k]==='string')))return {ok:false,errors:['invalid_provider_selection']};
   return {ok:true,draft:{
     scenario:clean(raw.scenario), date:clean(raw.date), time_known:raw.time_known===true,
     time:raw.time_known===true?clean(raw.time):null,
+    provider_selection:selection?{organizationId:clean(selection.organizationId),unitId:clean(selection.unitId),clinicianId:clean(selection.clinicianId)}:null,
     hospital_name:clean(raw.hospital), department:clean(raw.department),
     doctor_name:clean(raw.doctor), note:clean(raw.purpose),
     preparation_tasks:checklist.map((title,index)=>({title,sequence_no:index+1,status:'pending'})),
