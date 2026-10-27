@@ -78,6 +78,14 @@ BEGIN
     IF jsonb_typeof(v_task) <> 'object' OR nullif(btrim(v_task->>'title'),'') IS NULL OR length(v_task->>'title') > 160
     THEN RAISE EXCEPTION 'invalid_checklist_item'; END IF;
   END LOOP;
+  -- Reject overlong fields instead of silently truncating medical appointment details.
+  IF length(p_appointment->>'hospital_name') > 160 OR length(p_appointment->>'department') > 160
+    OR length(p_appointment->>'doctor_name') > 160 OR length(p_appointment->>'note') > 1000
+    OR length(p_appointment->>'preparation_notes') > 4000
+  THEN RAISE EXCEPTION 'appointment_text_too_long'; END IF;
+  FOR v_task IN SELECT value FROM jsonb_array_elements(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) LOOP
+    IF length(v_task->>'instruction') > 1000 THEN RAISE EXCEPTION 'checklist_instruction_too_long'; END IF;
+  END LOOP;
   -- Unique key serializes concurrent attempts; mismatched replay is explicitly rejected.
   v_hash := md5(p_appointment::text);
   SELECT * INTO v_existing FROM private.phms_v24_appointment_operations
