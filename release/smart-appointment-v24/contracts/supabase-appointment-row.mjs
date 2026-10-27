@@ -15,7 +15,9 @@ export function mapAppointmentInsert(command){
   if(v.appointment_at){ return {ok:false,error:'untrusted_precomputed_timestamp'}; }
   else { const resolved=resolveBangkokAppointmentTime(v.local_appointment_datetime);if(!resolved.ok)return {ok:false,error:'timestamp_not_resolved'};appointmentAt=resolved.appointment_at; }
  }
+ if(d.preparation_tasks!==undefined&&(!Array.isArray(d.preparation_tasks)||d.preparation_tasks.length>20||d.preparation_tasks.some(t=>!t||typeof t.title!=='string'||!t.title.trim()||t.title.length>160)))return {ok:false,error:'invalid_checklist'};
  const row={family_id:command.familyId,family_person_id:command.subjectId,person_id:command.personId,created_by:command.actorId,
+  preparation_tasks:(d.preparation_tasks||[]).map(t=>({title:t.title.trim(),instruction:typeof t.instruction==='string'?t.instruction.slice(0,1000):null})),
   hospital_name:d.hospital_name||null,department:d.department||null,doctor_name:d.doctor_name||null,
   note:d.note||null,preparation_notes:(d.preparation_tasks||[]).map(x=>x.title).join('\n')||null,
   appointment_at:appointmentAt,planned_visit_date:v.planned_visit_date,
