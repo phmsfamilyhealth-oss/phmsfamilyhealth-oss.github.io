@@ -5,3 +5,8 @@ test('no verified person ID prevents write',()=>assert.equal(map({...command,per
 test('no appointment type prevents write',()=>assert.equal(map({...command,appointmentType:null}).error,'invalid_appointment_type'));
 test('known time must have backend resolved timezone aware timestamp',()=>assert.equal(map({...command,canonicalVisit:{...command.canonicalVisit,visit_time_known:true,appointment_at:undefined}}).error,'timestamp_not_resolved'));
 test('fabricated timestamp for unknown time denied',()=>assert.equal(map({...command,canonicalVisit:{...command.canonicalVisit,appointment_at:'2026-11-03T09:00:00+07:00'}}).error,'invalid_date_only'));
+
+test('structured checklist preserves instructions and avoids duplicate production auto-projection',()=>{const a=map({...command,draft:{preparation_tasks:[{title:'ใบนัด',instruction:'นำฉบับจริงมาด้วย'}]}});assert.equal(a.ok,true);assert.equal(a.row.preparation_notes,null);assert.deepEqual(a.row.preparation_tasks,[{title:'ใบนัด',instruction:'นำฉบับจริงมาด้วย'}])});
+test('text-only preparation is preserved for production auto-projection',()=>{const a=map({...command,draft:{preparation_notes:'นำใบนัดมาด้วย'}});assert.equal(a.ok,true);assert.equal(a.row.preparation_notes,'นำใบนัดมาด้วย');assert.deepEqual(a.row.preparation_tasks,[])});
+test('dual checklist source is explicitly rejected before persistence',()=>assert.equal(map({...command,draft:{preparation_tasks:[{title:'ใบนัด'}],preparation_notes:'ตรวจเลือด'}}).error,'checklist_dual_source_not_supported'));
+test('overlong preparation text is rejected before persistence',()=>assert.equal(map({...command,draft:{preparation_notes:'ก'.repeat(4001)}}).error,'appointment_text_too_long'));
