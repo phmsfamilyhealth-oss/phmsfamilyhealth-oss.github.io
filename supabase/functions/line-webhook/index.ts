@@ -3699,8 +3699,8 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
   identityEnd=body.length;
   // PHMS_FAMILY_CATEGORY_COUNT_CENTRAL_V2: three equal-width category tiles for every visible family member.
   const categoryCounts:any[]=[
+   {label:'📅 นัด',value:p?.appointment_count,background:'#FFF3DC',foreground:'#805617'},
    {label:'💊 ยา',value:p?.medication_count,background:'#FCECEF',foreground:'#91213D'},
-   {label:'📅 นัดหมาย',value:p?.appointment_count,background:'#FFF3DC',foreground:'#805617'},
    {label:'🩺 สุขภาพ',value:p?.health_count,background:'#E7F4EA',foreground:'#205F46'}
   ];
   const hasCategoryTiles=categoryCounts.some((x:any)=>x.value!=null);
