@@ -6387,7 +6387,7 @@ async function replyAppointmentTypePicker(rt:string,u:string,k:string,id:string,
   type:'box',layout:'vertical',height:'48px',spacing:'none',justifyContent:'center',alignItems:'center',backgroundColor:bg,cornerRadius:'8px',action:{type:'postback',data,displayText:label},
   contents:[{type:'text',text:label,size:'md',weight:'regular',color:'#FFFFFF',align:'center',gravity:'center',wrap:false,maxLines:1}]
  });
- const card=phmsApptPickerCard('📅 เพิ่มนัดหมาย','นัดของ '+String(personName||'ผู้ใช้')+' • ขั้นตอนที่ 1/8',[
+ const card:any=phmsApptPickerCard('📅 เพิ่มนัดหมาย','นัดของ '+String(personName||'ผู้ใช้')+' • ขั้นตอนที่ 1/8',[
   option('🩺 ไปพบหมอ','เลือกหมวดนัด รักษา','ตรวจตามนัด / ติดตามโรค','#5F5048'),
   option('🔬 ไปตรวจอย่างเดียว','เลือกหมวดนัด ตรวจ','ตรวจเลือด / เอกซเรย์ / ตรวจพิเศษ','#89765E'),
   option('💊 ไปรับยาอย่างเดียว','เลือกหมวดนัด ยา','รับที่ รพ. / ส่งยาถึงบ้าน','#496476'),
