@@ -20,3 +20,5 @@ test('review requires a verified registered hospital instead of misleading free 
 test('save remains disabled until a nonempty authorized hospital registry is loaded',()=>{assert.match(html,/if\(catalogResult\.ok&&catalogResult\.catalog\.organizations\.length\)/);assert.match(html,/syncProviderNames\(\);document\.getElementById\('save'\)\.disabled=false/);assert.doesNotMatch(html,/confirmClient=makeLiffConfirmClient\([^;]+;document\.getElementById\('save'\)\.disabled=false/);});
 
 test('unimplemented document upload never advances to a misleading save confirmation',()=>{assert.match(html,/if\(packaged\.draft\.document_metadata\.length\)\{\$\('error'\)\.textContent='การแนบรูปใบนัดและเอกสารยังไม่เปิดใช้งาน/);assert.match(html,/เอาไฟล์ออกก่อน/);});
+
+test('missing LINE deployment config displays an actionable error instead of silently doing nothing',()=>{assert.match(html,/ยังไม่ตั้งค่าการเชื่อมต่อ LINE หรือยังไม่ได้เลือกบุคคล/);assert.match(html,/if\(!id\|\|!endpoint\|\|!memberId\)\{/)});
