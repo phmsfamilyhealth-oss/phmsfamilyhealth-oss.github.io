@@ -37,8 +37,10 @@ BEGIN
      OR private.user_can_access_family_person(p_actor_user_id,p_expected_family_person_id,'appointments','view') IS DISTINCT FROM true
   THEN RAISE EXCEPTION 'permission_denied'; END IF;
   -- Never accept caller-supplied person/family/provider/actor IDs or arbitrary column maps.
-  IF p_appointment ?| ARRAY['organization_id','service_unit_id','clinician_id','source_document_id']
-  THEN RAISE EXCEPTION 'provider_binding_not_yet_implemented'; END IF;
+  -- Do not silently lose requested documents, checklist or reschedule relationships.
+  -- These require their own verified atomic storage paths before release.
+  IF p_appointment ?| ARRAY['document_metadata','documents','preparation_tasks','rescheduled_from_appointment_id','source_document_id','organization_id','service_unit_id','clinician_id']
+  THEN RAISE EXCEPTION 'unsupported_related_data'; END IF;
   IF nullif(p_appointment->>'person_id','')::uuid IS DISTINCT FROM v_person
    OR nullif(p_appointment->>'family_id','')::uuid IS DISTINCT FROM p_expected_family_id
    OR nullif(p_appointment->>'family_person_id','')::uuid IS DISTINCT FROM p_expected_family_person_id
