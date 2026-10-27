@@ -20,7 +20,7 @@ SET search_path = pg_catalog, public, private
 AS $$
 DECLARE
   v_person uuid; v_id uuid; v_existing private.phms_v24_appointment_operations%ROWTYPE;
-  v_hash text; v_task jsonb; v_task_count integer; v_time timestamptz; v_date date; v_type text; v_mode text; v_status text;
+  v_hash text; v_task jsonb; v_task_count integer; v_unknown_key text; v_time timestamptz; v_date date; v_type text; v_mode text; v_status text;
 BEGIN
   IF p_actor_user_id IS NULL OR p_operation_key IS NULL OR p_expected_family_id IS NULL OR p_expected_family_person_id IS NULL
     OR jsonb_typeof(p_appointment) <> 'object' THEN RAISE EXCEPTION 'invalid_request'; END IF;
@@ -41,6 +41,13 @@ BEGIN
   -- These require their own verified atomic storage paths before release.
   IF p_appointment ?| ARRAY['document_metadata','documents','rescheduled_from_appointment_id','source_document_id','organization_id','service_unit_id','clinician_id']
   THEN RAISE EXCEPTION 'unsupported_related_data'; END IF;
+  -- Explicit payload allowlist: never silently discard a future form field.
+  SELECT key INTO v_unknown_key FROM jsonb_object_keys(p_appointment) AS key
+  WHERE key <> ALL(ARRAY['family_id','family_person_id','person_id','created_by',
+    'appointment_type','visit_mode','visit_time_known','status','planned_visit_date',
+    'appointment_at','hospital_name','department','doctor_name','note',
+    'preparation_notes','preparation_tasks']) LIMIT 1;
+  IF v_unknown_key IS NOT NULL THEN RAISE EXCEPTION 'unsupported_appointment_field'; END IF;
   IF nullif(p_appointment->>'person_id','')::uuid IS DISTINCT FROM v_person
    OR nullif(p_appointment->>'family_id','')::uuid IS DISTINCT FROM p_expected_family_id
    OR nullif(p_appointment->>'family_person_id','')::uuid IS DISTINCT FROM p_expected_family_person_id
