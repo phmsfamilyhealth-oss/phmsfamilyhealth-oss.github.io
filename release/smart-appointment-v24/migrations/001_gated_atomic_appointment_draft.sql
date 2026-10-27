@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS private.phms_v24_appointment_operations (
   PRIMARY KEY(actor_user_id,operation_key)
 );
 REVOKE ALL ON private.phms_v24_appointment_operations FROM PUBLIC, anon, authenticated;
-CREATE OR REPLACE FUNCTION public.phms_v24_commit_appointment(
+CREATE FUNCTION public.phms_v24_commit_appointment(
   p_actor_user_id uuid, p_operation_key uuid,
   p_expected_family_id uuid, p_expected_family_person_id uuid,
   p_appointment jsonb
