@@ -1821,6 +1821,7 @@ function phmsGlobal593Final(messages:any[]):void{
   /* Apply shared five-category spacing even after the height compactor. */
   const category=String(bubble.header?.contents?.find((n:any)=>n?.type==='text')?.text||'');
   if(['💊 ยา','📅 นัดหมาย','🩺 สุขภาพ','📄 เอกสาร','💰 ค่าใช้จ่าย'].includes(category)&&bubble.body?.type==='box')bubble.body.spacing='0px';
+  if(category==='💰 ค่าใช้จ่าย'){if(bubble.body?.type==='box')bubble.body.paddingBottom='4px';if(bubble.footer?.type==='box')bubble.footer.paddingTop='4px';}
   // PHMS_GLOBAL_BUTTON_MD_LOCK_V1: retain standard-sized controls regardless of
   // earlier per-screen layout rules. Only content/padding may be compacted.
   const lockButtons=(node:any,depth=0):void=>{
@@ -2963,6 +2964,11 @@ async function replyMessages(rt:string,t:string,messages:any[]){
    const name=String(bubble?.header?.contents?.find((n:any)=>n?.type==='text')?.text||'');
    if(!PHMS_SUMMARY_TITLES.has(name)||!Array.isArray(bubble?.body?.contents))continue;
    bubble.body.spacing='0px';
+   if(name==='💰 ค่าใช้จ่าย'){
+    bubble.body.paddingBottom='4px';
+    if(bubble.footer?.type==='box')bubble.footer.paddingTop='4px';
+    for(const n of bubble.body.contents){if(n?.type==='box'&&JSON.stringify(n).includes('📋 ดูอีก ')){n.margin='6px';n.paddingAll='0px';n.spacing='0px';}}
+   }
    const walk=(node:any,depth=0):void=>{
     if(!node||depth>18||!Array.isArray(node.contents))return;
     for(let i=0;i<node.contents.length-2;i++){
