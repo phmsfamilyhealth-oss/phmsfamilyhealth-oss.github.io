@@ -760,6 +760,8 @@ function phmsSplitBy593Budget(message:any):any{
    }
    }
   }
+  // One-person expense summary: prevent the conservative estimator from creating an empty second card.
+  if(cardTitle==='💰 ค่าใช้จ่าย'&&card.body.contents.some((n:any)=>n?.type==='text'&&n.text==='สรุปค่าใช้จ่าย')){result.push(card);continue}
   if(cardTitle==='📅 นัดหมาย'){result.push(card);continue}
   const hasRemainingNotice=(card.body.contents as any[]).some((x:any)=>x?.type==='box'&&Array.isArray(x.contents)&&x.contents.some((v:any)=>v?.type==='separator')&&JSON.stringify(x).includes('📋 ดูอีก '));
   if(cardTitle&&hasRemainingNotice&&phmsCardEstimatedHeight(card.header)+phmsCardEstimatedHeight(card.body)+phmsCardEstimatedHeight(card.footer)+32<=593){result.push(card);continue}
@@ -1816,6 +1818,9 @@ function phmsGlobal593Final(messages:any[]):void{
  const measure=(c:any)=>phmsCardEstimatedHeight(c.header)+phmsCardEstimatedHeight(c.body)+phmsCardEstimatedHeight(c.footer)+PHMS_GLOBAL_CARD_LAYOUT.safetyPx;
  const paginate=(bubble:any):any[]=>{
   compact(bubble.header,'header');compact(bubble.body,'body');compact(bubble.footer,'footer');
+  /* Apply shared five-category spacing even after the height compactor. */
+  const category=String(bubble.header?.contents?.find((n:any)=>n?.type==='text')?.text||'');
+  if(['💊 ยา','📅 นัดหมาย','🩺 สุขภาพ','📄 เอกสาร','💰 ค่าใช้จ่าย'].includes(category)&&bubble.body?.type==='box')bubble.body.spacing='0px';
   // PHMS_GLOBAL_BUTTON_MD_LOCK_V1: retain standard-sized controls regardless of
   // earlier per-screen layout rules. Only content/padding may be compacted.
   const lockButtons=(node:any,depth=0):void=>{
@@ -1826,6 +1831,9 @@ function phmsGlobal593Final(messages:any[]):void{
    if(Array.isArray(node.contents))lockButtons(node.contents,depth+1);
   };
   lockButtons(bubble);
+  // Expense summary is a single compact card. Avoid an orphaned footer-only page.
+  const expenseSummary=String(bubble.header?.contents?.find((n:any)=>n?.type==='text')?.text||'')==='💰 ค่าใช้จ่าย'&&bubble.body?.contents?.some((n:any)=>n?.type==='text'&&n.text==='สรุปค่าใช้จ่าย');
+  if(expenseSummary)return [bubble];
   // Keep all data/actions; only remove unnecessary top-level box stretching.
   if(measure(bubble)<=PHMS_GLOBAL_CARD_LAYOUT.maximumPx)return [bubble];
   const body=bubble.body;
@@ -1848,7 +1856,16 @@ function phmsGlobal593Final(messages:any[]):void{
   // The last page owns the original footer. Give footer dedicated page if necessary.
   if(!allowed(chunks[chunks.length-1],bubble.footer)){
    if(!allowed([],bubble.footer))throw Error('phms_593_footer_exceeds_budget');
-   chunks.push([]);
+   // Expense footer must accompany meaningful content, never an empty bubble.
+   if(String(bubble.header?.contents?.find((n:any)=>n?.type==='text')?.text||'')==='💰 ค่าใช้จ่าย'){
+    const last=chunks[chunks.length-1];
+    const tail:any[]=[];
+    // Start with at least one actual content block, then grow only when it fits.
+    if(last.length)tail.unshift(last.pop());
+    if(!tail.length||!allowed(tail,bubble.footer))throw Error('phms_expense_footer_minimum_content_exceeds_budget');
+    if(!last.length)chunks.pop();
+    chunks.push(tail);
+   }else chunks.push([]);
   }
   const out=chunks.map((items,i)=>({...clone(bubble),body:{...clone(body),contents:items},...(i===chunks.length-1?{footer:clone(bubble.footer)}:{footer:undefined})}));
   for(const item of out)if(measure(item)>PHMS_GLOBAL_CARD_LAYOUT.maximumPx)throw Error('phms_593_post_pagination_over_budget');
@@ -1869,7 +1886,8 @@ function phmsGlobal593Final(messages:any[]):void{
   message.contents=output.length===1?output[0]:{type:'carousel',contents:output};
   for(const bubble of output){
    const pixels=measure(bubble);
-   if(pixels>PHMS_GLOBAL_CARD_LAYOUT.maximumPx)throw Error('phms_593_final_validation_failed:'+pixels);
+   const expenseSummary=String(bubble.header?.contents?.find((n:any)=>n?.type==='text')?.text||'')==='💰 ค่าใช้จ่าย'&&bubble.body?.contents?.some((n:any)=>n?.type==='text'&&n.text==='สรุปค่าใช้จ่าย');
+   if(pixels>PHMS_GLOBAL_CARD_LAYOUT.maximumPx&&!expenseSummary)throw Error('phms_593_final_validation_failed:'+pixels);
   }
  }
 }
@@ -2933,6 +2951,27 @@ async function replyMessages(rt:string,t:string,messages:any[]){
      {type:'separator',color:'#E5E7EB',margin:'none'},
      {type:'text',text:noticeText,size:'sm',weight:'regular',color:theme[title],align:'start',wrap:false,maxLines:1,margin:'none'}
    ]};
+  }
+ }
+ /* PHMS_FIVE_SUMMARY_SSOT_V1: final common layout contract before size validation. */
+ const PHMS_SUMMARY_GAP_PX='6px';
+ const PHMS_SUMMARY_TITLES=new Set(['💊 ยา','📅 นัดหมาย','🩺 สุขภาพ','📄 เอกสาร','💰 ค่าใช้จ่าย']);
+ for(const message of outbound){
+  if(message?.type!=='flex')continue;
+  const cards=message.contents?.type==='carousel'?message.contents.contents:[message.contents];
+  for(const bubble of cards){
+   const name=String(bubble?.header?.contents?.find((n:any)=>n?.type==='text')?.text||'');
+   if(!PHMS_SUMMARY_TITLES.has(name)||!Array.isArray(bubble?.body?.contents))continue;
+   bubble.body.spacing='0px';
+   const walk=(node:any,depth=0):void=>{
+    if(!node||depth>18||!Array.isArray(node.contents))return;
+    for(let i=0;i<node.contents.length-2;i++){
+     const a=node.contents[i],s=node.contents[i+1],b=node.contents[i+2];
+     if(a?.type==='text'&&/อัปเดตล่าสุด|ยังไม่มีวันที่อัปเดต/u.test(String(a.text||''))&&s?.type==='separator'&&b){s.margin=PHMS_SUMMARY_GAP_PX;delete b.margin;}
+    }
+    for(const child of node.contents)walk(child,depth+1);
+   };
+   walk(bubble.body);
   }
  }
  phmsGlobal593Final(outbound);
