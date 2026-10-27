@@ -55,13 +55,10 @@ Deno.serve(async request=>{
    'vary':'Origin'
   }});
  }
- if(!handler||!isSchemaReady||await isSchemaReady()!==true)return json('feature_not_released',404);
+ const withCors=response=>{if(!origin)return response;const headers=new Headers(response.headers);headers.set('access-control-allow-origin',origin);headers.set('vary','Origin');return new Response(response.body,{status:response.status,headers});};
+ if(!handler||!isSchemaReady||await isSchemaReady()!==true)return withCors(json('feature_not_released',404));
  try{
   const response=await handler(request);
-  if(!origin)return response;
-  const headers=new Headers(response.headers);
-  headers.set('access-control-allow-origin',origin);
-  headers.set('vary','Origin');
-  return new Response(response.body,{status:response.status,headers});
- }catch{return json('request_failed',503);}
+  return withCors(response);
+ }catch{return withCors(json('request_failed',503));}
 });
