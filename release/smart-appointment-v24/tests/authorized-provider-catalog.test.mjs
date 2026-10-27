@@ -9,3 +9,5 @@ test('unauthorized member denied before catalog read',async()=>{const s=configur
 test('missing view rights never exposes catalog',async()=>{const s=configured({centralCanAccess:async()=>false});const res=await s.handle(request(),{selectedPersonCode:member});assert.equal(res.status,403);assert.equal(s.reads(),0)});
 
 test('normal LINE bearer token containing s is accepted',async()=>{const s=configured({verifyLineIdentity:async(token)=>token==='session-token'?{userId:'actor'}:null});const req=new Request('https://example.test/confirm',{method:'POST',headers:{authorization:'Bearer session-token'}});const res=await s.handle(req,{selectedPersonCode:member});assert.equal(res.status,200);assert.equal(s.reads(),3)});
+
+test('catalog rejects non-JSON or non-POST requests before querying provider data',async()=>{const s=configured();const req=new Request('https://example.test/confirm',{method:'GET',headers:{authorization:'Bearer valid'}});const response=await s.handle(req,{selectedPersonCode:member});assert.equal(response.status,400);assert.equal(s.reads(),0)});
