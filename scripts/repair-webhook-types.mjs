@@ -24,7 +24,7 @@ for(const [key,index] of [['person_code',2],['person_code',3],['user_code',2],['
 // Appointment navigation can include optional LINE display text and height.
 const picker="function phmsApptPickerCard(title:string,sub:string,options:any[],back=false,backData='เลือกประเภทนัดใหม่'){";
 if(source.includes(picker)){
- source=source.replace(picker,picker+"\n const footerContents: Array<{type:string;style:string;height?:string;action:{type:string;label:string;data:string;displayText?:string}}> = [\n  ...(back?[{type:'button',style:'primary',action:{type:'postback',label:'↩️ ย้อนกลับ',data:backData}}]:[]),\n  {type:'button',style:'primary',action:{type:'postback',label:'❌ ยกเลิกเพิ่มนัด',data:'ยกเลิกเพิ่มนัด'}}\n ];");
+ source=source.replace(picker,picker+"\n const footerContents: Array<{type:string;style?:string;height?:string;action:{type:string;label?:string;data:string;displayText?:string};[key:string]:unknown}> = [\n  ...(back?[{type:'button',style:'primary',action:{type:'postback',label:'↩️ ย้อนกลับ',data:backData}}]:[]),\n  {type:'button',style:'primary',action:{type:'postback',label:'❌ ยกเลิกเพิ่มนัด',data:'ยกเลิกเพิ่มนัด'}}\n ];");
  source=source.replace("footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'12px',contents:[\n   ...(back?[{type:'button',style:'primary',action:{type:'postback',label:'↩️ ย้อนกลับ',data:backData}}]:[]),\n   {type:'button',style:'primary',action:{type:'postback',label:'❌ ยกเลิกเพิ่มนัด',data:'ยกเลิกเพิ่มนัด'}}]}","footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'12px',contents:footerContents}");
 }
 await fs.writeFile(output,source);
