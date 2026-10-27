@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {mapAppointmentInsert as map} from '../contracts/supabase-appointment-row.mjs';
+const command={actorId:'verified-user',subjectId:'family-person',personId:'canonical-person',familyId:'family',appointmentType:'followup',draft:{hospital_name:'Hospital',preparation_tasks:[{title:'ใบนัด'}]},canonicalVisit:{visit_mode:'walk_in',visit_time_known:false,appointment_at:null,planned_visit_date:'2026-11-03',status:'planned'}};
+test('date only walk-in maps required person ID separately from family person ID',()=>{const a=map(command);assert.equal(a.ok,true);assert.equal(a.row.person_id,'canonical-person');assert.equal(a.row.family_person_id,'family-person');assert.equal(a.row.appointment_at,null)});
+test('no verified person ID prevents write',()=>assert.equal(map({...command,personId:null}).error,'missing_verified_context'));
+test('no appointment type prevents write',()=>assert.equal(map({...command,appointmentType:null}).error,'appointment_type_required'));
+test('known time must have backend resolved timezone aware timestamp',()=>assert.equal(map({...command,canonicalVisit:{...command.canonicalVisit,visit_time_known:true,appointment_at:undefined}}).error,'timestamp_not_resolved'));
+test('fabricated timestamp for unknown time denied',()=>assert.equal(map({...command,canonicalVisit:{...command.canonicalVisit,appointment_at:'2026-11-03T09:00:00+07:00'}}).error,'invalid_date_only'));
