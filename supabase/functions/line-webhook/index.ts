@@ -6376,31 +6376,33 @@ async function appointmentActivePersonName(u:string,k:string,id:string):Promise<
   Navigation buttons are an explicit exception to the generic four-action overflow splitter.
 */
 async function replyAppointmentTypePicker(rt:string,u:string,k:string,id:string,t:string,personName:string){
- const appointmentMainOption=(label:string,command:string,help:string,color:string)=>({
-  type:'box',layout:'vertical',spacing:'none',contents:[
-   {type:'box',layout:'vertical',height:'48px',justifyContent:'center',alignItems:'center',backgroundColor:color,cornerRadius:'8px',action:{type:'postback',data:command,displayText:label.slice(0,300)},contents:[
-    {type:'text',text:label,size:'md',weight:'regular',color:'#FFFFFF',align:'center',wrap:false,maxLines:1}
-   ]},
-   {type:'text',text:help,wrap:false,size:'sm',color:'#24364B',margin:'none',maxLines:1}
+ const option=(label:string,data:string,help:string,bg:string)=>({
+  type:'box',layout:'vertical',height:'60px',spacing:'none',justifyContent:'center',alignItems:'center',backgroundColor:bg,cornerRadius:'8px',action:{type:'postback',data,displayText:label},
+  contents:[
+   {type:'text',text:label,size:'md',weight:'regular',color:'#FFFFFF',align:'center',gravity:'center',wrap:false,maxLines:1},
+   {type:'text',text:help,size:'sm',weight:'regular',color:'#FFFFFF',align:'center',gravity:'center',wrap:false,maxLines:1}
   ]
  });
- const items=[
-  appointmentMainOption('🩺 ไปพบหมอ','เลือกหมวดนัด รักษา','ตรวจตามนัด / ติดตามโรค','#5F5048'),
-  appointmentMainOption('🔬 ไปตรวจอย่างเดียว','เลือกหมวดนัด ตรวจ','ตรวจเลือด / เอกซเรย์ / ตรวจพิเศษ','#89765E'),
-  appointmentMainOption('💊 ไปรับยาอย่างเดียว','เลือกหมวดนัด ยา','รับที่ รพ. / ส่งยาถึงบ้าน','#496476'),
-  appointmentMainOption('📋 นัดเรื่องอื่น ๆ','เลือกหมวดนัด อื่น','ฉีดวัคซีน / ส่งต่อ / อื่น ๆ','#795A52')
+ const action=(label:string,data:string,bg:string)=>({
+  type:'box',layout:'vertical',height:'48px',spacing:'none',justifyContent:'center',alignItems:'center',backgroundColor:bg,cornerRadius:'8px',action:{type:'postback',data,displayText:label},
+  contents:[{type:'text',text:label,size:'md',weight:'regular',color:'#FFFFFF',align:'center',gravity:'center',wrap:false,maxLines:1}]
+ });
+ const card=phmsApptPickerCard('📅 เพิ่มนัดหมาย','นัดของ '+String(personName||'ผู้ใช้')+' • ขั้นตอนที่ 1/8',[
+  option('🩺 ไปพบหมอ','เลือกหมวดนัด รักษา','ตรวจตามนัด / ติดตามโรค','#5F5048'),
+  option('🔬 ไปตรวจอย่างเดียว','เลือกหมวดนัด ตรวจ','ตรวจเลือด / เอกซเรย์ / ตรวจพิเศษ','#89765E'),
+  option('💊 ไปรับยาอย่างเดียว','เลือกหมวดนัด ยา','รับที่ รพ. / ส่งยาถึงบ้าน','#496476'),
+  option('📋 นัดเรื่องอื่น ๆ','เลือกหมวดนัด อื่น','ฉีดวัคซีน / ส่งต่อ / อื่น ๆ','#795A52')
+ ],false);
+ card.contents.header.height='68px';
+ card.contents.body.paddingAll='8px';
+ card.contents.body.spacing='6px';
+ card.contents.footer.paddingAll='8px';
+ card.contents.footer.spacing='6px';
+ card.contents.footer.contents=[
+  action('📝 กรอกข้อมูลเอง','เทมเพลตเพิ่มนัด','#5D6179'),
+  action('❌ ยกเลิกเพิ่มนัด','ยกเลิกเพิ่มนัด','#933C4A')
  ];
- // Keep 4 primary choices and 2 navigation actions in exactly one LINE bubble.
- const card:any=phmsApptPickerCard('📅 เพิ่มนัดหมาย','นัดของ '+String(personName||'ผู้ใช้')+' • ขั้นตอนที่ 1/8',items,false);
- // Compact unified one-bubble standard: 48px primary targets and equal-height secondary actions.
- card.contents.header.height='66px';
- card.contents.body.spacing='none';card.contents.body.paddingAll='6px';
- card.contents.footer.spacing='4px';card.contents.footer.paddingAll='8px';
- card.contents.footer.contents[0].height='sm';
- // Preserve 4 groups and the existing vertical back/cancel footer; expose existing text-template flow.
- card.contents.footer.contents.unshift({type:'button',style:'secondary',height:'sm',action:{type:'postback',label:'📝 กรอกข้อมูลเอง',data:'เทมเพลตเพิ่มนัด',displayText:'📝 กรอกข้อมูลเอง'}});
- card.contents.footer.contents[1].height='sm';
- await replyMessages(rt,t,[{...card,altText:'📅 เพิ่มนัดหมาย'}])
+ await replyMessages(rt,t,[card]);
 }
 async function replyAppointmentTypeSubPicker(rt:string,u:string,k:string,id:string,t:string,group:string){
  const hist=await phmsAppointmentHistoryPresence(u,k,id);
