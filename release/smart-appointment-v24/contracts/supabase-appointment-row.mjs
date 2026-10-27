@@ -8,7 +8,7 @@ export function mapAppointmentInsert(command){
  if(v.visit_time_known===false&&(v.visit_mode!=='walk_in'||v.appointment_at!==null||!v.planned_visit_date))return {ok:false,error:'invalid_date_only'};
  let appointmentAt=null;
  if(v.visit_time_known===true){
-  if(v.appointment_at){ if(typeof v.appointment_at!=='string'||!/^\\d{4}-\\d{2}-\\d{2}T/.test(v.appointment_at)||!Number.isFinite(Date.parse(v.appointment_at)))return {ok:false,error:'invalid_timestamp'}; appointmentAt=v.appointment_at; }
+  if(v.appointment_at){ if(typeof v.appointment_at!=='string'||!/^\d{4}-\d{2}-\d{2}T/.test(v.appointment_at)||!Number.isFinite(Date.parse(v.appointment_at)))return {ok:false,error:'invalid_timestamp'}; appointmentAt=v.appointment_at; }
   else { const resolved=resolveBangkokAppointmentTime(v.local_appointment_datetime);if(!resolved.ok)return {ok:false,error:'timestamp_not_resolved'};appointmentAt=resolved.appointment_at; }
  }
  const row={family_id:command.familyId,family_person_id:command.subjectId,person_id:command.personId,created_by:command.actorId,
