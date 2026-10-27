@@ -7,7 +7,7 @@ export function makePhmsLineSubjectResolver(supabase){
   const {data,error}=await supabase.from('line_identities').select('id,user_id,is_active').eq('line_user_id',lineSub).limit(2);
   if(error||!Array.isArray(data)||data.length!==1)return null;
   const row=data[0];
-  if(row?.is_active!==true||typeof row.user_id!=='string'||!/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(row.user_id))return null;
+  if(row?.is_active!==true||typeof row.user_id!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(row.user_id))return null;
   return {userId:row.user_id};
  };
 }
