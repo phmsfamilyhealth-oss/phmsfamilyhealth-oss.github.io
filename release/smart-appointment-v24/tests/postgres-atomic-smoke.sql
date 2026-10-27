@@ -34,3 +34,23 @@ BEGIN
  SELECT count(*) INTO d FROM public.appointment_tasks;
  IF c<>1 OR d<>1 THEN RAISE EXCEPTION 'unexpected counts %, %',c,d; END IF;
 END $$;
+
+-- Negative controls: security gate and mismatched replay must be rejected.
+DO $$
+DECLARE rejected boolean:=false;
+BEGIN
+ BEGIN
+  PERFORM public.phms_v24_commit_appointment(
+  '99999999-9999-4999-8999-999999999999','66666666-6666-4666-8666-666666666666',
+  '22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333','{}'::jsonb);
+ EXCEPTION WHEN OTHERS THEN rejected:=true; END;
+ IF NOT rejected THEN RAISE EXCEPTION 'unauthorized actor was accepted'; END IF;
+ UPDATE private.phms_appointment_release_gate SET enabled_for_everyone=false;
+ rejected:=false;
+ BEGIN
+  PERFORM public.phms_v24_commit_appointment(
+  '11111111-1111-4111-8111-111111111111','77777777-7777-4777-8777-777777777777',
+  '22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333','{}'::jsonb);
+ EXCEPTION WHEN OTHERS THEN rejected:=true; END;
+ IF NOT rejected THEN RAISE EXCEPTION 'release gate not enforced'; END IF;
+END $$;
