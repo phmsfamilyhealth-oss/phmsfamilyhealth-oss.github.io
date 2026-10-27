@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {confirmAppointment} from '../contracts/confirm-orchestrator.mjs';
+const req={credential:'verified-line-token',selectedPersonCode:'P1',operationKey:'12345678-1234-4234-8234-123456789abc',draft:{scenario:'booked',date:'2026-11-03',time_known:true,time:'09:00',hospital:'H'}};
+const base={verifyLineIdentity:async()=>({userId:'u1'}),resolvePerson:async()=>({familyPersonId:'p1',familyId:'f1'}),isReleaseEnabled:async()=>true,centralCanAccess:async()=>true,verifyProviderBinding:async()=>true,atomicCommit:async()=>({appointmentId:'a1',authorizedReadback:true})};
+test('create permission without view permission cannot write',async()=>{let commits=0;const a={...base,centralCanAccess:async(_u,_p,_r,act)=>act==='create',atomicCommit:async()=>{commits++}};const r=await confirmAppointment(req,a);assert.equal(r.error,'read_permission_denied');assert.equal(commits,0)});
+test('create and view authorization can continue to verified receipt',async()=>assert.equal((await confirmAppointment(req,base)).ok,true));
