@@ -4,6 +4,8 @@ on:
     paths:
       - 'supabase/**'
       - 'tests/**'
+      - 'release/smart-health/**'
+      - 'scripts/**'
       - 'package*.json'
       - '.github/workflows/smart-health-tests.yml'
   workflow_dispatch:

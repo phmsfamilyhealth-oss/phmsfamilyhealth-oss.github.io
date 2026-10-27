@@ -5,6 +5,7 @@ import fs from 'node:fs/promises';
 import {newReading,validateSession,validateReading,convert,numberInput,healthCard} from '../supabase/functions/line-webhook/smart-health.ts';
 import {handleSmartHealth} from '../supabase/functions/line-webhook/smart-health-runtime.ts';
 import {webhookHarness} from './webhook-harness.mjs';
+import {startObjectStorage} from './http-object-storage.mjs';
 const db=new PGlite();
 const actor='11111111-1111-4111-8111-111111111111',person='22222222-2222-4222-8222-222222222222',other='33333333-3333-4333-8333-333333333333';
 const read=(type,value,extra={})=>({...newReading(type,new Date().toISOString()),value,...extra});
@@ -103,4 +104,18 @@ test('all eight metrics commit together and temperature/height/weight/RR survive
  const rt=runtime();await enter(rt,'custom');for(const type of ['Temp','Weight','Height','RR'])await rt.click('toggle '+type);await rt.click('chosen');await rt.click('unit °F');await rt.run('98.6','message');await rt.click('ctx 0');await rt.click('unit lb');await rt.run('134.481979','message');await rt.click('unit in');await rt.run('60','message');await rt.run('18','message');await contextSkip(rt);await saveRuntime(rt);
  const rows=(await db.query('select * from health_measurements where intake_session_id=$1',[rt.state.state_data.sid])).rows;assert.equal(rows.length,4);assert.ok(Math.abs(Number(rows.find(x=>x.measurement_type==='Temp').value_numeric)-37)<1e-6);assert.equal(rows.find(x=>x.measurement_type==='Temp').measurement_context.site,'รักแร้');assert.equal(Number(rows.find(x=>x.measurement_type==='Height').value_numeric),152.4);assert.equal(Number(rows.find(x=>x.measurement_type==='RR').value_numeric),18);
  const id=crypto.randomUUID();await api('begin',id);await api('save',id,{revision:0,readings:[read('BP',undefined,{systolic:120,diastolic:80}),read('HR',72),read('SpO2',98),read('DTX',110),read('Temp',37),read('Weight',61),read('Height',154),read('RR',18)]});await api('review',id,{revision:1});await api('commit',id,{revision:1});assert.equal((await db.query('select count(*) n from health_measurements where intake_session_id=$1',[id])).rows[0].n,8);
+});
+test('signed webhook uploads and reads real object bytes over HTTP; private URLs reject tampering and expiry',async()=>{
+ const storage=await startObjectStorage();
+ try{
+  const h=await webhookHarness(db,{storage});await h.run('เพิ่มสุขภาพ','text');await h.run('phms_health_owner self');await h.run('','image');
+  await h.click('preset oximeter');await h.run('98','text');await h.click('ctx skip');await h.click('hr_source oximeter');await h.run('74','text');await h.click('ctx skip');
+  await h.run('','image');assert.equal(storage.count,1);await h.click('photo_done');await h.click('time_now');await h.click('review');await h.click('commit');
+  const evidence=(await api('evidence_list',h.state.state_data.sid)).items[0];await h.click('evidence '+evidence.asset_id);
+  const signed=new URL(h.sent[0].originalContentUrl),local=storage.origin+signed.pathname+signed.search;
+  const bytes=await fetch(local);assert.equal(bytes.status,200);assert.deepEqual(new Uint8Array(await bytes.arrayBuffer()),new Uint8Array([255,216,255,0,23]));
+  const tampered=new URL(local);tampered.searchParams.set('token','wrong');assert.equal((await fetch(tampered)).status,403);
+  assert.equal((await fetch(storage.origin+'/storage/v1/object/phms-medical-sources/private')).status,401);
+  storage.advance(301);assert.equal((await fetch(local)).status,403);
+ }finally{await storage.close();}
 });

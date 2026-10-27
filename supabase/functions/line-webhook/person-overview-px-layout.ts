@@ -66,7 +66,7 @@ export function layoutPersonOverviewPx(message:Node, estimateHeight:(node:Node)=
     if(f?.type==='box'){
       f.paddingAll='6px';f.spacing='4px';
       for(const btn of f.contents??[])if(btn.type==='button'){
-        btn.height='sm';btn.margin='0px';
+        btn.height='md';btn.margin='0px';
       }
     }
     const predicted=PERSON_OVERVIEW_PX.header+estimateHeight(b)+estimateHeight(f)+PERSON_OVERVIEW_PX.safety;

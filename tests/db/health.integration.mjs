@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {restore} from './restore.mjs';
 import {newReading} from '../../supabase/functions/line-webhook/smart-health.ts';
+import {webhookHarness} from '../webhook-harness.mjs';
+import {startObjectStorage} from '../http-object-storage.mjs';
 
 // Empty schema snapshot only: real context resolution, policies, FKs and audit
 // triggers, with synthetic accounts. No production patient rows are copied.
@@ -66,8 +68,39 @@ try{
   await db.transaction(async tx=>{await tx.exec('grant select on health_measurements to authenticated;set local role authenticated');await tx.query("select set_config('request.jwt.claim.sub',$1,true)",[actors[1].actor]);assert.equal((await tx.query('select * from health_measurements')).rows.length,0);});
   await db.transaction(async tx=>{await tx.exec('grant select on health_measurements to authenticated;set local role authenticated');await tx.query("select set_config('request.jwt.claim.sub',$1,true)",[actors[0].actor]);assert.ok((await tx.query('select * from health_measurements')).rows.length>=8);});
  });
+ await check('signed LINE event to actual context/wizard/draft/HTTP image/review/commit/readback/history uses restored backend RPCs',async()=>{
+  const storage=await startObjectStorage();
+  const databaseRPC=async(name,params)=>{
+   const keys=Object.keys(params),args=keys.map((key,i)=>key+'=> $'+(i+1)).join(',');
+   const kind=(await db.query("select prorettype::regtype::text type from pg_proc where proname=$1 and pronamespace='public'::regnamespace",[name])).rows[0]?.type;
+   if(!kind)throw Error('Missing real RPC '+name);
+   await db.exec('set role service_role');
+   try{const rows=(await db.query(kind==='jsonb'?'select public.'+name+'('+args+') result':'select * from public.'+name+'('+args+')',keys.map(key=>params[key]!==null&&typeof params[key]==='object'?JSON.stringify(params[key]):params[key]))).rows;return kind==='jsonb'?rows[0].result:rows;}
+   finally{await db.exec('reset role');}
+  };
+  try{
+   const h=await webhookHarness(db,{storage,databaseRPC,lineUserId:actors[0].line});await h.run('เพิ่มสุขภาพ','text');assert.ok(JSON.stringify(h.sent).includes('phms_health_owner self'));
+   await h.run('phms_health_owner self');await h.run('','image');await h.click('preset daily');await h.run('122','text');await h.run('81','text');for(let i=0;i<3;i++)await h.click('ctx skip');await h.click('hr_source bp_monitor');await h.run('76','text');await h.click('ctx skip');await h.run('','image');
+   assert.equal(storage.count,1);await h.click('photo_done');await h.click('time_now');await h.click('review');await h.click('commit');const saved=await h.snapshot();assert.equal(saved.status,'committed');assert.equal((await db.query('select id from health_measurements where intake_session_id=$1',[saved.id])).rows.length,2);
+   await h.click('history 30');assert.ok(JSON.stringify(h.sent).includes('graph 30 BP'));await h.click('graph 30 BP');assert.ok(JSON.stringify(h.sent).includes('ค่าเฉลี่ยรายวัน'));
+   const evidence=(await rpc('evidence_list',saved.id)).items[0];await h.click('evidence '+evidence.asset_id);const url=new URL(h.sent[0].originalContentUrl);const response=await fetch(storage.origin+url.pathname+url.search);assert.equal(response.status,200);assert.deepEqual(new Uint8Array(await response.arrayBuffer()),new Uint8Array([255,216,255,0,23]));
+  }finally{await storage.close();}
+ });
  await check('disabled release gate rejects authorized service RPC without creating health records',async()=>{
   await db.exec("update phms_runtime_environment set health_smart_intake_release_state='off'");await assert.rejects(rpc('begin',crypto.randomUUID()),/smart_health_release_not_authorized/);
+ });
+ await check('reapplying migration preserves canonical rows, constraints and closed gate',async()=>{
+  const before=(await db.query('select count(*) n from health_measurements')).rows[0].n;
+  await db.exec(fs.readFileSync(new URL('../../supabase/migrations/20261022144248_smart_health_intake.sql',import.meta.url),'utf8'));
+  assert.equal((await db.query('select count(*) n from health_measurements')).rows[0].n,before);
+  assert.equal((await db.query('select health_smart_intake_release_state state from phms_runtime_environment')).rows[0].state,'off');
+ });
+ await check('operational rollback disables commits and restores introduced grants without deleting evidence',async()=>{
+  const before=(await db.query('select count(*) n from health_measurements')).rows[0].n;
+  await db.exec(fs.readFileSync(new URL('../../release/smart-health/rollback.sql',import.meta.url),'utf8'));
+  assert.equal((await db.query('select count(*) n from health_measurements')).rows[0].n,before);
+  assert.equal((await db.query("select has_function_privilege('service_role','public.phms_smart_health(text,text,uuid,jsonb)','execute') ok")).rows[0].ok,false);
+  assert.equal((await db.query("select has_function_privilege('service_role','private.phms_line_crud_context(text,text,text)','execute') ok")).rows[0].ok,false);
  });
 }finally{console.log(JSON.stringify({passed,failed,productionPatientRowsCopied:0,storageTransport:'isolated; production predicates and asset authorization restored'}));await db.close();}
 if(failed)process.exitCode=1;

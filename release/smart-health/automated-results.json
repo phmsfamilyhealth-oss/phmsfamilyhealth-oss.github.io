@@ -1,0 +1,35 @@
+{
+  "baseline_webhook_version": 1370,
+  "migration_sha256": "a30497d49800e5bdab520a6dfff3c8b8f62f95ad08bebac5cbbcb8c8f1a9e786",
+  "integrated_webhook_sha256": "167cac41720ff1b08a1613bd895466c61f4cff95b07c43dd62b8ead998a12ef8",
+  "runtime_flex_regression": {
+    "passed": 56,
+    "failed": 0
+  },
+  "restored_schema_health_integration": {
+    "passed": 13,
+    "failed": 0,
+    "includes": [
+      "real LINE context RPCs",
+      "signed event/router",
+      "canonical measurements",
+      "HTTP filesystem image upload/readback",
+      "private document policy",
+      "history/graph",
+      "idempotent migration reapply",
+      "data-preserving rollback"
+    ]
+  },
+  "medication_refill_integration": {
+    "passed": 29,
+    "failed": 0
+  },
+  "object_storage_provider": "isolated HTTP/filesystem contract service; not Supabase Storage",
+  "production_storage_verified": false,
+  "production_patient_rows_copied": 0,
+  "production_migration_applied": false,
+  "production_deployed": false,
+  "real_device_uat": "NOT_RUN",
+  "public_enabled": false,
+  "approval_status": "DECLINED_ORIGIN_UNDETERMINED"
+}

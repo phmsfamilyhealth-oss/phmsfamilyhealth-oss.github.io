@@ -1,0 +1,73 @@
+{
+  "production_webhook_baseline": 1370,
+  "production_mutations_performed": false,
+  "approval": {
+    "result": "declined",
+    "reason": null,
+    "approver": null,
+    "origin": "undetermined"
+  },
+  "preflight": {
+    "bucket": {
+      "public": false,
+      "file_size_limit": 26214400
+    },
+    "tables": [
+      {
+        "table": "public.data_intake_sessions",
+        "insert": false,
+        "select": false,
+        "update": false
+      },
+      {
+        "table": "public.data_intake_sources",
+        "insert": false,
+        "select": false,
+        "update": false
+      },
+      {
+        "table": "public.data_intake_actions",
+        "insert": false,
+        "select": false,
+        "update": false
+      },
+      {
+        "table": "public.health_measurements",
+        "insert": false,
+        "select": false,
+        "update": false
+      },
+      {
+        "table": "public.medical_documents",
+        "insert": false,
+        "select": false,
+        "update": false
+      },
+      {
+        "table": "public.phms_storage_assets",
+        "insert": true,
+        "select": true,
+        "update": true
+      },
+      {
+        "table": "public.phms_runtime_environment",
+        "insert": false,
+        "select": true,
+        "update": false
+      },
+      {
+        "table": "storage.objects",
+        "insert": true,
+        "select": true,
+        "update": true
+      },
+      {
+        "table": "storage.buckets",
+        "insert": true,
+        "select": true,
+        "update": true
+      }
+    ],
+    "resolver_execute": false
+  }
+}
