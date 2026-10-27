@@ -10,7 +10,7 @@ export function makePhmsAuthorityAdapter(query){
   }catch{return false;}
  };
  const isReleaseEnabled=async(actorId)=>{
-  if(!actorId)return false;
+  if(typeof actorId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actorId))return false;
   try{
    const result=await query('select (enabled_for_everyone = true or $1::uuid = any(allowed_actor_ids)) as allowed from private.phms_appointment_release_gate where singleton = true',[actorId]);
    return result?.rows?.length===1&&result.rows[0]?.allowed===true;
