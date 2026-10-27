@@ -19,3 +19,10 @@
 ## Acceptance
 - CI green is necessary, never sufficient; no release without targeted-user real device LINE -> LIFF -> review -> database write -> scoped readback -> LINE UAT and owner approval.
 - Recovery: do not change production during design. Branch changes can be reverted in PR #12. Edge v1 stays fail-closed.
+
+## Latest verified continuation — commit aa5da8b0 (27 Oct 2026)
+- GitHub PR #12 remains draft and unmerged; PHMS Contract Regression jobs `scenario-validation` and `postgres-atomic-smoke` passed in run 40534203116; Medication release gates passed in run 40534203507.
+- Read-only live Supabase verification: dedicated v2.4 appointment commit routine remains absent; release gate is closed globally with zero enabled test actors; deployed appointment confirm remains v1 fail-closed.
+- Live database CHECK `aim_walk_in_date_only_allowed` permits unknown-time date-only visits only for `walk_in` with planned/scheduled status; historical completed date-only is not supported without an approved schema-compatible design.
+- Unresolved actual-use dependencies: owner-approved gated database migration and recovery plan; server-only private database connectivity/credentials; configured LIFF channel/origin and trusted endpoint; restricted test actor; authenticated LINE to LIFF to persisted readback and back to LINE UAT.
+- Do not present green isolated CI as real LINE release acceptance. Do not deploy a write-capable candidate without explicit production-change authorization. No patient records were modified during these inspections.
