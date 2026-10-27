@@ -74,3 +74,9 @@ This commit only adds a documentation file on a feature branch. Rollback: revert
 - Coverage: appointments/procedures/tasks/document links, three healthcare master tables, RLS flags on three canonical tables, gate disabled, allowlist empty, and browser authenticated role lacking EXECUTE on both wizard draft save and gate RPCs.
 - These are *metadata/configuration assertions only*, not full behavioral cross-family access tests, LINE token verification, transaction tests, automated CI or UAT. Phase 1 and 2 remain BLOCKED.
 - No production data, policy, storage object, Edge Function, or flag was changed by the audit. Rollback of this documentation/test-only commit: revert PR commits without database rollback.
+
+## 2026-10-27 follow-up: privileged function boundary assertions
+- GitHub main unchanged 1d988866dfcd9a1a97196b5fa26bbc989110f3cb; Production line-webhook ACTIVE v1426; gate disabled; allowlist empty.
+- Added `release/smart-appointment-v24/tests/auth_boundary_readonly.sql` and executed exact committed SQL against Production read-only: 10/10 PASS, no failed assertions.
+- Checked authenticated/anon cannot invoke sensitive candidate commit, LINE context, wizard save/get RPCs, while service_role can invoke wizard save. This does not demonstrate safe token binding or end-to-end authorized behavior.
+- Phase 1–2 still BLOCKED for full source parity, actual behavioral security tests, field acceptance and integration. No production mutation or deploy performed. Rollback: revert documentation/test-only PR commits.
