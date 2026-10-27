@@ -20,7 +20,7 @@ SET search_path = pg_catalog, public, private
 AS $$
 DECLARE
   v_person uuid; v_id uuid; v_existing private.phms_v24_appointment_operations%ROWTYPE;
-  v_hash text; v_time timestamptz; v_date date; v_type text; v_mode text; v_status text;
+  v_hash text; v_task jsonb; v_task_count integer; v_time timestamptz; v_date date; v_type text; v_mode text; v_status text;
 BEGIN
   IF p_actor_user_id IS NULL OR p_operation_key IS NULL OR p_expected_family_id IS NULL OR p_expected_family_person_id IS NULL
     OR jsonb_typeof(p_appointment) <> 'object' THEN RAISE EXCEPTION 'invalid_request'; END IF;
@@ -39,7 +39,7 @@ BEGIN
   -- Never accept caller-supplied person/family/provider/actor IDs or arbitrary column maps.
   -- Do not silently lose requested documents, checklist or reschedule relationships.
   -- These require their own verified atomic storage paths before release.
-  IF p_appointment ?| ARRAY['document_metadata','documents','preparation_tasks','rescheduled_from_appointment_id','source_document_id','organization_id','service_unit_id','clinician_id']
+  IF p_appointment ?| ARRAY['document_metadata','documents','rescheduled_from_appointment_id','source_document_id','organization_id','service_unit_id','clinician_id']
   THEN RAISE EXCEPTION 'unsupported_related_data'; END IF;
   IF nullif(p_appointment->>'person_id','')::uuid IS DISTINCT FROM v_person
    OR nullif(p_appointment->>'family_id','')::uuid IS DISTINCT FROM p_expected_family_id
@@ -64,6 +64,13 @@ BEGIN
   THEN RAISE EXCEPTION 'time_required'; END IF;
   -- JSON null and absent values must not bypass three-valued SQL comparisons.
   IF v_type IS NULL OR v_mode IS NULL OR v_status IS NULL THEN RAISE EXCEPTION 'invalid_appointment'; END IF;
+  IF p_appointment ? 'preparation_tasks' AND jsonb_typeof(p_appointment->'preparation_tasks') <> 'array' THEN RAISE EXCEPTION 'invalid_checklist'; END IF;
+  v_task_count := CASE WHEN jsonb_typeof(p_appointment->'preparation_tasks')='array' THEN jsonb_array_length(p_appointment->'preparation_tasks') ELSE 0 END;
+  IF v_task_count > 20 THEN RAISE EXCEPTION 'checklist_too_long'; END IF;
+  FOR v_task IN SELECT value FROM jsonb_array_elements(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) LOOP
+    IF jsonb_typeof(v_task) <> 'object' OR nullif(btrim(v_task->>'title'),'') IS NULL OR length(v_task->>'title') > 160
+    THEN RAISE EXCEPTION 'invalid_checklist_item'; END IF;
+  END LOOP;
   -- Unique key serializes concurrent attempts; mismatched replay is explicitly rejected.
   v_hash := md5(p_appointment::text);
   SELECT * INTO v_existing FROM private.phms_v24_appointment_operations
@@ -90,6 +97,10 @@ BEGIN
     left(p_appointment->>'doctor_name',160),left(p_appointment->>'note',1000),
     left(p_appointment->>'preparation_notes',4000)
   ) RETURNING id INTO v_id;
+  FOR v_task IN SELECT value FROM jsonb_array_elements(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) LOOP
+    INSERT INTO public.appointment_tasks(appointment_id,task_type,title,instruction,status,created_by)
+    VALUES(v_id,'other',left(btrim(v_task->>'title'),160),left(v_task->>'instruction',1000),'pending',p_actor_user_id);
+  END LOOP;
   INSERT INTO private.phms_v24_appointment_operations(actor_user_id,operation_key,request_hash,appointment_id)
   VALUES(p_actor_user_id,p_operation_key,v_hash,v_id);
   RETURN jsonb_build_object('ok',true,'appointment_id',v_id,'idempotent_replay',false);
