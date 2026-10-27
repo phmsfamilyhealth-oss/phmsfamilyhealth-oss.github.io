@@ -1,9 +1,13 @@
 import {resolveBangkokAppointmentTime} from './bangkok-time.mjs';
 // Production schema-aligned appointment row mapping. Server-only, never direct client INSERT.
 // Actor/person/family must originate from verified identity + central permission resolver.
+const allowedTypes=new Set(['new_case','follow_up','referral','investigation','procedure','walk_in','rescheduled','other','checkup','vaccination','medication_refill']);
+const allowedModes=new Set(['booked','walk_in','unspecified']);
 export function mapAppointmentInsert(command){
  const v=command?.canonicalVisit,d=command?.draft;
  if(!v||!d||!command.actorId||!command.subjectId||!command.personId||!command.familyId)return {ok:false,error:'missing_verified_context'};
+ if(!allowedModes.has(v.visit_mode))return {ok:false,error:'invalid_visit_mode'};
+ if(!allowedTypes.has(command.appointmentType))return {ok:false,error:'invalid_appointment_type'};
  if(v.visit_time_known!==true&&v.visit_time_known!==false)return {ok:false,error:'invalid_time'};
  if(v.visit_time_known===false&&(v.visit_mode!=='walk_in'||v.appointment_at!==null||!v.planned_visit_date))return {ok:false,error:'invalid_date_only'};
  let appointmentAt=null;
