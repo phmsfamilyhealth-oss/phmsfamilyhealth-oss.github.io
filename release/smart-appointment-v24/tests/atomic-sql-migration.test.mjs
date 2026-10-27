@@ -10,3 +10,5 @@ test('production checklist projection rejects dual-source payload instead of sil
   assert.match(sql,/IF v_task_count > 0\s+THEN RAISE EXCEPTION 'checklist_dual_source_not_supported'/);
   assert.doesNotMatch(sql,/checklist_instructions_not_supported_by_projection/);
 });
+
+test('atomic write rejects a visit date differing from Bangkok-local appointment timestamp',()=>{assert.match(sql,/v_time AT TIME ZONE 'Asia\/Bangkok'/);assert.match(sql,/appointment_date_time_mismatch/)});
