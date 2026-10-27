@@ -38,10 +38,30 @@ if(ready){
   });
  }catch{handler=null;}
 }
+// Browser access is restricted to one owner-configured HTTPS LIFF form origin.
+// Never enable wildcard CORS for a bearer-token patient-data API.
+const trustedOrigin=env('PHMS_V24_LIFF_ORIGIN');
+const originAllowed=origin=>/^https:\/\/[^/]+$/.test(trustedOrigin)&&origin===trustedOrigin;
 Deno.serve(async request=>{
- if(request.method==='OPTIONS')return json('not_enabled',403);
+ const origin=request.headers.get('origin');
+ if(origin&&!originAllowed(origin))return json('origin_not_allowed',403);
+ if(request.method==='OPTIONS'){
+  if(!origin||!originAllowed(origin))return json('origin_not_allowed',403);
+  return new Response(null,{status:204,headers:{
+   'access-control-allow-origin':origin,
+   'access-control-allow-methods':'POST, OPTIONS',
+   'access-control-allow-headers':'authorization, content-type',
+   'access-control-max-age':'300',
+   'vary':'Origin'
+  }});
+ }
  if(!handler||!isSchemaReady||await isSchemaReady()!==true)return json('feature_not_released',404);
- // Private release gate is checked by the handler; requests are never
- // allowed to bypass central PHMS permissions.
- try{return await handler(request);}catch{return json('request_failed',503);}
+ try{
+  const response=await handler(request);
+  if(!origin)return response;
+  const headers=new Headers(response.headers);
+  headers.set('access-control-allow-origin',origin);
+  headers.set('vary','Origin');
+  return new Response(response.body,{status:response.status,headers});
+ }catch{return json('request_failed',503);}
 });
