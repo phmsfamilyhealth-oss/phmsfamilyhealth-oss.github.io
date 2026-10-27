@@ -4,12 +4,14 @@ import {makeAppointmentBackend} from './appointment-backend.mjs';
 import {makePhmsLineIdentityAdapter} from './phms-line-identity-adapter.mjs';
 import {makePhmsPersonResolver} from './phms-person-resolver.mjs';
 import {makePhmsAuthorityAdapter} from './phms-private-authority.mjs';
+import {makePhmsWriteIdentityResolver} from './phms-write-identity-resolver.mjs';
 export function makePhmsAppointmentHttpHandler({supabase,channelId,fetchImpl,privateQuery,security}={}){
- if(!supabase?.from||!supabase?.rpc||typeof privateQuery!=='function'||!security)
+ if(!supabase?.from||!supabase?.rpc||typeof privateQuery!=='function'||typeof security?.resolveAppointmentType!=='function')
   throw new Error('phms_http_backend_not_configured');
  const authority=makePhmsAuthorityAdapter(privateQuery);
  const mergedSecurity={...security,...authority};
+ const resolveWriteIdentity=makePhmsWriteIdentityResolver({supabase,centralCanAccess:authority.centralCanAccess,resolveAppointmentType:security.resolveAppointmentType});
  const verifyLineIdentity=makePhmsLineIdentityAdapter({supabase,channelId,fetchImpl});
  const resolvePerson=makePhmsPersonResolver({supabase,centralCanAccess:authority.centralCanAccess});
- return makeAppointmentBackend({supabase,security:{...mergedSecurity,verifyLineIdentity,resolvePerson}});
+ return makeAppointmentBackend({supabase,security:{...mergedSecurity,verifyLineIdentity,resolvePerson,resolveWriteIdentity}});
 }
