@@ -122,9 +122,11 @@ BEGIN
                AND tgname='trg_phms_sync_appointment_preparation_tasks'
                AND tgenabled IN ('O','A'))
      AND nullif(btrim(coalesce(p_appointment->>'preparation_notes','')),'') IS NOT NULL THEN
-    IF EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) AS item
-               WHERE nullif(btrim(item->>'instruction'),'') IS NOT NULL)
-    THEN RAISE EXCEPTION 'checklist_instructions_not_supported_by_projection'; END IF;
+    -- Production trigger generates tasks only from preparation_notes; it does NOT
+    -- preserve structured preparation_tasks titles or instructions. Reject a
+    -- dual-source request instead of acknowledging a save that silently drops data.
+    IF v_task_count > 0
+    THEN RAISE EXCEPTION 'checklist_dual_source_not_supported'; END IF;
   ELSE
   FOR v_task IN SELECT value FROM jsonb_array_elements(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) LOOP
     INSERT INTO public.appointment_tasks(appointment_id,task_type,title,instruction,status,created_by)
