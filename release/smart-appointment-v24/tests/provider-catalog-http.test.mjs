@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {handleProviderCatalog as handle} from '../contracts/provider-catalog-http.mjs';
+const url='https://example.test/catalog?personCode=P1&organizationId=h1&unitId=u1';
+const req=(address=url,headers={})=>new Request(address,{headers:{authorization:'Bearer verified-line-credential',...headers}});
+const identity={verifyLineIdentity:async()=>({userId:'u1'}),resolvePerson:async()=>({familyPersonId:'p1'}),isReleaseEnabled:async()=>true,centralCanAccess:async()=>true};
+let queries=0;const data={healthcare_organizations:[{id:'h1',name:'รพ.หนึ่ง'}],healthcare_service_units:[{id:'u1',organization_id:'h1',name:'ตรวจ'}],healthcare_clinicians:[{id:'d1',organization_id:'h1',service_unit_id:'u1',display_name:'แพทย์หนึ่ง'}]};
+const db={from(t){queries++;return{select(){return{is(){return{limit:async()=>({data:data[t],error:null})}}}}}}};
+test('authorized GET returns 200 and no-store',async()=>{const r=await handle(req(),identity,db);assert.equal(r.status,200);assert.equal(r.headers.get('cache-control'),'no-store');assert.equal((await r.json()).clinicians[0].value,'d1')});
+test('no bearer yields 401 without database reads',async()=>{queries=0;const r=await handle(req(url,{authorization:''}),identity,db);assert.equal(r.status,401);assert.equal(queries,0)});
+test('feature off yields 404 without DB reads',async()=>{queries=0;const r=await handle(req(),{...identity,isReleaseEnabled:async()=>false},db);assert.equal(r.status,404);assert.equal(queries,0)});
+test('permission denial yields 403 without DB reads',async()=>{queries=0;const r=await handle(req(),{...identity,centralCanAccess:async()=>false},db);assert.equal(r.status,403);assert.equal(queries,0)});
+test('unexpected query parameter rejected',async()=>assert.equal((await handle(req(url+'&familyId=forged'),identity,db)).status,400));
+test('database fault is generic 503',async()=>{const r=await handle(req(),identity,{from(){throw new Error('sensitive database detail')}});assert.equal(r.status,503);assert.doesNotMatch(await r.text(),/sensitive database detail/)});
+test('wrong method rejected',async()=>assert.equal((await handle(new Request(url,{method:'POST'}),identity,db)).status,405));
