@@ -2,3 +2,5 @@ import test from 'node:test';import assert from 'node:assert/strict';import {rea
 test('edge requires installed atomic routine and operation table',()=>{assert.match(code,/to_regprocedure\('public\.phms_v24_commit_appointment/);assert.match(code,/to_regclass\('private\.phms_v24_appointment_operations/)});
 
 test('LIFF CORS preflight only permits configured exact HTTPS origin',()=>{assert.match(code,/PHMS_V24_LIFF_ORIGIN/);assert.match(code,/origin===trustedOrigin/);assert.match(code,/access-control-allow-methods/);assert.match(code,/authorization, content-type/);assert.match(code,/origin_not_allowed/);assert.doesNotMatch(code,/access-control-allow-origin['"]\s*:\s*['"]\*['"]/)});
+
+test('authorized LIFF origin can read both unavailable-backend and unexpected-error responses',()=>{assert.match(code,/return withCors\(json\('feature_not_released',404\)\)/);assert.match(code,/return withCors\(json\('request_failed',503\)\)/);assert.match(code,/headers\.set\('access-control-allow-origin',origin\)/)});
