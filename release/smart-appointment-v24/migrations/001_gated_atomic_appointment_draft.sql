@@ -47,19 +47,21 @@ BEGIN
   v_type := p_appointment->>'appointment_type';
   v_mode := p_appointment->>'visit_mode';
   v_status := p_appointment->>'status';
-  IF v_type NOT IN ('new_case','follow_up','referral','investigation','procedure','walk_in','rescheduled','other','checkup','vaccination','medication_refill')
+  IF v_type IS NULL OR v_mode IS NULL OR v_status IS NULL OR v_type NOT IN ('new_case','follow_up','referral','investigation','procedure','walk_in','rescheduled','other','checkup','vaccination','medication_refill')
     OR v_mode NOT IN ('booked','walk_in','unspecified')
     OR v_status NOT IN ('planned','scheduled','completed')
   THEN RAISE EXCEPTION 'invalid_appointment'; END IF;
   v_time := nullif(p_appointment->>'appointment_at','')::timestamptz;
   v_date := nullif(p_appointment->>'planned_visit_date','')::date;
-  IF v_date IS NULL OR (p_appointment->>'visit_time_known') NOT IN ('true','false')
+  IF v_date IS NULL OR (p_appointment->>'visit_time_known') IS NULL OR (p_appointment->>'visit_time_known') NOT IN ('true','false')
   THEN RAISE EXCEPTION 'invalid_date'; END IF;
   IF (p_appointment->>'visit_time_known')='false' AND
      (v_mode <> 'walk_in' OR v_time IS NOT NULL OR v_status NOT IN ('planned','scheduled'))
   THEN RAISE EXCEPTION 'unknown_time_not_supported'; END IF;
   IF (p_appointment->>'visit_time_known')='true' AND v_time IS NULL
   THEN RAISE EXCEPTION 'time_required'; END IF;
+  -- JSON null and absent values must not bypass three-valued SQL comparisons.
+  IF v_type IS NULL OR v_mode IS NULL OR v_status IS NULL THEN RAISE EXCEPTION 'invalid_appointment'; END IF;
   -- Unique key serializes concurrent attempts; mismatched replay is explicitly rejected.
   v_hash := md5(p_appointment::text);
   SELECT * INTO v_existing FROM private.phms_v24_appointment_operations
