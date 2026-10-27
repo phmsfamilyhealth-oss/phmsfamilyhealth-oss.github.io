@@ -81,3 +81,27 @@ BEGIN
  EXCEPTION WHEN SQLSTATE 'P0001' THEN rejected:=true; END;
  IF NOT rejected THEN RAISE EXCEPTION 'unsupported document was accepted'; END IF;
 END $$;
+
+-- Verify browser roles have no EXECUTE grant on the privileged function.
+DO $$
+DECLARE anon_allowed boolean; auth_allowed boolean;
+BEGIN
+ SELECT has_function_privilege('anon','public.phms_v24_commit_appointment(uuid,uuid,uuid,uuid,jsonb)','EXECUTE') INTO anon_allowed;
+ SELECT has_function_privilege('authenticated','public.phms_v24_commit_appointment(uuid,uuid,uuid,uuid,jsonb)','EXECUTE') INTO auth_allowed;
+ IF anon_allowed OR auth_allowed THEN RAISE EXCEPTION 'privileged RPC exposed to browser roles'; END IF;
+END $$;
+-- Verify invalid checklist rolls back both appointment and task writes.
+DO $$
+DECLARE before_appointments bigint; before_tasks bigint; rejected boolean:=false;
+BEGIN
+ SELECT count(*) INTO before_appointments FROM public.appointments;
+ SELECT count(*) INTO before_tasks FROM public.appointment_tasks;
+ BEGIN
+ PERFORM public.phms_v24_commit_appointment(
+ '11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+ '22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333',
+ '{"family_id":"22222222-2222-4222-8222-222222222222","family_person_id":"33333333-3333-4333-8333-333333333333","person_id":"44444444-4444-4444-8444-444444444444","created_by":"11111111-1111-4111-8111-111111111111","appointment_type":"walk_in","visit_mode":"walk_in","visit_time_known":false,"status":"planned","planned_visit_date":"2026-11-03","appointment_at":null,"preparation_tasks":[{"title":""}]}'::jsonb);
+ EXCEPTION WHEN OTHERS THEN rejected:=true; END;
+ IF NOT rejected THEN RAISE EXCEPTION 'invalid checklist accepted'; END IF;
+ IF (SELECT count(*) FROM public.appointments)<>before_appointments OR (SELECT count(*) FROM public.appointment_tasks)<>before_tasks THEN RAISE EXCEPTION 'partial write after rejected checklist'; END IF;
+END $$;
