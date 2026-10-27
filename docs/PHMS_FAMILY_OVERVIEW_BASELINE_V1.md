@@ -28,6 +28,11 @@ Scope: Family member directory cards and family navigation card. Applies uniform
 - Do not add separators or create duplicate margin on the parent container. Verify rendered LINE Flex layout for both empty and populated family members.
 - Governance does not establish Production deployment; verify the active Supabase `line-webhook` code separately.
 
+## Amendment C — Category order (2026-10-27)
+- The three family summary tiles are ordered **📅 นัด → 💊 ยา → 🩺 สุขภาพ**, left to right, for every visible member in every household.
+- Preserve each tile's original semantic color, count, label, typography, padding and action. Reorder only the three data-backed entries in the shared `personDirectoryBubble()` categoryCounts array. No additional separator or spacing changes.
+- All records, permissions, and other screens are unchanged. Validate empty and populated member cards after release.
+
 ## Change control (mandatory)
 1. Treat the approved visual baseline as frozen. No incidental global text-size, layout, button, padding or color changes to this screen.
 2. Any future edit affecting this screen requires explicit owner approval, a before/after rendered screenshot, and regression review of dense and empty profiles.
