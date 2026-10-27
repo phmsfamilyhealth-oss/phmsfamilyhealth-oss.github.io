@@ -2,6 +2,7 @@
 // Both use the existing provider master tables; never accept browser-supplied names as proof.
 import {fetchProviderMaster} from './supabase-provider-master.mjs';
 import {verifyProviderSelection} from './provider-hierarchy.mjs';
+const norm=x=>typeof x==='string'?x.trim().replace(/\s+/g,' ').toLocaleLowerCase():'';
 const uuid=x=>typeof x==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(x);
 export function makePhmsPersistenceSecurity({supabase,centralCanAccess}={}){
  if(!supabase?.from||typeof centralCanAccess!=='function')throw new Error('persistence_security_not_configured');
@@ -12,7 +13,19 @@ export function makePhmsPersistenceSecurity({supabase,centralCanAccess}={}){
   if(!selection?.organizationId||!uuid(selection.organizationId))return false;
   if(selection.unitId&&!uuid(selection.unitId))return false;
   if(selection.clinicianId&&!uuid(selection.clinicianId))return false;
-  try{return verifyProviderSelection(await fetchProviderMaster(supabase),selection)===true}catch{return false}
+  try{
+   const master=await fetchProviderMaster(supabase);
+   if(verifyProviderSelection(master,selection)!==true)return false;
+   const org=master.organizations.find(x=>x.id===selection.organizationId);
+   const unit=selection.unitId?master.units.find(x=>x.id===selection.unitId):null;
+   const clinician=selection.clinicianId?master.clinicians.find(x=>x.id===selection.clinicianId):null;
+   if(!org||!norm(draft.hospital_name)||![org.name,org.display_name].some(x=>norm(x)===norm(draft.hospital_name)))return false;
+   if(unit&&norm(unit.name)!==norm(draft.department))return false;
+   if(clinician&&norm(clinician.display_name)!==norm(draft.doctor_name))return false;
+   if(!unit&&norm(draft.department))return false;
+   if(!clinician&&norm(draft.doctor_name))return false;
+   return true;
+  }catch{return false}
  }
  async function readAuthorizedAppointment(actorId,appointmentId){
   if(!uuid(actorId)||!uuid(appointmentId))return null;
