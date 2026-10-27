@@ -18,4 +18,5 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run test:integration
+      - run: npm run test:transport
       - run: npm run compile
