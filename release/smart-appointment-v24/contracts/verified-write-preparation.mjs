@@ -6,7 +6,7 @@ export async function prepareVerifiedAppointmentWrite(command,adapters){
   return {ok:false,error:'missing_verified_context'};
  // The initial RPC cannot atomically persist document links or structured checklist items.
  if((command.draft?.document_metadata?.length||0)>0) return {ok:false,error:'related_records_not_supported'};
- const identity=await adapters.resolveWriteIdentity(command.actorId,command.subjectId,command.familyId);
+ const identity=await adapters.resolveWriteIdentity(command.actorId,command.subjectId,command.familyId,command);
  if(!identity?.personId||!identity?.appointmentType)return {ok:false,error:'write_identity_unresolved'};
  // The resolver must verify identity and appointment category against server-owned tables.
  if(identity.familyPersonId!==command.subjectId||identity.familyId!==command.familyId)
