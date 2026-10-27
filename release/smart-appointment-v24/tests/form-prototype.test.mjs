@@ -16,3 +16,5 @@ test('LIFF never enables save without a real LINE ID token',()=>{assert.match(ht
 test('missing LINE ID token shows an actionable Thai error without activating save',()=>{assert.match(html,/ยังยืนยันตัวตนกับ LINE ไม่สำเร็จ/);assert.match(html,/if\(!window\.liff\.getIDToken\(\)\)\{document\.getElementById\('error'\)/);});
 
 test('review requires a verified registered hospital instead of misleading free text',()=>{assert.match(html,/providerPickerState\(authorizedCatalog,\$\('providerOrg'\)\.value/);assert.match(html,/กรุณาเลือกโรงพยาบาลจากรายชื่อที่ระบบแสดงก่อนบันทึก/)});
+
+test('save remains disabled until a nonempty authorized hospital registry is loaded',()=>{assert.match(html,/if\(catalogResult\.ok&&catalogResult\.catalog\.organizations\.length\)/);assert.match(html,/syncProviderNames\(\);document\.getElementById\('save'\)\.disabled=false/);assert.doesNotMatch(html,/confirmClient=makeLiffConfirmClient\([^;]+;document\.getElementById\('save'\)\.disabled=false/);});
