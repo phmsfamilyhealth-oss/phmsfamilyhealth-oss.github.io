@@ -27,3 +27,8 @@ Functions inspected: private.phms_commit_appointment_candidate and private.phms_
 10. Unrelated LINE CRUD unchanged.
 
 Gate: Phase 1 BLOCKED / Phase 2 BLOCKED. No patient records accessed, no production mutations. Rollback of this document commit is revert-only.
+
+## Follow-up regression evidence (2026-10-27)
+- Production line-webhook observed v1424 ACTIVE, main SHA unchanged; release gate disabled and allowlist empty.
+- Added tests/unknown_time_contract_readonly.sql and executed against live schema: **5/5 PASS**, zero data mutations.
+- These tests confirm the **presence of the mismatch**, not successful date-only visit support. Isolated code change and integration tests remain pending.
