@@ -12371,6 +12371,14 @@ async function personDashboardMessages(u:string,k:string,id:string,title='👤 �
    ...(extraSummary?.expenses?.view===true&&Number(extraSummary.expenses.count??extraSummary.expenses.items?.length??0)>0?[{type:'button',color:'#7956A0',height:'md',style:'primary',action:{type:'postback',label:'💰 ดูค่าใช้จ่ายทั้งหมด',data:'สรุปค่าใช้จ่ายนัด'}}]:[]),
    ...(access?.expenses?.create===true?[{type:'button',color:'#6E5B91',height:'md',style:'primary',action:{type:'postback',label:'＋ เพิ่มค่าใช้จ่าย',data:'เพิ่มค่าใช้จ่ายบุคคล'}}]:[])
   ]}});
+ /* PHMS_PERSON_OVERVIEW_CATEGORY_ORDER_CENTRAL_V1: shared category ordering across all households. */
+ {
+  const priority:any={'📅 นัดหมาย':1,'💊 ยา':2,'🩺 สุขภาพ':3,'💰 ค่าใช้จ่าย':4,'📄 เอกสาร':5};
+  const cardOrder=(card:any)=>priority[String(card?.header?.contents?.find((x:any)=>x?.type==='text')?.text||'')]??99;
+  const first=cards[0];
+  const ordered=cards.slice(1).sort((a:any,b:any)=>cardOrder(a)-cardOrder(b));
+  cards.splice(0,cards.length,first,...ordered);
+ }
  /* PHMS_PERSON_DASHBOARD_CAROUSEL_COUNTER_V1: only category cards, count actual visible cards. */
  {
   const total=cards.length;
