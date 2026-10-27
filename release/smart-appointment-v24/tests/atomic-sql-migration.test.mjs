@@ -3,5 +3,5 @@ const sql=readFileSync(new URL('../migrations/001_gated_atomic_appointment_draft
 test('migration grants RPC only to service role and denies browser roles',()=>{assert.match(sql,/REVOKE ALL ON FUNCTION[^;]+FROM PUBLIC, anon, authenticated/);assert.match(sql,/GRANT EXECUTE ON FUNCTION[^;]+TO service_role/)});
 test('database transaction rechecks release gate and both central actions',()=>{assert.match(sql,/private\.phms_appointment_release_gate/);assert.match(sql,/'appointments','create'/);assert.match(sql,/'appointments','view'/)});
 test('database transaction locks idempotency and rejects payload changes',()=>{assert.match(sql,/pg_advisory_xact_lock/);assert.match(sql,/operation_key_reused/);assert.match(sql,/PRIMARY KEY\(actor_user_id,operation_key\)/)});
-test('uses trusted family person record and never trusts provider IDs',()=>{assert.match(sql,/FROM public\.family_persons/);assert.match(sql,/provider_binding_not_yet_implemented/)});
+test('uses trusted family person record and never trusts provider IDs',()=>{assert.match(sql,/FROM public\.family_persons/);assert.match(sql,/unsupported_related_data/)});
 test('migration is separately staged, not self-deploying',()=>{assert.match(sql,/NOT APPLIED TO PRODUCTION/);assert.match(sql,/BEGIN;/);assert.match(sql,/COMMIT;/)});
