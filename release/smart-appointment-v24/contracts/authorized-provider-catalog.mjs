@@ -5,7 +5,8 @@ const response=(data,status)=>new Response(JSON.stringify(data),{status,headers:
 export function makeAuthorizedProviderCatalogHandler({supabase,verifyLineIdentity,resolvePerson,isReleaseEnabled,centralCanAccess}={}){
  if(!supabase?.from||[verifyLineIdentity,resolvePerson,isReleaseEnabled,centralCanAccess].some(f=>typeof f!=='function'))throw new Error('catalog_security_not_configured');
  return async(request,raw)=>{
-  if(request.method!=='POST'||!request.headers.get('content-type')?.toLowerCase().startsWith('application/json'))return response({ok:false,error:'invalid_request'},400);
+  if(request.method!=='POST'||!/^application\/json(?:\s*;|\s*$)/i.test(request.headers.get('content-type')||''))return response({ok:false,error:'invalid_request'},400);
+  if(!raw||raw.action!=='provider_catalog'||typeof raw.selectedPersonCode!=='string'||!(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw.selectedPersonCode)))return response({ok:false,error:'invalid_request'},400);
   const token=/^Bearer ([^\s]+)$/.exec(request.headers.get('authorization')||'')?.[1];
   if(!token)return response({ok:false,error:'unauthenticated'},401);
   try{
