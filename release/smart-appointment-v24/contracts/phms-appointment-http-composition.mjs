@@ -6,6 +6,7 @@ import {makePhmsPersonResolver} from './phms-person-resolver.mjs';
 import {makePhmsAuthorityAdapter} from './phms-private-authority.mjs';
 import {makePhmsWriteIdentityResolver} from './phms-write-identity-resolver.mjs';
 import {makePhmsPersistenceSecurity} from './phms-persistence-security.mjs';
+import {makeAuthorizedProviderCatalogHandler} from './authorized-provider-catalog.mjs';
 export function makePhmsAppointmentHttpHandler({supabase,channelId,fetchImpl,privateQuery,security}={}){
  if(!supabase?.from||!supabase?.rpc||typeof privateQuery!=='function'||typeof security?.resolveAppointmentType!=='function')
   throw new Error('phms_http_backend_not_configured');
@@ -15,5 +16,15 @@ export function makePhmsAppointmentHttpHandler({supabase,channelId,fetchImpl,pri
  const resolveWriteIdentity=makePhmsWriteIdentityResolver({supabase,centralCanAccess:authority.centralCanAccess,resolveAppointmentType:security.resolveAppointmentType});
  const verifyLineIdentity=makePhmsLineIdentityAdapter({supabase,channelId,fetchImpl});
  const resolvePerson=makePhmsPersonResolver({supabase,centralCanAccess:authority.centralCanAccess});
- return makeAppointmentBackend({supabase,security:{...mergedSecurity,verifyLineIdentity,resolvePerson,resolveWriteIdentity}});
+ const appointment=makeAppointmentBackend({supabase,security:{...mergedSecurity,verifyLineIdentity,resolvePerson,resolveWriteIdentity}});
+ const catalog=makeAuthorizedProviderCatalogHandler({supabase,verifyLineIdentity,resolvePerson,isReleaseEnabled:authority.isReleaseEnabled,centralCanAccess:authority.centralCanAccess});
+ return async request=>{
+  if(request.method==='POST'&&request.headers.get('content-type')?.toLowerCase().startsWith('application/json')){
+   try{
+    const rawText=await request.clone().text();
+    if(rawText.length<=32768){const raw=JSON.parse(rawText);if(raw?.action==='provider_catalog')return catalog(request,raw);}
+   }catch{/* existing appointment handler supplies uniform invalid-request errors */}
+  }
+  return appointment(request);
+ };
 }
