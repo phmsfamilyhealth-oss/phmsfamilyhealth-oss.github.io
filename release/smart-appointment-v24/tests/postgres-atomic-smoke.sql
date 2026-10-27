@@ -16,7 +16,7 @@ CREATE FUNCTION private.user_can_access_family_person(uuid,uuid,text,text) RETUR
 INSERT INTO public.family_persons VALUES('33333333-3333-4333-8333-333333333333','22222222-2222-4222-8222-222222222222','44444444-4444-4444-8444-444444444444');
 -- Emulate existing Production automatic checklist projection trigger in synthetic PostgreSQL.
 -- This catches duplicate items from both trigger and explicit migration insert.
-CREATE FUNCTION public.phms_test_preparation_projection() RETURNS trigger LANGUAGE plpgsql AS $
+CREATE FUNCTION public.phms_test_preparation_projection() RETURNS trigger LANGUAGE plpgsql AS $phms_projection$
 BEGIN
  IF nullif(btrim(coalesce(NEW.preparation_notes,'')),'') IS NOT NULL THEN
   INSERT INTO public.appointment_tasks(appointment_id,task_type,title,status,created_by)
@@ -25,7 +25,7 @@ BEGIN
   WHERE nullif(btrim(line),'') IS NOT NULL;
  END IF;
  RETURN NEW;
-END $;
+END $phms_projection$;
 CREATE TRIGGER trg_phms_sync_appointment_preparation_tasks
 AFTER INSERT ON public.appointments FOR EACH ROW
 EXECUTE FUNCTION public.phms_test_preparation_projection();
