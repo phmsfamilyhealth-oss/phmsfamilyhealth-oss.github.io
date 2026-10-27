@@ -1,7 +1,7 @@
 {
-  "baseline_webhook_version": 1370,
+  "baseline_webhook_version": 1406,
   "migration_sha256": "a30497d49800e5bdab520a6dfff3c8b8f62f95ad08bebac5cbbcb8c8f1a9e786",
-  "integrated_webhook_sha256": "167cac41720ff1b08a1613bd895466c61f4cff95b07c43dd62b8ead998a12ef8",
+  "integrated_webhook_sha256": "16addcc3e11c01f5fdf9549a80054ca5e0205aeac2b5e807eb42725da0f0413f",
   "runtime_flex_regression": {
     "passed": 56,
     "failed": 0

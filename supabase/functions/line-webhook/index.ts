@@ -753,16 +753,17 @@ function phmsSplitBy593Budget(message:any):any{
     if(card.footer?.type==='box'){card.footer.paddingAll='6px';card.footer.spacing='4px'}
    }else{
    if(card.header?.type==='box'){card.header.paddingAll='16px';card.header.spacing='6px'}
-   if(card.body?.type==='box'){card.body.paddingAll='16px';card.body.spacing='12px'}
+   if(card.body?.type==='box'){card.body.paddingAll='16px';card.body.spacing=summaryKind==='📅 นัดหมาย'?'6px':'12px'}
    if(card.footer?.type==='box'){card.footer.paddingAll='12px';card.footer.spacing='8px'}
    for(const block of card.body.contents){
-    if(block?.type==='separator')block.margin='10px';
+    if(block?.type==='separator')block.margin=summaryKind==='📅 นัดหมาย'?'8px':'10px';
     if(block?.type==='box'&&JSON.stringify(block).includes('📋 ดูอีก ')){
      block.paddingAll='8px';block.margin='4px';block.spacing='4px';
     }
    }
    }
   }
+  if(cardTitle==='📅 นัดหมาย'){result.push(card);continue}
   const hasRemainingNotice=(card.body.contents as any[]).some((x:any)=>x?.type==='box'&&Array.isArray(x.contents)&&x.contents.some((v:any)=>v?.type==='separator')&&JSON.stringify(x).includes('📋 ดูอีก '));
   if(cardTitle&&hasRemainingNotice&&phmsCardEstimatedHeight(card.header)+phmsCardEstimatedHeight(card.body)+phmsCardEstimatedHeight(card.footer)+32<=593){result.push(card);continue}
   /* PHMS_EXPENSE_OVERVIEW_NO_ORPHAN_PAGE_V1 */
@@ -770,7 +771,7 @@ function phmsSplitBy593Budget(message:any):any{
   const name=String(card.header?.contents?.find((n:any)=>n?.type==='text')?.text||'');
   if(name!=='💰 ค่าใช้จ่าย'&&['💊 ยา','📅 นัดหมาย','🩺 สุขภาพ','📄 เอกสาร'].includes(name)&&card.footer?.contents?.some((b:any)=>b.type==='button'&&String(b.action?.label||'').includes('ทั้งหมด'))){
     card.header.paddingAll='16px';card.header.spacing='6px';
-    card.body.paddingAll='16px';card.body.spacing='12px';
+    card.body.paddingAll='16px';card.body.spacing=name==='📅 นัดหมาย'?'6px':'12px';
     card.footer.paddingAll='12px';card.footer.spacing='8px';
     for(const block of card.body.contents){
       if(block?.type==='separator')block.margin='10px';
@@ -2066,6 +2067,42 @@ async function replyMessages(rt:string,t:string,messages:any[]){
     footer.paddingTop='8px';
    }
   }
+  /* PHMS_LAST_UPDATED_DIVIDER_GAP_V6: five category body.spacing 0px, updated divider.margin 6px, no duplicated child margin. */
+  const PHMS_LAST_UPDATED_DIVIDER_GAP_PX='6px';
+  const fiveHeads=['💊 ยา','📅 นัดหมาย','🩺 สุขภาพ','📄 เอกสาร','💰 ค่าใช้จ่าย'];
+  const updated=(n:any,d=0):boolean=>!!n&&typeof n==='object'&&d<20&&(
+   (n.type==='text'&&/อัปเดตล่าสุด|ยังไม่มีวันที่อัปเดต/u.test(String(n.text||'')))||
+   (Array.isArray(n.contents)&&n.contents.some((v:any)=>updated(v,d+1))));
+  const canonical=(root:any,d=0):boolean=>{
+   if(!root||d>20||!Array.isArray(root.contents))return false;
+   const arr=root.contents;
+   for(let i=0;i<arr.length-2;i++){
+    if(!updated(arr[i]))continue;
+    const sep=arr[i+1];
+    if(sep?.type==='separator'){
+     while(arr[i+2]?.type==='spacer')arr.splice(i+2,1);
+     const first=arr[i+2];if(!first||first.type==='separator')continue;
+     sep.margin=PHMS_LAST_UPDATED_DIVIDER_GAP_PX;delete first.margin;
+     arr.splice(i+1,2,{type:'box',layout:'vertical',spacing:'none',
+      contents:[sep,first]});
+     return true;
+    }
+    if(sep?.type==='box'&&sep.contents?.[0]?.type==='separator'&&sep.contents[1]){
+     sep.contents[0].margin=PHMS_LAST_UPDATED_DIVIDER_GAP_PX;
+     while(sep.contents[1]?.type==='spacer')sep.contents.splice(1,1);
+     if(!sep.contents[1])continue;
+     delete sep.contents[1].margin;
+     sep.spacing='none';delete sep.paddingTop;delete sep.paddingAll;
+     return true;
+    }
+   }
+   for(const child of arr)if(canonical(child,d+1))return true;
+   return false;
+  };
+  for(const card of bubbles){
+   const hd=JSON.stringify(card?.header?.contents||[]);
+   if(fiveHeads.some(h=>hd.includes(h))){if(card.body?.type==='box')card.body.spacing='0px';canonical(card.body);}
+  }
   phmsApplyCategoryThemeToFlex(m.contents);phmsCardHeaderType(m);phmsEnforceHeaderHeight(m);phmsOwnerSummaryHeaderContract(m);phmsPersonHeaderCanonical(m);phmsApplyFiveCategorySecondaryBackground(m);phmsEnforcePersonOverviewCenterPortrait(m);layoutPersonOverviewPx(m,phmsCardEstimatedHeight);phmsRoundFlexImages(m.contents);phmsGlobalCarouselCounter(m);phmsLineFlexSchemaGuard(m)
  }
 
@@ -2872,6 +2909,28 @@ async function replyMessages(rt:string,t:string,messages:any[]){
      }
     }
    }
+  }
+ }
+ /* PHMS_PERSON_REMAINING_DIVIDER_V2: five category summary cards, all members / households.
+    Normalize after earlier notice styling passes so none can restore old boxes. */
+ for(const msg of outbound){
+  if(msg?.type!=='flex')continue;
+  const cards=msg.contents?.type==='carousel'?msg.contents.contents:[msg.contents];
+  for(const card of cards){
+   if(card?.type!=='bubble'||!Array.isArray(card.body?.contents))continue;
+   const title=String(card.header?.contents?.find((n:any)=>n?.type==='text')?.text||'');
+   if(!['💊 ยา','📅 นัดหมาย','🩺 สุขภาพ','📄 เอกสาร','💰 ค่าใช้จ่าย'].includes(title))continue;
+   const contents=card.body.contents;
+   const idx=contents.findIndex((node:any)=>node&&(node.type==='text'||node.type==='box')&&JSON.stringify(node).includes('📋 ดูอีก '));
+   if(idx<0)continue;
+   const old=contents[idx];
+   const noticeText=old.type==='text'?String(old.text||''):String(JSON.stringify(old).match(/📋 ดูอีก \d+ รายการ/u)?.[0]||'');
+   if(!/^📋 ดูอีก \d+ รายการ$/u.test(noticeText))continue;
+   const theme:any={'💊 ยา':'#872C42','📅 นัดหมาย':'#85571D','🩺 สุขภาพ':'#27694B','📄 เอกสาร':'#2D578B','💰 ค่าใช้จ่าย':'#66458A'};
+   contents[idx]={type:'box',layout:'vertical',margin:'8px',paddingAll:'0px',spacing:'8px',contents:[
+     {type:'separator',color:'#E5E7EB',margin:'none'},
+     {type:'text',text:noticeText,size:'sm',weight:'regular',color:theme[title],align:'start',wrap:false,maxLines:1,margin:'none'}
+   ]};
   }
  }
  phmsGlobal593Final(outbound);
@@ -3854,19 +3913,26 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
    if(p?.birth_info?.date)body.push({type:'text',text:'🎂 วันเกิด '+shortBirthThai(p.birth_info.date),size:'md',color:'#344054',wrap:true});
   }
   identityEnd=body.length;
-  const counts=[
-   ...(p?.medication_count!=null?['💊 ยา '+String(p.medication_count)]:[]),
-   ...(p?.appointment_count!=null?['📅 นัด '+String(p.appointment_count)]:[]),
-   ...(p?.health_count!=null?['🩺 สุขภาพ '+String(p.health_count)]:[])
+  // PHMS_FAMILY_CATEGORY_COUNT_CENTRAL_V2 — three equal-width compact tiles for every family member.
+  const categoryCounts:any[]=[
+   {label:'💊 ยา',value:p?.medication_count,background:'#FCECEF',foreground:'#91213D'},
+   {label:'📅 นัด',value:p?.appointment_count,background:'#FFF3DC',foreground:'#805617'},
+   {label:'🩺 สุขภาพ',value:p?.health_count,background:'#E7F4EA',foreground:'#205F46'}
   ];
-  if(counts.length){
-   body.push({type:'separator',margin:sectionGap});
-   body.push({type:'text',text:counts.join(' • '),size:'sm',weight:'bold',wrap:true,margin:'sm',color:'#263649'});
-   body.push({type:'separator',margin:sectionGap})
+  const hasCategoryTiles=categoryCounts.some((x:any)=>x.value!=null);
+  if(hasCategoryTiles){
+   body.push({type:'box',layout:'horizontal',spacing:'4px',margin:'sm',contents:categoryCounts.map((x:any)=>({
+    type:'box',layout:'vertical',flex:1,alignItems:'center',justifyContent:'center',
+    backgroundColor:x.background,cornerRadius:'8px',paddingAll:'3px',spacing:'0px',
+    contents:[
+     {type:'text',text:x.label,size:'sm',weight:'bold',color:x.foreground,align:'center',wrap:false},
+     {type:'text',text:String(Math.max(0,Number(x.value)||0)),size:'xl',weight:'bold',color:x.foreground,align:'center'},
+     {type:'text',text:'รายการ',size:'xs',color:x.foreground,align:'center'}
+    ]
+   }))});
   }
   if(Number(p?.medication_count||0)===0&&Number(p?.appointment_count||0)===0&&Number(p?.health_count||0)===0&&[p?.medication_count,p?.appointment_count,p?.health_count].every((v:any)=>v!=null)&&!p?.next_appointment&&!p?.latest_health){
-   if(body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
-   body.push({type:'text',text:'ยังไม่มีข้อมูลที่บันทึก',size:'md',color:'#475569',wrap:true,margin:'xs'});
+   body.push({type:'text',text:'ยังไม่มีข้อมูลที่บันทึก',size:'md',color:'#475569',wrap:true,margin:'8px'});
   }
   statsEnd=body.length;
   // PHMS_FAMILY_FIXED_PREVIEW_SLOTS_V2: shared placement for all persons.
@@ -3875,7 +3941,7 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
   if(p?.next_appointment){
    const ap=p.next_appointment;
    const apTitle=String(ap?.title||'นัดหมาย').replace(/\s+/g,' ').trim();
-   if(body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
+   if(!hasCategoryTiles&&body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
    const familyHasBothPreviews=Boolean(p?.next_appointment&&p?.latest_health); // PHMS_FAMILY_DYNAMIC_PREVIEW_LINES_V2
    const apBlocks:any[]=[{type:'text',text:'📅 นัดถัดไป  ›',weight:'bold',size:'md',color:PHMS_FIVE_CATEGORY_SECONDARY_FONT['📅 นัดหมาย']},{type:'text',text:apTitle||'นัดหมาย',size:'md',wrap:true,maxLines:1,color:'#344054'}];
    if(ap?.appointment_at){const dateTime=crudDate(ap.appointment_at);const natural=appointmentTimeOnlyLabel(ap.appointment_at).match(/\(([^)]+)\)$/)?.[1];apBlocks.push({type:'text',text:dateTime+(natural?' ('+natural+')':''),size:'md',wrap:true,maxLines:1,color:'#475569'});} // PHMS_FAMILY_APPOINTMENT_THAI_TIME_V1
@@ -3894,12 +3960,12 @@ function personDirectoryBubble(p:any,photoUrl:any=null,familyName='ครอบ�
    const healthTitle=type==='ผลตรวจจากนัด'&&appointmentPurpose?'ผลตรวจจากนัด: '+appointmentPurpose:type;
    const value=h?.systolic!=null&&h?.diastolic!=null?String(h.systolic)+'/'+String(h.diastolic):String(h?.value_numeric??h?.value_text??'');
    const summary=(healthTitle+(value?' • '+value:'')+(h?.unit?' '+String(h.unit):'')).trim();
-   if(body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
+   if((p?.next_appointment||!hasCategoryTiles)&&body[body.length-1]?.type!=='separator')body.push({type:'separator',margin:sectionGap});
    const healthCode=String(h?.code||h?.record_code||h?.health_code||'');
    const healthPersonSelection=String(p?.selection_code||p?.person_code||'');
    const healthCommand=/^[a-f0-9]{12}$/i.test(healthCode)?'ดูสุขภาพ '+healthCode:'เปิดสุขภาพครอบครัว '+healthPersonSelection+' '+encodeURIComponent(summary.slice(0,22));
    // Adaptive 2-3 lines: preserve legibility when appointment title is unusually long.
-   const healthPreviewLines=3; /* PHMS_FAMILY_HEALTH_PREVIEW_TWO_LINES_GLOBAL_V1 */
+   const healthPreviewLines=1; /* PHMS_FAMILY_HEALTH_PREVIEW_COMPACT_V3 */ /* PHMS_FAMILY_HEALTH_PREVIEW_TWO_LINES_GLOBAL_V2 */
    const healthBlocks:any[]=[{type:'text',text:'🩺 สุขภาพล่าสุด  ›',weight:'bold',size:'md',color:PHMS_FIVE_CATEGORY_SECONDARY_FONT['🩺 สุขภาพ']},{type:'text',text:summary.replace(/\s+/g,' ')||'มีข้อมูลสุขภาพที่บันทึกไว้',size:'md',wrap:true,maxLines:healthPreviewLines,color:'#263649'}];
    body.push({type:'box',layout:'vertical',spacing:'4px',margin:sectionGap,paddingAll:cardInset,cornerRadius:'8px',contents:healthBlocks,...(/^[a-f0-9]{12}$/i.test(healthCode)||/^[a-f0-9]{12}$/i.test(healthPersonSelection)?{action:{type:'postback',label:'🩺 ดูสุขภาพ',data:healthCommand}}:{})});
   }
@@ -4809,7 +4875,7 @@ function parseAppointmentFreeText(text:string):AppointmentPartial{
  const labeled=(re:RegExp)=>{const m=s.match(re);if(!m)return undefined;const v=String(m[1]||'').trim();return !v||['-','—','ไม่แก้'].includes(v)?undefined:v};
  const templateDate=labeled(/(?:^|\n)[ \t]*(?:วัน|วันที่|วันนัด)[ \t]*[:：=][ \t]*([^\n]*)/i);
  const templateTime=labeled(/(?:^|\n)[ \t]*(?:เวลา|เวลานัด)[ \t]*[:：=][ \t]*([^\n]*)/i);
- const templateTitle=labeled(/(?:^|\n)[ \t]*(?:นัดเพื่อ|นัด|นัดอะไร|รายละเอียดนัด)[ \t]*[:：=][ \t]*([^\n]*)/i);
+ const templateTitle=labeled(/(?:^|\n)[ \t]*(?:นัดเพื่อ|นัด|นัดอะไร|รายละเอียดนัด|ไปทำอะไร)[ \t]*[:：=][ \t]*([^\n]*)/i);
  const templateHospital=labeled(/(?:^|\n)[ \t]*(?:โรงพยาบาล|รพ\.\/คลินิก|สถานพยาบาล|รพ)[ \t]*[:：=][ \t]*([^\n]*)/i);
  const templateHN=labeled(/(?:^|\n)[ \t]*(?:HN|เลข\s*HN|เลขผู้ป่วย)[ \t]*[:：=][ \t]*([^\n]*)/i);
  const templateVN=labeled(/(?:^|\n)[ \t]*(?:VN|เลข\s*VN|เลขเยี่ยม|เลขครั้งรับบริการ)[ \t]*[:：=][ \t]*([^\n]*)/i);
@@ -4825,8 +4891,9 @@ function parseAppointmentFreeText(text:string):AppointmentPartial{
  const templatePhone=labeled(/(?:^|\n)[ \t]*(?:ติดต่อ|เบอร์ติดต่อ|โทรศัพท์)[ \t]*[:：=][ \t]*([^\n]*)/i);
  const templateEmail=labeled(/(?:^|\n)[ \t]*(?:อีเมล|email)[ \t]*[:：=][ \t]*([^\n]*)/i);
  const templateNote=labeled(/(?:^|\n)[ \t]*(?:หมายเหตุ|หมายเหตุทั่วไป)[ \t]*[:：=][ \t]*([^\n]*)/i);
+ const extraActivities=labeled(/(?:^|\n)[ \t]*(?:กิจกรรมเพิ่มเติม|ทำอะไรเพิ่ม)[ \t]*[:：=][ \t]*([^\n]*)/i);
  const templateType=labeled(/(?:^|\n)[ \t]*(?:ประเภทนัด|ชนิดนัด)[ \t]*[:：=][ \t]*([^\n]*)/i);
- const templateMode=/(?:^|\n)[ \t]*(?:วัน|วันที่|วันนัด|เวลา|เวลานัด|นัดเพื่อ|นัดอะไร|รายละเอียดนัด|รพ\.\/คลินิก|สถานพยาบาล|โรงพยาบาล|รพ|HN|เลข\s*HN|เลขผู้ป่วย|VN|เลข\s*VN|เลขเยี่ยม|เลขครั้งรับบริการ|โรคประจำตัวที่ติดตาม|เรื่องที่รักษา|กลุ่มการรักษา\/โรค|กลุ่มการรักษา|หัวข้อการรักษา|โรค\/ปัญหา|โรค|แผนก|คลินิก|แผนก\/คลินิก|แพทย์|หมอ|ชื่อแพทย์|จุดนัด|สถานที่|อาคาร\/ชั้น|จุด\/อาคาร\/ชั้น|สิทธิรักษา|สิทธิ|สิทธิการรักษา|เตรียมตัว|การเตรียมตัว|คำแนะนำก่อนนัด|ติดต่อ|เบอร์ติดต่อ|โทรศัพท์|อีเมล|email|หมายเหตุทั่วไป|หมายเหตุผู้ดูแล|หมายเหตุ|ควรมาถึงก่อน|มาถึงก่อน|มาก่อน|ประเภทนัด|ชนิดนัด|สถานะนัด|บันทึกเป็น)[ \t]*[:：=]/i.test(s);
+ const templateMode=/(?:^|\n)[ \t]*(?:วัน|วันที่|วันนัด|เวลา|เวลานัด|นัดเพื่อ|นัดอะไร|รายละเอียดนัด|รพ\.\/คลินิก|สถานพยาบาล|โรงพยาบาล|รพ|HN|เลข\s*HN|เลขผู้ป่วย|VN|เลข\s*VN|เลขเยี่ยม|เลขครั้งรับบริการ|โรคประจำตัวที่ติดตาม|เรื่องที่รักษา|กลุ่มการรักษา\/โรค|กลุ่มการรักษา|หัวข้อการรักษา|โรค\/ปัญหา|โรค|แผนก|คลินิก|แผนก\/คลินิก|แพทย์|หมอ|ชื่อแพทย์|จุดนัด|สถานที่|อาคาร\/ชั้น|จุด\/อาคาร\/ชั้น|สิทธิรักษา|สิทธิ|สิทธิการรักษา|เตรียมตัว|การเตรียมตัว|คำแนะนำก่อนนัด|ติดต่อ|เบอร์ติดต่อ|โทรศัพท์|อีเมล|email|หมายเหตุทั่วไป|หมายเหตุผู้ดูแล|หมายเหตุ|ควรมาถึงก่อน|มาถึงก่อน|มาก่อน|ประเภทนัด|ชนิดนัด|สถานะนัด|บันทึกเป็น|ไปทำอะไร|กิจกรรมเพิ่มเติม|ทำอะไรเพิ่ม)[ \t]*[:：=]/i.test(s);
  // Empty fields in a template must not infer dates/times from instructional or unrelated text.
  out.date=templateDate?parseAppointmentDate(templateDate):(!templateMode?parseAppointmentDate(s):undefined);
  out.time=templateTime?parseAppointmentTime(templateTime):(!templateMode?parseAppointmentTime(s):undefined);
@@ -4846,7 +4913,7 @@ function parseAppointmentFreeText(text:string):AppointmentPartial{
  if(templatePrep)out.preparation_notes=normalizeAppointmentPreparationInput(templatePrep);
  if(templatePhone)out.contact_phone=templatePhone;
  if(templateEmail)out.contact_email=templateEmail.toLowerCase();
- if(templateNote)out.note=templateNote;
+ if(templateNote||extraActivities)out.note=[templateNote,extraActivities?'กิจกรรมเพิ่มเติม: '+extraActivities:undefined].filter(Boolean).join(' • ');
  if(templateType){
   const typ=normalizeAppointmentTypeInput(templateType);
   if(typ)out.appointment_type=typ
@@ -6239,18 +6306,20 @@ function phmsApptOption(label:string,command:string,explain:string){
  // Elder-friendly UI: a short action label with a separate plain-language hint.
  return {type:'box',layout:'vertical',spacing:'xs',contents:[
   {type:'button',style:'primary',height:'sm',action:{type:'postback',label,data:command,displayText:label}},
-  ...(explain?[{type:'text',text:explain,wrap:false,size:'xs',color:'#667085',margin:'none',maxLines:1}]:[])
+  ...(explain?[{type:'text',text:explain,wrap:false,size:'sm',color:'#24364B',margin:'none',maxLines:1}]:[])
  ]}
 }
 function phmsApptPickerCard(title:string,sub:string,options:any[],back=false,backData='เลือกประเภทนัดใหม่'){
+ const footerContents: Array<{type:string;style:string;height?:string;action:{type:string;label:string;data:string;displayText?:string}}> = [
+  ...(back?[{type:'button',style:'primary',action:{type:'postback',label:'↩️ ย้อนกลับ',data:backData}}]:[]),
+  {type:'button',style:'primary',action:{type:'postback',label:'❌ ยกเลิกเพิ่มนัด',data:'ยกเลิกเพิ่มนัด'}}
+ ];
  return {type:'flex',altText:title,contents:{type:'bubble',size:'kilo',
-  header:{type:'box',layout:'vertical',paddingAll:'10px',backgroundColor:PHMS_CATEGORY_THEME.appointments.background,contents:[
-   {type:'text',text:title,size:'lg',weight:'bold',color:'#34465D',wrap:true},
-   {type:'text',text:sub,size:'sm',color:'#667085',wrap:true,margin:'sm'}]},
+  header:{type:'box',layout:'vertical',height:'76px',justifyContent:'center',spacing:'xs',paddingAll:'10px',backgroundColor:PHMS_CATEGORY_THEME.appointments.background,contents:[
+   {type:'text',text:title,size:'xl',weight:'bold',color:'#111111',wrap:true,maxLines:1},
+   {type:'text',text:sub,size:'md',weight:'regular',color:'#30343B',wrap:true,margin:'xs',maxLines:1}]},
   body:{type:'box',layout:'vertical',spacing:'xs',paddingAll:'8px',contents:options},
-  footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'12px',contents:[
-   ...(back?[{type:'button',style:'primary',action:{type:'postback',label:'↩️ ย้อนกลับ',data:backData}}]:[]),
-   {type:'button',style:'primary',action:{type:'postback',label:'❌ ยกเลิกเพิ่มนัด',data:'ยกเลิกเพิ่มนัด'}}]}}}
+  footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'12px',contents:footerContents}}}
 }
 /* PHMS_SELECTED_PERSON_APPOINTMENT_CONTEXT_FIX: use existing selected person; no repeat selection. */
 async function appointmentActivePersonName(u:string,k:string,id:string):Promise<string>{
@@ -6268,14 +6337,25 @@ async function appointmentActivePersonName(u:string,k:string,id:string):Promise<
   Navigation buttons are an explicit exception to the generic four-action overflow splitter.
 */
 async function replyAppointmentTypePicker(rt:string,u:string,k:string,id:string,t:string,personName:string){
+ const appointmentMainOption=(label:string,command:string,help:string,color:string)=>({
+  type:'box',layout:'vertical',spacing:'xs',contents:[
+   {type:'box',layout:'vertical',height:'56px',justifyContent:'center',alignItems:'center',backgroundColor:color,cornerRadius:'8px',action:{type:'postback',data:command,displayText:label.slice(0,300)},contents:[
+    {type:'text',text:label,size:'md',weight:'regular',color:'#FFFFFF',align:'center',wrap:false,maxLines:1}
+   ]},
+   {type:'text',text:help,wrap:false,size:'sm',color:'#24364B',margin:'none',maxLines:1}
+  ]
+ });
  const items=[
-  phmsApptOption('🩺 พบหมอ','เลือกหมวดนัด รักษา','ครั้งแรก / ติดตามรักษา'),
-  phmsApptOption('🔬 ตรวจสุขภาพ','เลือกหมวดนัด ตรวจ','ตรวจเพิ่มเติม / ฉีดวัคซีน'),
-  phmsApptOption('💊 รับยา','เลือกหมวดนัด ยา','รับยาเดิม / รับยาต่อเนื่อง'),
-  phmsApptOption('📋 นัดอื่น ๆ','เลือกหมวดนัด อื่น','ส่งต่อ / Walk-in / อื่น ๆ')
+  appointmentMainOption('🩺 ไปพบหมอ','เลือกหมวดนัด รักษา','ตรวจตามนัด / ติดตามโรค','#5F5048'),
+  appointmentMainOption('🔬 ไปตรวจอย่างเดียว','เลือกหมวดนัด ตรวจ','ตรวจเลือด / เอกซเรย์ / ตรวจพิเศษ','#89765E'),
+  appointmentMainOption('💊 ไปรับยาอย่างเดียว','เลือกหมวดนัด ยา','รับที่ รพ. / ส่งยาถึงบ้าน','#496476'),
+  appointmentMainOption('📋 นัดเรื่องอื่น ๆ','เลือกหมวดนัด อื่น','ฉีดวัคซีน / ส่งต่อ / อื่น ๆ','#795A52')
  ];
  // Keep 4 primary choices and 2 navigation actions in exactly one LINE bubble.
- await replyMessages(rt,t,[{...phmsApptPickerCard('📅 เพิ่มนัดหมาย','นัดของ '+String(personName||'ผู้ใช้')+' • ขั้นตอนที่ 1/8',items,true,'กลับยืนยันเจ้าของนัด'),altText:'📅 เพิ่มนัดหมาย'}])
+ const card=phmsApptPickerCard('📅 เพิ่มนัดหมาย','นัดของ '+String(personName||'ผู้ใช้')+' • ขั้นตอนที่ 1/8',items,false);
+ // Preserve 4 groups and the existing vertical back/cancel footer; expose existing text-template flow.
+ card.contents.footer.contents.unshift({type:'button',style:'secondary',height:'sm',action:{type:'postback',label:'📝 กรอกข้อมูลเอง',data:'เทมเพลตเพิ่มนัด',displayText:'📝 กรอกข้อมูลเอง'}});
+ await replyMessages(rt,t,[{...card,altText:'📅 เพิ่มนัดหมาย'}])
 }
 async function replyAppointmentTypeSubPicker(rt:string,u:string,k:string,id:string,t:string,group:string){
  const hist=await phmsAppointmentHistoryPresence(u,k,id);
@@ -6288,11 +6368,12 @@ async function replyAppointmentTypeSubPicker(rt:string,u:string,k:string,id:stri
  }else if(group==='ตรวจ'){title='🔬 ตรวจสุขภาพ / ตรวจเพิ่มเติม';items=[
  phmsApptOption('🔬 ตรวจเพิ่มเติม','เลือกประเภทนัด investigation',''),
  phmsApptOption('🩺 ตรวจสุขภาพ','เลือกประเภทนัด checkup',''),
- phmsApptOption('💉 ฉีดวัคซีน','เลือกประเภทนัด vaccination','')];
+ phmsApptOption('🧪 ตรวจตามใบนัด','เลือกประเภทนัด investigation','')];
  }else if(group==='ยา'){title='💊 รับยา / นัดรับยาเดิม';items=[
  phmsApptOption('💊 นัดรับยาเดิม','phms_refill_begin','')];
  }else if(group==='อื่น'){title='📋 นัดหมายอื่น ๆ';items=[
  phmsApptOption('📤 ส่งต่อ','เลือกประเภทนัด referral',''),
+ phmsApptOption('💉 ฉีดวัคซีน','เลือกประเภทนัด vaccination',''),
  phmsApptOption('🚶 Walk-in','เลือกวอล์กอิน',''),
  phmsApptOption('📋 นัดหมายอื่น','เลือกประเภทนัด other','')];
  }else if(group==='ใหม่'){title='🆕 นัดใหม่';items=[
@@ -11904,7 +11985,7 @@ function aimPersonSummaryRows(kind:'medications'|'appointments'|'health_data',da
    const doctor=String(x?.doctor_name??'').replace(/\s+/g,' ').trim();
    const showDoctor=!!doctor&&!/^(?:-|—|ไม่ระบุ|ไม่ทราบ|ไม่มี|n\/a)$/i.test(doctor);
    const compactTwo=showDoctor&&xs.length>1;
-   blocks.push({type:'text',text:'📌 '+String(x?.title||'นัดหมาย')+chevron,size:'md',weight:'bold',color:'#344054',wrap:true,maxLines:2});
+   blocks.push({type:'box',layout:'horizontal',spacing:'none',alignItems:'start',contents:[{type:'text',text:'📌',size:'md',flex:0,wrap:false,margin:'none'},{type:'text',text:String(x?.title||'นัดหมาย')+chevron,size:'md',weight:'bold',color:'#344054',wrap:true,maxLines:2,flex:1,margin:'none'}]});
    if(x?.appointment_at){const d=new Date(x.appointment_at);const weekday=new Intl.DateTimeFormat('th-TH',{timeZone:'Asia/Bangkok',weekday:'long'}).format(d).replace(/^วัน/,'');const timeParts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(d);const h=Number(timeParts.find((v:any)=>v.type==='hour')?.value||0),m=Number(timeParts.find((v:any)=>v.type==='minute')?.value||0);blocks.push({type:'text',text:'📅 '+weekday+' '+phmsPersonCardShortThaiDate(x.appointment_at),size:'sm',color:'#365F8D',wrap:false,maxLines:1});blocks.push({type:'text',text:'🕒 '+pad2(h)+':'+pad2(m)+' ('+appointmentNaturalTimeLabel(h,m)+')',size:'sm',color:'#365F8D',wrap:false,maxLines:1});}
    const hospital=phmsHospitalShortLabel(x?.hospital_display_name||x?.hospital_name);
    if(hospital)blocks.push({type:'text',text:'🏥 '+hospital,size:'sm',color:'#64748B',wrap:true,maxLines:1});
@@ -11917,7 +11998,7 @@ function aimPersonSummaryRows(kind:'medications'|'appointments'|'health_data',da
   }
   if(i)rows.push({type:'separator',margin:kind==='health_data'?'sm':'md'});
   const detailPrefix=kind==='medications'?'ดูยา ':kind==='appointments'?'ดูนัด ':'ดูสุขภาพ ';
-  rows.push({type:'box',layout:'vertical',spacing:kind==='health_data'?'xs':'sm',paddingAll:kind==='health_data'?'4px':'8px',cornerRadius:'8px',contents:blocks,...(/^(?:[a-f0-9]{8}-[a-f0-9]{3}|[a-f0-9]{12})$/i.test(recordCode)?{action:{type:'postback',label:'ดูรายละเอียด',data:detailPrefix+recordCode}}:{})});
+  rows.push({type:'box',layout:'vertical',spacing:kind==='appointments'?'5px':kind==='health_data'?'xs':'sm',paddingAll:kind==='appointments'?'0px':kind==='health_data'?'4px':'8px',margin:kind==='appointments'?'8px':undefined,cornerRadius:'8px',contents:blocks,...(/^(?:[a-f0-9]{8}-[a-f0-9]{3}|[a-f0-9]{12})$/i.test(recordCode)?{action:{type:'postback',label:'ดูรายละเอียด',data:detailPrefix+recordCode}}:{})});
  }
  const count=Number(data?.count??all.length);
  /* PHMS_HEALTH_SINGLE_CARD_V3: count remains in header; do not add a health remaining-notice block or split into an otherwise empty extra card. Full records and footer actions remain available. */
@@ -11934,6 +12015,7 @@ const PHMS_PERSON_CATEGORY_HEADER_BG:Record<string,string>={
 };
 /* PHMS_FIVE_CATEGORY_REMAINING_NOTICE_V4: one shared layout and theme-based colors for all five category summaries. */
 const phmsPersonRemainingNotice=(n:number,category:string='documents')=>{
+ if(category==='appointments')return {type:'text',text:'📋 ดูอีก '+n+' รายการ',size:'sm',weight:'regular',color:'#85571D',align:'start',wrap:false,maxLines:1,margin:'8px'};
  const key=category==='health_data'?'health':category;
  const palette=(PHMS_CATEGORY_THEME as Record<string,{color:string,background:string}>)[key]||PHMS_CATEGORY_THEME.documents;
  return {type:'box',layout:'vertical',spacing:'4px',margin:'4px',contents:[
@@ -11944,7 +12026,7 @@ const phmsPersonRemainingNotice=(n:number,category:string='documents')=>{
   ]}
  ]};
 };
-const phmsPersonExtraRows=(kind:'documents'|'expenses',data:any)=>{
+const phmsPersonExtraRows=(kind:'documents'|'expenses',data:any,displayName='')=>{
  if(kind==='expenses'){
  const rows=(Array.isArray(data?.items)?data.items:[]).filter((x:any)=>x?.amount!=null&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0);
  const verified=data?.view===true&&data?.amounts_verified===true;
@@ -11962,20 +12044,19 @@ const phmsPersonExtraRows=(kind:'documents'|'expenses',data:any)=>{
  {type:'text',text:'สรุปค่าใช้จ่าย',weight:'bold',size:'md',color:'#66458A'},
  {type:'text',text:(()=>{const dt=phmsPersonCardShortThaiDate(data?.updated_at||rows[0]?.updated_at||rows[0]?.created_at);return dt?'🕒 อัปเดตล่าสุด '+dt:'🕒 ยังไม่มีวันที่อัปเดต'})(),size:'xs',color:'#667085',margin:'xs',wrap:false,maxLines:1},
  {type:'separator',margin:'sm'},
- {type:'box',layout:'horizontal',spacing:'sm',contents:[
-  {type:'box',layout:'vertical',flex:1,backgroundColor:'#F5EFFB',cornerRadius:'10px',paddingAll:'6px',spacing:'2px',contents:[
-   {type:'text',text:'💰 รวมปีนี้  ›',size:'sm',weight:'bold',color:'#9163A3',wrap:false,action:{type:'postback',label:'💰 ปีนี้',data:'ดูค่าใช้จ่ายรายปี'}},
-   {type:'text',text:verified&&data.year_paid!=null?money(data.year_paid):'ยังไม่มียอดสรุป',size:'md',weight:'bold',color:'#66458A',wrap:true,action:{type:'postback',label:'💰 ดูรายปี',data:'ดูค่าใช้จ่ายรายปี'}},
-   ...compare(yearlyDelta,'จากปีก่อน')
+ {type:'box',layout:'horizontal',spacing:'8px',margin:'8px',contents:[
+  {type:'box',layout:'vertical',flex:1,backgroundColor:'#F5EFFB',cornerRadius:'10px',paddingAll:'10px',spacing:'6px',action:{type:'postback',label:'💰 ปีนี้',data:'ดูค่าใช้จ่ายรายปี'},contents:[
+   {type:'box',layout:'horizontal',alignItems:'center',spacing:'2px',contents:[{type:'text',text:'💰 ปีนี้',size:'sm',weight:'regular',color:'#66458A',wrap:false,flex:1},{type:'text',text:'›',size:'md',color:'#66458A',align:'end',flex:0}]},
+   {type:'text',text:verified&&data.year_paid!=null?money(data.year_paid):'ยังไม่มียอดสรุป',size:'lg',weight:'bold',color:'#66458A',wrap:false,action:{type:'postback',label:'💰 ดูรายปี',data:'ดูค่าใช้จ่ายรายปี'}},
   ]},
-  {type:'box',layout:'vertical',flex:1,backgroundColor:'#F5EFFB',cornerRadius:'10px',paddingAll:'6px',spacing:'2px',contents:[
-   {type:'text',text:'📅 เดือนนี้  ›',size:'sm',weight:'bold',color:'#9163A3',wrap:false,action:{type:'postback',label:'📅 เดือนนี้',data:'ดูค่าใช้จ่ายรายเดือน'}},
-   {type:'text',text:verified&&data.month_paid!=null?money(data.month_paid):'ยังไม่มียอดสรุป',size:'md',weight:'bold',color:'#66458A',wrap:true,action:{type:'postback',label:'📅 ดูรายเดือน',data:'ดูค่าใช้จ่ายรายเดือน'}},
-   ...compare(delta,'จากเดือนก่อน')
+  {type:'box',layout:'vertical',flex:1,backgroundColor:'#F5EFFB',cornerRadius:'10px',paddingAll:'10px',spacing:'6px',action:{type:'postback',label:'📅 เดือนนี้',data:'ดูค่าใช้จ่ายรายเดือน'},contents:[
+   {type:'box',layout:'horizontal',alignItems:'center',spacing:'2px',contents:[{type:'text',text:'📅 เดือนนี้',size:'sm',weight:'regular',color:'#66458A',wrap:false,flex:1},{type:'text',text:'›',size:'md',color:'#66458A',align:'end',flex:0}]},
+   {type:'text',text:verified&&data.month_paid!=null?money(data.month_paid):'ยังไม่มียอดสรุป',size:'lg',weight:'bold',color:'#66458A',wrap:false,action:{type:'postback',label:'📅 ดูรายเดือน',data:'ดูค่าใช้จ่ายรายเดือน'}},
   ]}
- ]}
+ ]},
+ ...(delta===null?[]:[{type:'text',text:delta>0?'▲ เพิ่มขึ้น '+money(delta)+' จากเดือนก่อน':delta<0?'▼ ลดลง '+money(Math.abs(delta))+' จากเดือนก่อน':'• เท่ากับเดือนก่อน',size:'sm',weight:'regular',color:delta>0?'#B42318':delta<0?'#16803D':'#667085',wrap:false,maxLines:1,margin:'12px'}])
  ];
- out.push({type:'separator',margin:'sm'});
+ out.push({type:'separator',margin:'12px'});
  const nowMonth=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit'}).format(new Date());
  const prevMonth=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit'}).format(new Date(Date.UTC(Number(nowMonth.slice(0,4)),Number(nowMonth.slice(5,7))-2,1)));
  const latestTwo=rows;
@@ -11983,24 +12064,24 @@ const phmsPersonExtraRows=(kind:'documents'|'expenses',data:any)=>{
  const currentRows=latestTwo.filter((x:any)=>monthOf(x)===nowMonth);
  const previousRows=latestTwo.filter((x:any)=>monthOf(x)===prevMonth);
  const olderRows=latestTwo.filter((x:any)=>monthOf(x)!==nowMonth&&monthOf(x)!==prevMonth);
- if(currentRows.length)out.push({type:'text',text:'รายการล่าสุดเดือนนี้',weight:'bold',size:'md',color:'#66458A',margin:'4px'});
+ if(currentRows.length)out.push({type:'text',text:'รายการล่าสุดเดือนนี้',weight:'bold',size:'md',color:'#66458A',margin:'12px'});
  const displayRows=(currentRows.length?currentRows:previousRows.length?previousRows:olderRows).slice(0,1);
  let section='';
  for(const [rowIndex,x] of displayRows.entries()){
   // Keep latest expense entries visually separated by whitespace only.
   const group=monthOf(x)===nowMonth?'current':monthOf(x)===prevMonth?'previous':'older';
   if(group!==section){
-   if(group==='previous')out.push({type:'text',text:'รายการล่าสุดเดือนที่แล้ว',weight:'bold',size:'md',color:'#66458A',margin:'4px'});
-   else if(group==='older')out.push({type:'text',text:'รายการล่าสุดก่อนหน้านี้',weight:'bold',size:'md',color:'#66458A',margin:'4px'});
+   if(group==='previous')out.push({type:'text',text:'รายการล่าสุดเดือนที่แล้ว',weight:'bold',size:'md',color:'#66458A',margin:'12px'});
+   else if(group==='older')out.push({type:'text',text:'รายการล่าสุดก่อนหน้านี้',weight:'bold',size:'md',color:'#66458A',margin:'12px'});
    section=group;
   }
   const name=String(x.appointment_title||x.title||'ค่าใช้จ่ายที่บันทึกไว้');
   const expenseAppointmentId=String(x?.appointment_id||'');
   const expenseDetailCommand=/^[0-9a-fA-F-]{36}$/.test(expenseAppointmentId)?'รายละเอียดค่ารักษา '+expenseAppointmentId:'สรุปค่าใช้จ่ายนัด';
-  out.push({type:'box',layout:'vertical',spacing:'2px',margin:'4px',action:{type:'postback',label:'💰 ดูรายละเอียดค่ารักษา',data:expenseDetailCommand},contents:[
+  out.push({type:'box',layout:'vertical',spacing:'6px',margin:'10px',action:{type:'postback',label:'💰 ดูรายละเอียดค่ารักษา',data:expenseDetailCommand},contents:[
    {type:'box',layout:'horizontal',spacing:'sm',alignItems:'start',contents:[
-    {type:'text',text:'🩺 ค่ารักษาพยาบาล:',size:'sm',weight:'bold',wrap:false,flex:7},
-    {type:'text',text:x.amount==null?'ยังไม่ระบุยอด':money(x.amount),size:'sm',weight:'bold',align:'end',wrap:false,flex:4,action:{type:'postback',label:'💰 ดูค่ารักษา',data:expenseDetailCommand}}
+    {type:'text',text:'🩺 ค่ารักษาพยาบาล',size:'sm',weight:'regular',wrap:false,flex:7},
+    {type:'text',text:x.amount==null?'ยังไม่ระบุยอด':money(x.amount),size:'sm',weight:'regular',align:'end',wrap:false,flex:4,action:{type:'postback',label:'💰 ดูค่ารักษา',data:expenseDetailCommand}}
    ]},
    {type:'text',text:name,size:'sm',weight:'regular',wrap:true,maxLines:2,action:{type:'postback',label:'🩺 ดูค่ารักษา',data:expenseDetailCommand}},
    // Date remains accessible in expense details.
@@ -12010,24 +12091,41 @@ const phmsPersonExtraRows=(kind:'documents'|'expenses',data:any)=>{
  if(!displayRows.length)out.push({type:'text',text:'ยังไม่มีรายการที่มีค่าใช้จ่าย',size:'sm',color:'#667085',wrap:true});
  /* PHMS_EXPENSE_REMAINING_NOTICE_V1: show records not in the one-row preview; count includes unpaid records. */
  const remainingExpenses=Math.max(0,count-displayRows.length);
- if(remainingExpenses>0)out.push(phmsPersonRemainingNotice(remainingExpenses,'expenses'));
+ if(remainingExpenses>0)out.push({type:'text',text:'📋 ดูอีก '+remainingExpenses+' รายการ',size:'sm',weight:'regular',color:'#66458A',wrap:false,maxLines:1,margin:'14px'});
  return out;
  }
- if(!data)return [{type:'text',text:'ยังดึงข้อมูลเอกสารไม่ได้ ลองอีกครั้งนะ',size:'md',color:'#475569',wrap:true}];
- const x=Array.isArray(data?.items)?data.items[0]:null;
- if(!x)return [{type:'text',text:'ยังไม่มีข้อมูลเอกสาร\nเมื่อมีข้อมูล จะแสดงรายการที่นี่',size:'md',wrap:true,color:'#475569'}];
- const documentRows:any[]=[
-  {type:'text',text:'เอกสารล่าสุด',size:'md',weight:'bold',color:'#2D578B'},
-  {type:'text',text:(()=>{const updated=phmsPersonCardShortThaiDate(x.updated_at||data?.updated_at);return updated?'🕒 อัปเดตล่าสุด '+updated:'🕒 อัปเดตล่าสุด —'})(),size:'xs',color:'#667085'},
-  {type:'separator',margin:'sm'},
-  ...(typeof x.preview_url==='string'&&x.preview_url.startsWith('https://')?[{type:'image',url:x.preview_url,size:'full',aspectRatio:'2.4:1',aspectMode:'fit',backgroundColor:'#F7F9FC',action:{type:'uri',label:'เปิดรูป',uri:x.preview_url},margin:'xs'}]:[{type:'text',text:x.is_image===true?'ยังเปิดภาพตัวอย่างไม่ได้ กรุณาดูจากเอกสารทั้งหมด':'เอกสารนี้ไม่มีภาพตัวอย่าง กรุณาดูจากเอกสารทั้งหมด',size:'sm',color:'#667085',wrap:true}]),
-  {type:'text',text:String(x.title||'เอกสารแนบ')+'  ›',size:'lg',weight:'bold',wrap:true,margin:'xs',action:{type:'postback',label:'📄 รายละเอียดเอกสาร',data:'รายละเอียดเอกสารล่าสุด',displayText:'📄 รายละเอียดเอกสาร'}},
-  ...(x.appointment_title?[{type:'text',text:'🩺 นัดเพื่อ: '+String(x.appointment_title),size:'sm',color:'#475569',wrap:true,action:{type:'postback',label:'📄 รายละเอียดเอกสาร',data:'รายละเอียดเอกสารล่าสุด',displayText:'📄 รายละเอียดเอกสาร'}}]:[]),
+
+ /* PHMS_DOCUMENT_SUMMARY_GLOBAL_V1 — shared card for all persons/families.
+    Category counts and precise category navigation are pending backend enhancement.
+    Never infer total category counts from the five recent preview records. */
+ const total=Math.max(0,Number(data?.count??0)||0);
+ const updated=phmsPersonCardShortThaiDate(data?.items?.[0]?.updated_at||data?.updated_at||data?.items?.[0]?.date);
+ const person=String(displayName||'สมาชิก').trim().slice(0,70);
+ const action=(label:string,command:string)=>({type:'postback',label,data:command,displayText:label});
+ const docRows:any[]=[
+  {type:'text',text:'เอกสารของ'+person,size:'md',weight:'bold',color:'#2D578B',wrap:false,maxLines:1},
+  {type:'text',text:updated?'🕒 อัปเดตล่าสุด '+updated:'🕒 อัปเดตล่าสุด —',size:'xs',color:'#475569',wrap:false,maxLines:1},
+  {type:'separator',margin:'xs'}
  ];
- /* PHMS_FOUR_CATEGORY_REMAINING_NOTICE_V5: documents use the same central notice as medications, appointments and health; expenses intentionally excluded. */
- const remaining=Math.max(0,Number(data?.count??1)-1);
- if(remaining>0)documentRows.push(phmsPersonRemainingNotice(remaining,'documents'));
- return documentRows;
+ const sections=[
+  {label:'📅 เอกสารนัดหมาย',key:'appointments',command:'แกลเลอรี นัดหมาย ทั้งหมด'},
+  {label:'🧪 ผลตรวจสุขภาพ',key:'health',command:'แกลเลอรี สุขภาพ ทั้งหมด'},
+  {label:'🗂️ เอกสารอื่น ๆ',key:'other',command:'รูปและเอกสาร ทั้งหมด'}
+ ];
+ for(const section of sections){
+  const a=action(section.label,section.command);
+  docRows.push({type:'box',layout:'horizontal',alignItems:'center',spacing:'sm',margin:'xs',paddingAll:'10px',cornerRadius:'8px',backgroundColor:'#F7FAFE',action:a,contents:[
+   {type:'box',layout:'vertical',flex:1,spacing:'2px',contents:[
+    {type:'text',text:section.label,size:'md',weight:'bold',color:'#2D578B',wrap:false,maxLines:1},
+    {type:'text',text:(data?.category_counts?.[section.key]==null?'กำลังตรวจจำนวน':String(Math.max(0,Number(data.category_counts[section.key])||0))+' รายการ'),size:'sm',color:'#344862',wrap:false,maxLines:1}
+   ]},
+   {type:'text',text:'›',size:'lg',color:'#2D578B',align:'end',flex:0}
+  ]});
+ }
+ if(total>3)docRows.push({type:'box',layout:'vertical',margin:'xs',contents:[
+  {type:'text',text:'📋 ดูอีก '+String(total-3)+' รายการ',size:'sm',weight:'regular',color:'#2D578B',wrap:false,maxLines:1}
+ ]});
+ return docRows;
 };
 /* AIM_PERSON_DASHBOARD_V3: unique name, right-aligned connection status, three actions, color-aware header. */
 async function personDashboardMessages(u:string,k:string,id:string,title='👤 ภาพรวมบุคคล'){
@@ -12211,14 +12309,14 @@ async function personDashboardMessages(u:string,k:string,id:string,title='👤 �
  }
  if(access?.documents?.view)cards.push({type:'bubble',size:'kilo',
   header:{type:'box',layout:'vertical',backgroundColor:PHMS_PERSON_CATEGORY_HEADER_BG.documents,paddingAll:'14px',contents:[{type:'text',text:'📄 เอกสาร',weight:'bold',size:'lg',color:'#2D578B'},{type:'text',text:extraSummary?.documents?.view===true?'มี '+String(extraSummary.documents.count??extraSummary.documents.items?.length??0)+' รายการ':'กำลังตรวจข้อมูล',size:'xs',color:'#777777',margin:'xs'}]},
-  body:{type:'box',layout:'vertical',spacing:'xs',paddingAll:'12px',contents:phmsPersonExtraRows('documents',extraSummary?.documents)},
+  body:{type:'box',layout:'vertical',spacing:'xs',paddingAll:'12px',contents:phmsPersonExtraRows('documents',extraSummary?.documents,shortName)},
   footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'10px',contents:[
    ...(extraSummary?.documents?.view===true&&Number(extraSummary.documents.count??extraSummary.documents.items?.length??0)>0?[{type:'button',color:'#376BA7',height:'md',style:'primary',action:{type:'postback',label:'📄 ดูเอกสารทั้งหมด',data:'รูปและเอกสาร'}}]:[]),
    ...(access?.documents?.create===true?[{type:'button',color:'#55779D',height:'md',style:'primary',action:{type:'postback',label:'＋ เพิ่มเอกสาร',data:'เพิ่มเอกสาร'}}]:[])
   ]}});
  if(access?.expenses?.view)cards.push({type:'bubble',size:'kilo',
   header:{type:'box',layout:'vertical',backgroundColor:PHMS_PERSON_CATEGORY_HEADER_BG.expenses,paddingAll:'14px',contents:[{type:'text',text:'💰 ค่าใช้จ่าย',weight:'bold',size:'lg',color:'#66458A'},{type:'text',text:extraSummary?.expenses?.view===true?'มี '+String(extraSummary.expenses.count??extraSummary.expenses.items?.length??0)+' รายการ':'กำลังตรวจข้อมูล',size:'xs',color:'#777777',margin:'xs'}]},
-  body:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'12px',contents:phmsPersonExtraRows('expenses',extraSummary?.expenses)},
+  body:{type:'box',layout:'vertical',spacing:'12px',paddingAll:'12px',contents:phmsPersonExtraRows('expenses',extraSummary?.expenses)},
   footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'10px',contents:[
    ...(extraSummary?.expenses?.view===true&&Number(extraSummary.expenses.count??extraSummary.expenses.items?.length??0)>0?[{type:'button',color:'#7956A0',height:'md',style:'primary',action:{type:'postback',label:'💰 ดูค่าใช้จ่ายทั้งหมด',data:'สรุปค่าใช้จ่ายนัด'}}]:[]),
    ...(access?.expenses?.create===true?[{type:'button',color:'#6E5B91',height:'md',style:'primary',action:{type:'postback',label:'＋ เพิ่มค่าใช้จ่าย',data:'เพิ่มค่าใช้จ่ายบุคคล'}}]:[])
@@ -12330,7 +12428,10 @@ async function personDashboardMessages(u:string,k:string,id:string,title='👤 �
  return {dashboard:d,messages:[{type:'flex',altText:'ภาพรวม '+String(d?.display_name||'บุคคล'),contents:{type:'carousel',contents:cards.slice(0,10)}}]};
 }
 async function replyPersonDashboard(rt:string,u:string,k:string,id:string,t:string,title='👤 ภาพรวมบุคคล'){
- const x=await personDashboardMessages(u,k,id,title);await replyMessages(rt,t,x.messages);return x.dashboard
+ const x=await personDashboardMessages(u,k,id,title);
+ // Source-aware routing: only buttons on the person overview carry this origin.
+ for(const m of x.messages||[]){const walk=(n:any):void=>{if(!n||typeof n!=='object')return; if(n.action?.type==='postback'&&n.action.data==='เพิ่มนัด')n.action.data='เพิ่มนัด จากภาพรวม'; for(const val of Object.values(n))if(val&&typeof val==='object'){if(Array.isArray(val))val.forEach(walk);else walk(val)}};walk(m)}
+ await replyMessages(rt,t,x.messages);return x.dashboard
 }
 
 
@@ -19480,14 +19581,14 @@ if(c==='แนวโน้มค่าใช้จ่ายบุคคล'){
  }catch(err){console.error('person_expense_trend_open',String(err));await reply(e.replyToken,'ตอนนี้ยังเปิดแนวโน้มค่าใช้จ่ายไม่ได้',t)}
  continue
 }
-const hospitalView=c.match(/^ค่าใช้จ่ายโรงพยาบาล (\\d+)(?: (\\d+))?$/);
+const hospitalView=c.match(/^ค่าใช้จ่ายโรงพยาบาล (\d+)(?: (\d+))?$/);
 if(hospitalView){try{await phmsHospitalFinanceView(e.replyToken,u,k,id,t,Number(hospitalView[1]),Number(hospitalView[2]||0))}catch(err){console.error('hospital_finance_view',String(err));await reply(e.replyToken,'เปิดค่าใช้จ่ายโรงพยาบาลไม่ได้',t,[pb('↩️ ค่าใช้จ่ายทั้งหมด','สรุปค่าใช้จ่ายนัด')])}continue}
 if(c==='สรุปค่าใช้จ่ายนัด'){
  try{await clear(u,k,id);await replyAppointmentExpenseSummaryCards(e.replyToken,u,k,id,t)}
  catch(err){console.error('appointment_expense_summary',String(err));await reply(e.replyToken,'⚠️ ยังเปิดสรุปค่าใช้จ่ายไม่ได้',t,[pb('↩️ นัดหมาย','นัดหมายบุคคลปัจจุบัน')])}
  continue
 }
-const itemDetailCmd=c.match(/^รายละเอียดรายการค่ารักษา ([a-f0-9-]{8,36}) (\\d+)$/i);
+const itemDetailCmd=c.match(/^รายละเอียดรายการค่ารักษา ([a-f0-9-]{8,36}) (\d+)$/i);
 if(itemDetailCmd){try{await phmsFinanceItemDetail(e.replyToken,u,k,id,t,itemDetailCmd[1],Number(itemDetailCmd[2]))}catch(err){console.error('finance_item_detail',String(err));await reply(e.replyToken,'ยังเปิดรายการนี้ไม่ได้',t)}continue}
 const appointmentFinanceDetail=c.match(/^(?:รายละเอียดค่ารักษา|ดูรายละเอียดค่ารักษา|รายการค่ารักษา)\s+#?([0-9a-fA-F-]{8,36})(?:\s+หน้า\s+(\d+))?$/);
 if(appointmentFinanceDetail){
@@ -21942,8 +22043,11 @@ if(st?.state_key==='crud_add_medication'){
 }
 
 if(c==='ยกเลิกเพิ่มนัด'&&['crud_add_appointment','appointment_followup_confirm','crud_add_appointment_person_confirm'].includes(String(st?.state_key||''))){
+ const origin=String(st?.state_data?.origin||'appointments');
  await clear(u,k,id);
- await replyAppointmentEntry(e.replyToken,u,k,id,t);continue
+ if(origin==='person_overview')await replyPersonDashboard(e.replyToken,u,k,id,t);
+ else await replyAppointmentEntry(e.replyToken,u,k,id,t);
+ continue
 }
 if(st?.state_key==='appointment_followup_confirm'){
  const partial=st?.state_data?.partial||{};
@@ -22404,8 +22508,9 @@ if(st?.state_key==='crud_add_appointment'){
  }
  if(c==='เทมเพลตเพิ่มนัด'||c==='ใช้เทมเพลตนัด'){
   const owner=await appointmentActivePersonName(u,k,id),p=st?.state_data?.partial||{};
-  const sample={...p,date:p.date||addBangkokDays(7),time:p.time||'10:00',title:p.title||'พบแพทย์ตามใบนัด',hospital_name:p.hospital_name||'ชื่อโรงพยาบาลตามใบนัด'};
-  await replyMessages(e.replyToken,t,[phmsApptPickerCard('🧾 กรอกหลายช่อง','คัดลอกข้อความถัดไป แล้วแก้ตัวอย่างตามใบนัดจริง',[phmsApptOption('↩️ กลับกรอกทีละขั้น','กลับหน้าเพิ่มนัดใหม่','ข้อมูลที่เลือกไว้ยังอยู่')]),{type:'text',text:appointmentAddTemplateText(owner,sample)}]);continue
+  const sample={...p};
+  const plainSample=['📝 กรอกข้อมูลนัดหมาย','คัดลอกข้อความนี้ เติมข้อมูล แล้วส่งกลับมาได้เลย','ช่องที่ยังไม่ทราบเว้นว่างได้','', 'นัดของ: '+owner,'ไปทำอะไร: '+String(sample.title||''),'วัน: '+String(sample.date||''),'เวลา: '+String(sample.time||''),'โรงพยาบาล: '+String(sample.hospital_name||''),'แผนก: '+String(sample.department||''),'แพทย์: '+String(sample.doctor_name||''),'กิจกรรมเพิ่มเติม: ','หมายเหตุ: '+String(sample.note||'')].join('\n');
+  await replyMessages(e.replyToken,t,[phmsApptPickerCard('📝 กรอกข้อมูลเอง','เติมข้อมูลแล้วส่งกลับมาในแชต',[phmsApptOption('↩️ กลับกรอกทีละขั้น','กลับหน้าเพิ่มนัดใหม่','ข้อมูลที่เลือกไว้ยังอยู่')]),{type:'text',text:plainSample}]);continue
  }
  if(c==='ใช้ข้อมูลที่กรอก ไม่เชื่อม'){
   await emitAppointmentDraft(e,u,k,id,t,st?.state_data?.partial||{},String(st?.state_data?.raw_text||''),st?.state_data?.old_source_code||null,st?.state_data?.person_confirmed===true);
@@ -23582,7 +23687,7 @@ if(c==='เทมเพลตเพิ่มยา'){
  await state(u,k,id,'crud_add_medication',{});
  await replyMessages(e.replyToken,t,[{type:'text',text:'🧾 เทมเพลตเพิ่มยา\n\nคัดลอกข้อความถัดไป แก้ข้อมูลตามฉลากยาจริง แล้วส่งกลับมาในแชต\nช่องที่ไม่มีข้อมูลลบออกได้',quickReply:{items:[pb('❌ ยกเลิก','ยา')]}},{type:'text',text:medicationAddTemplateText()}]);continue
 }
-if(c==='เพิ่มนัด'){await state(u,k,id,'crud_add_appointment',{person_confirmed:true});await replyAppointmentTypePicker(e.replyToken,u,k,id,t,await appointmentActivePersonName(u,k,id));continue}
+if(c==='เพิ่มนัด'||c==='เพิ่มนัด จากภาพรวม'){await state(u,k,id,'crud_add_appointment',{person_confirmed:true,origin:c==='เพิ่มนัด จากภาพรวม'?'person_overview':'appointments'});await replyAppointmentTypePicker(e.replyToken,u,k,id,t,await appointmentActivePersonName(u,k,id));continue}
 if(c==='ประวัติอาการก่อนนัด'){
  try{
   const hist=one(await rpc(u,k,'phms_line_person_previsit_health_history',{p_line_user_id:id,p_limit:15}))||{};
@@ -23652,4 +23757,3 @@ if(['กลับหน้าเริ่มต้น','หน้าเริ่
   continue;
 }
 await reply(e.replyToken,'🛠️ ส่วนนี้กำลังพัฒนา/ตั้งค่าอยู่\n\nกดปุ่มด้านล่างเพื่อกลับไปส่วนที่พร้อมทดสอบได้เลย',t,[act('🏡 หน้าเริ่มต้น','กลับหน้าเริ่มต้น'),act('👤 ข้อมูลของฉัน','ใช้ข้อมูลของฉัน'),act('👨‍👩‍👧 ครอบครัว','ครอบครัว')])}return Response.json({ok:true})});
-

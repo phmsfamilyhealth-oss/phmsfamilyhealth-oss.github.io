@@ -77,4 +77,3 @@ export function layoutPersonOverviewPx(message:Node, estimateHeight:(node:Node)=
   }
   return message;
 }
-

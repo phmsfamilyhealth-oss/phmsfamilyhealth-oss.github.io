@@ -69,5 +69,6 @@
       }
     ],
     "resolver_execute": false
-  }
+  },
+  "preflight_note": "Privileges inspected against v1370-era schema; recheck current schema before deployment. Integrated source updated to v1406."
 }
