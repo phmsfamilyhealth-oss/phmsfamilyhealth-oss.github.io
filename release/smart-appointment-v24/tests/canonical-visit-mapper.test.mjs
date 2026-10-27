@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {canonicalizeVisit as map} from '../contracts/canonical-visit-mapper.mjs';
+test('walk-in date-only produces null timestamp',()=>{let r=map({scenario:'walk_in',date:'2026-11-03',time_known:false});assert.equal(r.ok,true);assert.equal(r.visit.appointment_at,null);assert.equal(r.visit.planned_visit_date,'2026-11-03');assert.equal(r.visit.visit_mode,'walk_in');});
+test('scheduled date-only rejected',()=>assert.equal(map({scenario:'booked',date:'2026-11-03',time_known:false}).ok,false));
+test('historical date-only fails closed without schema design',()=>assert.equal(map({scenario:'historical',date:'2026-11-03',time_known:false}).error,'historical_unknown_time_requires_schema_design'));
+test('historical timed visit marked completed',()=>{const r=map({scenario:'historical',date:'2026-10-01',time_known:true,time:'08:00'});assert.equal(r.ok,true);assert.equal(r.visit.status,'completed');});
+test('invalid calendar date denied',()=>assert.equal(map({scenario:'walk_in',date:'2026-02-30',time_known:false}).ok,false));
+test('no invented UTC timestamp',()=>{const r=map({scenario:'booked',date:'2026-11-03',time_known:true,time:'09:30'});assert.equal(r.ok,true);assert.equal(r.visit.local_appointment_datetime,'2026-11-03T09:30');assert.equal('appointment_at' in r.visit,false);});
