@@ -8,3 +8,5 @@ test('no real save exposed without auth backend',()=>{assert.match(html,/<button
 test('no editable patient or family identifiers',()=>{assert.doesNotMatch(html,/id="(?:person_id|family_id|line_user_id)"/)});
 test('date-only scenario and previous history selectable',()=>{assert.match(html,/value="walk_in"/);assert.match(html,/value="historical"/);});
 test('review fields inserted as safe text',()=>{assert.match(html,/dd\.textContent=/);assert.doesNotMatch(html,/innerHTML\s*=/);});
+
+test('LIFF requires LINE login before enabling appointment save',()=>{assert.match(html,/if\(!window\.liff\.isLoggedIn\(\)\)\{window\.liff\.login\(\);return;\}/);assert.match(html,/confirmClient=makeLiffConfirmClient/);});
