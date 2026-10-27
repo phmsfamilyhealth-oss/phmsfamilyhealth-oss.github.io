@@ -5,6 +5,7 @@ const response=(data,status)=>new Response(JSON.stringify(data),{status,headers:
 export function makeAuthorizedProviderCatalogHandler({supabase,verifyLineIdentity,resolvePerson,isReleaseEnabled,centralCanAccess}={}){
  if(!supabase?.from||[verifyLineIdentity,resolvePerson,isReleaseEnabled,centralCanAccess].some(f=>typeof f!=='function'))throw new Error('catalog_security_not_configured');
  return async(request,raw)=>{
+  if(request.method!=='POST'||!request.headers.get('content-type')?.toLowerCase().startsWith('application/json'))return response({ok:false,error:'invalid_request'},400);
   const token=/^Bearer ([^\s]+)$/.exec(request.headers.get('authorization')||'')?.[1];
   if(!token)return response({ok:false,error:'unauthenticated'},401);
   try{
