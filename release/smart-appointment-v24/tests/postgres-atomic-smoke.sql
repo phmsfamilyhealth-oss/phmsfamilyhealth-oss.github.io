@@ -148,3 +148,20 @@ DO $$ DECLARE rejected boolean:=false; n_before bigint; BEGIN
  IF NOT rejected THEN RAISE EXCEPTION 'cross_family_write_was_accepted'; END IF;
  IF (SELECT count(*) FROM public.appointments)<>n_before THEN RAISE EXCEPTION 'cross_family_write_modified_database'; END IF;
 END $$;
+
+-- Negative historical acceptance: no fabricated timestamp and no invalid date-only scheduled visit.
+DO $$ DECLARE rejected boolean:=false; before_count bigint; BEGIN
+ SELECT count(*) INTO before_count FROM public.appointments;
+ BEGIN
+  INSERT INTO public.appointments(person_id,appointment_type,visit_mode,visit_time_known,status,planned_visit_date,appointment_at)
+  VALUES ('44444444-4444-4444-8444-444444444444','follow_up','booked',false,'planned','2026-11-05',NULL);
+ EXCEPTION WHEN check_violation THEN rejected:=true; END;
+ IF NOT rejected THEN RAISE EXCEPTION 'unknown_time_booked_future_was_accepted'; END IF;
+ rejected:=false;
+ BEGIN
+  INSERT INTO public.appointments(person_id,appointment_type,visit_mode,visit_time_known,status,planned_visit_date,appointment_at)
+  VALUES ('44444444-4444-4444-8444-444444444444','follow_up','booked',false,'completed',NULL,NULL);
+ EXCEPTION WHEN check_violation THEN rejected:=true; END;
+ IF NOT rejected THEN RAISE EXCEPTION 'historical_unknown_date_was_accepted'; END IF;
+ IF (SELECT count(*) FROM public.appointments)<>before_count THEN RAISE EXCEPTION 'rejected_historical_case_wrote_rows'; END IF;
+END $$;
