@@ -37,3 +37,5 @@ test('save feedback is targeted to confirmation rather than setup status',()=>{
 
 test('review is disabled until LINE and authorized catalog are ready',()=>{assert.match(html,/<button id="review" type="button" disabled>/);});
 test('successful save prevents return to editable form',()=>{assert.match(html,/\$\('back'\)\.disabled=true/);});
+
+test('review handler itself fails closed without trusted LINE and provider catalog',()=>{assert.match(html,/if\(!confirmClient\|\|!authorizedCatalog\|\|\$\('review'\)\.disabled\)\{/);assert.match(html,/ยังเชื่อมต่อ LINE และทะเบียนโรงพยาบาลไม่สำเร็จ/);});
