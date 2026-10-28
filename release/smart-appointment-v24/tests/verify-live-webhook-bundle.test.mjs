@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {verifyLiveWebhookBundle} from '../scripts/verify-live-webhook-bundle.mjs';
+import {V1431_APPOINTMENT_ANCHOR} from '../contracts/v1431-appointment-route-patch.mjs';
+const files={'index.ts':'const untouched=1;'+V1431_APPOINTMENT_ANCHOR,'person-overview-px-layout.ts':'export const layout=1','smart-medication.ts':'export const medication=1','smart-medication-runtime.ts':'export const runtime=1'};
+const sum=x=>createHash('sha256').update(x).digest('hex');
+const manifest={function:'line-webhook',version:1431,files:Object.fromEntries(Object.entries(files).map(([name,body])=>[name,sum(body)]))};
+test('phase1 accepts all four exact deployed modules and unchanged legacy route',()=>assert.deepEqual(verifyLiveWebhookBundle(manifest,files).problems,[]));
+test('phase1 detects stale module even where index matches',()=>assert.ok(verifyLiveWebhookBundle(manifest,{...files,'smart-medication.ts':'modified'}).problems.includes('source_drift_smart-medication.ts')));
+test('phase1 refuses incomplete runtime bundles',()=>assert.ok(!verifyLiveWebhookBundle(manifest,{'index.ts':files['index.ts']}).ok));
+test('phase1 refuses duplicate appointment routes',()=>assert.ok(verifyLiveWebhookBundle(manifest,{...files,'index.ts':files['index.ts']+V1431_APPOINTMENT_ANCHOR}).problems.includes('line_add_appointment_anchor_mismatch')));
+test('phase1 refuses unreviewed v2.4 integration',()=>{const main=files['index.ts']+'\nconst phmsV24OwnerRoute=1';const changed={...files,'index.ts':main};const approved={...manifest,files:{...manifest.files,'index.ts':sum(main)}};assert.ok(verifyLiveWebhookBundle(approved,changed).problems.includes('unreviewed_v24_route'))});
