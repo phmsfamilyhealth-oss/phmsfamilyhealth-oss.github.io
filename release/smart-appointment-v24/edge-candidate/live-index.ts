@@ -8,15 +8,17 @@ import { makePhmsAppointmentHttpHandler } from '../contracts/phms-appointment-ht
 import { canReleaseAppointmentSchema } from '../contracts/schema-release-guard.mjs';
 const json=(error,status)=>new Response(JSON.stringify({ok:false,error}),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});
 const env=name=>(Deno.env.get(name)||'').trim();
-const required=['SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','PHMS_V24_PRIVATE_DATABASE_URL','PHMS_V24_LINE_CHANNEL_ID','PHMS_V24_LIFF_ORIGIN'];
-const ready=required.every(name=>env(name));
+// Supabase automatically injects SUPABASE_DB_URL. No owner-managed database password is needed.
+const required=['SUPABASE_URL','SUPABASE_DB_URL','PHMS_V24_LINE_CHANNEL_ID','PHMS_V24_LIFF_ORIGIN'];
+const serviceKey=()=>{if(env('SUPABASE_SERVICE_ROLE_KEY'))return env('SUPABASE_SERVICE_ROLE_KEY');try{return JSON.parse(env('SUPABASE_SECRET_KEYS'))?.default||'';}catch{return '';}};
+const ready=required.every(name=>env(name))&&!!serviceKey();
 let handler=null;
 let isSchemaReady=null;
 
 if(ready){
  try{
-  const supabase=createClient(env('SUPABASE_URL'),env('SUPABASE_SERVICE_ROLE_KEY'),{auth:{persistSession:false,autoRefreshToken:false}});
-  const sql=postgres(env('PHMS_V24_PRIVATE_DATABASE_URL'),{max:2,prepare:false,connect_timeout:5,idle_timeout:10});
+  const supabase=createClient(env('SUPABASE_URL'),serviceKey(),{auth:{persistSession:false,autoRefreshToken:false}});
+  const sql=postgres(env('SUPABASE_DB_URL'),{max:2,prepare:false,connect_timeout:5,idle_timeout:10});
   // The private driver must run only on the server. The browser NEVER supplies SQL,
   // actor identity, family identity or database credentials.
   const privateQuery=async(query,args)=>({rows:await sql.unsafe(query,args)});
