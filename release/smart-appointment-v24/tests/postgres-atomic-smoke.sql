@@ -120,3 +120,16 @@ BEGIN
  IF NOT rejected THEN RAISE EXCEPTION 'invalid checklist accepted'; END IF;
  IF (SELECT count(*) FROM public.appointments)<>before_appointments OR (SELECT count(*) FROM public.appointment_tasks)<>before_tasks THEN RAISE EXCEPTION 'partial write after rejected checklist'; END IF;
 END $$;
+
+-- Candidate historical unknown-time DB acceptance, synthetic records only.
+-- Separate from Production; schema is modified only in the GitHub CI PostgreSQL service.
+ALTER TABLE public.appointments ADD CONSTRAINT aim_walk_in_date_only_allowed
+ CHECK (visit_time_known OR (visit_mode='walk_in' AND appointment_at IS NULL AND planned_visit_date IS NOT NULL AND status IN ('planned','scheduled')));
+\ir ../migrations/002_historical_unknown_time_candidate.sql
+DO $$ DECLARE historical_id uuid; BEGIN
+ INSERT INTO public.appointments (person_id,appointment_type,visit_mode,visit_time_known,status,planned_visit_date,appointment_at)
+ VALUES ('44444444-4444-4444-8444-444444444444','follow_up','booked',false,'completed','2026-10-20',NULL)
+ RETURNING id INTO historical_id;
+ IF NOT EXISTS (SELECT 1 FROM public.appointments WHERE id=historical_id AND appointment_at IS NULL AND planned_visit_date='2026-10-20' AND status='completed')
+ THEN RAISE EXCEPTION 'historical_unknown_time_date_not_preserved'; END IF;
+END $$;
