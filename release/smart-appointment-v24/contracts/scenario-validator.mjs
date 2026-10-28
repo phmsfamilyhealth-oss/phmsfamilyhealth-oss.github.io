@@ -13,8 +13,7 @@ export function validateAppointmentDraft(x) {
  if(x.time_known===false && x.time!=null && x.time!=="") errors.push("time_must_be_empty");
  if(x.scenario==="booked" && x.time_known!==true) errors.push("booked_requires_time");
  if(x.scenario==="historical" && x.status!=="completed") errors.push("historical_requires_completed");
- // Historical date-only is not persistable under current canonical DB CHECK.
- if(x.scenario==="historical" && x.time_known===false) errors.push("historical_unknown_time_requires_schema_design");
+ // Date-only historical is designed for the proposed 002 migration; not yet Production-persistable.
  if(x.scenario==="walk_in" && x.status && !["planned","scheduled"].includes(x.status)) errors.push("walkin_invalid_status");
  if(x.clinician && (!x.organization || x.clinician.organization_id!==x.organization.id)) errors.push("doctor_hospital_mismatch");
  if(x.service_unit && (!x.organization || x.service_unit.organization_id!==x.organization.id)) errors.push("unit_hospital_mismatch");
