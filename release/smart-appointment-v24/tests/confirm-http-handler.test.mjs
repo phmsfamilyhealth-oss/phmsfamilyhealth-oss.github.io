@@ -17,3 +17,5 @@ test('JSON-like MIME types cannot bypass strict content type gate',async()=>{for
 test('application/json with charset remains accepted',async()=>{const r=await handle(make(body,{'content-type':'application/json; charset=utf-8'}),adapters);assert.equal(r.status,201)});
 
 test('multibyte UTF-8 payload over 32KiB rejected despite shorter JavaScript length',async()=>{const oversized={...body,draft:{...body.draft,note:'ก'.repeat(12000)}};const r=await handle(make(oversized),adapters);assert.equal(r.status,413);});
+
+test('missing appointment view permission is forbidden, not misreported as malformed input',async()=>{const r=await handle(make(),{...adapters,centralCanAccess:async(_actor,_subject,_resource,action)=>action!=='view'});assert.equal(r.status,403);assert.equal((await r.json()).error,'read_permission_denied');});
