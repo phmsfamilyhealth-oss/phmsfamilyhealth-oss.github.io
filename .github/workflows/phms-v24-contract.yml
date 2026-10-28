@@ -2,6 +2,7 @@ name: PHMS v2.4 Contract Regression
 on:
   pull_request:
     paths:
+      - 'supabase/functions/line-webhook/index.ts'
       - 'release/smart-appointment-v24/contracts/**'
       - 'release/smart-appointment-v24/tests/*.mjs'
       - '.github/workflows/phms-v24-contract.yml'
@@ -21,6 +22,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Typecheck reconciled live LINE webhook candidate
+        run: deno check supabase/functions/line-webhook/index.ts
       - name: Validate and package full Edge dependency closure
         run: node release/smart-appointment-v24/scripts/package-edge.mjs
       - name: Smoke build deployable LIFF site with synthetic public configuration
