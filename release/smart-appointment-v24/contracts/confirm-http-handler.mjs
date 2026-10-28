@@ -6,7 +6,7 @@ const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:
 export async function handleAppointmentConfirm(request, adapters) {
  if(request.method!=='POST') return json({ok:false,error:'method_not_allowed'},405);
  const ct=request.headers.get('content-type')||'';
- if(!ct.toLowerCase().startsWith('application/json')) return json({ok:false,error:'unsupported_media_type'},415);
+ if(ct.split(';',1)[0].trim().toLowerCase()!=='application/json') return json({ok:false,error:'unsupported_media_type'},415);
  const length=Number(request.headers.get('content-length')||0);
  if(length>32768) return json({ok:false,error:'request_too_large'},413);
  let raw;try {const text=await request.text();if(text.length>32768)return json({ok:false,error:'request_too_large'},413);raw=JSON.parse(text);}catch{return json({ok:false,error:'invalid_json'},400);}
