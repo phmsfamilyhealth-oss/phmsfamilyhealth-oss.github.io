@@ -10,7 +10,7 @@ export function makeV1431AppointmentRouteReplacement(handlerName='phmsV24OwnerRo
  return `if(c==='เพิ่มนัด'||c==='เพิ่มนัด จากภาพรวม'){
  let v24Handled=false;
  if(typeof ${handlerName}==='function'){
-  try{const v24=await ${handlerName}(e);v24Handled=v24?.handled===true&&['liff','legacy','rejected'].includes(v24.mode)}catch{}
+  try{const v24=await ${handlerName}(e);v24Handled=v24?.handled===true&&['liff','legacy','rejected','delivery_uncertain'].includes(v24.mode)}catch{}
  }
  if(!v24Handled){await state(u,k,id,'crud_add_appointment',{person_confirmed:true,origin:c==='เพิ่มนัด จากภาพรวม'?'person_overview':'appointments'});await replyAppointmentTypePicker(e.replyToken,u,k,id,t,await appointmentActivePersonName(u,k,id));}
  continue
