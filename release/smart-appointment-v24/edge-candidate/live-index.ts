@@ -5,6 +5,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import postgres from 'npm:postgres@3.4.7';
 import { makePhmsAppointmentHttpHandler } from '../contracts/phms-appointment-http-composition.mjs';
+import { canReleaseAppointmentSchema } from '../contracts/schema-release-guard.mjs';
 const json=(error,status)=>new Response(JSON.stringify({ok:false,error}),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});
 const env=name=>(Deno.env.get(name)||'').trim();
 const required=['SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','PHMS_V24_PRIVATE_DATABASE_URL','PHMS_V24_LINE_CHANNEL_ID','PHMS_V24_LIFF_ORIGIN'];
@@ -21,8 +22,8 @@ if(ready){
   const privateQuery=async(query,args)=>({rows:await sql.unsafe(query,args)});
   isSchemaReady=async()=>{
    try{
-    const result=await sql`select to_regprocedure('public.phms_v24_commit_appointment(uuid,uuid,uuid,uuid,jsonb)') is not null as installed, to_regclass('private.phms_v24_appointment_operations') is not null as operations_ready`;
-    return result.length===1&&result[0].installed===true&&result[0].operations_ready===true;
+    const result=await sql`select to_regprocedure('public.phms_v24_commit_appointment(uuid,uuid,uuid,uuid,jsonb)') is not null as installed, to_regclass('private.phms_v24_appointment_operations') is not null as operations_ready, exists(select 1 from pg_constraint where conrelid='public.appointments'::regclass and conname='aim_walk_in_date_only_allowed' and position('completed' in pg_get_constraintdef(oid))>0 and position('booked' in pg_get_constraintdef(oid))>0) as historical_check_ready`;
+    return result.length===1&&canReleaseAppointmentSchema(result[0]);
    }catch{return false;}
   };
   const resolveAppointmentType=async command=>{
