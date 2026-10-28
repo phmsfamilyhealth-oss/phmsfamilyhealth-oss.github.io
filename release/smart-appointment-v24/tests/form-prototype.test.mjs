@@ -22,3 +22,15 @@ test('save remains disabled until a nonempty authorized hospital registry is loa
 test('unimplemented document upload never advances to a misleading save confirmation',()=>{assert.match(html,/if\(packaged\.draft\.document_metadata\.length\)\{\$\('error'\)\.textContent='การแนบรูปใบนัดและเอกสารยังไม่เปิดใช้งาน/);assert.match(html,/เอาไฟล์ออกก่อน/);});
 
 test('missing LINE deployment config displays an actionable error instead of silently doing nothing',()=>{assert.match(html,/ยังไม่ตั้งค่าการเชื่อมต่อ LINE หรือยังไม่ได้เลือกบุคคล/);assert.match(html,/if\(!id\|\|!endpoint\|\|!memberId\)\{/)});
+
+test('LIFF status reflects actual readiness rather than permanent not-open notice',()=>{
+ assert.match(html,/id="connectionStatus" role="status"/);
+ assert.match(html,/เชื่อมต่อ LINE สำเร็จ/);
+ assert.match(html,/เชื่อมต่อ LINE ไม่สำเร็จ/);
+ assert.doesNotMatch(html,/ฟอร์มนี้ยังไม่เปิดบันทึกจริงจนกว่า/);
+});
+test('save feedback is targeted to confirmation rather than setup status',()=>{
+ assert.match(html,/id="saveStatus" role="status"/);
+ assert.match(html,/\$\('saveStatus'\)\.textContent='บันทึกนัดแล้ว/);
+ assert.doesNotMatch(html,/\\n<label for="hospital">/);
+});
