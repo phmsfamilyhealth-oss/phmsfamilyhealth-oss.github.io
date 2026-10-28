@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {renderLiffHtml} from '../scripts/build-liff-site.mjs';
+const template='<meta name="phms-liff-id" content=""><meta name="phms-confirm-api" content="">';
+const cfg={liffId:'1234567890-abcdefgh',confirmApi:'https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-confirm'};
+test('release page embeds only the public LIFF ID and verified Edge function URL',()=>{const s=renderLiffHtml(template,cfg);assert.match(s,/name="phms-liff-id" content="1234567890-abcdefgh"/);assert.match(s,/https:\/\/buxvdlfrikpwdscdlcfd.supabase.co\/functions\/v1\/phms-v24-appointment-confirm/)});
+test('missing LIFF ID or endpoint fails build',()=>{assert.throws(()=>renderLiffHtml(template,{}),/public_liff_id_required/);assert.throws(()=>renderLiffHtml(template,{liffId:cfg.liffId}),/public_confirm_api_invalid/)});
+test('never place browser config on foreign hosts, insecure scheme or different function',()=>{for(const url of ['http://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-confirm','https://attacker.test/functions/v1/phms-v24-appointment-confirm','https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/line-webhook','https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-confirm?secret=1'])assert.throws(()=>renderLiffHtml(template,{...cfg,confirmApi:url}))});
+test('incompatible template fails before deployment',()=>assert.throws(()=>renderLiffHtml('<h1>wrong</h1>',cfg),/unexpected_liff_template/));
