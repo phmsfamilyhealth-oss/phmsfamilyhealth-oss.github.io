@@ -15,3 +15,12 @@ test('pilot off and cross-family permission denied use legacy flow',async()=>{fo
 test('unrelated postbacks are not intercepted',async()=>{const x=make();assert.deepEqual(await x.bridge({...event,postback:{data:'ยา'}}),{handled:false});assert.deepEqual(x.stats(),{sent:0,legacy:0,active:0})});
 
 test('missing active member preserves legacy route without LIFF launch',async()=>{const x=make({activeMember:false});const eventResult=await x.bridge(event);assert.equal(eventResult.mode,'legacy');assert.equal(x.stats().sent,0);assert.equal(x.stats().legacy,1)});
+
+test('LIFF reply transport uncertainty never triggers a duplicate legacy reply',async()=>{
+ let sent=0,legacy=0;
+ const supabase={from:table=>{if(table==='line_identities')return {select:()=>({eq:()=>({limit:async()=>({data:[{id:'44444444-4444-4444-8444-444444444444',user_id:actor,is_active:true}],error:null})})})};if(table==='family_persons')return {select:()=>({eq:()=>({limit:async()=>({data:[{id:member,family_id:'55555555-5555-4555-8555-555555555555',person_id:'66666666-6666-4666-8666-666666666666',status:'active'}],error:null})})})};throw Error('unexpected')}};
+ const bridge=makeLineOwnerLiffWebhookBridge({supabase,privateQuery:async()=>({rows:[{allowed:true}]}),launchUrl:'https://example.test/appointment/',verifyEvent:async()=>true,resolveActiveMember:async()=>member,sendLiff:async()=>{sent++;throw Error('ambiguous LINE transport')},legacy:async()=>{legacy++}});
+ const result=await bridge(event);
+ assert.deepEqual(result,{handled:true,mode:'delivery_uncertain'});
+ assert.equal(sent,1);assert.equal(legacy,0);
+});
