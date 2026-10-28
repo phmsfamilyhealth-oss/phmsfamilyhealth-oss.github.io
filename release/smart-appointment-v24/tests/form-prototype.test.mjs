@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 const html=readFileSync(new URL('../prototype/index.html',import.meta.url),'utf8');
 test('Thai form and review steps exist',()=>{assert.match(html,/เพิ่มนัดหมาย/);assert.match(html,/ตรวจทานก่อนบันทึก/);});
 test('client draft uses shared validator',()=>assert.match(html,/import \{validateAppointmentDraft\} from '\.\.\/contracts\/scenario-validator\.mjs'/));
-test('no real save exposed without auth backend',()=>{assert.match(html,/<button id="save" disabled/);assert.match(html,/if\(!id\|\|!endpoint\|\|!memberId\)\{/);assert.doesNotMatch(html,/fetch\(|supabase\.from\(|localStorage|service_role/);});
+test('no real save exposed without auth backend',()=>{assert.match(html,/<button id="save" disabled/);assert.match(html,/if\(!id\|\|!endpoint\)\{/);assert.doesNotMatch(html,/fetch\(|supabase\.from\(|localStorage|service_role/);});
 test('no editable patient or family identifiers',()=>{assert.doesNotMatch(html,/id="(?:person_id|family_id|line_user_id)"/)});
 test('date-only scenario and previous history selectable',()=>{assert.match(html,/value="walk_in"/);assert.match(html,/value="historical"/);});
 test('review fields inserted as safe text',()=>{assert.match(html,/dd\.textContent=/);assert.doesNotMatch(html,/innerHTML\s*=/);});
@@ -21,7 +21,7 @@ test('save remains disabled until a nonempty authorized hospital registry is loa
 
 test('unimplemented document upload never advances to a misleading save confirmation',()=>{assert.match(html,/if\(packaged\.draft\.document_metadata\.length\)\{\$\('error'\)\.textContent='การแนบรูปใบนัดและเอกสารยังไม่เปิดใช้งาน/);assert.match(html,/เอาไฟล์ออกก่อน/);});
 
-test('missing LINE deployment config displays an actionable error instead of silently doing nothing',()=>{assert.match(html,/ยังไม่ตั้งค่าการเชื่อมต่อ LINE หรือยังไม่ได้เลือกบุคคล/);assert.match(html,/if\(!id\|\|!endpoint\|\|!memberId\)\{/)});
+test('missing LINE deployment config displays an actionable error instead of silently doing nothing',()=>{assert.match(html,/ยังไม่ได้ตั้งค่าการเชื่อมต่อ LINE/);assert.match(html,/if\(!id\|\|!endpoint\)\{/)});
 
 test('LIFF status reflects actual readiness rather than permanent not-open notice',()=>{
  assert.match(html,/id="connectionStatus" role="status"/);
@@ -39,3 +39,5 @@ test('review is disabled until LINE and authorized catalog are ready',()=>{asser
 test('successful save prevents return to editable form',()=>{assert.match(html,/\$\('back'\)\.disabled=true/);});
 
 test('review handler itself fails closed without trusted LINE and provider catalog',()=>{assert.match(html,/if\(!confirmClient\|\|!authorizedCatalog\|\|\$\('review'\)\.disabled\)\{/);assert.match(html,/ยังเชื่อมต่อ LINE และทะเบียนโรงพยาบาลไม่สำเร็จ/);});
+
+test('LIFF identity initialization proceeds before missing member gate, but catalog remains blocked',()=>{const auth=html.indexOf('window.liff.getIDToken()');const member=html.indexOf('if(!memberId){');const catalog=html.indexOf('const catalogResult=await');assert.ok(auth>=0&&member>auth&&catalog>member);assert.match(html,/เชื่อมต่อ LINE สำเร็จ — ยังไม่ได้เลือกบุคคล/);});
