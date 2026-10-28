@@ -6,7 +6,7 @@ function make({signed=true,gate=true,access=true,subject=true}={}){
  let sent=0,legacy=0,active=0;
  const supabase={from:table=>{if(table==='line_identities')return {select:()=>({eq:()=>({limit:async()=>({data:subject?[{id:'44444444-4444-4444-8444-444444444444',user_id:actor,is_active:true}]:[],error:null})})})};if(table==='family_persons')return {select:()=>({eq:()=>({limit:async()=>({data:[{id:member,family_id:'55555555-5555-4555-8555-555555555555',person_id:'66666666-6666-4666-8666-666666666666',status:'active'}],error:null})})})};throw Error('unexpected table')}};
  const privateQuery=async sql=>({rows:[{allowed:sql.includes('phms_appointment_release_gate')?gate:access}]});
- const bridge=makeLineOwnerLiffWebhookBridge({supabase,privateQuery,launchUrl:'https://example.test/appointment/',verifyEvent:async()=>signed,resolveActiveMember:async()=>{active++;return member},sendLiff:async(_e,url)=>{sent++;assert.equal(new URL(url).searchParams.get('member'),member)},legacy:async()=>{legacy++}});
+ const bridge=makeLineOwnerLiffWebhookBridge({supabase,privateQuery,launchUrl:'https://example.test/appointment/',verifyEvent:async()=>signed,resolveActiveMember:async()=>{active++;return member},sendLiff:async(_e,url)=>{sent++;assert.equal(new URL(url).searchParams.get('member'),member)},legacy:async ctx=>{assert.equal(ctx.event,event);legacy++}});
  return {bridge,stats:()=>({sent,legacy,active})};
 }
 test('signed LINE user with central rights opens scoped LIFF link',async()=>{const x=make();assert.equal((await x.bridge(event)).mode,'liff');assert.deepEqual(x.stats(),{sent:1,legacy:0,active:1})});
