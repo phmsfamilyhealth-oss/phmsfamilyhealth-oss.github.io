@@ -57,7 +57,14 @@ Deno.serve(async request=>{
   }});
  }
  const withCors=response=>{if(!origin)return response;const headers=new Headers(response.headers);headers.set('access-control-allow-origin',origin);headers.set('vary','Origin');return new Response(response.body,{status:response.status,headers});};
- if(!handler||!isSchemaReady||await isSchemaReady()!==true)return withCors(json('feature_not_released',404));
+ if(!handler||!isSchemaReady)return withCors(json('feature_not_released',404));
+ // Read-only member and provider discovery do not depend on the write migration.
+ // Both routes still require verified LINE identity, owner release gate and family rights.
+ let readOnly=false;
+ if(request.method==='POST'&&request.headers.get('content-type')?.split(';',1)[0].trim().toLowerCase()==='application/json'){
+  try{const body=await request.clone().text();if(new TextEncoder().encode(body).byteLength<=32768){const action=JSON.parse(body)?.action;readOnly=action==='person_options'||action==='provider_catalog';}}catch{/* use strict appointment handler */}
+ }
+ if(!readOnly&&await isSchemaReady()!==true)return withCors(json('feature_not_released',404));
  try{
   const response=await handler(request);
   return withCors(response);
