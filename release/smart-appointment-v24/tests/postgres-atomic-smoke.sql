@@ -165,3 +165,18 @@ DO $$ DECLARE rejected boolean:=false; before_count bigint; BEGIN
  IF NOT rejected THEN RAISE EXCEPTION 'historical_unknown_date_was_accepted'; END IF;
  IF (SELECT count(*) FROM public.appointments)<>before_count THEN RAISE EXCEPTION 'rejected_historical_case_wrote_rows'; END IF;
 END $$;
+
+-- Full atomic RPC historical date-only acceptance, following migration 002.
+DO $$ DECLARE receipt jsonb; stored record; BEGIN
+ SELECT public.phms_v24_commit_appointment(
+ '11111111-1111-4111-8111-111111111111'::uuid,
+ 'f1111111-1111-4111-8111-111111111111'::uuid,
+ '22222222-2222-4222-8222-222222222222'::uuid,
+ '33333333-3333-4333-8333-333333333333'::uuid,
+ '{"family_id":"22222222-2222-4222-8222-222222222222","family_person_id":"33333333-3333-4333-8333-333333333333","person_id":"44444444-4444-4444-8444-444444444444","created_by":"11111111-1111-4111-8111-111111111111","appointment_type":"follow_up","visit_mode":"booked","visit_time_known":false,"status":"completed","planned_visit_date":"2026-10-20","appointment_at":null}'::jsonb
+ ) INTO receipt;
+ IF receipt->>'ok' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'atomic historical insert failed %',receipt; END IF;
+ SELECT * INTO stored FROM public.appointments WHERE id=(receipt->>'appointment_id')::uuid;
+ IF stored.appointment_at IS NOT NULL OR stored.visit_time_known IS DISTINCT FROM false OR stored.status IS DISTINCT FROM 'completed' OR stored.planned_visit_date IS DISTINCT FROM '2026-10-20'::date THEN
+ RAISE EXCEPTION 'historical date-only fields not preserved'; END IF;
+END $$;
