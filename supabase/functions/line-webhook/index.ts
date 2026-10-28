@@ -23808,7 +23808,7 @@ if(c==='เพิ่มนัด'||c==='เพิ่มนัด จากภา
   const rawLiff=(Deno.env.get('PHMS_V24_OWNER_LIFF_URL')||'').trim();
   if(rawLiff){
    const entry=new URL(rawLiff);
-   if(entry.protocol==='https:'&&entry.hostname==='liff.line.me'&&entry.username===''&&entry.password===''&&entry.port===''&&entry.search===''&&entry.hash===''&&/^\\/[0-9A-Za-z_-]+$/.test(entry.pathname)){
+   if(entry.protocol==='https:'&&entry.hostname==='liff.line.me'&&entry.username===''&&entry.password===''&&entry.port===''&&entry.search===''&&entry.hash===''&&entry.pathname.startsWith('/')&&/^[0-9A-Za-z_-]+$/.test(entry.pathname.slice(1))){
     const gated=one(await rpc(u,k,'phms_line_appointment_wizard_enabled',{p_line_user_id:id}));
     if(gated===true){
      const ctx=one(await rpc(u,k,'phms_resolve_line_command_context',{p_line_user_id:id,p_resource:'appointments',p_action:'create',p_require_person:true,p_required_scope:'any'}));
@@ -23824,7 +23824,7 @@ if(c==='เพิ่มนัด'||c==='เพิ่มนัด จากภา
  }catch(err){console.error('phms_v24_liff_preflight_failed',String(err))}
  if(phmsV24LiffUrl){
   // A failed LINE reply must never be retried with the same reply token.
-  await reply(e.replyToken,'📅 เพิ่มนัดหมาย\\n\\nกดปุ่มด้านล่างเพื่อเปิดแบบฟอร์มเพิ่มนัด',t,[uri('📝 เปิดแบบฟอร์มเพิ่มนัด',phmsV24LiffUrl),pb('↩️ ใช้แบบเดิม','เลือกประเภทนัด')]);
+  await reply(e.replyToken,'📅 เพิ่มนัดหมาย\\n\\nกดปุ่มด้านล่างเพื่อเปิดแบบฟอร์มเพิ่มนัด',t,[uri('📝 เปิดแบบฟอร์มเพิ่มนัด',phmsV24LiffUrl),pb('↩️ กลับเมนูนัดหมาย','นัดหมาย')]);
   continue
  }
  await state(u,k,id,'crud_add_appointment',{person_confirmed:true,origin:c==='เพิ่มนัด จากภาพรวม'?'person_overview':'appointments'});
