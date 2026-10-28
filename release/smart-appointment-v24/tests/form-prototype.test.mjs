@@ -40,6 +40,6 @@ test('successful save prevents return to editable form',()=>{assert.match(html,/
 
 test('review handler itself fails closed without trusted LINE and provider catalog',()=>{assert.match(html,/if\(!confirmClient\|\|!authorizedCatalog\|\|\$\('review'\)\.disabled\)\{/);assert.match(html,/ยังเชื่อมต่อ LINE และทะเบียนโรงพยาบาลไม่สำเร็จ/);});
 
-test('LIFF identity initialization proceeds before missing member gate, but catalog remains blocked',()=>{const auth=html.indexOf('window.liff.getIDToken()');const member=html.indexOf('if(!memberId){');const catalog=html.indexOf('const catalogResult=await');assert.ok(auth>=0&&member>auth&&catalog>member);assert.match(html,/เชื่อมต่อ LINE สำเร็จ — ยังไม่ได้เลือกบุคคล/);});
+test('LIFF authenticates before discovering authorized people and providers',()=>{const auth=html.indexOf('window.liff.getIDToken()');const people=html.indexOf('const people=await loadAuthorizedPeople');const catalog=html.indexOf('const catalogResult=await');assert.ok(auth>=0&&people>auth&&catalog>people);assert.match(html,/เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล/);});
 
 test('member picker is authenticated and passes only selected canonical member to catalog',()=>{assert.match(html,/action:'person_options'/);assert.match(html,/authorization:'Bearer '\+liff\.getIDToken\(\)/);assert.match(html,/people\.people\.some\(x=>x\.id===memberId\)/);assert.match(html,/if\(memberId\)loadSelectedCatalog\(window\.liff,endpoint\)/);});
