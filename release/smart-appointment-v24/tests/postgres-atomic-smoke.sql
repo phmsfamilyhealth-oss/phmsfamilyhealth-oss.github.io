@@ -180,3 +180,14 @@ DO $$ DECLARE receipt jsonb; stored record; BEGIN
  IF stored.appointment_at IS NOT NULL OR stored.visit_time_known IS DISTINCT FROM false OR stored.status IS DISTINCT FROM 'completed' OR stored.planned_visit_date IS DISTINCT FROM '2026-10-20'::date THEN
  RAISE EXCEPTION 'historical date-only fields not preserved'; END IF;
 END $$;
+
+-- Completed historical operation replay: same key must not duplicate a past visit.
+DO $$ DECLARE first_result jsonb; replay_result jsonb; n_before bigint; n_after bigint;
+ payload jsonb:='{"family_id":"22222222-2222-4222-8222-222222222222","family_person_id":"33333333-3333-4333-8333-333333333333","person_id":"44444444-4444-4444-8444-444444444444","created_by":"11111111-1111-4111-8111-111111111111","appointment_type":"follow_up","visit_mode":"booked","visit_time_known":false,"status":"completed","planned_visit_date":"2026-10-19","appointment_at":null}'::jsonb;
+BEGIN
+ SELECT count(*) INTO n_before FROM public.appointments;
+ SELECT public.phms_v24_commit_appointment('11111111-1111-4111-8111-111111111111','f2222222-2222-4222-8222-222222222222','22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333',payload) INTO first_result;
+ SELECT public.phms_v24_commit_appointment('11111111-1111-4111-8111-111111111111','f2222222-2222-4222-8222-222222222222','22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333',payload) INTO replay_result;
+ SELECT count(*) INTO n_after FROM public.appointments;
+ IF first_result->>'ok' IS DISTINCT FROM 'true' OR replay_result->>'idempotent_replay' IS DISTINCT FROM 'true' OR first_result->>'appointment_id' IS DISTINCT FROM replay_result->>'appointment_id' OR n_after<>n_before+1 THEN RAISE EXCEPTION 'historical_replay_not_idempotent'; END IF;
+END $$;
