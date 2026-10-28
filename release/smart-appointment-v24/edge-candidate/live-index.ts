@@ -29,8 +29,8 @@ if(ready){
   const resolveAppointmentType=async command=>{
    const scenario=command?.draft?.scenario;
    if(scenario==='walk_in')return 'walk_in';
-   if(scenario==='booked')return 'follow_up';
-   // Historical and rescheduled flows stay closed pending their own acceptance.
+   if(scenario==='booked'||scenario==='historical')return 'follow_up';
+   // Historical release still requires database schema readiness; reschedule stays closed.
    return null;
   };
   handler=makePhmsAppointmentHttpHandler({
