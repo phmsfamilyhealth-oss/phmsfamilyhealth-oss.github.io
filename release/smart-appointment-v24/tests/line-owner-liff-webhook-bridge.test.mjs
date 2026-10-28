@@ -24,3 +24,12 @@ test('LIFF reply transport uncertainty never triggers a duplicate legacy reply',
  assert.deepEqual(result,{handled:true,mode:'delivery_uncertain'});
  assert.equal(sent,1);assert.equal(legacy,0);
 });
+
+test('failed nested legacy reply is never retried with the same LINE reply token',async()=>{
+ const x=make({gate:false});
+ // The existing mock cannot throw: create a dedicated bridge whose legacy transport rejects.
+ let attempts=0;
+ const supabase={from:table=>{if(table==='line_identities')return {select:()=>({eq:()=>({limit:async()=>({data:[{id:'44444444-4444-4444-8444-444444444444',user_id:actor,is_active:true}],error:null})})})};if(table==='family_persons')return {select:()=>({eq:()=>({limit:async()=>({data:[{id:member,family_id:'55555555-5555-4555-8555-555555555555',person_id:'66666666-6666-4666-8666-666666666666',status:'active'}],error:null})})})};throw Error('unexpected')}};
+ const bridge=makeLineOwnerLiffWebhookBridge({supabase,privateQuery:async sql=>({rows:[{allowed:sql.includes('phms_appointment_release_gate')?false:true}]}),launchUrl:'https://example.test/appointment/',verifyEvent:async()=>true,resolveActiveMember:async()=>member,sendLiff:async()=>{throw Error('not permitted')},legacy:async()=>{attempts++;throw Error('transport uncertain')}});
+ assert.deepEqual(await bridge(event),{handled:true,mode:'delivery_uncertain'});assert.equal(attempts,1);
+});
