@@ -11,13 +11,13 @@ test('review fields inserted as safe text',()=>{assert.match(html,/dd\.textConte
 
 test('LIFF requires LINE login before enabling appointment save',()=>{assert.match(html,/if\(!window\.liff\.isLoggedIn\(\)\)\{window\.liff\.login\(\);return;\}/);assert.match(html,/confirmClient=makeLiffConfirmClient/);});
 
-test('LIFF never enables save without a real LINE ID token',()=>{assert.match(html,/if\(!window\.liff\.getIDToken\(\)\)\{document\.getElementById\('error'\)/);});
+test('LIFF never enables save without a real LINE ID token',()=>{assert.match(html,/if\(!window\.liff\.getIDToken\(\)\)\{document\.getElementById\('connectionStatus'\)/);});
 
-test('missing LINE ID token shows an actionable Thai error without activating save',()=>{assert.match(html,/ยังยืนยันตัวตนกับ LINE ไม่สำเร็จ/);assert.match(html,/if\(!window\.liff\.getIDToken\(\)\)\{document\.getElementById\('error'\)/);});
+test('missing LINE ID token shows an actionable Thai error without activating save',()=>{assert.match(html,/ยังยืนยันตัวตนกับ LINE ไม่สำเร็จ/);assert.match(html,/if\(!window\.liff\.getIDToken\(\)\)\{document\.getElementById\('connectionStatus'\)/);});
 
 test('review requires a verified registered hospital instead of misleading free text',()=>{assert.match(html,/providerPickerState\(authorizedCatalog,\$\('providerOrg'\)\.value/);assert.match(html,/กรุณาเลือกโรงพยาบาลจากรายชื่อที่ระบบแสดงก่อนบันทึก/)});
 
-test('save remains disabled until a nonempty authorized hospital registry is loaded',()=>{assert.match(html,/if\(catalogResult\.ok&&catalogResult\.catalog\.organizations\.length\)/);assert.match(html,/syncProviderNames\(\);document\.getElementById\('save'\)\.disabled=false/);assert.doesNotMatch(html,/confirmClient=makeLiffConfirmClient\([^;]+;document\.getElementById\('save'\)\.disabled=false/);});
+test('save remains disabled until a nonempty authorized hospital registry is loaded',()=>{assert.match(html,/if\(catalogResult\.ok&&catalogResult\.catalog\.organizations\.length\)/);assert.match(html,/syncProviderNames\(\);document\.getElementById\('connectionStatus'\)\.textContent='เชื่อมต่อ LINE สำเร็จ[^;]*;document\.getElementById\('save'\)\.disabled=false/);assert.doesNotMatch(html,/confirmClient=makeLiffConfirmClient\([^;]+;document\.getElementById\('save'\)\.disabled=false/);});
 
 test('unimplemented document upload never advances to a misleading save confirmation',()=>{assert.match(html,/if\(packaged\.draft\.document_metadata\.length\)\{\$\('error'\)\.textContent='การแนบรูปใบนัดและเอกสารยังไม่เปิดใช้งาน/);assert.match(html,/เอาไฟล์ออกก่อน/);});
 
