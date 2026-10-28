@@ -9,7 +9,7 @@ export async function handleAppointmentConfirm(request, adapters) {
  if(ct.split(';',1)[0].trim().toLowerCase()!=='application/json') return json({ok:false,error:'unsupported_media_type'},415);
  const length=Number(request.headers.get('content-length')||0);
  if(length>32768) return json({ok:false,error:'request_too_large'},413);
- let raw;try {const text=await request.text();if(text.length>32768)return json({ok:false,error:'request_too_large'},413);raw=JSON.parse(text);}catch{return json({ok:false,error:'invalid_json'},400);}
+ let raw;try {const text=await request.text();if(new TextEncoder().encode(text).byteLength>32768)return json({ok:false,error:'request_too_large'},413);raw=JSON.parse(text);}catch{return json({ok:false,error:'invalid_json'},400);}
  if(!raw || typeof raw!=='object' || Array.isArray(raw))return json({ok:false,error:'invalid_request'},400);
  // Only accept identity token from authorization header, not browser-provided actor or family UUID.
  const match=/^Bearer ([^\s]+)$/.exec(request.headers.get('authorization')||'');
