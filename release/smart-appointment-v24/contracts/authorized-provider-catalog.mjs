@@ -2,7 +2,7 @@
 // resolution, central view permission and the owner-controlled release gate.
 import {fetchProviderMaster} from './supabase-provider-master.mjs';
 const response=(data,status)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});
-export function makeAuthorizedProviderCatalogHandler({supabase,verifyLineIdentity,resolvePerson,isReleaseEnabled,centralCanAccess}={}){
+export function makeAuthorizedProviderCatalogHandler({supabase,verifyLineIdentity,resolvePerson,isReleaseEnabled,centralCanAccess,fetchMaster=fetchProviderMaster}={}){
  if(!supabase?.from||[verifyLineIdentity,resolvePerson,isReleaseEnabled,centralCanAccess].some(f=>typeof f!=='function'))throw new Error('catalog_security_not_configured');
  return async(request,raw)=>{
   if(request.method!=='POST'||!/^application\/json(?:\s*;|\s*$)/i.test(request.headers.get('content-type')||''))return response({ok:false,error:'invalid_request'},400);
@@ -16,7 +16,7 @@ export function makeAuthorizedProviderCatalogHandler({supabase,verifyLineIdentit
    const person=await resolvePerson(actor.userId,raw?.selectedPersonCode);
    if(!person?.familyPersonId)return response({ok:false,error:'person_not_found'},404);
    if(await centralCanAccess(actor.userId,person.familyPersonId,'appointments','view')!==true)return response({ok:false,error:'permission_denied'},403);
-   const catalog=await fetchProviderMaster(supabase);
+   const catalog=await fetchMaster(supabase);
    return response({ok:true,catalog},200);
   }catch{return response({ok:false,error:'catalog_unavailable'},503);}
  };
