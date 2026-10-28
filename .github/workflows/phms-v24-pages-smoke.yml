@@ -24,6 +24,11 @@ jobs:
             test -s /tmp/phms-check
             if [[ "$path" == 'prototype/index.html' ]]; then
               grep -q 'PHMS — เพิ่มนัดหมาย' /tmp/phms-check
+              for attempt in $(seq 1 24); do
+                if grep -q 'name="phms-liff-id" content="2011619364-D0xazyre"' /tmp/phms-check; then break; fi
+                sleep 5
+                curl --fail --location --silent --show-error --max-time 15 -o /tmp/phms-check "$base/$path"
+              done
               grep -q 'name="phms-liff-id" content="2011619364-D0xazyre"' /tmp/phms-check
             else
               grep -Eq 'export |import ' /tmp/phms-check
