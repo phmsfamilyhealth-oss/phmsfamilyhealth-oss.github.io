@@ -24,7 +24,7 @@ jobs:
             test -s /tmp/phms-check
             if [[ "$path" == 'prototype/index.html' ]]; then
               grep -q 'PHMS — เพิ่มนัดหมาย' /tmp/phms-check
-              grep -q 'name="phms-liff-id" content=""' /tmp/phms-check
+              grep -q 'name="phms-liff-id" content="2011619364-D0xazyre"' /tmp/phms-check
             else
               grep -Eq 'export |import ' /tmp/phms-check
             fi
