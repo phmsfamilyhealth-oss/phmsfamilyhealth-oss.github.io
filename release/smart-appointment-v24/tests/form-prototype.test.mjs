@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 const html=readFileSync(new URL('../prototype/index.html',import.meta.url),'utf8');
 test('Thai form and review steps exist',()=>{assert.match(html,/เพิ่มนัดหมาย/);assert.match(html,/ตรวจทานก่อนบันทึก/);});
 test('client draft uses shared validator',()=>assert.match(html,/import \{validateAppointmentDraft\} from '\.\.\/contracts\/scenario-validator\.mjs'/));
-test('no real save exposed without auth backend',()=>{assert.match(html,/<button id="save" disabled/);assert.match(html,/if\(!id\|\|!endpoint\)\{/);assert.doesNotMatch(html,/fetch\(|supabase\.from\(|localStorage|service_role/);});
+test('no real save exposed without auth backend',()=>{assert.match(html,/<button id="save" disabled/);assert.match(html,/if\(!id\|\|!endpoint\)\{/);assert.doesNotMatch(html,/supabase\.from\(|localStorage|service_role/);});
 test('no editable patient or family identifiers',()=>{assert.doesNotMatch(html,/id="(?:person_id|family_id|line_user_id)"/)});
 test('date-only scenario and previous history selectable',()=>{assert.match(html,/value="walk_in"/);assert.match(html,/value="historical"/);});
 test('review fields inserted as safe text',()=>{assert.match(html,/dd\.textContent=/);assert.doesNotMatch(html,/innerHTML\s*=/);});
@@ -41,3 +41,5 @@ test('successful save prevents return to editable form',()=>{assert.match(html,/
 test('review handler itself fails closed without trusted LINE and provider catalog',()=>{assert.match(html,/if\(!confirmClient\|\|!authorizedCatalog\|\|\$\('review'\)\.disabled\)\{/);assert.match(html,/ยังเชื่อมต่อ LINE และทะเบียนโรงพยาบาลไม่สำเร็จ/);});
 
 test('LIFF identity initialization proceeds before missing member gate, but catalog remains blocked',()=>{const auth=html.indexOf('window.liff.getIDToken()');const member=html.indexOf('if(!memberId){');const catalog=html.indexOf('const catalogResult=await');assert.ok(auth>=0&&member>auth&&catalog>member);assert.match(html,/เชื่อมต่อ LINE สำเร็จ — ยังไม่ได้เลือกบุคคล/);});
+
+test('member picker is authenticated and passes only selected canonical member to catalog',()=>{assert.match(html,/action:'person_options'/);assert.match(html,/authorization:'Bearer '\+liff\.getIDToken\(\)/);assert.match(html,/people\.people\.some\(x=>x\.id===memberId\)/);assert.match(html,/if\(memberId\)loadSelectedCatalog\(window\.liff,endpoint\)/);});
