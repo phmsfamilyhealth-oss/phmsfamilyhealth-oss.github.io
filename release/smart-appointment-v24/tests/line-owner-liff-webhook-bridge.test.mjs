@@ -10,7 +10,7 @@ function make({signed=true,gate=true,access=true,subject=true,activeMember=true}
  return {bridge,stats:()=>({sent,legacy,active})};
 }
 test('signed LINE user with central rights opens scoped LIFF link',async()=>{const x=make();assert.equal((await x.bridge(event)).mode,'liff');assert.deepEqual(x.stats(),{sent:1,legacy:0,active:1})});
-test('unsigned LINE event never looks up active person nor opens legacy flow',async()=>{const x=make({signed:false});assert.equal((await x.bridge(event)).mode,'rejected');assert.deepEqual(x.stats(),{sent:0,legacy:0,active:0})});
+test('unsigned LINE event never looks up active person nor opens legacy flow',async()=>{const x=make({signed:false});assert.deepEqual(await x.bridge(event),{handled:false,mode:'rejected'});assert.deepEqual(x.stats(),{sent:0,legacy:0,active:0})});
 test('pilot off and cross-family permission denied use legacy flow',async()=>{for(const opts of [{gate:false},{access:false},{subject:false}]){const x=make(opts);assert.equal((await x.bridge(event)).mode,'legacy');assert.equal(x.stats().sent,0);assert.equal(x.stats().legacy,1)}});
 test('unrelated postbacks are not intercepted',async()=>{const x=make();assert.deepEqual(await x.bridge({...event,postback:{data:'ยา'}}),{handled:false});assert.deepEqual(x.stats(),{sent:0,legacy:0,active:0})});
 
