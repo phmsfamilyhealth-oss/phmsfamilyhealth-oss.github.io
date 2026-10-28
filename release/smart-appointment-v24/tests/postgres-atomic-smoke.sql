@@ -133,3 +133,18 @@ DO $$ DECLARE historical_id uuid; BEGIN
  IF NOT EXISTS (SELECT 1 FROM public.appointments WHERE id=historical_id AND appointment_at IS NULL AND planned_visit_date='2026-10-20' AND status='completed')
  THEN RAISE EXCEPTION 'historical_unknown_time_date_not_preserved'; END IF;
 END $$;
+
+-- Two synthetic families: the real atomic writer must deny cross-family writes
+-- even if an attacker supplies a valid foreign family-person UUID.
+INSERT INTO public.family_persons VALUES ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','cccccccc-cccc-4ccc-8ccc-cccccccccccc','dddddddd-dddd-4ddd-8ddd-dddddddddddd');
+DO $$ DECLARE rejected boolean:=false; n_before bigint; BEGIN
+ SELECT count(*) INTO n_before FROM public.appointments;
+ BEGIN
+ PERFORM public.phms_v24_commit_appointment(
+ '11111111-1111-4111-8111-111111111111','eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+ 'cccccccc-cccc-4ccc-8ccc-cccccccccccc','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+ '{"family_id":"cccccccc-cccc-4ccc-8ccc-cccccccccccc","family_person_id":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","person_id":"dddddddd-dddd-4ddd-8ddd-dddddddddddd","created_by":"11111111-1111-4111-8111-111111111111","appointment_type":"walk_in","visit_mode":"walk_in","visit_time_known":false,"status":"planned","planned_visit_date":"2026-11-05","appointment_at":null}'::jsonb);
+ EXCEPTION WHEN OTHERS THEN rejected:=true; END;
+ IF NOT rejected THEN RAISE EXCEPTION 'cross_family_write_was_accepted'; END IF;
+ IF (SELECT count(*) FROM public.appointments)<>n_before THEN RAISE EXCEPTION 'cross_family_write_modified_database'; END IF;
+END $$;
