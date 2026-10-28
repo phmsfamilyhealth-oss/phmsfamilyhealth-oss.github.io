@@ -17,7 +17,7 @@ export async function handleAppointmentConfirm(request, adapters) {
  try {
  const result=await confirmAppointment({credential:match[1],selectedPersonCode:raw.selectedPersonCode,operationKey:raw.operationKey,draft:raw.draft},adapters);
  if(result.ok)return json(result,201);
- const statuses={unauthenticated:401,permission_denied:403,document_permission_denied:403,feature_not_released:404,person_not_found:404,provider_mismatch:422,invalid_draft:422,invalid_operation_key:400,person_required:400,commit_not_verified:503};
+ const statuses={unauthenticated:401,permission_denied:403,read_permission_denied:403,document_permission_denied:403,feature_not_released:404,person_not_found:404,provider_mismatch:422,invalid_draft:422,invalid_operation_key:400,person_required:400,commit_not_verified:503};
  return json(result,statuses[result.error]||400);
  }catch{return json({ok:false,error:'request_failed'},503);}
 }
