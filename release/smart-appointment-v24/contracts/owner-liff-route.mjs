@@ -9,7 +9,9 @@ export function makeOwnerLiffRoute({launch,legacy}={}){
   let result;
   try{result=await launch({verifiedActorId:context.verifiedActorId,selectedPersonCode:context.selectedPersonCode})}
   catch{result={ok:false,error:'launch_unavailable'}}
-  if(result?.ok===true&&typeof result.url==='string')return {handled:true,mode:'liff',url:result.url};
+  if(result?.ok===true&&typeof result.url==='string'){
+   try{const url=new URL(result.url);if(url.protocol==='https:'&&url.username===''&&url.password===''&&url.hash===''&&url.searchParams.getAll('member').length===1&&url.searchParams.get('member')===context.selectedPersonCode)return {handled:true,mode:'liff',url:url.href};}catch{}
+  }
   await legacy(context);
   return {handled:true,mode:'legacy'};
  };
