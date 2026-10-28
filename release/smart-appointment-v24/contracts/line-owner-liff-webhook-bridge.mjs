@@ -16,7 +16,8 @@ export function makeLineOwnerLiffWebhookBridge({supabase,privateQuery,launchUrl,
   try{
    const subject=await resolveSubject(event?.source?.userId);
    const member=subject?.userId?await resolveActiveMember({userId:subject.userId,lineUserId:event.source.userId}):null;
-   const result=await launch({command,verifiedActorId:subject?.userId,selectedPersonCode:member,event});
+   if(!subject?.userId||!member){await legacy({command,event});return {handled:true,mode:'legacy'};}
+   const result=await launch({command,verifiedActorId:subject.userId,selectedPersonCode:member,event});
    if(result.mode==='liff'){
     await sendLiff(event,result.url);
     return {handled:true,mode:'liff'};
