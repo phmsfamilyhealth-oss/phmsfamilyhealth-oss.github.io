@@ -66,7 +66,7 @@ BEGIN
   IF v_date IS NULL OR (p_appointment->>'visit_time_known') IS NULL OR (p_appointment->>'visit_time_known') NOT IN ('true','false')
   THEN RAISE EXCEPTION 'invalid_date'; END IF;
   IF (p_appointment->>'visit_time_known')='false' AND
-     (v_mode <> 'walk_in' OR v_time IS NOT NULL OR v_status NOT IN ('planned','scheduled'))
+     (v_time IS NOT NULL OR NOT ((v_mode='walk_in' AND v_status IN ('planned','scheduled')) OR (v_mode IN ('booked','walk_in') AND v_status='completed')))
   THEN RAISE EXCEPTION 'unknown_time_not_supported'; END IF;
   IF (p_appointment->>'visit_time_known')='true' AND v_time IS NULL
   THEN RAISE EXCEPTION 'time_required'; END IF;
