@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {makeAuthorizedPersonPicker} from '../contracts/authorized-person-picker.mjs';
+const uuid=['11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222'];
+const membership={data:[{family_id:'f1'}],error:null};
+const members={data:[{id:uuid[0],family_id:'f1',person_id:'p1',status:'active'},{id:uuid[1],family_id:'f1',person_id:'p2',status:'active'}],error:null};
+const persons={data:[{id:'p1',display_name:'ยาย'},{id:'p2',display_name:'คนอื่น'}],error:null};
+const supabase={from(table){return {select(){return {eq(){return {eq(){return {limit:async()=>membership}}}},in(){return {limit:async()=>table==='family_persons'?members:persons}}}}}}}};
+const req=new Request('https://example.test',{method:'POST',headers:{authorization:'Bearer verified-token','content-type':'application/json'}});
+const base={supabase,verifyLineIdentity:async()=>({userId:'u1'}),isReleaseEnabled:async()=>true,centralCanAccess:async(_actor,id)=>id===uuid[0]};
+test('lists only a verified member with both appointment rights',async()=>{const handle=makeAuthorizedPersonPicker(base);const r=await handle(req,{action:'person_options'});assert.equal(r.status,200);assert.deepEqual((await r.json()).people,[{id:uuid[0],name:'ยาย'}]);});
+test('release gate blocks person discovery',async()=>{const r=await makeAuthorizedPersonPicker({...base,isReleaseEnabled:async()=>false})(req,{action:'person_options'});assert.equal(r.status,404)});
+test('unverified LINE token cannot discover people',async()=>{const r=await makeAuthorizedPersonPicker({...base,verifyLineIdentity:async()=>null})(req,{action:'person_options'});assert.equal(r.status,401)});
+test('no token is forbidden',async()=>{const r=await makeAuthorizedPersonPicker(base)(new Request('https://example.test',{method:'POST'}),{action:'person_options'});assert.equal(r.status,401)});
