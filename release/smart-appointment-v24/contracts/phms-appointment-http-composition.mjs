@@ -22,7 +22,7 @@ export function makePhmsAppointmentHttpHandler({supabase,channelId,fetchImpl,pri
   if(request.method==='POST'&&request.headers.get('content-type')?.split(';',1)[0].trim().toLowerCase()==='application/json'){
    try{
     const rawText=await request.clone().text();
-    if(rawText.length<=32768){const raw=JSON.parse(rawText);if(raw?.action==='provider_catalog')return catalog(request,raw);}
+    if(new TextEncoder().encode(rawText).byteLength<=32768){const raw=JSON.parse(rawText);if(raw?.action==='provider_catalog')return catalog(request,raw);}
    }catch{/* existing appointment handler supplies uniform invalid-request errors */}
   }
   return appointment(request);
