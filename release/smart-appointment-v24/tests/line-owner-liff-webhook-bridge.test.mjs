@@ -33,3 +33,10 @@ test('failed nested legacy reply is never retried with the same LINE reply token
  const bridge=makeLineOwnerLiffWebhookBridge({supabase,privateQuery:async sql=>({rows:[{allowed:sql.includes('phms_appointment_release_gate')?false:true}]}),launchUrl:'https://example.test/appointment/',verifyEvent:async()=>true,resolveActiveMember:async()=>member,sendLiff:async()=>{throw Error('not permitted')},legacy:async()=>{attempts++;throw Error('transport uncertain')}});
  assert.deepEqual(await bridge(event),{handled:true,mode:'delivery_uncertain'});assert.equal(attempts,1);
 });
+
+test('verified LINE subject lookup failure restores legacy appointment before any reply',async()=>{
+ let legacyCount=0,sendCount=0;
+ const bridge=makeLineOwnerLiffWebhookBridge({supabase:{from:()=>{throw Error('identity lookup outage')}},privateQuery:async()=>({rows:[{allowed:false}]}),launchUrl:'https://example.test/appointment/',verifyEvent:async()=>true,resolveActiveMember:async()=>member,sendLiff:async()=>{sendCount++},legacy:async()=>{legacyCount++}});
+ assert.deepEqual(await bridge(event),{handled:true,mode:'legacy'});
+ assert.equal(legacyCount,1);assert.equal(sendCount,0);
+});
