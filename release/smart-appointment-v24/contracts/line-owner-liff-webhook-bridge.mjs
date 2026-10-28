@@ -14,22 +14,26 @@ export function makeLineOwnerLiffWebhookBridge({supabase,privateQuery,launchUrl,
   let verified=false;try{verified=await verifyEvent(event)===true}catch{}
   // Invalid signatures are consumed without a reply, to prevent legacy fallback.
   if(!verified)return {handled:true,mode:'rejected'};
+  // All authorization/identity failures before a LINE reply may safely fall
+  // back to the existing appointment flow. Once delivery is attempted, never retry.
+  let subject=null,member=null;
   try{
-   const subject=await resolveSubject(event?.source?.userId);
-   const member=subject?.userId?await resolveActiveMember({userId:subject.userId,lineUserId:event.source.userId}):null;
-   if(!subject?.userId||!member){await legacy({command,event});return {handled:true,mode:'legacy'};}
-   const result=await launch({command,verifiedActorId:subject.userId,selectedPersonCode:member,event});
-   if(result.mode==='liff'){
-    // Reply delivery may have succeeded even if transport later throws.
-    // Never attempt a second legacy reply using the same LINE reply token.
-    try{await sendLiff(event,result.url);return {handled:true,mode:'liff'};}
-    catch{return {handled:true,mode:'delivery_uncertain'};}
-   }
-   return result;
-  }catch{
-   // A legacy reply may already have been attempted by the inner route.
-   // Retrying with the same token can double-send or obscure a delivery error.
-   return {handled:true,mode:'delivery_uncertain'};
+   subject=await resolveSubject(event?.source?.userId);
+   member=subject?.userId?await resolveActiveMember({userId:subject.userId,lineUserId:event.source.userId}):null;
+  }catch{/* Keep the legacy flow available when a lookup fails. */}
+  if(!subject?.userId||!member){
+   try{await legacy({command,event});return {handled:true,mode:'legacy'};}
+   catch{return {handled:true,mode:'delivery_uncertain'};}
   }
+  // launch() internally invokes legacy() if release/permission checks fail.
+  // It may have already attempted a reply when it throws.
+  let result;
+  try{result=await launch({command,verifiedActorId:subject.userId,selectedPersonCode:member,event});}
+  catch{return {handled:true,mode:'delivery_uncertain'};}
+  if(result.mode==='liff'){
+   try{await sendLiff(event,result.url);return {handled:true,mode:'liff'};}
+   catch{return {handled:true,mode:'delivery_uncertain'};}
+  }
+  return result;
  };
 }
