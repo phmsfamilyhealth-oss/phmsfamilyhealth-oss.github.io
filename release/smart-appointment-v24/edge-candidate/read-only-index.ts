@@ -21,7 +21,8 @@ if(env('SUPABASE_URL')&&env('SUPABASE_DB_URL')&&serviceKey()){
   const verifyLineIdentity=makePhmsLineIdentityAdapter({supabase:client,channelId:'2011619364',fetchImpl:fetch});
   const resolvePerson=makePhmsPersonResolver({supabase:client,centralCanAccess:authority.centralCanAccess});
   options=makeAuthorizedPersonPicker({supabase:client,verifyLineIdentity,isReleaseEnabled:authority.isReleaseEnabled,centralCanAccess:authority.centralCanAccess});
-  catalog=makeAuthorizedProviderCatalogHandler({supabase:client,verifyLineIdentity,resolvePerson,isReleaseEnabled:authority.isReleaseEnabled,centralCanAccess:authority.centralCanAccess});
+  const fetchMaster=async()=>{const tables=[['healthcare_organizations','id,name,display_name,deleted_at'],['healthcare_service_units','id,organization_id,name,deleted_at'],['healthcare_clinicians','id,organization_id,service_unit_id,display_name,deleted_at']];const values=[];for(const [table,cols] of tables){const result=await sql.unsafe('select '+cols+' from public.'+table+' where deleted_at is null limit 1000');values.push([...result]);}return {organizations:values[0],units:values[1],clinicians:values[2]};};
+  catalog=makeAuthorizedProviderCatalogHandler({supabase:client,verifyLineIdentity,resolvePerson,isReleaseEnabled:authority.isReleaseEnabled,centralCanAccess:authority.centralCanAccess,fetchMaster});
  }catch{options=null;catalog=null}
 }
 Deno.serve(async request=>{
