@@ -35,3 +35,13 @@ jobs:
             fi
           done
           echo 'Published GitHub Pages HTML and six module files: HTTP 200, content verified'
+      - name: Verify read-only backend rejects unauthenticated caller
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-read'
+          status=$(curl --silent --show-error --location --max-time 20 -o /tmp/phms-read-response -w '%{http_code}' -X POST -H 'content-type: application/json' -d '{"action":"person_options"}' "$url")
+          echo "Unauthenticated read-only API status: $status"
+          test "$status" = '401'
+          grep -q 'unauthenticated' /tmp/phms-read-response
+
