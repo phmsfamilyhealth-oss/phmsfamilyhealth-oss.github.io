@@ -5,7 +5,7 @@ const uuid=x=>typeof x==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f
 export function makeLiffProviderCatalogClient({liff,endpoint,fetchImpl=fetch}={}){
  if(!liff?.getIDToken||typeof fetchImpl!=='function'||typeof endpoint!=='string')throw new Error('catalog_not_configured');
  const url=new URL(endpoint);
- if(url.protocol!=='https:'||!url.pathname.endsWith('/phms-v24-appointment-confirm'))throw new Error('unsafe_catalog_endpoint');
+ if(url.protocol!=='https:'||!['/functions/v1/phms-v24-appointment-read','/functions/v1/phms-v24-appointment-confirm'].includes(url.pathname))throw new Error('unsafe_catalog_endpoint');
  return async function loadCatalog(selectedPersonCode){
   const token=liff.getIDToken();
   if(!token||!uuid(selectedPersonCode))return {ok:false,error:'unauthenticated'};
