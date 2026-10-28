@@ -4,6 +4,7 @@ on:
     paths:
       - 'supabase/functions/line-webhook/index.ts'
       - 'release/smart-appointment-v24/contracts/**'
+      - 'release/smart-appointment-v24/prototype/**'
       - 'release/smart-appointment-v24/tests/*.mjs'
       - '.github/workflows/phms-v24-contract.yml'
       - 'release/smart-appointment-v24/migrations/**'
@@ -37,6 +38,13 @@ jobs:
           node release/smart-appointment-v24/scripts/build-liff-site.mjs /tmp/phms-v24-liff-smoke
           test -s /tmp/phms-v24-liff-smoke/prototype/index.html
           test -s /tmp/phms-v24-liff-smoke/contracts/provider-hierarchy.mjs
+          test -s /tmp/phms-v24-liff-smoke/contracts/liff-confirm-client.mjs
+      - name: Publish static LIFF build for preview and deployment review
+        uses: actions/upload-artifact@v4
+        with:
+          name: phms-v24-liff-site-preview
+          path: /tmp/phms-v24-liff-smoke/
+          retention-days: 7
       - name: Run isolated contract tests (no service secrets)
         run: node --test release/smart-appointment-v24/tests/*.test.mjs
 
