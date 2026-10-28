@@ -12,3 +12,6 @@ test('release off hides feature',async()=>assert.equal((await handle(make(),{...
 test('central permission denial',async()=>assert.equal((await handle(make(),{...adapters,centralCanAccess:async()=>false})).status,403));
 test('backend error gives generic 503',async()=>{const r=await handle(make(),{...adapters,verifyLineIdentity:async()=>{throw new Error('private secret must not leak')}});assert.equal(r.status,503);assert.doesNotMatch(await r.text(),/private secret/);});
 test('frontend identity cannot override verified actor',async()=>{const r=await handle(make({...body,userId:'spoofed',familyId:'other'}),{...adapters,atomicCommit:async x=>{assert.equal(x.actorId,'u1');assert.equal(x.familyId,'f1');return {appointmentId:'a1',authorizedReadback:true}}});assert.equal(r.status,201);});
+
+test('JSON-like MIME types cannot bypass strict content type gate',async()=>{for(const ct of ['application/jsonp','application/json-bogus','application/jsonx']){const r=await handle(make(body,{'content-type':ct}),adapters);assert.equal(r.status,415,ct)}});
+test('application/json with charset remains accepted',async()=>{const r=await handle(make(body,{'content-type':'application/json; charset=utf-8'}),adapters);assert.equal(r.status,201)});
