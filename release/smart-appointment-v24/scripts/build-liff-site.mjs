@@ -19,6 +19,6 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const result=renderLiffHtml(html,{liffId:process.env.PHMS_V24_PUBLIC_LIFF_ID,confirmApi:process.env.PHMS_V24_PUBLIC_CONFIRM_API});
  mkdirSync(join(output,'prototype'),{recursive:true});mkdirSync(join(output,'contracts'),{recursive:true});
  writeFileSync(join(output,'prototype/index.html'),result);
- for(const name of ['scenario-validator.mjs','draft-packager.mjs','provider-picker-state.mjs','liff-confirm-client.mjs','liff-provider-catalog-client.mjs'])copyFileSync(join(root,'contracts',name),join(output,'contracts',name));
+ for(const name of ['scenario-validator.mjs','draft-packager.mjs','provider-picker-state.mjs','provider-hierarchy.mjs','liff-confirm-client.mjs','liff-provider-catalog-client.mjs'])copyFileSync(join(root,'contracts',name),join(output,'contracts',name));
  console.log('LIFF static site generated with public configuration only');
 }
