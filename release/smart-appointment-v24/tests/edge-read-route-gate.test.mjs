@@ -7,5 +7,5 @@ test('read-only API is excluded from write-schema migration requirement',()=>{
 test('unsafe origins and missing server settings remain fail closed',()=>{
  assert.match(source,/if\(origin&&!originAllowed\(origin\)\)/);
  assert.match(source,/if\(!handler\|\|!isSchemaReady\)/);
- assert.match(source,/PHMS_V24_PRIVATE_DATABASE_URL/);
+ assert.match(source,/SUPABASE_DB_URL/);assert.doesNotMatch(source,/PHMS_V24_PRIVATE_DATABASE_URL/);
 });
