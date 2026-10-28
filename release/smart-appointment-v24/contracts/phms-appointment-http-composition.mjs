@@ -7,6 +7,7 @@ import {makePhmsAuthorityAdapter} from './phms-private-authority.mjs';
 import {makePhmsWriteIdentityResolver} from './phms-write-identity-resolver.mjs';
 import {makePhmsPersistenceSecurity} from './phms-persistence-security.mjs';
 import {makeAuthorizedProviderCatalogHandler} from './authorized-provider-catalog.mjs';
+import {makeAuthorizedPersonPicker} from './authorized-person-picker.mjs';
 export function makePhmsAppointmentHttpHandler({supabase,channelId,fetchImpl,privateQuery,security}={}){
  if(!supabase?.from||!supabase?.rpc||typeof privateQuery!=='function'||typeof security?.resolveAppointmentType!=='function')
   throw new Error('phms_http_backend_not_configured');
@@ -18,11 +19,12 @@ export function makePhmsAppointmentHttpHandler({supabase,channelId,fetchImpl,pri
  const resolvePerson=makePhmsPersonResolver({supabase,centralCanAccess:authority.centralCanAccess});
  const appointment=makeAppointmentBackend({supabase,security:{...mergedSecurity,verifyLineIdentity,resolvePerson,resolveWriteIdentity}});
  const catalog=makeAuthorizedProviderCatalogHandler({supabase,verifyLineIdentity,resolvePerson,isReleaseEnabled:authority.isReleaseEnabled,centralCanAccess:authority.centralCanAccess});
+ const personPicker=makeAuthorizedPersonPicker({supabase,verifyLineIdentity,isReleaseEnabled:authority.isReleaseEnabled,centralCanAccess:authority.centralCanAccess});
  return async request=>{
   if(request.method==='POST'&&request.headers.get('content-type')?.split(';',1)[0].trim().toLowerCase()==='application/json'){
    try{
     const rawText=await request.clone().text();
-    if(new TextEncoder().encode(rawText).byteLength<=32768){const raw=JSON.parse(rawText);if(raw?.action==='provider_catalog')return catalog(request,raw);}
+    if(new TextEncoder().encode(rawText).byteLength<=32768){const raw=JSON.parse(rawText);if(raw?.action==='provider_catalog')return catalog(request,raw);if(raw?.action==='person_options')return personPicker(request,raw);}
    }catch{/* existing appointment handler supplies uniform invalid-request errors */}
   }
   return appointment(request);
