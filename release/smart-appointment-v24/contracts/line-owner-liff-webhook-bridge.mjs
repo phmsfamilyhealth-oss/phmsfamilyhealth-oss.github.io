@@ -19,8 +19,10 @@ export function makeLineOwnerLiffWebhookBridge({supabase,privateQuery,launchUrl,
    if(!subject?.userId||!member){await legacy({command,event});return {handled:true,mode:'legacy'};}
    const result=await launch({command,verifiedActorId:subject.userId,selectedPersonCode:member,event});
    if(result.mode==='liff'){
-    await sendLiff(event,result.url);
-    return {handled:true,mode:'liff'};
+    // Reply delivery may have succeeded even if transport later throws.
+    // Never attempt a second legacy reply using the same LINE reply token.
+    try{await sendLiff(event,result.url);return {handled:true,mode:'liff'};}
+    catch{return {handled:true,mode:'delivery_uncertain'};}
    }
    return result;
   }catch{
