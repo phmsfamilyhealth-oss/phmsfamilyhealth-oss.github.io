@@ -12,8 +12,8 @@ export function makeLineOwnerLiffWebhookBridge({supabase,privateQuery,launchUrl,
   if(!['เพิ่มนัด','เพิ่มนัด จากภาพรวม'].includes(command))return {handled:false};
   // Do not let a forged postback or a user-controlled UUID reach the launch authorizer.
   let verified=false;try{verified=await verifyEvent(event)===true}catch{}
-  // Invalid signatures must never trigger either patient-data access or a LINE reply.
-  if(!verified)return {handled:false,mode:'rejected'};
+  // Invalid signatures are consumed without a reply, to prevent legacy fallback.
+  if(!verified)return {handled:true,mode:'rejected'};
   try{
    const subject=await resolveSubject(event?.source?.userId);
    const member=subject?.userId?await resolveActiveMember({userId:subject.userId,lineUserId:event.source.userId}):null;
