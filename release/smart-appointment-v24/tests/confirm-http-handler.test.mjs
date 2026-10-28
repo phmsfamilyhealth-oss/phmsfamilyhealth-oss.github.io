@@ -15,3 +15,5 @@ test('frontend identity cannot override verified actor',async()=>{const r=await 
 
 test('JSON-like MIME types cannot bypass strict content type gate',async()=>{for(const ct of ['application/jsonp','application/json-bogus','application/jsonx']){const r=await handle(make(body,{'content-type':ct}),adapters);assert.equal(r.status,415,ct)}});
 test('application/json with charset remains accepted',async()=>{const r=await handle(make(body,{'content-type':'application/json; charset=utf-8'}),adapters);assert.equal(r.status,201)});
+
+test('multibyte UTF-8 payload over 32KiB rejected despite shorter JavaScript length',async()=>{const oversized={...body,draft:{...body.draft,note:'ก'.repeat(12000)}};const r=await handle(make(oversized),adapters);assert.equal(r.status,413);});
