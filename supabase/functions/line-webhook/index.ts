@@ -23799,7 +23799,38 @@ if(c==='เทมเพลตเพิ่มยา'){
  await state(u,k,id,'crud_add_medication',{});
  await replyMessages(e.replyToken,t,[{type:'text',text:'🧾 เทมเพลตเพิ่มยา\n\nคัดลอกข้อความถัดไป แก้ข้อมูลตามฉลากยาจริง แล้วส่งกลับมาในแชต\nช่องที่ไม่มีข้อมูลลบออกได้',quickReply:{items:[pb('❌ ยกเลิก','ยา')]}},{type:'text',text:medicationAddTemplateText()}]);continue
 }
-if(c==='เพิ่มนัด'||c==='เพิ่มนัด จากภาพรวม'){await state(u,k,id,'crud_add_appointment',{person_confirmed:true,origin:c==='เพิ่มนัด จากภาพรวม'?'person_overview':'appointments'});await replyAppointmentTypePicker(e.replyToken,u,k,id,t,await appointmentActivePersonName(u,k,id));continue}
+if(c==='เพิ่มนัด'||c==='เพิ่มนัด จากภาพรวม'){
+ // PHMS v2.4 owner-only LIFF pilot. The enclosing LINE webhook signature
+ // has already been verified. Context and release gate are server-resolved.
+ // Do not use postback-supplied actor, family, member or LIFF URL parameters.
+ let phmsV24LiffUrl:string|null=null;
+ try{
+  const rawLiff=(Deno.env.get('PHMS_V24_OWNER_LIFF_URL')||'').trim();
+  if(rawLiff){
+   const entry=new URL(rawLiff);
+   if(entry.protocol==='https:'&&entry.hostname==='liff.line.me'&&entry.username===''&&entry.password===''&&entry.port===''&&entry.search===''&&entry.hash===''&&/^\\/[0-9A-Za-z_-]+$/.test(entry.pathname)){
+    const gated=one(await rpc(u,k,'phms_line_appointment_wizard_enabled',{p_line_user_id:id}));
+    if(gated===true){
+     const ctx=one(await rpc(u,k,'phms_resolve_line_command_context',{p_line_user_id:id,p_resource:'appointments',p_action:'create',p_require_person:true,p_required_scope:'any'}));
+     const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+     if(ctx?.context_ready===true&&ctx?.permission_granted===true&&uuid.test(String(ctx.user_id||''))&&uuid.test(String(ctx.active_family_id||''))&&uuid.test(String(ctx.active_family_person_id||''))&&uuid.test(String(ctx.target_person_id||''))){
+      // The launch URL contains only the server-resolved family-person UUID.
+      entry.searchParams.set('member',String(ctx.active_family_person_id));
+      phmsV24LiffUrl=entry.href;
+     }
+    }
+   }
+  }
+ }catch(err){console.error('phms_v24_liff_preflight_failed',String(err))}
+ if(phmsV24LiffUrl){
+  // A failed LINE reply must never be retried with the same reply token.
+  await reply(e.replyToken,'📅 เพิ่มนัดหมาย\\n\\nกดปุ่มด้านล่างเพื่อเปิดแบบฟอร์มเพิ่มนัด',t,[uri('📝 เปิดแบบฟอร์มเพิ่มนัด',phmsV24LiffUrl),pb('↩️ ใช้แบบเดิม','เลือกประเภทนัด')]);
+  continue
+ }
+ await state(u,k,id,'crud_add_appointment',{person_confirmed:true,origin:c==='เพิ่มนัด จากภาพรวม'?'person_overview':'appointments'});
+ await replyAppointmentTypePicker(e.replyToken,u,k,id,t,await appointmentActivePersonName(u,k,id));
+ continue
+}
 if(c==='ประวัติอาการก่อนนัด'){
  try{
   const hist=one(await rpc(u,k,'phms_line_person_previsit_health_history',{p_line_user_id:id,p_limit:15}))||{};
