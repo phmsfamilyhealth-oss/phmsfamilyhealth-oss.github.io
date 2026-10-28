@@ -27,8 +27,9 @@ export function makeLineOwnerLiffWebhookBridge({supabase,privateQuery,launchUrl,
    }
    return result;
   }catch{
-   await legacy({command,event});
-   return {handled:true,mode:'legacy'};
+   // A legacy reply may already have been attempted by the inner route.
+   // Retrying with the same token can double-send or obscure a delivery error.
+   return {handled:true,mode:'delivery_uncertain'};
   }
  };
 }
