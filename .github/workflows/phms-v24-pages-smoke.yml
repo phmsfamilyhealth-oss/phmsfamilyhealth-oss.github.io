@@ -1,0 +1,32 @@
+name: PHMS v2.4 Pages HTTPS smoke
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'phms-v24-pilot/**'
+      - '.github/workflows/phms-v24-pages-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pages-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Confirm deployed HTTPS HTML and browser modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://phmsfamilyhealth-oss.github.io/phms-v24-pilot'
+          for path in prototype/index.html contracts/scenario-validator.mjs contracts/draft-packager.mjs contracts/provider-picker-state.mjs contracts/provider-hierarchy.mjs contracts/liff-confirm-client.mjs contracts/liff-provider-catalog-client.mjs; do
+            echo "Checking $base/$path"
+            curl --fail --location --silent --show-error --retry 8 --retry-delay 5 --retry-all-errors --max-time 15 -o /tmp/phms-check "$base/$path"
+            test -s /tmp/phms-check
+            if [[ "$path" == 'prototype/index.html' ]]; then
+              grep -q 'PHMS — เพิ่มนัดหมาย' /tmp/phms-check
+              grep -q 'name="phms-liff-id" content=""' /tmp/phms-check
+            else
+              grep -Eq 'export |import ' /tmp/phms-check
+            fi
+          done
+          echo 'Published GitHub Pages HTML and six module files: HTTP 200, content verified'
