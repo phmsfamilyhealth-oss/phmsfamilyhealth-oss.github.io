@@ -9,7 +9,7 @@ export function mapAppointmentInsert(command){
  if(!allowedModes.has(v.visit_mode))return {ok:false,error:'invalid_visit_mode'};
  if(!allowedTypes.has(command.appointmentType))return {ok:false,error:'invalid_appointment_type'};
  if(v.visit_time_known!==true&&v.visit_time_known!==false)return {ok:false,error:'invalid_time'};
- if(v.visit_time_known===false&&(v.visit_mode!=='walk_in'||v.appointment_at!==null||!v.planned_visit_date))return {ok:false,error:'invalid_date_only'};
+ if(v.visit_time_known===false&&(v.appointment_at!==null||!v.planned_visit_date||!((v.visit_mode==='walk_in'&&['planned','scheduled'].includes(v.status))||(['booked','walk_in'].includes(v.visit_mode)&&v.status==='completed'))))return {ok:false,error:'invalid_date_only'};
  let appointmentAt=null;
  if(v.visit_time_known===true){
   if(v.appointment_at){ return {ok:false,error:'untrusted_precomputed_timestamp'}; }
