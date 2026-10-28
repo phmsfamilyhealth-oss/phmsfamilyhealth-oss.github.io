@@ -19,7 +19,7 @@ export function makePhmsAppointmentHttpHandler({supabase,channelId,fetchImpl,pri
  const appointment=makeAppointmentBackend({supabase,security:{...mergedSecurity,verifyLineIdentity,resolvePerson,resolveWriteIdentity}});
  const catalog=makeAuthorizedProviderCatalogHandler({supabase,verifyLineIdentity,resolvePerson,isReleaseEnabled:authority.isReleaseEnabled,centralCanAccess:authority.centralCanAccess});
  return async request=>{
-  if(request.method==='POST'&&request.headers.get('content-type')?.toLowerCase().startsWith('application/json')){
+  if(request.method==='POST'&&request.headers.get('content-type')?.split(';',1)[0].trim().toLowerCase()==='application/json'){
    try{
     const rawText=await request.clone().text();
     if(rawText.length<=32768){const raw=JSON.parse(rawText);if(raw?.action==='provider_catalog')return catalog(request,raw);}
