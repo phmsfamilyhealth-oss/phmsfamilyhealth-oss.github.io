@@ -17,7 +17,7 @@ test('missing LINE ID token shows an actionable Thai error without activating sa
 
 test('review requires a verified registered hospital instead of misleading free text',()=>{assert.match(html,/providerPickerState\(authorizedCatalog,\$\('providerOrg'\)\.value/);assert.match(html,/กรุณาเลือกโรงพยาบาลจากรายชื่อที่ระบบแสดงก่อนบันทึก/)});
 
-test('save remains disabled until a nonempty authorized hospital registry is loaded',()=>{assert.match(html,/if\(catalogResult\.ok&&catalogResult\.catalog\.organizations\.length\)/);assert.match(html,/syncProviderNames\(\);document\.getElementById\('connectionStatus'\)\.textContent='เชื่อมต่อ LINE สำเร็จ[^;]*;document\.getElementById\('save'\)\.disabled=false/);assert.doesNotMatch(html,/confirmClient=makeLiffConfirmClient\([^;]+;document\.getElementById\('save'\)\.disabled=false/);});
+test('save remains disabled until a nonempty authorized hospital registry is loaded',()=>{assert.match(html,/if\(catalogResult\.ok&&catalogResult\.catalog\.organizations\.length\)/);assert.match(html,/document\.getElementById\('review'\)\.disabled=false;document\.getElementById\('save'\)\.disabled=false/);assert.doesNotMatch(html,/confirmClient=makeLiffConfirmClient\([^;]+;document\.getElementById\('save'\)\.disabled=false/);});
 
 test('unimplemented document upload never advances to a misleading save confirmation',()=>{assert.match(html,/if\(packaged\.draft\.document_metadata\.length\)\{\$\('error'\)\.textContent='การแนบรูปใบนัดและเอกสารยังไม่เปิดใช้งาน/);assert.match(html,/เอาไฟล์ออกก่อน/);});
 
@@ -34,3 +34,6 @@ test('save feedback is targeted to confirmation rather than setup status',()=>{
  assert.match(html,/\$\('saveStatus'\)\.textContent='บันทึกนัดแล้ว/);
  assert.doesNotMatch(html,/\\n<label for="hospital">/);
 });
+
+test('review is disabled until LINE and authorized catalog are ready',()=>{assert.match(html,/<button id="review" type="button" disabled>/);});
+test('successful save prevents return to editable form',()=>{assert.match(html,/\$\('back'\)\.disabled=true/);});
