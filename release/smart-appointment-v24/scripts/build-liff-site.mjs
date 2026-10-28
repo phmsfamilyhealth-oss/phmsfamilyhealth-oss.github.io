@@ -9,8 +9,8 @@ const html=readFileSync(join(root,'prototype/index.html'),'utf8');
 export function renderLiffHtml(template,{liffId,confirmApi}={}){
  if(typeof liffId!=='string'||!/^[0-9]{5,20}-[A-Za-z0-9]{5,32}$/.test(liffId))throw Error('public_liff_id_required');
  let url;try{url=new URL(confirmApi)}catch{throw Error('public_confirm_api_invalid')}
- if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||!/\\/functions\\/v1\\/phms-v24-appointment-confirm$/.test(url.pathname))throw Error('public_confirm_api_invalid');
- if(!/^[a-z0-9-]+\\.supabase\\.co$/i.test(url.hostname))throw Error('public_confirm_api_untrusted_host');
+ if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||url.pathname!=='/functions/v1/phms-v24-appointment-confirm')throw Error('public_confirm_api_invalid');
+ if(!url.hostname.endsWith('.supabase.co')||!url.hostname.slice(0,-'.supabase.co'.length).match(/^[a-z0-9-]+$/i))throw Error('public_confirm_api_untrusted_host');
  if(!template.includes('name="phms-liff-id" content=""')||!template.includes('name="phms-confirm-api" content=""'))throw Error('unexpected_liff_template');
  return template.replace('name="phms-liff-id" content=""','name="phms-liff-id" content="'+liffId+'"').replace('name="phms-confirm-api" content=""','name="phms-confirm-api" content="'+url.href+'"');
 }
