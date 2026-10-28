@@ -7,8 +7,8 @@ export function canonicalizeVisit(draft){
  const {scenario,time_known,time}=draft;
  if(time_known!==true&&time_known!==false)return {ok:false,error:'invalid_time_flag'};
  if(time_known===false){
-   // Existing DB check: date-only is permitted ONLY for walk_in planned/scheduled.
-   if(scenario==='historical') return {ok:false,error:'historical_unknown_time_requires_schema_design'};
+   // Candidate schema v2.4 allows completed historical visits with date and no invented time.
+   if(scenario==='historical')return {ok:true,visit:{visit_mode:'booked',visit_time_known:false,planned_visit_date:draft.date,appointment_at:null,status:'completed'}};
    if(scenario!=='walk_in')return {ok:false,error:'time_required_for_scheduled_visit'};
    return {ok:true,visit:{visit_mode:'walk_in',visit_time_known:false,planned_visit_date:draft.date,appointment_at:null,status:'planned'}};
  }
