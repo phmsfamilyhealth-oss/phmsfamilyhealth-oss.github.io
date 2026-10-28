@@ -13,3 +13,5 @@ test('signed LINE user with central rights opens scoped LIFF link',async()=>{con
 test('unsigned LINE event never looks up active person nor opens legacy flow',async()=>{const x=make({signed:false});assert.equal((await x.bridge(event)).mode,'rejected');assert.deepEqual(x.stats(),{sent:0,legacy:0,active:0})});
 test('pilot off and cross-family permission denied use legacy flow',async()=>{for(const opts of [{gate:false},{access:false},{subject:false}]){const x=make(opts);assert.equal((await x.bridge(event)).mode,'legacy');assert.equal(x.stats().sent,0);assert.equal(x.stats().legacy,1)}});
 test('unrelated postbacks are not intercepted',async()=>{const x=make();assert.deepEqual(await x.bridge({...event,postback:{data:'ยา'}}),{handled:false});assert.deepEqual(x.stats(),{sent:0,legacy:0,active:0})});
+
+test('missing active member preserves legacy route without LIFF launch',async()=>{let fallback=0,launches=0;const x=make();const eventResult=await x.bridge({...event,source:{userId:'U'+'z'.repeat(32)}});assert.equal(eventResult.mode,'legacy');assert.equal(x.stats().sent,0);assert.equal(x.stats().legacy,1)});
