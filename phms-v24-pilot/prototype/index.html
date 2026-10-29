@@ -13,7 +13,7 @@
 <label for="known">ทราบเวลาหรือไม่</label><select id="known"><option value="yes">ทราบเวลา</option><option value="no">ไม่ทราบเวลา</option></select>
 <div id="timebox"><label for="time">เวลา</label><input type="time" id="time"></div>
 <label for="documents">แนบรูปใบนัดหรือเอกสาร (ไม่เกิน 5 ไฟล์)</label><input type="file" id="documents" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"><p class="help" id="filehelp">ไฟล์ละไม่เกิน 10 MB — ยังไม่อัปโหลดจริง</p>
-<label for="providerOrg">เลือกจากทะเบียนโรงพยาบาล</label><select id="providerOrg" disabled><option>รอเชื่อมทะเบียนโรงพยาบาลที่ได้รับสิทธิ์</option></select><label for="providerUnit">แผนกจากทะเบียน</label><select id="providerUnit" disabled><option>เลือกโรงพยาบาลก่อน</option></select><label for="providerClinician">แพทย์ (ถ้าทราบ — ข้ามได้)</label><select id="providerClinician" disabled><option>ยังไม่มีรายชื่อแพทย์ในทะเบียน</option></select><div id="manualDoctorBox" class="hidden"><label for="manualDoctor">ชื่อแพทย์ (ถ้าทราบ)</label><input id="manualDoctor" maxlength="160" autocomplete="off" placeholder="พิมพ์ชื่อแพทย์ หรือเว้นว่างได้"></div><p class="help" id="doctorHint">ยังไม่มีรายชื่อแพทย์ในทะเบียน — พิมพ์เองหรือข้ามได้</p><p class="help">เมื่อต่อระบบจริง จะเลือกรายชื่อที่ได้รับสิทธิ์เท่านั้น และเปลี่ยนโรงพยาบาลแล้วต้องเลือกแผนก/แพทย์ใหม่</p>
+<label for="providerOrg">เลือกจากทะเบียนโรงพยาบาล</label><select id="providerOrg" disabled><option>รอเชื่อมทะเบียนโรงพยาบาลที่ได้รับสิทธิ์</option></select><label for="providerUnit">แผนกจากทะเบียน</label><select id="providerUnit" disabled><option>เลือกโรงพยาบาลก่อน</option></select><label for="providerClinician">แพทย์ (ถ้าทราบ — ข้ามได้)</label><select id="providerClinician" disabled><option>ยังไม่มีรายชื่อแพทย์ในทะเบียน</option></select><div id="manualDoctorBox"><label for="manualDoctor">ชื่อแพทย์ (ถ้าทราบ)</label><input id="manualDoctor" maxlength="160" autocomplete="off" placeholder="พิมพ์ชื่อแพทย์ หรือเว้นว่างได้"></div><p class="help" id="doctorHint">ยังไม่มีรายชื่อแพทย์ในทะเบียน — พิมพ์เองหรือข้ามได้</p><p class="help">เมื่อต่อระบบจริง จะเลือกรายชื่อที่ได้รับสิทธิ์เท่านั้น และเปลี่ยนโรงพยาบาลแล้วต้องเลือกแผนก/แพทย์ใหม่</p>
 <input type="hidden" id="hospital">
 <input type="hidden" id="department">
 <div id="details"><label for="prior">เลขที่นัดเดิม (เฉพาะการเลื่อนนัด)</label><input id="prior" maxlength="100" placeholder="ยังไม่เปิดการเลื่อนนัดจริง"><input type="hidden" id="doctor">
@@ -55,9 +55,11 @@ function refreshProviderPicker(changed=''){
  }
  const selected=state.clinicianId||(clinician==='__manual__'&&state.organizationId?'__manual__':'');
  picker.value=selected;
- const manual=state.organizationId&&(!state.clinicians.length||selected==='__manual__');
+ const manual=!!state.organizationId;
  document.getElementById('manualDoctorBox').classList.toggle('hidden',!manual);
- document.getElementById('doctorHint').textContent=state.clinicians.length?'เลือกจากทะเบียน พิมพ์เอง หรือข้ามได้':'ยังไม่มีรายชื่อแพทย์ในทะเบียน — พิมพ์เองหรือข้ามได้';
+ picker.classList.toggle('hidden',!state.clinicians.length);
+ document.querySelector('label[for="providerClinician"]').classList.toggle('hidden',!state.clinicians.length);
+ document.getElementById('doctorHint').textContent=state.clinicians.length?'เลือกชื่อจากทะเบียนหรือพิมพ์เองได้':'ยังไม่มีแพทย์ในทะเบียน — พิมพ์ชื่อเองหรือข้ามได้';
 }
 function selectedClinicianId(){const id=document.getElementById('providerClinician').value;return id==='__manual__'?'':id;}
 function syncProviderNames(){
@@ -67,11 +69,11 @@ function syncProviderNames(){
  const doctor=authorizedCatalog.clinicians.find(x=>x.id===selectedClinicianId());
  document.getElementById('hospital').value=org?(org.display_name||org.name):'';
  document.getElementById('department').value=unit?.name||'';
- document.getElementById('doctor').value=doctor?.display_name||(document.getElementById('manualDoctorBox').classList.contains('hidden')?'':document.getElementById('manualDoctor').value.trim());
+ document.getElementById('doctor').value=doctor?.display_name||document.getElementById('manualDoctor').value.trim();
 }
 for(const id of ['providerOrg','providerUnit'])document.getElementById(id).addEventListener('change',()=>{refreshProviderPicker(id);syncProviderNames();});
 document.getElementById('providerClinician').addEventListener('change',()=>{document.getElementById('manualDoctor').value='';refreshProviderPicker();syncProviderNames();});
-document.getElementById('manualDoctor').addEventListener('input',syncProviderNames);
+document.getElementById('manualDoctor').addEventListener('input',()=>{if(document.getElementById('manualDoctor').value.trim())document.getElementById('providerClinician').value='';syncProviderNames();});
 // Registry remains disconnected until the protected API supplies a verified, authorized catalog.
 const $=id=>document.getElementById(id), ids=['detail','scenario','date','known','time','hospital','department','doctor','purpose','prep'];
 function refresh(){ $('details').classList.toggle('hidden',$('detail').value!=='full');const unknown=$('known').value==='no';$('timebox').classList.toggle('hidden',unknown);if(unknown)$('time').value='';}
