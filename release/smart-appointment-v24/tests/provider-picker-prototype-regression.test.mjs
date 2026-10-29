@@ -1,13 +1,35 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {fileURLToPath} from 'node:url';const html=readFileSync(new URL('../prototype/index.html',import.meta.url),'utf8');test('hospital change clears department and clinician selection',()=>assert.match(html,/unit=changed==='providerOrg'\?'':/));test('department change clears clinician selection',()=>assert.match(html,/changed==='providerUnit'\)\?'':/));test('provider change events identify the changed selector',()=>assert.match(html,/refreshProviderPicker\(id\)/));test('real write remains disabled before authorization is integrated',()=>{assert.match(html,/<button id="save" disabled/);assert.match(html,/if\(!id\|\|!endpoint\|\|!readEndpoint\)\{/)});
-test('provider, department and doctor appear only once while hidden values support review',()=>{for(const id of ['hospital','department','doctor']){assert.match(html,new RegExp('<input type="hidden" id="'+id+'"'));assert.doesNotMatch(html,new RegExp('<label for="'+id+'"'));}assert.match(html,/hospital:'โรงพยาบาล',department:'แผนก',doctor:'แพทย์'/);assert.match(html,/dd\.textContent=/);});
-test('physician genuinely optional, master list empty shows skip message',()=>{assert.match(html,/ยังไม่มีรายชื่อแพทย์ในทะเบียน — พิมพ์เองหรือข้ามได้/);assert.match(html,/state\.clinicians\.length\?/);assert.doesNotMatch(html,/if\(!\$\('doctor'\)\.value\)/);});
-
-test('manual physician is optional and never treated as a catalog clinician ID',()=>{assert.match(html,/id="manualDoctor" maxlength="160"/);assert.match(html,/selectedClinicianId\(\)/);assert.match(html,/id==='__manual__'\?'':id/);assert.match(html,/document\.getElementById\('manualDoctor'\)\.addEventListener\('input',\(\)=>/);});
-test('provider changes clear stale doctor and confirmation omits blank doctor',()=>{assert.match(html,/if\(changed==='providerOrg'\|\|changed==='providerUnit'\)document\.getElementById\('manualDoctor'\)\.value=''/);assert.match(html,/if\(id==='doctor'&&!\$\('doctor'\)\.value\.trim\(\)\)continue/);});
-
-test('empty catalog hides disabled physician select and exposes manual doctor input',()=>{assert.match(html,/<div id="manualDoctorBox">/);assert.match(html,/picker\.classList\.toggle\('hidden',!state\.clinicians\.length\)/);assert.match(html,/document\.getElementById\('doctor'\)\.value=doctor\?\.display_name\|\|document\.getElementById\('manualDoctor'\)\.value\.trim\(\)/);});
-
-test('existing hospital and department names are searchable without adding master rows',()=>{assert.match(html,/id="hospitalSearch"/);assert.match(html,/id="unitSearch"/);assert.match(html,/filterMasterOptions\(state\.organizations/);assert.match(html,/filterMasterOptions\(state\.units/);});
-test('unsafe central-registry create actions stay disabled while schema gate is pending',()=>{assert.match(html,/id="addHospital"[^>]*disabled/);assert.match(html,/id="addUnit"[^>]*disabled/);assert.match(html,/checkNewMasterDuplicates/);});
-
-test('three catalogs support name search with gated add operations',()=>{for(const kind of ['hospital','unit','clinician'])assert.match(html,new RegExp('id="'+kind+(kind==='hospital'?'Search':'Search')+'"'));assert.match(html,/id="addClinician"[^>]*disabled/);assert.match(html,/filterMasterOptions\(state\.clinicians/);});
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const html=readFileSync(new URL('../prototype/index.html',import.meta.url),'utf8');
+test('all three providers expose exactly one visible autocomplete combobox each',()=>{
+ for(const k of ['hospital','unit','clinician']){
+  assert.match(html,new RegExp('id="'+k+'Search" role="combobox"'));
+  assert.match(html,new RegExp('id="'+k+'SearchResults"[^>]+role="listbox"'));
+  assert.match(html,new RegExp('id="provider'+(k==='hospital'?'Org':k==='unit'?'Unit':'Clinician')+'" class="hidden"'));
+ }
+ assert.doesNotMatch(html,/id="manualDoctor"/);
+});
+test('results are keyboard and touch accessible and sourced from authorized catalog',()=>{
+ assert.match(html,/masterMatches\(x,term\)/);
+ assert.match(html,/button\.addEventListener\('click'/);
+ assert.match(html,/e\.key==='ArrowDown'/);
+ assert.match(html,/e\.key==='Escape'/);
+ assert.match(html,/authorizedCatalog/);
+});
+test('no unapproved master writes are available; unmatched addition is disabled',()=>{
+ assert.match(html,/add\.disabled=true/);
+ assert.match(html,/รอเปิดระบบตรวจสอบทะเบียน/);
+ assert.match(html,/<button id="save" disabled/);
+});
+test('changing organization clears unit and doctor, and changing unit clears clinician',()=>{
+ assert.match(html,/unit=changed==='providerOrg'\?'':/);
+ assert.match(html,/changed==='providerOrg'\|\|changed==='providerUnit'/);
+ assert.match(html,/document\.getElementById\('clinicianSearch'\)\.value=''/);
+});
+test('doctor is optional without a fabricated clinician id and the review retains selected names',()=>{
+ assert.match(html,/document\.getElementById\('doctor'\)\.value=clinician\?\.display_name\|\|document\.getElementById\('clinicianSearch'\)\.value\.trim\(\)/);
+ assert.match(html,/if\(id==='doctor'&&!\$\('doctor'\)\.value\.trim\(\)\)continue/);
+ assert.match(html,/hospital:'โรงพยาบาล',department:'แผนก',doctor:'แพทย์'/);
+ assert.match(html,/clinicianId:selectedClinicianId\(\)/);
+});
