@@ -11,6 +11,7 @@ export function prepareDraftForReview(raw) {
   if(docs.length>5) return {ok:false,errors:['too_many_documents']};
   if(docs.some(f => !f || !['application/pdf','image/jpeg','image/png','image/webp'].includes(f.type) || !Number.isFinite(f.size) || f.size<=0 || f.size>10*1024*1024))
     return {ok:false,errors:['invalid_document']};
+  if(clean(raw.doctor).length>160)return {ok:false,errors:['doctor_name_too_long']};
   const selection=raw.provider_selection;
   if(selection!==undefined&&(selection===null||typeof selection!=='object'||Array.isArray(selection)||!['organizationId','unitId','clinicianId'].every(k=>selection[k]===undefined||typeof selection[k]==='string')))return {ok:false,errors:['invalid_provider_selection']};
   return {ok:true,draft:{
