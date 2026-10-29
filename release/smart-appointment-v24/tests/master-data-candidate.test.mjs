@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {normalizeMasterName,validateMasterCandidate,findExistingMaster} from '../contracts/master-data-candidate.mjs';
+const org='11111111-1111-4111-8111-111111111111';
+test('hospital names normalize alternative title spacing',()=>assert.equal(normalizeMasterName('โรงพยาบาล พระจอมเกล้า'),normalizeMasterName('รพ.พระจอมเกล้า')));
+test('duplicate hospitals are identified before creating',()=>{const x=validateMasterCandidate({kind:'organization',name:'รพ.พระจอมเกล้า',records:[{id:org,name:'โรงพยาบาลพระจอมเกล้า'}]});assert.equal(x.error,'duplicate_candidate')});
+test('department duplicates are scoped to a single hospital',()=>{const records=[{id:'x',name:'ศัลยกรรม',organization_id:org}];assert.equal(validateMasterCandidate({kind:'unit',name:'ศัลยกรรม',organizationId:org,records}).error,'duplicate_candidate');assert.equal(validateMasterCandidate({kind:'unit',name:'ศัลยกรรม',organizationId:'22222222-2222-4222-8222-222222222222',records}).ok,true)});
+test('doctor optional department and no fabricated registration number',()=>{const x=validateMasterCandidate({kind:'clinician',name:'นพ.ภาณุกร',organizationId:org});assert.equal(x.ok,true);assert.equal(x.unitId,null);assert.equal('license_no' in x,false)});
+test('invalid or missing relations are rejected',()=>{assert.equal(validateMasterCandidate({kind:'unit',name:'ศัลยกรรม'}).error,'organization_required');assert.equal(findExistingMaster({kind:'clinician',name:'หมอ ก',organizationId:org,records:[{id:'x',display_name:'หมอ ก',organization_id:'wrong'}]}).length,0)});
+test('input length and control characters are bounded',()=>assert.equal(validateMasterCandidate({kind:'clinician',name:'x'.repeat(161),organizationId:org}).ok,false));
