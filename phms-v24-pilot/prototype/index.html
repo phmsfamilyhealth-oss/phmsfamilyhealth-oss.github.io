@@ -2,7 +2,7 @@
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PHMS — เพิ่มนัดหมาย</title><meta name="phms-liff-id" content="2011619364-D0xazyre"><meta name="phms-confirm-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-confirm"><meta name="phms-read-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-read">
 <style>
-:root{font-family:system-ui,"Noto Sans Thai",sans-serif;color:#17324d;background:#f3f7fc}*{box-sizing:border-box}main{max-width:620px;margin:auto;padding:20px 14px 40px}h1{font-size:1.55rem}h2{font-size:1.2rem}p{line-height:1.55}.box{background:#fff;border:1px solid #dae4ee;border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 1px 3px #12263a0c}label{display:block;font-weight:650;margin:14px 0 6px}input,select,textarea,button{font:inherit}input,select,textarea{width:100%;min-height:46px;padding:10px;border:1px solid #9eaebf;border-radius:9px}button{min-height:48px;border-radius:10px;padding:10px 18px;border:0;background:#1666a7;color:white;font-weight:700}button:disabled{background:#9ba9b4}button.secondary{background:#e6eef6;color:#17324d}.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.help{color:#526579;font-size:.92rem}.error{color:#a51e2c}.hidden{display:none}.notice{background:#fff2d8;border:1px solid #d9ad54;padding:12px;border-radius:10px}dl{display:grid;grid-template-columns:120px 1fr;gap:10px}dd{margin:0;overflow-wrap:anywhere}
+:root{font-family:system-ui,"Noto Sans Thai",sans-serif;color:#17324d;background:#f3f7fc}*{box-sizing:border-box}main{max-width:620px;margin:auto;padding:20px 14px 40px}h1{font-size:1.55rem}h2{font-size:1.2rem}p{line-height:1.55}.box{background:#fff;border:1px solid #dae4ee;border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 1px 3px #12263a0c}label{display:block;font-weight:650;margin:14px 0 6px}input,select,textarea,button{font:inherit}input,select,textarea{width:100%;min-height:46px;padding:10px;border:1px solid #9eaebf;border-radius:9px}button{min-height:48px;border-radius:10px;padding:10px 18px;border:0;background:#1666a7;color:white;font-weight:700}button:disabled{background:#9ba9b4}button.secondary{background:#e6eef6;color:#17324d}.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.help{color:#526579;font-size:.92rem}.error{color:#a51e2c}.hidden{display:none}.combo-results{border:1px solid #9eaebf;border-radius:10px;max-height:240px;overflow-y:auto;background:#fff}.combo-results button{display:block;width:100%;border-radius:0;text-align:left;background:white;color:#17324d;border-bottom:1px solid #dae4ee;min-height:48px}.combo-results button:focus{outline:3px solid #1666a7}.combo-results .unavailable{color:#526579;padding:12px}.notice{background:#fff2d8;border:1px solid #d9ad54;padding:12px;border-radius:10px}dl{display:grid;grid-template-columns:120px 1fr;gap:10px}dd{margin:0;overflow-wrap:anywhere}
 </style></head><body><main>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด</label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -13,13 +13,9 @@
 <label for="known">ทราบเวลาหรือไม่</label><select id="known"><option value="yes">ทราบเวลา</option><option value="no">ไม่ทราบเวลา</option></select>
 <div id="timebox"><label for="time">เวลา</label><input type="time" id="time"></div>
 <label for="documents">แนบรูปใบนัดหรือเอกสาร (ไม่เกิน 5 ไฟล์)</label><input type="file" id="documents" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"><p class="help" id="filehelp">ไฟล์ละไม่เกิน 10 MB — ยังไม่อัปโหลดจริง</p>
-<label for="hospitalSearch">ค้นหาโรงพยาบาล</label><input id="hospitalSearch" placeholder="ค้นหาชื่อเต็ม ชื่อย่อ หรือชื่อที่ใช้เรียก" autocomplete="off">
-<label for="providerOrg">เลือกจากทะเบียนโรงพยาบาล</label><select id="providerOrg" disabled><option>รอเชื่อมทะเบียนโรงพยาบาลที่ได้รับสิทธิ์</option></select><button id="addHospital" class="secondary" type="button" disabled>+ เพิ่มโรงพยาบาลใหม่ (ยังไม่เปิดบันทึกทะเบียน)</button>
-<div id="newHospitalBox" class="hidden"><label for="newHospitalName">ชื่อโรงพยาบาลใหม่</label><input id="newHospitalName" maxlength="160" autocomplete="off"><p id="hospitalDuplicate" role="status"></p></div>
-<label for="unitSearch">ค้นหาแผนกในโรงพยาบาลที่เลือก</label><input id="unitSearch" placeholder="ค้นหาชื่อแผนก" autocomplete="off">
-<label for="providerUnit">แผนกจากทะเบียน</label><select id="providerUnit" disabled><option>เลือกโรงพยาบาลก่อน</option></select><button id="addUnit" class="secondary" type="button" disabled>+ เพิ่มแผนกใหม่ (ยังไม่เปิดบันทึกทะเบียน)</button>
-<div id="newUnitBox" class="hidden"><label for="newUnitName">ชื่อแผนกใหม่</label><input id="newUnitName" maxlength="160" autocomplete="off"><p id="unitDuplicate" role="status"></p></div>
-<label for="clinicianSearch">ค้นหาชื่อแพทย์ (ถ้าทราบ — ข้ามได้)</label><input id="clinicianSearch" placeholder="ค้นหาชื่อหรือรหัสในทะเบียน" autocomplete="off"><label for="providerClinician">เลือกแพทย์จากทะเบียน</label><select id="providerClinician" disabled><option>ยังไม่มีรายชื่อแพทย์ในทะเบียน</option></select><button id="addClinician" class="secondary" type="button" disabled>+ เสนอเพิ่มแพทย์ใหม่ (ยังไม่เปิดบันทึกทะเบียน)</button><div id="manualDoctorBox"><label for="manualDoctor">ชื่อแพทย์ (ถ้าทราบ)</label><input id="manualDoctor" maxlength="160" autocomplete="off" placeholder="พิมพ์ชื่อแพทย์ หรือเว้นว่างได้"></div><p class="help" id="doctorHint">ยังไม่มีรายชื่อแพทย์ในทะเบียน — พิมพ์เองหรือข้ามได้</p><p class="help">เมื่อต่อระบบจริง จะเลือกรายชื่อที่ได้รับสิทธิ์เท่านั้น และเปลี่ยนโรงพยาบาลแล้วต้องเลือกแผนก/แพทย์ใหม่</p>
+<label for="hospitalSearch">โรงพยาบาล / สถานพยาบาล</label><input id="hospitalSearch" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="hospitalSearchResults" autocomplete="off" placeholder="พิมพ์ค้นหาแล้วแตะเลือกรายการ"><div id="hospitalSearchResults" class="combo-results hidden" role="listbox"></div><select id="providerOrg" class="hidden" aria-hidden="true" tabindex="-1" disabled></select>
+<label for="unitSearch">แผนก / คลินิก</label><input id="unitSearch" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="unitSearchResults" autocomplete="off" placeholder="พิมพ์ค้นหาแล้วแตะเลือกรายการ"><div id="unitSearchResults" class="combo-results hidden" role="listbox"></div><select id="providerUnit" class="hidden" aria-hidden="true" tabindex="-1" disabled></select>
+<label for="clinicianSearch">แพทย์ (ถ้าทราบ — ข้ามได้)</label><input id="clinicianSearch" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="clinicianSearchResults" autocomplete="off" placeholder="พิมพ์ค้นหาแล้วแตะเลือกรายการ"><div id="clinicianSearchResults" class="combo-results hidden" role="listbox"></div><select id="providerClinician" class="hidden" aria-hidden="true" tabindex="-1" disabled></select><p class="help" id="doctorHint">หากไม่มีรายชื่อแพทย์ สามารถระบุชื่อสำหรับนัดนี้หรือข้ามได้</p>
 <input type="hidden" id="hospital">
 <input type="hidden" id="department">
 <div id="details"><label for="prior">เลขที่นัดเดิม (เฉพาะการเลื่อนนัด)</label><input id="prior" maxlength="100" placeholder="ยังไม่เปิดการเลื่อนนัดจริง"><input type="hidden" id="doctor">
@@ -43,49 +39,26 @@ initializeLiff();
 // No fake catalog. A verified backend integration will invoke setAuthorizedCatalog after LINE authentication.
 let authorizedCatalog=null;
 function fillOptions(id,items,placeholder){const select=document.getElementById(id);select.replaceChildren(new Option(placeholder,''),...items.map(x=>new Option(x.label,x.value)));select.disabled=!items.length;}
-function normalizedMasterName(value){return String(value||'').normalize('NFKC').toLocaleLowerCase('th-TH').replace(/[\\s._()\u200b-\u200d-]+/g,'').replace(/^โรงพยาบาล|^รพ\.?/,'');}
-function filterMasterOptions(items,term){const needle=normalizedMasterName(term);return !needle?items:items.filter(x=>normalizedMasterName(x.label).includes(needle));}
-function checkNewMasterDuplicates(kind,name){const list=kind==='organization'?(authorizedCatalog?.organizations||[]):(authorizedCatalog?.units||[]).filter(x=>x.organization_id===document.getElementById('providerOrg').value);const norm=normalizedMasterName(name);return norm.length>0?list.filter(x=>[x.display_name,x.name,x.external_code,x.code].filter(Boolean).some(y=>normalizedMasterName(y)===norm)):[];}
-document.getElementById('hospitalSearch').addEventListener('input',()=>refreshProviderPicker());
-document.getElementById('unitSearch').addEventListener('input',()=>refreshProviderPicker());
-document.getElementById('clinicianSearch').addEventListener('input',()=>refreshProviderPicker());
+function normalizedMasterName(value){return String(value||'').normalize('NFKC').toLocaleLowerCase('th-TH').replace(/[\\s._()\u200b-\u200d-]+/g,'').replace(/^(?:โรงพยาบาล|รพ)/,'');}
+function masterMatches(item,term){const q=normalizedMasterName(term);return !q||[item.label,item.name,item.display_name,item.code,item.external_code,...(Array.isArray(item.aliases)?item.aliases:[])].filter(Boolean).some(v=>normalizedMasterName(v).includes(q));}
+function renderCombo(kind,choices){const input=document.getElementById(kind+'Search'),list=document.getElementById(kind+'SearchResults');list.replaceChildren();const term=input.value.trim();const matched=choices.filter(x=>masterMatches(x,term)).slice(0,40);for(const item of matched){const button=document.createElement('button');button.type='button';button.setAttribute('role','option');button.textContent=item.label;button.addEventListener('click',()=>{const select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');select.value=item.value;input.value=item.label;list.classList.add('hidden');input.setAttribute('aria-expanded','false');if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});list.append(button);}
+if(term&&!matched.length){const msg=document.createElement('div');msg.className='unavailable';msg.textContent='ไม่พบรายการที่ตรงกัน';list.append(msg);}
+if(term&&!matched.some(x=>normalizedMasterName(x.label)===normalizedMasterName(term))){const add=document.createElement('button');add.type='button';add.disabled=true;add.textContent='+ เพิ่ม "'+term.slice(0,160)+'" เป็นรายการใหม่ — รอเปิดระบบตรวจสอบทะเบียน';list.append(add);}
+list.classList.toggle('hidden',!list.children.length);input.setAttribute('aria-expanded',String(!!list.children.length));}
 function refreshProviderPicker(changed=''){
- const org=document.getElementById('providerOrg').value;
- const unit=changed==='providerOrg'?'':document.getElementById('providerUnit').value;
- const clinician=(changed==='providerOrg'||changed==='providerUnit')?'':document.getElementById('providerClinician').value;
- if(changed==='providerOrg'||changed==='providerUnit')document.getElementById('manualDoctor').value='';if(changed==='providerOrg')document.getElementById('unitSearch').value='';if(changed==='providerOrg'||changed==='providerUnit')document.getElementById('clinicianSearch').value='';
- const state=providerPickerState(authorizedCatalog,org,unit,clinician==='__manual__'?'':clinician);
- fillOptions('providerOrg',filterMasterOptions(state.organizations,document.getElementById('hospitalSearch').value),'เลือกโรงพยาบาล');
- document.getElementById('providerOrg').value=state.organizationId;
- fillOptions('providerUnit',filterMasterOptions(state.units,document.getElementById('unitSearch').value),'เลือกแผนก');
- document.getElementById('providerUnit').value=state.unitId;
- fillOptions('providerClinician',filterMasterOptions(state.clinicians,document.getElementById('clinicianSearch').value),state.clinicians.length?'เลือกแพทย์ (หรือข้ามได้)':'ยังไม่มีรายชื่อแพทย์ในทะเบียน');
- const picker=document.getElementById('providerClinician');
- if(state.organizationId){
-  picker.add(new Option('พิมพ์ชื่อแพทย์เอง (ไม่เพิ่มเข้าทะเบียน)','__manual__'));
-  picker.disabled=false;
- }
- const selected=state.clinicianId||(clinician==='__manual__'&&state.organizationId?'__manual__':'');
- picker.value=selected;
- const manual=!!state.organizationId;
- document.getElementById('manualDoctorBox').classList.toggle('hidden',!manual);
- picker.classList.toggle('hidden',!state.clinicians.length);
- document.querySelector('label[for="providerClinician"]').classList.toggle('hidden',!state.clinicians.length);
- document.getElementById('doctorHint').textContent=state.clinicians.length?'เลือกชื่อจากทะเบียนหรือพิมพ์เองได้':'ยังไม่มีแพทย์ในทะเบียน — พิมพ์ชื่อเองหรือข้ามได้';
+ const org=document.getElementById('providerOrg').value,unit=changed==='providerOrg'?'':document.getElementById('providerUnit').value,clinician=(changed==='providerOrg'||changed==='providerUnit')?'':document.getElementById('providerClinician').value;
+ if(changed==='providerOrg'||changed==='providerUnit'){document.getElementById('clinicianSearch').value='';document.getElementById('doctor').value='';}
+ if(changed==='providerOrg')document.getElementById('unitSearch').value='';
+ const state=providerPickerState(authorizedCatalog,org,unit,clinician);
+ fillOptions('providerOrg',state.organizations,'เลือกโรงพยาบาล');document.getElementById('providerOrg').value=state.organizationId;
+ fillOptions('providerUnit',state.units,'เลือกแผนก');document.getElementById('providerUnit').value=state.unitId;
+ fillOptions('providerClinician',state.clinicians,'เลือกแพทย์');document.getElementById('providerClinician').value=state.clinicianId;
+ for(const [kind,choices] of [['hospital',state.organizations],['unit',state.units],['clinician',state.clinicians]])renderCombo(kind,choices);
+ document.getElementById('doctorHint').textContent=state.clinicians.length?'เลือกชื่อแพทย์จากทะเบียนหรือข้ามได้':'ไม่มีชื่อแพทย์ในทะเบียน — เว้นว่างได้';
 }
-function selectedClinicianId(){const id=document.getElementById('providerClinician').value;return id==='__manual__'?'':id;}
-function syncProviderNames(){
- if(!authorizedCatalog)return;
- const org=authorizedCatalog.organizations.find(x=>x.id===document.getElementById('providerOrg').value);
- const unit=authorizedCatalog.units.find(x=>x.id===document.getElementById('providerUnit').value);
- const doctor=authorizedCatalog.clinicians.find(x=>x.id===selectedClinicianId());
- document.getElementById('hospital').value=org?(org.display_name||org.name):'';
- document.getElementById('department').value=unit?.name||'';
- document.getElementById('doctor').value=doctor?.display_name||document.getElementById('manualDoctor').value.trim();
-}
-for(const id of ['providerOrg','providerUnit'])document.getElementById(id).addEventListener('change',()=>{refreshProviderPicker(id);syncProviderNames();});
-document.getElementById('providerClinician').addEventListener('change',()=>{document.getElementById('manualDoctor').value='';refreshProviderPicker();syncProviderNames();});
-document.getElementById('manualDoctor').addEventListener('input',()=>{if(document.getElementById('manualDoctor').value.trim())document.getElementById('providerClinician').value='';syncProviderNames();});
+function selectedClinicianId(){return document.getElementById('providerClinician').value;}
+for(const kind of ['hospital','unit','clinician']){const input=document.getElementById(kind+'Search');input.addEventListener('input',()=>{const select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');select.value='';if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});input.addEventListener('focus',()=>refreshProviderPicker());input.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById(kind+'SearchResults').classList.add('hidden');input.setAttribute('aria-expanded','false');}if(e.key==='ArrowDown'){e.preventDefault();document.getElementById(kind+'SearchResults').querySelector('button:not(:disabled)')?.focus();}});}
+function syncProviderNames(){if(!authorizedCatalog)return;const org=authorizedCatalog.organizations.find(x=>x.id===document.getElementById('providerOrg').value),unit=authorizedCatalog.units.find(x=>x.id===document.getElementById('providerUnit').value),clinician=authorizedCatalog.clinicians.find(x=>x.id===selectedClinicianId());document.getElementById('hospital').value=org?(org.display_name||org.name):'';document.getElementById('department').value=unit?.name||'';document.getElementById('doctor').value=clinician?.display_name||document.getElementById('clinicianSearch').value.trim();}
 // Registry remains disconnected until the protected API supplies a verified, authorized catalog.
 const $=id=>document.getElementById(id), ids=['detail','scenario','date','known','time','hospital','department','doctor','purpose','prep'];
 function refresh(){ $('details').classList.toggle('hidden',$('detail').value!=='full');const unknown=$('known').value==='no';$('timebox').classList.toggle('hidden',unknown);if(unknown)$('time').value='';}
