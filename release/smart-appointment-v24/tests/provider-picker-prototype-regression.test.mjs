@@ -6,3 +6,6 @@ test('manual physician is optional and never treated as a catalog clinician ID',
 test('provider changes clear stale doctor and confirmation omits blank doctor',()=>{assert.match(html,/if\(changed==='providerOrg'\|\|changed==='providerUnit'\)document\.getElementById\('manualDoctor'\)\.value=''/);assert.match(html,/if\(id==='doctor'&&!\$\('doctor'\)\.value\.trim\(\)\)continue/);});
 
 test('empty catalog hides disabled physician select and exposes manual doctor input',()=>{assert.match(html,/<div id="manualDoctorBox">/);assert.match(html,/picker\.classList\.toggle\('hidden',!state\.clinicians\.length\)/);assert.match(html,/document\.getElementById\('doctor'\)\.value=doctor\?\.display_name\|\|document\.getElementById\('manualDoctor'\)\.value\.trim\(\)/);});
+
+test('existing hospital and department names are searchable without adding master rows',()=>{assert.match(html,/id="hospitalSearch"/);assert.match(html,/id="unitSearch"/);assert.match(html,/filterMasterOptions\(state\.organizations/);assert.match(html,/filterMasterOptions\(state\.units/);});
+test('unsafe central-registry create actions stay disabled while schema gate is pending',()=>{assert.match(html,/id="addHospital"[^>]*disabled/);assert.match(html,/id="addUnit"[^>]*disabled/);assert.match(html,/checkNewMasterDuplicates/);});
