@@ -9,3 +9,5 @@ test('empty catalog hides disabled physician select and exposes manual doctor in
 
 test('existing hospital and department names are searchable without adding master rows',()=>{assert.match(html,/id="hospitalSearch"/);assert.match(html,/id="unitSearch"/);assert.match(html,/filterMasterOptions\(state\.organizations/);assert.match(html,/filterMasterOptions\(state\.units/);});
 test('unsafe central-registry create actions stay disabled while schema gate is pending',()=>{assert.match(html,/id="addHospital"[^>]*disabled/);assert.match(html,/id="addUnit"[^>]*disabled/);assert.match(html,/checkNewMasterDuplicates/);});
+
+test('three catalogs support name search with gated add operations',()=>{for(const kind of ['hospital','unit','clinician'])assert.match(html,new RegExp('id="'+kind+(kind==='hospital'?'Search':'Search')+'"'));assert.match(html,/id="addClinician"[^>]*disabled/);assert.match(html,/filterMasterOptions\(state\.clinicians/);});
