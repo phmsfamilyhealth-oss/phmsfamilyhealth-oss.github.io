@@ -73,7 +73,7 @@ function syncProviderNames(){
 }
 for(const id of ['providerOrg','providerUnit'])document.getElementById(id).addEventListener('change',()=>{refreshProviderPicker(id);syncProviderNames();});
 document.getElementById('providerClinician').addEventListener('change',()=>{document.getElementById('manualDoctor').value='';refreshProviderPicker();syncProviderNames();});
-document.getElementById('manualDoctor').addEventListener('input',syncProviderNames);
+document.getElementById('manualDoctor').addEventListener('input',()=>{if(document.getElementById('manualDoctor').value.trim())document.getElementById('providerClinician').value='';syncProviderNames();});
 // Registry remains disconnected until the protected API supplies a verified, authorized catalog.
 const $=id=>document.getElementById(id), ids=['detail','scenario','date','known','time','hospital','department','doctor','purpose','prep'];
 function refresh(){ $('details').classList.toggle('hidden',$('detail').value!=='full');const unknown=$('known').value==='no';$('timebox').classList.toggle('hidden',unknown);if(unknown)$('time').value='';}
