@@ -12,7 +12,7 @@
 /* Compact elder-friendly entry mode, leaving the underlying draft fields intact. */
 #editor.simple-ui{padding:16px}#personPicker{padding:16px}
 #pilotNotice{padding:12px 14px;margin:5px 0 10px;border-radius:12px;box-shadow:none}
-#pilotNotice strong{font-size:.98rem}#pilotNotice .help{display:none}
+#pilotNotice strong{font-size:.98rem}.simple-entry #pilotNotice .help{display:none}
 #connectionStatus{margin:8px 0;padding:9px 12px;border-radius:10px;font-size:.9rem}
 #editor.simple-ui h2{font-size:1.16rem;margin:4px 0 8px}
 #editor.simple-ui label{font-size:1rem;margin:11px 0 5px}
@@ -445,20 +445,21 @@ const outcomeExtras=document.createElement('details');outcomeExtras.id='outcomeE
 const outcomeSummary=document.createElement('summary');outcomeSummary.textContent='ผลตรวจ การรักษา และแผนยา (ถ้ามี)';outcomeExtras.append(outcomeSummary);outcome.append(outcomeExtras);
 moveFieldsIntoDisclosure(document.querySelector('label[for="diagnosis_summary"]'),outcome.querySelector('p.help'),outcomeExtras);
 const simpleExtras=document.createElement('details');simpleExtras.id='simpleExtras';simpleExtras.className='progressive-extras';
-const simpleSummary=document.createElement('summary');simpleSummary.textContent='เพิ่มอาการ รายละเอียด และสิ่งที่ต้องเตรียม (ถ้ามี)';simpleExtras.append(simpleSummary);
+const simpleSummary=document.createElement('summary');simpleSummary.textContent='อาการและข้อมูลเพิ่มเติม (ถ้ามี)';simpleExtras.append(simpleSummary);
 $('historicalGuide').before(simpleExtras);
 moveFieldsIntoDisclosure($('historicalGuide'),$('checklistBox'),simpleExtras);
 function updateProgressiveLayout(){
- const simple=$('detail').value==='simple';$('editor').classList.toggle('simple-ui',simple);
+ const simple=$('detail').value==='simple';$('editor').classList.toggle('simple-ui',simple);document.body.classList.toggle('simple-entry',simple);
+ const stepTitles=document.querySelectorAll('.appointment-section-title');if(stepTitles.length>1)stepTitles[1].textContent=simple?'3. โรงพยาบาลและชื่อนัด':'3. โรงพยาบาล แผนก แพทย์ และชื่อนัด';
  for(const panel of [providerExtras,simpleExtras,outcomeExtras]){
   const filled=Array.from(panel.querySelectorAll('input,textarea,select')).some(el=>el.type!=='hidden'&&!!String(el.value||'').trim());
-  if(!simple||filled)panel.open=true;
+  panel.open=!simple||filled;
  }
 }
 $('detail').addEventListener('change',updateProgressiveLayout);updateProgressiveLayout();
 // Section markers preserve the original DOM order and all established form controls.
 function sectionHeading(beforeId,title){const field=$(beforeId);if(!field)return;const label=field.previousElementSibling;const anchor=label?.tagName==='LABEL'?label:field;const heading=document.createElement('h3');heading.className='appointment-section-title';heading.textContent=title;anchor.before(heading);}
-sectionHeading('date','2. วันและเวลานัด');
+sectionHeading('date','2. วันและเวลา');
 sectionHeading('hospitalSearch','3. โรงพยาบาล แผนก แพทย์ และชื่อนัด');
-refresh();
+updateProgressiveLayout();refresh();
 </script></body></html>
