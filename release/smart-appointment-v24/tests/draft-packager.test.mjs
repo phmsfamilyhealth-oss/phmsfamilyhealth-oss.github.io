@@ -14,3 +14,6 @@ test('historical omitted preparation is zero tasks',()=>assert.deepEqual(pack({.
 
 test('appointment title and optional details are distinct draft fields',()=>{const r=pack({...base,purpose:'ปวดเข่า',additional_note:'ปวดมากเวลาเดิน'});assert.equal(r.ok,true);assert.equal(r.draft.title,'ปวดเข่า');assert.equal(r.draft.note,'ปวดมากเวลาเดิน');});
 test('short appointment title max 80 and optional empty details',()=>{assert.equal(pack({...base,purpose:'ก'.repeat(81)}).ok,false);const r=pack({...base,purpose:'ฟังผลเลือด'});assert.equal(r.ok,true);assert.equal(r.draft.note,'');});
+
+test('extended fields carry only supported canonical appointment attributes',()=>{const x=pack({...base,extended_details:{hospital_hn:'HN123',location_detail:'ชั้น 2',arrival_lead_minutes:'30',care_topic:'ข้อเข่า'}});assert.equal(x.ok,true);assert.equal(x.draft.extended_details.hospital_hn,'HN123');assert.equal(x.draft.extended_details.arrival_lead_minutes,'30');});
+test('unknown extended attributes and unsafe arrival times fail closed',()=>{assert.equal(pack({...base,extended_details:{doctor_verified:'yes'}}).ok,false);assert.equal(pack({...base,extended_details:{arrival_lead_minutes:'-30'}}).ok,false);});
