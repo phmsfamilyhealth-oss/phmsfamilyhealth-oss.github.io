@@ -7,7 +7,7 @@ export function providerPickerState(master, organizationId='', unitId='', clinic
  const safeClinician=choices.clinicians.some(x=>x.id===clinicianId)?clinicianId:'';
  return {
   organizations:choices.organizations.map(x=>({value:x.id,label:x.display_name||x.name||'สถานพยาบาล'})),
-  units:choices.units.map(x=>({value:x.id,label:x.name||'แผนก'})),
+  units:choices.units.map(x=>({value:x.id,label:(x.name||'แผนก')+(x.code&&!String(x.name||'').includes('('+x.code+')')?' ('+x.code+')':''),code:x.code||''})),
   clinicians:choices.clinicians.map(x=>({value:x.id,label:x.display_name||'แพทย์'})),
   organizationId:choices.organizations.some(x=>x.id===organizationId)?organizationId:'',
   unitId:safeUnit,clinicianId:safeClinician,
