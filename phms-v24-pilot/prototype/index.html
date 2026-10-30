@@ -48,6 +48,23 @@
 #editor.simple-ui #review:disabled{background:#9a9a9a}
 @media(min-width:600px){#editor.simple-ui .scenario-option{min-height:74px;flex-direction:column;align-items:flex-start;gap:3px}}
 @media(max-width:380px){#editor.simple-ui{padding:13px}#editor.simple-ui .scenario-option{min-height:53px}}
+
+/* Detailed mode: clear, compact expandable clinical categories rather than a long wall of fields. */
+#editor:not(.simple-ui){padding:17px}
+#editor:not(.simple-ui) label{margin:12px 0 5px;font-size:1rem}
+#editor:not(.simple-ui) .appointment-section-title{font-size:1.05rem;padding:11px 12px;margin:17px 0 9px}
+#editor:not(.simple-ui) .scenario-option{padding:11px 12px}
+#editor:not(.simple-ui) #registryHelp,#editor:not(.simple-ui) #historicalGuide,#editor:not(.simple-ui) #previsitHelp{display:none}
+#editor:not(.simple-ui) #doctorHint{font-size:.86rem;margin:5px 0}
+#editor:not(.simple-ui) .progressive-extras{border:1px solid #e4d5c2;border-radius:13px;padding:11px 13px;margin:12px 0;background:#fffdf9}
+#editor:not(.simple-ui) .progressive-extras>summary{display:list-item;font-weight:700;color:#30291f;font-size:1.04rem;cursor:pointer;line-height:1.5}
+#editor:not(.simple-ui) .progressive-extras[open]>summary{margin-bottom:11px}
+#editor:not(.simple-ui) #details>details,#editor:not(.simple-ui) #contactRescheduleBox,#editor:not(.simple-ui) #procedurePreviewBox{border:1px solid #e4d5c2;border-radius:12px;padding:11px 13px;margin:9px 0;background:#fffdf9}
+#editor:not(.simple-ui) #details>details>summary,#editor:not(.simple-ui) #contactRescheduleBox>summary,#editor:not(.simple-ui) #procedurePreviewBox>summary{font-size:1.02rem;font-weight:700;line-height:1.5;cursor:pointer}
+#editor:not(.simple-ui) #details>details[open]>summary,#editor:not(.simple-ui) #contactRescheduleBox[open]>summary,#editor:not(.simple-ui) #procedurePreviewBox[open]>summary{margin-bottom:10px}
+#editor:not(.simple-ui) #review{width:100%}
+#editor:not(.simple-ui) #requiredLegend{background:transparent;padding:3px 0;font-size:.86rem}
+#editor:not(.simple-ui) .help{font-size:.88rem;line-height:1.5}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 โหมดทดลอง — ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -445,7 +462,7 @@ const outcomeExtras=document.createElement('details');outcomeExtras.id='outcomeE
 const outcomeSummary=document.createElement('summary');outcomeSummary.textContent='ผลตรวจ การรักษา และแผนยา (ถ้ามี)';outcomeExtras.append(outcomeSummary);outcome.append(outcomeExtras);
 moveFieldsIntoDisclosure(document.querySelector('label[for="diagnosis_summary"]'),outcome.querySelector('p.help'),outcomeExtras);
 const simpleExtras=document.createElement('details');simpleExtras.id='simpleExtras';simpleExtras.className='progressive-extras';
-const simpleSummary=document.createElement('summary');simpleSummary.textContent='อาการและข้อมูลเพิ่มเติม (ถ้ามี)';simpleExtras.append(simpleSummary);
+const simpleSummary=document.createElement('summary');simpleSummary.textContent='อาการ รายละเอียด และสิ่งที่ต้องเตรียม (ถ้ามี)';simpleExtras.append(simpleSummary);
 $('historicalGuide').before(simpleExtras);
 moveFieldsIntoDisclosure($('historicalGuide'),$('checklistBox'),simpleExtras);
 function updateProgressiveLayout(){
@@ -453,7 +470,7 @@ function updateProgressiveLayout(){
  const stepTitles=document.querySelectorAll('.appointment-section-title');if(stepTitles.length>1)stepTitles[1].textContent=simple?'3. โรงพยาบาลและชื่อนัด':'3. โรงพยาบาล แผนก แพทย์ และชื่อนัด';
  for(const panel of [providerExtras,simpleExtras,outcomeExtras]){
   const filled=Array.from(panel.querySelectorAll('input,textarea,select')).some(el=>el.type!=='hidden'&&!!String(el.value||'').trim());
-  panel.open=!simple||filled;
+  if(simple){if(filled)panel.open=true;}else if(filled){panel.open=true;}
  }
 }
 $('detail').addEventListener('change',updateProgressiveLayout);updateProgressiveLayout();
