@@ -79,6 +79,7 @@ BEGIN
   IF p_appointment ? 'preparation_tasks' AND jsonb_typeof(p_appointment->'preparation_tasks') IS DISTINCT FROM 'array' THEN RAISE EXCEPTION 'invalid_checklist'; END IF;
   v_task_count := CASE WHEN jsonb_typeof(p_appointment->'preparation_tasks')='array' THEN jsonb_array_length(p_appointment->'preparation_tasks') ELSE 0 END;
   IF v_task_count > 20 THEN RAISE EXCEPTION 'checklist_too_long'; END IF;
+  IF p_appointment ? 'walk_in_reason' AND (p_appointment->>'walk_in_reason' NOT IN ('queue_full','hospital_advised','no_booking','urgent','other') OR p_appointment->>'visit_mode' <> 'walk_in') THEN RAISE EXCEPTION 'invalid_walk_in_reason'; END IF;
   IF p_appointment ? 'arrival_lead_minutes' AND (p_appointment->>'arrival_lead_minutes' !~ '^\\d{1,4}(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) LOOP
     IF jsonb_typeof(v_task) <> 'object' OR nullif(btrim(v_task->>'title'),'') IS NULL OR length(v_task->>'title') > 160
     THEN RAISE EXCEPTION 'invalid_checklist_item'; END IF;
@@ -158,7 +159,7 @@ END; $$;
 REVOKE ALL ON FUNCTION public.phms_v24_commit_appointment(uuid,uuid,uuid,uuid,jsonb) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.phms_v24_commit_appointment(uuid,uuid,uuid,uuid,jsonb) TO service_role;
 COMMIT;
- OR (p_appointment->>'arrival_lead_minutes')::int > 1440) THEN RAISE EXCEPTION 'invalid_arrival_lead'; END IF;
+ OR (p_appointment->>'arrival_lead_minutes')::int > 720) THEN RAISE EXCEPTION 'invalid_arrival_lead'; END IF;
   IF length(p_appointment->>'hospital_hn') > 80 THEN RAISE EXCEPTION 'appointment_text_too_long'; END IF;
   IF length(p_appointment->>'hospital_vn') > 80 THEN RAISE EXCEPTION 'appointment_text_too_long'; END IF;
   IF length(p_appointment->>'location_detail') > 240 THEN RAISE EXCEPTION 'appointment_text_too_long'; END IF;
