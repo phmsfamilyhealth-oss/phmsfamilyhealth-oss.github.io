@@ -85,7 +85,7 @@ if(people.error==='unauthenticated'){
  retry.style.marginTop='12px';retry.addEventListener('click',()=>{window.liff.logout();window.liff.login({redirectUri:location.href});});
  status.append(document.createElement('br'),retry);
 }
-return;}const picker=document.getElementById('personPicker'),select=document.getElementById('personSelect');select.replaceChildren(new Option('เลือกบุคคล',''),...people.people.map(x=>new Option(x.name,x.id)));picker.classList.remove('hidden');if(memberId&&!people.people.some(x=>x.id===memberId))memberId='';if(memberId)select.value=memberId;document.getElementById('selectedPersonLabel').textContent=memberId?'เพิ่มนัดให้: '+select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';select.addEventListener('change',()=>{memberId=select.value;document.getElementById('selectedPersonLabel').textContent=memberId?'เพิ่มนัดให้: '+select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';clearSourceFilled();authorizedCatalog=null;relatedAllItems=[];sourceAppointments=new Map();relatedLoadGeneration++;$('relatedAppointmentBox').hidden=true;$('relatedCards').replaceChildren();$('relatedClear').classList.add('hidden');document.getElementById('review').disabled=true;document.getElementById('save').disabled=true;if(memberId){loadRelatedAppointments();loadSelectedCatalog(window.liff,readEndpoint);}else{refreshProviderPicker();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';}});if(!memberId){document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';return;}loadRelatedAppointments();const catalogResult=await makeLiffProviderCatalogClient({liff:window.liff,endpoint:readEndpoint})(memberId);if(catalogResult.ok&&catalogResult.catalog.organizations.length){authorizedCatalog=catalogResult.catalog;refreshProviderPicker();syncProviderNames();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกโรงพยาบาลและตรวจทานนัด';document.getElementById('review').disabled=false;document.getElementById('save').disabled=true;document.getElementById('save').textContent='บันทึกนัด (ยังไม่เปิด)';}else{document.getElementById('connectionStatus').textContent='ยังไม่พร้อมบันทึก';document.getElementById('error').textContent='ยังโหลดทะเบียนโรงพยาบาลไม่ได้ กรุณาลองใหม่เมื่อระบบพร้อม';document.getElementById('save').disabled=true;}}catch{confirmClient=null;document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE ไม่สำเร็จ';document.getElementById('error').textContent='ไม่สามารถเชื่อมต่อ LINE ได้ กรุณาเปิดจาก LINE แล้วลองอีกครั้ง';}}
+return;}const picker=document.getElementById('personPicker'),select=document.getElementById('personSelect');select.replaceChildren(new Option('เลือกบุคคล',''),...people.people.map(x=>new Option(x.name,x.id)));picker.classList.remove('hidden');if(memberId&&!people.people.some(x=>x.id===memberId))memberId='';if(memberId)select.value=memberId;document.getElementById('selectedPersonLabel').textContent=memberId?'เพิ่มนัดให้: '+select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';select.addEventListener('change',()=>{memberId=select.value;document.getElementById('selectedPersonLabel').textContent=memberId?'เพิ่มนัดให้: '+select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';clearSourceFilled({personChanged:true});authorizedCatalog=null;relatedAllItems=[];sourceAppointments=new Map();relatedLoadGeneration++;$('relatedAppointmentBox').hidden=true;$('relatedCards').replaceChildren();$('relatedClear').classList.add('hidden');document.getElementById('review').disabled=true;document.getElementById('save').disabled=true;if(memberId){loadRelatedAppointments();loadSelectedCatalog(window.liff,readEndpoint);}else{refreshProviderPicker();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';}});if(!memberId){document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';return;}loadRelatedAppointments();const catalogResult=await makeLiffProviderCatalogClient({liff:window.liff,endpoint:readEndpoint})(memberId);if(catalogResult.ok&&catalogResult.catalog.organizations.length){authorizedCatalog=catalogResult.catalog;refreshProviderPicker();syncProviderNames();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกโรงพยาบาลและตรวจทานนัด';document.getElementById('review').disabled=false;document.getElementById('save').disabled=true;document.getElementById('save').textContent='บันทึกนัด (ยังไม่เปิด)';}else{document.getElementById('connectionStatus').textContent='ยังไม่พร้อมบันทึก';document.getElementById('error').textContent='ยังโหลดทะเบียนโรงพยาบาลไม่ได้ กรุณาลองใหม่เมื่อระบบพร้อม';document.getElementById('save').disabled=true;}}catch{confirmClient=null;document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE ไม่สำเร็จ';document.getElementById('error').textContent='ไม่สามารถเชื่อมต่อ LINE ได้ กรุณาเปิดจาก LINE แล้วลองอีกครั้ง';}}
 initializeLiff();
 // No fake catalog. A verified backend integration will invoke setAuthorizedCatalog after LINE authentication.
 let authorizedCatalog=null;
@@ -214,19 +214,45 @@ function applyFollowupTitle(src){
 }
 $('purpose').addEventListener('input',()=>{purposeManuallyEdited=true;});
 const sourceFilled=new Map();
-function clearSourceFilled(){
- for(const [id,value] of sourceFilled){const field=$(id);if(field&&field.value===value)field.value='';}
- sourceFilled.clear();
- for(const kind of ['hospital','unit','clinician']){const id=kind==='hospital'?'providerOrg':kind==='unit'?'providerClinician':'providerUnit';if(!$(kind+'Search').value&&$(id))$(id).value='';}
- if(!$('hospitalSearch').value&&!$('unitSearch').value){refreshProviderPicker();syncProviderNames();}
- if($('purpose').value===autoPurposeValue){$('purpose').value='';purposeManuallyEdited=false;}
- autoPurposeValue='';
+function clearSourceFilled({personChanged=false}={}){
+ // Remove exact values generated by the selected source, not unrelated typed data.
+ const fields=new Map(sourceFilled);
+ if(autoPurposeValue)fields.set('purpose',autoPurposeValue);
+ for(const [id,value] of fields){const field=$(id);if(field&&field.value===value)field.value='';}
+ sourceFilled.clear();autoPurposeValue='';
+ if(personChanged){
+  // No patient-specific values may leak when switching to another person.
+  for(const id of ['hospitalSearch','unitSearch','clinicianSearch','providerOrg','providerUnit','providerClinician','hospital','department','doctor','care_topic','hospital_hn','hospital_vn','location_detail','contact_phone','coverage_type','arrival_lead_minutes','previsitSymptoms','additionalNote','visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps','walk_in_reason','reschedulePhase']){
+   if($(id))$(id).value='';
+  }
+  if(!purposeManuallyEdited)$('purpose').value='';
+  for(const kind of ['hospital','unit','clinician']){
+   comboState[kind]={searchText:'',selectedItem:null,isOpen:false};
+   closeCombo(kind);
+  }
+  $('relatedSelect').value='';
+  $('relatedQuery').value='';
+  $('contactDetails').textContent='ยังไม่ได้โหลดข้อมูลติดต่อ';
+ }else{
+  // Reset the master picks if they were inserted by the linked source.
+  for(const [kind,id] of [['hospital','providerOrg'],['unit','providerUnit'],['clinician','providerClinician']]){
+   if(fields.has(id)&&!$(id).value){
+    comboState[kind]={searchText:'',selectedItem:null,isOpen:false};closeCombo(kind);
+   }
+  }
+ }
+ refreshProviderPicker();
+ syncProviderNames();
 }
 function applySourceAppointment(){
  const src=sourceAppointments.get($('relatedSelect').value);if(!src)return;
  clearSourceFilled();
  const assign=(id,value)=>{if(value&&!$(id).value.trim()){const text=String(value);$(id).value=text;sourceFilled.set(id,text);}};
- applyFollowupTitle(src);assign('care_topic',src.care_topic);assign('hospitalSearch',src.hospital_name);assign('unitSearch',src.department);assign('clinicianSearch',src.doctor_name);const catalog=authorizedCatalog;if(catalog){const org=catalog.organizations.find(x=>x.id===src.organization_id);if(org){sourceFilled.set('providerOrg',org.id);$('providerOrg').value=org.id;comboState.hospital.selectedItem={value:org.id,label:org.display_name||org.name};refreshProviderPicker('providerOrg');$('hospitalSearch').value=org.display_name||org.name;}const unit=catalog.units.find(x=>x.id===src.service_unit_id);if(unit){sourceFilled.set('providerUnit',unit.id);$('providerUnit').value=unit.id;comboState.unit.selectedItem={value:unit.id,label:unit.name};refreshProviderPicker('providerUnit');$('unitSearch').value=unit.name;}const clinician=catalog.clinicians.find(x=>x.id===src.clinician_id);if(clinician){sourceFilled.set('providerClinician',clinician.id);$('providerClinician').value=clinician.id;$('clinicianSearch').value=clinician.display_name||clinician.name;}syncProviderNames();} $('relatedStatus').textContent='เติมข้อมูลจากนัดครั้งก่อนแล้ว — ตรวจสอบและแก้ไขข้อมูลสำหรับครั้งใหม่ได้ โดยวันที่และเวลาจะไม่ถูกคัดลอก';}
+ applyFollowupTitle(src);assign('care_topic',src.care_topic);assign('hospitalSearch',src.hospital_name);assign('unitSearch',src.department);assign('clinicianSearch',src.doctor_name);const catalog=authorizedCatalog;if(catalog){const org=catalog.organizations.find(x=>x.id===src.organization_id);if(org){sourceFilled.set('providerOrg',org.id);$('providerOrg').value=org.id;comboState.hospital.selectedItem={value:org.id,label:org.display_name||org.name};refreshProviderPicker('providerOrg');$('hospitalSearch').value=org.display_name||org.name;}const unit=catalog.units.find(x=>x.id===src.service_unit_id);if(unit){sourceFilled.set('providerUnit',unit.id);$('providerUnit').value=unit.id;comboState.unit.selectedItem={value:unit.id,label:unit.name};refreshProviderPicker('providerUnit');$('unitSearch').value=unit.name;}const clinician=catalog.clinicians.find(x=>x.id===src.clinician_id);if(clinician){sourceFilled.set('providerClinician',clinician.id);$('providerClinician').value=clinician.id;$('clinicianSearch').value=clinician.display_name||clinician.name;}syncProviderNames();
+ for(const id of ['hospitalSearch','unitSearch','clinicianSearch','providerOrg','providerUnit','providerClinician','hospital','department','doctor']){
+  if($(id)?.value)sourceFilled.set(id,$(id).value);
+ }
+} $('relatedStatus').textContent='เติมข้อมูลจากนัดครั้งก่อนแล้ว — ตรวจสอบและแก้ไขข้อมูลสำหรับครั้งใหม่ได้ โดยวันที่และเวลาจะไม่ถูกคัดลอก';}
 let relatedAllItems=[],relatedExpanded=false,relatedLoadGeneration=0;
 function thaiSourceDate(value){
  const raw=String(value||'').slice(0,10);const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
