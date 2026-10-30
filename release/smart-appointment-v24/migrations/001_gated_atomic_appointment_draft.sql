@@ -46,7 +46,7 @@ BEGIN
   SELECT key INTO v_unknown_key FROM jsonb_object_keys(p_appointment) AS key
   WHERE key <> ALL(ARRAY['family_id','family_person_id','person_id','created_by',
     'appointment_type','visit_mode','visit_time_known','status','planned_visit_date',
-    'appointment_at','hospital_name','department','doctor_name','note',
+    'appointment_at','hospital_name','department','doctor_name','title','note',
     'preparation_notes','preparation_tasks']) LIMIT 1;
   IF v_unknown_key IS NOT NULL THEN RAISE EXCEPTION 'unsupported_appointment_field'; END IF;
   IF nullif(p_appointment->>'person_id','')::uuid IS DISTINCT FROM v_person
@@ -84,7 +84,7 @@ BEGIN
   END LOOP;
   -- Reject overlong fields instead of silently truncating medical appointment details.
   IF length(p_appointment->>'hospital_name') > 160 OR length(p_appointment->>'department') > 160
-    OR length(p_appointment->>'doctor_name') > 160 OR length(p_appointment->>'note') > 1000
+    OR length(p_appointment->>'doctor_name') > 160 OR length(p_appointment->>'title') > 80 OR length(p_appointment->>'note') > 1000
     OR length(p_appointment->>'preparation_notes') > 4000
   THEN RAISE EXCEPTION 'appointment_text_too_long'; END IF;
   FOR v_task IN SELECT value FROM jsonb_array_elements(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) LOOP
@@ -108,12 +108,12 @@ BEGIN
   END IF;
   INSERT INTO public.appointments(
     family_id,family_person_id,person_id,created_by,appointment_type,visit_mode,visit_time_known,
-    status,planned_visit_date,appointment_at,hospital_name,department,doctor_name,note,preparation_notes
+    status,planned_visit_date,appointment_at,hospital_name,department,doctor_name,title,note,preparation_notes
   ) VALUES (
     p_expected_family_id,p_expected_family_person_id,v_person,p_actor_user_id,v_type,v_mode,
     (p_appointment->>'visit_time_known')::boolean,v_status,v_date,v_time,
     left(p_appointment->>'hospital_name',160),left(p_appointment->>'department',160),
-    left(p_appointment->>'doctor_name',160),left(p_appointment->>'note',1000),
+    left(p_appointment->>'doctor_name',160),left(p_appointment->>'title',80),left(p_appointment->>'note',1000),
     left(p_appointment->>'preparation_notes',4000)
   ) RETURNING id INTO v_id;
   -- Production's trg_phms_sync_appointment_preparation_tasks already inserts checklist
