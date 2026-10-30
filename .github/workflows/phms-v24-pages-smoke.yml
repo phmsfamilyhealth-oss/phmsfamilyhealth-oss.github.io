@@ -40,7 +40,7 @@ jobs:
               grep -q 'โหมดทดลอง — ยังบันทึกไม่ได้' /tmp/phms-check
               grep -q 'id="relatedCards"' /tmp/phms-check
               grep -q 'function thaiSourceDate' /tmp/phms-check
-              grep -q 'TH_DAYS[date.getUTCDay()]' /tmp/phms-check
+              grep -Fq 'TH_DAYS[date.getUTCDay()]' /tmp/phms-check
               if grep -q 'id="relatedAll"' /tmp/phms-check; then echo 'ERROR: legacy appointment dropdown controls still published'; exit 1; fi
               grep -q 'id="contactLoad"' /tmp/phms-check
               grep -q 'id="procedureAdd"' /tmp/phms-check
