@@ -23,13 +23,14 @@ export function makePhmsPersistenceSecurity({supabase,centralCanAccess}={}){
    if(unit&&norm(unit.name)!==norm(draft.department))return false;
    if(clinician&&norm(clinician.display_name)!==norm(draft.doctor_name))return false;
    if(!unit&&norm(draft.department))return false;
-   if(!clinician&&norm(draft.doctor_name))return false;
+   // Manual doctor name is appointment-local only; never infer a clinician ID.
+   if(!clinician&&draft.doctor_name!=null&&typeof draft.doctor_name!=='string')return false;
    return true;
   }catch{return false}
  }
  async function readAuthorizedAppointment(actorId,appointmentId){
   if(!uuid(actorId)||!uuid(appointmentId))return null;
-  const {data,error}=await supabase.from('appointments').select('id,family_id,family_person_id,deleted_at').eq('id',appointmentId).limit(2);
+  const {data,error}=await supabase.from('appointments').select('id,family_id,family_person_id,deleted_at,title,note,hospital_name,department,doctor_name,hospital_hn,hospital_vn,location_detail,contact_phone,care_topic,coverage_type,arrival_lead_minutes,visit_outcome_notes,diagnosis_summary,treatment_summary,test_results_summary,medication_plan_notes,next_steps,walk_in_reason').eq('id',appointmentId).limit(2);
   if(error||!Array.isArray(data)||data.length!==1)return null;
   const row=data[0];
   if(!row||row.deleted_at||!uuid(row.family_person_id))return null;
