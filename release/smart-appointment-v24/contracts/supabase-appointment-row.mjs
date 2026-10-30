@@ -21,6 +21,10 @@ export function mapAppointmentInsert(command){
  if((d.preparation_tasks||[]).length>0&&d.preparation_notes?.trim())return {ok:false,error:'checklist_dual_source_not_supported'};
  const extras=d.extended_details??{};if(typeof extras!=='object'||extras===null||Array.isArray(extras)||Object.keys(extras).some(k=>!Object.hasOwn({"hospital_hn":80,"hospital_vn":80,"location_detail":240,"contact_phone":40,"care_topic":500,"coverage_type":100,"arrival_lead_minutes":4,"visit_outcome_notes":1000,"diagnosis_summary":1000,"treatment_summary":1000,"test_results_summary":1000,"medication_plan_notes":1000,"next_steps":1000,"walk_in_reason":500},k)))return {ok:false,error:'invalid_extended_details'};
  if(extras.walk_in_reason&&!['queue_full','hospital_advised','no_booking','urgent','other'].includes(extras.walk_in_reason))return {ok:false,error:'invalid_walk_in_reason'};
+ if(extras.walk_in_reason&&v.visit_mode!=='walk_in')return {ok:false,error:'invalid_walk_in_reason'};
+ const extraLengths={hospital_hn:80,hospital_vn:80,location_detail:240,contact_phone:40,care_topic:500,coverage_type:100,visit_outcome_notes:1000,diagnosis_summary:1000,treatment_summary:1000,test_results_summary:1000,medication_plan_notes:1000,next_steps:1000};
+ if(Object.entries(extras).some(([k,value])=>typeof value!=='string'||(extraLengths[k]!=null&&value.length>extraLengths[k])))return {ok:false,error:'extended_details_too_long'};
+ if(v.status!=='completed'&&['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].some(k=>extras[k]))return {ok:false,error:'post_visit_details_before_completion'};
  if(extras.arrival_lead_minutes!==undefined&&(!/^[0-9]+$/.test(String(extras.arrival_lead_minutes))||Number(extras.arrival_lead_minutes)>720))return {ok:false,error:'invalid_arrival_lead'};
  const limits=[['hospital_name',160],['department',160],['doctor_name',160],['title',80],['note',1000]];
  if(limits.some(([key,max])=>typeof d[key]==='string'&&d[key].length>max))return {ok:false,error:'appointment_text_too_long'};
