@@ -8,10 +8,50 @@
 :root{color:#342b21;background:#f7f6f3}main{max-width:680px;padding:18px 14px 52px}h1{color:#493820;font-size:1.6rem}h2{color:#493820;font-size:1.22rem}.box{border-color:#e4d8c8;border-radius:18px;box-shadow:0 2px 8px #4d35200c;padding:22px;margin:14px 0}#editor{border-top:5px solid #aa8758}#personPicker{border-top:5px solid #aa8758}label{font-size:1.05rem;color:#44331e;margin:18px 0 7px}input,select,textarea{min-height:54px;border-radius:11px;border-color:#b8aa99;color:#342b21;background:white;font-size:1.05rem}input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #c8ab79;outline-offset:1px}button{background:#5b432b;min-height:54px;border-radius:11px}button.secondary,#relatedClear{background:#eee3d5;color:#583f25}button.secondary:hover,#relatedClear:hover{background:#e5d4bd}.notice{background:#fff4dc;border-color:#d9b77d}.help{color:#62584d;font-size:.95rem}.appointment-card{border-color:#d4c3ad;color:#3c2d1d}.appointment-card span{color:#6a5b48}.appointment-card[aria-pressed="true"]{background:#fff6e9;border-color:#76542d}.combo-results button{color:#44331e;border-color:#e7dbcc}.combo-results button:focus{outline-color:#a68350}.required-star{color:#b42318}.scenario-grid{display:grid;grid-template-columns:1fr;gap:9px;margin:10px 0}.scenario-option{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;color:#3f3123;border:1px solid #d8cab7;padding:14px 15px;min-height:68px;font-weight:500}.scenario-option .scenario-symbol{font-size:1.35rem}.scenario-option .scenario-copy{display:grid;gap:3px;line-height:1.4}.scenario-option small{font-size:.86rem;color:#756758}.scenario-option[aria-pressed="true"]{background:#fff2dc;border:2px solid #947143;color:#3f2b16}.scenario-option:focus-visible{outline:3px solid #bc925f;outline-offset:2px}.scenario-original{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important}.appointment-section{border:1px solid #ece1d2;border-radius:15px;padding:14px 15px 19px;margin:14px 0;background:#fff}.appointment-section-title{font-size:1.12rem;color:#4b3822;background:#f9f2e7;border-radius:11px;padding:13px;margin:22px 0 12px}.appointment-section h3{font-size:1.13rem;color:#4b3822;background:#f9f2e7;border-radius:10px;padding:12px 13px;margin:0 0 10px}.appointment-section>label:first-of-type{margin-top:8px}#relatedAppointmentBox{border:1px solid #e1d2bb;border-radius:14px;background:#fffcf8;padding:14px;margin:16px 0}#relatedAppointmentBox summary{font-weight:700;color:#513b23;font-size:1.07rem;cursor:pointer}#requiredLegend{padding:8px 12px;background:#fff8ec;border-radius:9px}#review{background:#5b432b}#connectionStatus{font-size:.97rem}.appointment-section .help{line-height:1.55} @media(min-width:600px){.scenario-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.scenario-option{min-height:104px;align-items:flex-start;flex-direction:column;gap:7px}}
 :root{color:#202020}h1,h2,label,.appointment-section-title{color:#202020}input,select,textarea{color:#202020}.help{color:#4c4c4c}.scenario-option,.scenario-option[aria-pressed="true"],.appointment-card{color:#202020}
 .appointment-photo-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}.appointment-photo-item{border:1px solid #d9c6af;border-radius:12px;padding:10px;min-width:0}.appointment-photo-item img{width:100%;height:132px;object-fit:contain;background:#f8f4ef;border-radius:8px;cursor:pointer}.appointment-photo-item p{font-size:.9rem;overflow-wrap:anywhere}.appointment-photo-actions{display:flex;gap:7px;flex-wrap:wrap}.appointment-photo-actions button{flex:1;min-width:68px;padding:8px;font-size:.94rem}.appointment-photo-actions .photo-remove{background:#eee3d5;color:#513b23}#appointmentPhotoDialog{max-width:min(92vw,720px);max-height:90vh;border:1px solid #ccbaa4;border-radius:16px;padding:16px}#appointmentPhotoDialog::backdrop{background:#000b}#appointmentPhotoLarge{display:block;max-width:100%;max-height:75vh;object-fit:contain;margin:0 auto 12px}
-</style></head><body><main><aside role="status" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 โหมดทดลอง — ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
+
+/* Compact elder-friendly entry mode, leaving the underlying draft fields intact. */
+#editor.simple-ui{padding:16px}#personPicker{padding:16px}
+#pilotNotice{padding:12px 14px;margin:5px 0 10px;border-radius:12px;box-shadow:none}
+#pilotNotice strong{font-size:.98rem}#pilotNotice .help{display:none}
+#connectionStatus{margin:8px 0;padding:9px 12px;border-radius:10px;font-size:.9rem}
+#editor.simple-ui h2{font-size:1.16rem;margin:4px 0 8px}
+#editor.simple-ui label{font-size:1rem;margin:11px 0 5px}
+#editor.simple-ui input,#editor.simple-ui select,#editor.simple-ui textarea{min-height:52px}
+#editor.simple-ui .scenario-grid{gap:7px;margin:7px 0 12px}
+#editor.simple-ui .scenario-option{padding:9px 12px;min-height:56px;flex-direction:row;align-items:center;gap:12px}
+#editor.simple-ui .scenario-option small{display:none}
+#editor.simple-ui .scenario-option .scenario-symbol{font-size:1.15rem}
+#editor.simple-ui .appointment-section-title{margin:16px 0 8px;padding:10px 12px;font-size:1.05rem}
+#editor.simple-ui #registryHelp,#editor.simple-ui #doctorHint,#editor.simple-ui #historicalGuide,#editor.simple-ui #previsitHelp{display:none}
+#editor.simple-ui #requiredLegend{padding:4px 0;margin:4px 0 8px;background:transparent;font-size:.85rem}
+#editor.simple-ui #relatedAppointmentBox{margin:12px 0;padding:10px 12px}
+#editor.simple-ui #relatedAppointmentBox .help{font-size:.86rem}
+#editor.simple-ui #dateRule{font-size:.86rem;margin:5px 0 3px}
+#editor.simple-ui .thai-preview{margin:4px 0}
+#editor.simple-ui #filehelp{font-size:.86rem}
+#editor.simple-ui #appointmentPhotoPicker>p.help{font-size:.86rem;margin:5px 0}
+#editor.simple-ui #appointmentPhotosSection{margin:8px 0}
+#editor.simple-ui .appointment-photo-item p{font-size:.84rem}
+#editor.simple-ui #review{width:100%;min-height:54px}
+#editor .progressive-extras{border:1px solid #e8daca;border-radius:12px;padding:10px 12px;margin:12px 0}
+#editor .progressive-extras>summary{font-size:1rem;font-weight:700;color:#403226;cursor:pointer;padding:3px 0}
+#editor .progressive-extras[open]>summary{margin-bottom:9px}
+#editor:not(.simple-ui) .progressive-extras{border:0;padding:0;margin:0}
+#editor:not(.simple-ui) .progressive-extras>summary{display:none}
+#editor #outcomeDetails{border:1px solid #e8daca;border-radius:12px;padding:12px;margin:12px 0}
+#editor #outcomeDetails>summary{font-weight:700;cursor:pointer;font-size:1.03rem}
+#editor.simple-ui #outcomeDetails label{font-size:1rem}
+#editor .progressive-extras .help{font-size:.88rem}
+#editor.simple-ui #selectedPersonLabel{font-size:.91rem;margin:5px 0 7px}
+#editor.simple-ui #checklistBox .actions{flex-wrap:nowrap}
+#editor.simple-ui #checklistBox .actions button{padding:8px 12px}
+#editor.simple-ui #review:disabled{background:#9a9a9a}
+@media(min-width:600px){#editor.simple-ui .scenario-option{min-height:74px;flex-direction:column;align-items:flex-start;gap:3px}}
+@media(max-width:380px){#editor.simple-ui{padding:13px}#editor.simple-ui .scenario-option{min-height:53px}}
+</style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 โหมดทดลอง — ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
-<section id="editor" class="box"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> จำเป็นต้องกรอก ช่องที่ไม่มีดอกจันข้ามได้</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
+<section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
 <label for="scenario">รูปแบบการนัด <span class="required-star" aria-label="จำเป็นต้องกรอก">*</span></label><select id="scenario"><option value="booked">นัดตามวันและเวลาที่โรงพยาบาลแจ้ง</option><option value="walk_in">ไปโรงพยาบาลโดยไม่ได้นัด (Walk-in)</option><option value="historical">บันทึกวันที่ไปมาแล้ว</option></select>
 <label for="date">วันที่ <span class="required-star" aria-label="จำเป็นต้องกรอก">*</span></label><input type="date" id="date" required aria-describedby="dateThaiPreview dateRule"><p id="dateRule" class="help" role="status"></p><p id="dateThaiPreview" class="help thai-preview" aria-live="polite" hidden></p>
@@ -20,7 +60,7 @@
 <section id="appointmentPhotosSection" aria-label="รูปใบนัด">
 <div id="historicalPhotoChoice" class="hidden"><label for="hasAppointmentPhotos">มีรูปใบนัดหรือไม่</label><select id="hasAppointmentPhotos"><option value="">เลือกก่อนว่ามีรูปหรือไม่</option><option value="yes">มีรูปใบนัด</option><option value="no">ไม่มีรูปใบนัด</option></select></div>
 <div id="appointmentPhotoPicker" class="hidden"><label for="documents">รูปใบนัด (ถ้ามี)</label><p class="help">ใส่ได้สูงสุด 2 รูป เช่น ใบนัดกระดาษ หรือภาพนัดในแอป</p><input type="file" id="documents" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple class="hidden" aria-label="เลือกรูปใบนัด">
-<button type="button" id="addAppointmentPhoto" class="secondary">+ เพิ่มรูปใบนัด</button><p id="filehelp" class="help" role="status">ยังไม่ได้เลือกรูป · รูปนี้ใช้ดูตัวอย่างในเครื่องเท่านั้น ยังไม่บันทึกจริง</p><div id="appointmentPhotoList" class="appointment-photo-list"></div></div>
+<button type="button" id="addAppointmentPhoto" class="secondary">+ เพิ่มรูปใบนัด</button><p id="filehelp" class="help" role="status">0/2 รูป · ยังไม่บันทึกจริง</p><div id="appointmentPhotoList" class="appointment-photo-list"></div></div>
 <dialog id="appointmentPhotoDialog" aria-label="ดูรูปใบนัด"><img id="appointmentPhotoLarge" alt="รูปใบนัดที่เลือก"><button type="button" id="closeAppointmentPhoto" class="secondary">ปิดรูป</button></dialog>
 </section>
 <label for="hospitalSearch">โรงพยาบาล / สถานพยาบาล <span class="required-star" aria-label="จำเป็นต้องกรอก">*</span></label><input id="hospitalSearch" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="hospitalSearchResults" autocomplete="off" placeholder="พิมพ์ค้นหาแล้วแตะเลือกรายการ"><div id="hospitalSearchResults" class="combo-results hidden" role="listbox"></div><select id="providerOrg" class="hidden" aria-hidden="true" tabindex="-1" disabled></select>
@@ -42,7 +82,7 @@
 <label for="arrival_lead_minutes">ควรไปถึงก่อนนัดกี่นาที</label><input id="arrival_lead_minutes" type="number" min="0" max="720" step="5"></details>
 <details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล (ถ้ามี)</option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
 <details id="outcomeDetails" class="hidden"><summary>📋 บันทึกผลการไปโรงพยาบาล (ย้อนหลัง)</summary>
-<label for="visit_outcome_notes">ครั้งนี้ไปพบแพทย์เรื่องอะไร และได้คำแนะนำอะไร</label><textarea id="visit_outcome_notes" maxlength="1000" rows="2"></textarea>
+<label for="visit_outcome_notes">ผลการไปพบแพทย์และคำแนะนำ (ถ้าทราบ)</label><textarea id="visit_outcome_notes" maxlength="1000" rows="2"></textarea>
 <label for="diagnosis_summary">การวินิจฉัยตามเอกสาร</label><textarea id="diagnosis_summary" maxlength="1000" rows="2"></textarea>
 <label for="treatment_summary">การรักษาที่ได้รับ</label><textarea id="treatment_summary" maxlength="1000" rows="2"></textarea>
 <label for="test_results_summary">ผลตรวจ</label><textarea id="test_results_summary" maxlength="1000" rows="2"></textarea>
@@ -50,7 +90,7 @@
 <label for="next_steps">สิ่งที่ต้องทำต่อ</label><textarea id="next_steps" maxlength="1000" rows="2"></textarea>
 <p class="help">บันทึกตามข้อมูลจริง ไม่ถือเป็นผลที่แพทย์ยืนยันโดยอัตโนมัติ</p></details>
 <details id="procedurePreviewBox"><summary>🧪 รายการตรวจหรือหัตถการ (ทดลอง)</summary><p class="help">พิมพ์รายการที่ทราบได้หลายข้อ ข้อมูลนี้ยังไม่ใช่ทะเบียนตรวจที่แพทย์ยืนยันและยังไม่บันทึกลงระบบ</p><label for="procedureEntry">ชื่อการตรวจหรือหัตถการ</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
-<details id="relatedAppointmentBox"><summary>🔗 นัดนี้ต่อเนื่องจากครั้งไหน? (ถ้ามี)</summary>
+<details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดครั้งก่อน (ถ้ามี)</summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
 <p id="relatedStatus" class="help" role="status">กำลังตรวจประวัตินัด…</p><button type="button" id="relatedClear" class="secondary hidden" style="margin-bottom:10px">ไม่เชื่อมนัดเดิม</button><div id="relatedCards" class="appointment-cards" role="group" aria-label="รายการนัดเดิม"></div>
@@ -65,7 +105,7 @@
 <p class="help">เอกสาร งานมอบหมาย และแจ้งเตือนยังรอ API ตรวจสิทธิ์ จึงยังไม่เปิดการบันทึก</p>
 <input type="hidden" id="doctor"></div><label for="purpose">ชื่อนัดหมาย</label><input id="purpose" type="text" maxlength="80" placeholder="เช่น ปวดเข่า, ฟังผลเลือด, รับยาเดิม" autocomplete="off"><p class="help">ตั้งชื่อสั้น ๆ เพื่อให้รู้ว่าไปโรงพยาบาลเรื่องอะไร</p><p id="historicalGuide" class="help hidden" role="status">บันทึกการไปพบแพทย์ย้อนหลัง: ระบุเหตุผลที่ไปและผลหลังพบแพทย์ตามข้อมูลที่ทราบ ไม่ต้องกรอกเรื่องที่อยากบอกแพทย์ในอนาคต</p><label id="previsitLabel" for="previsitSymptoms">อาการหรือเรื่องที่อยากบอกหมอ (ถ้ามี)</label><textarea id="previsitSymptoms" maxlength="1000" rows="2" placeholder="เช่น ปวดเข่ามา 3 วัน หรือมีคำถามเรื่องยา"></textarea><p id="previsitHelp" class="help">ข้อมูลที่ผู้ใช้แจ้งเอง ยังไม่ใช่การวินิจฉัยจากแพทย์ และยังไม่บันทึกในโหมดทดลอง</p><label id="additionalNoteLabel" for="additionalNote">รายละเอียดเพิ่มเติม (ถ้ามี)</label><textarea id="additionalNote" maxlength="1000" rows="3" placeholder="อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม"></textarea>
 <div id="checklistBox"><label for="prepEntry">เตรียมอะไรไปบ้าง (Checklist)</label><div class="actions"><input id="prepEntry" maxlength="160" placeholder="พิมพ์รายการที่ต้องเตรียม"><button id="prepAdd" type="button">+ เพิ่ม</button></div><p id="prepProgress" role="status">เตรียมแล้ว 0/0 รายการ</p><div id="prepItems"></div></div><input type="hidden" id="prep">
-<p class="help">ชื่อโรงพยาบาล แผนก และแพทย์จะเติมอัตโนมัติจากทะเบียนที่ตรวจสอบแล้ว หากยังไม่มีชื่อแพทย์ในทะเบียน สามารถบันทึกนัดโดยไม่ระบุแพทย์ได้เมื่อเปิดระบบจริง</p>
+<p class="help" id="registryHelp">ชื่อโรงพยาบาล แผนก และแพทย์จะเติมอัตโนมัติจากทะเบียนที่ตรวจสอบแล้ว หากยังไม่มีชื่อแพทย์ในทะเบียน สามารถบันทึกนัดโดยไม่ระบุแพทย์ได้เมื่อเปิดระบบจริง</p>
 <p class="error" id="error" role="alert"></p><div class="actions"><button id="review" type="button" disabled>ตรวจทานข้อมูล</button></div>
 </section>
 <section id="confirmation" class="box hidden"><h2>ตรวจทานก่อนบันทึก</h2><dl id="preview"></dl><p class="notice" id="saveStatus" role="status">ตรวจทานข้อมูลได้ แต่ยังไม่สามารถบันทึกนัดจริงในโหมดทดลองนี้</p><div class="actions"><button id="back" class="secondary">ย้อนกลับไปแก้ไข</button><button id="save" disabled type="button">บันทึกนัด (ยังไม่เปิด)</button></div></section>
@@ -374,7 +414,7 @@ $('relatedQuery').addEventListener('input',()=>{relatedExpanded=false;renderRela
 const editor=$('editor'),scenario=$('scenario');
 const sourceBox=$('relatedAppointmentBox');
 editor.insertBefore(sourceBox,$('date').previousElementSibling);
-sourceBox.open=true;sourceBox.hidden=!memberId;
+sourceBox.open=false;sourceBox.hidden=!memberId;
 // Three clearly visible appointment types; keep the original select as the single source of state.
 const scenarioChoices=[
  ['booked','📅','นัดตามใบนัด','มีวันนัดจากโรงพยาบาล'],
@@ -390,8 +430,32 @@ for(const [value,symbol,name,description] of scenarioChoices){
  button.addEventListener('click',()=>{$('scenario').value=value;$('scenario').dispatchEvent(new Event('change',{bubbles:true}));});
  scenarioGrid.append(button);
 }
-function syncScenarioCards(){for(const button of scenarioGrid.children)button.setAttribute('aria-pressed',String(button.dataset.scenario===$('scenario').value));sourceBox.open=true;}
+function syncScenarioCards(){for(const button of scenarioGrid.children)button.setAttribute('aria-pressed',String(button.dataset.scenario===$('scenario').value));}
 $('scenario').addEventListener('change',syncScenarioCards);syncScenarioCards();
+// One set of inputs in both entry modes: disclosure never discards data.
+function moveFieldsIntoDisclosure(start,end,panel){
+ let node=start;while(node){const next=node.nextSibling;panel.append(node);if(node===end)break;node=next;}
+}
+const providerExtras=document.createElement('details');providerExtras.id='providerExtras';providerExtras.className='progressive-extras';
+const providerSummary=document.createElement('summary');providerSummary.textContent='แผนกและแพทย์ (ถ้ามี)';providerExtras.append(providerSummary);
+const unitFieldLabel=document.querySelector('label[for="unitSearch"]');unitFieldLabel.before(providerExtras);
+moveFieldsIntoDisclosure(unitFieldLabel,$('doctorHint'),providerExtras);
+const outcome=$('outcomeDetails');$('historicalGuide').before(outcome);
+const outcomeExtras=document.createElement('details');outcomeExtras.id='outcomeExtras';outcomeExtras.className='progressive-extras';
+const outcomeSummary=document.createElement('summary');outcomeSummary.textContent='ผลตรวจ การรักษา และแผนยา (ถ้ามี)';outcomeExtras.append(outcomeSummary);outcome.append(outcomeExtras);
+moveFieldsIntoDisclosure(document.querySelector('label[for="diagnosis_summary"]'),outcome.querySelector('p.help'),outcomeExtras);
+const simpleExtras=document.createElement('details');simpleExtras.id='simpleExtras';simpleExtras.className='progressive-extras';
+const simpleSummary=document.createElement('summary');simpleSummary.textContent='เพิ่มอาการ รายละเอียด และสิ่งที่ต้องเตรียม (ถ้ามี)';simpleExtras.append(simpleSummary);
+$('historicalGuide').before(simpleExtras);
+moveFieldsIntoDisclosure($('historicalGuide'),$('checklistBox'),simpleExtras);
+function updateProgressiveLayout(){
+ const simple=$('detail').value==='simple';$('editor').classList.toggle('simple-ui',simple);
+ for(const panel of [providerExtras,simpleExtras,outcomeExtras]){
+  const filled=Array.from(panel.querySelectorAll('input,textarea,select')).some(el=>el.type!=='hidden'&&!!String(el.value||'').trim());
+  if(!simple||filled)panel.open=true;
+ }
+}
+$('detail').addEventListener('change',updateProgressiveLayout);updateProgressiveLayout();
 // Section markers preserve the original DOM order and all established form controls.
 function sectionHeading(beforeId,title){const field=$(beforeId);if(!field)return;const label=field.previousElementSibling;const anchor=label?.tagName==='LABEL'?label:field;const heading=document.createElement('h3');heading.className='appointment-section-title';heading.textContent=title;anchor.before(heading);}
 sectionHeading('date','2. วันและเวลานัด');
