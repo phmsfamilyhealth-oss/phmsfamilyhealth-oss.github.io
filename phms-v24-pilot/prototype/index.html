@@ -2,7 +2,7 @@
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PHMS — เพิ่มนัดหมาย</title><meta name="phms-liff-id" content="2011619364-D0xazyre"><meta name="phms-confirm-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-confirm"><meta name="phms-read-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-read">
 <style>
-:root{font-family:system-ui,"Noto Sans Thai",sans-serif;color:#17324d;background:#f3f7fc}*{box-sizing:border-box}main{max-width:620px;margin:auto;padding:20px 14px 40px}h1{font-size:1.55rem}h2{font-size:1.2rem}p{line-height:1.55}.box{background:#fff;border:1px solid #dae4ee;border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 1px 3px #12263a0c}label{display:block;font-weight:650;margin:14px 0 6px}input,select,textarea,button{font:inherit}input,select,textarea{width:100%;min-height:46px;padding:10px;border:1px solid #9eaebf;border-radius:9px}button{min-height:48px;border-radius:10px;padding:10px 18px;border:0;background:#1666a7;color:white;font-weight:700}button:disabled{background:#9ba9b4}button.secondary{background:#e6eef6;color:#17324d}.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.help{color:#526579;font-size:.92rem}.error{color:#a51e2c}.hidden{display:none}.checklist-row{display:flex;align-items:center;gap:8px;margin:8px 0}.checklist-row input[type=checkbox]{width:24px;min-height:24px;flex:none}.checklist-row input:not([type=checkbox]){min-width:0;flex:1}.checklist-row button{flex:none}.checklist-row button.checklist-delete{width:52px;min-width:52px;min-height:48px;padding:8px;background:#913b4b;color:#fff;font-size:1.25rem;display:inline-flex;align-items:center;justify-content:center}.checklist-row button.checklist-delete:hover,.checklist-row button.checklist-delete:focus-visible{background:#7d2f40}.checklist-row button.checklist-delete:focus-visible{outline:3px solid #17324d;outline-offset:2px}.actions #prepEntry{flex:1;min-width:160px}.combo-results{border:1px solid #9eaebf;border-radius:10px;max-height:240px;overflow-y:auto;background:#fff}.combo-results button{display:block;width:100%;border-radius:0;text-align:left;background:white;color:#17324d;border-bottom:1px solid #dae4ee;min-height:48px}.combo-results button:focus{outline:3px solid #1666a7}.combo-results .unavailable{color:#526579;padding:12px}.thai-preview{margin:6px 2px 0;font-size:.9rem;line-height:1.5;color:#345678}.notice{background:#fff2d8;border:1px solid #d9ad54;padding:12px;border-radius:10px}dl{display:grid;grid-template-columns:120px 1fr;gap:10px}dd{margin:0;overflow-wrap:anywhere}
+:root{font-family:system-ui,"Noto Sans Thai",sans-serif;color:#17324d;background:#f3f7fc}*{box-sizing:border-box}main{max-width:620px;margin:auto;padding:20px 14px 40px}h1{font-size:1.55rem}h2{font-size:1.2rem}p{line-height:1.55}.box{background:#fff;border:1px solid #dae4ee;border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 1px 3px #12263a0c}label{display:block;font-weight:650;margin:14px 0 6px}input,select,textarea,button{font:inherit}input,select,textarea{width:100%;min-height:46px;padding:10px;border:1px solid #9eaebf;border-radius:9px}button{min-height:48px;border-radius:10px;padding:10px 18px;border:0;background:#1666a7;color:white;font-weight:700}button:disabled{background:#9ba9b4}button.secondary{background:#e6eef6;color:#17324d}.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.help{color:#526579;font-size:.92rem}.error{color:#a51e2c}.hidden{display:none}.checklist-row{display:flex;align-items:center;gap:8px;margin:8px 0}.checklist-row input[type=checkbox]{width:24px;min-height:24px;flex:none}.checklist-row input:not([type=checkbox]){min-width:0;flex:1}.checklist-row button{flex:none}.checklist-row button.checklist-delete{width:52px;min-width:52px;min-height:48px;padding:8px;background:#913b4b;color:#fff;font-size:1.25rem;display:inline-flex;align-items:center;justify-content:center}.checklist-row button.checklist-delete:hover,.checklist-row button.checklist-delete:focus-visible{background:#7d2f40}.checklist-row button.checklist-delete:focus-visible{outline:3px solid #17324d;outline-offset:2px}.actions #prepEntry{flex:1;min-width:160px}.combo-results{border:1px solid #9eaebf;border-radius:10px;max-height:240px;overflow-y:auto;background:#fff}.combo-results button{display:block;width:100%;border-radius:0;text-align:left;background:white;color:#17324d;border-bottom:1px solid #dae4ee;min-height:48px}.combo-results button:focus{outline:3px solid #1666a7}.combo-results .unavailable{color:#526579;padding:12px}.appointment-cards{display:grid;gap:10px;margin:12px 0}.appointment-card{background:#fff;border:1px solid #b8c7d5;color:#17324d;text-align:left;width:100%;padding:14px;border-radius:12px;font-weight:400}.appointment-card strong{display:block;font-weight:700}.appointment-card span{display:block;color:#526579;font-size:.9rem;margin-top:5px}.appointment-card[aria-pressed="true"]{border:2px solid #1666a7;background:#eaf4ff}.thai-preview{margin:6px 2px 0;font-size:.9rem;line-height:1.5;color:#345678}.notice{background:#fff2d8;border:1px solid #d9ad54;padding:12px;border-radius:10px}dl{display:grid;grid-template-columns:120px 1fr;gap:10px}dd{margin:0;overflow-wrap:anywhere}
 </style></head><body><main><aside role="status" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 โหมดทดลอง — ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด</label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -41,11 +41,14 @@
 <p class="help">บันทึกตามข้อมูลจริง ไม่ถือเป็นผลที่แพทย์ยืนยันโดยอัตโนมัติ</p></details>
 <details id="procedurePreviewBox"><summary>🧪 รายการตรวจหรือหัตถการ (ทดลอง)</summary><p class="help">พิมพ์รายการที่ทราบได้หลายข้อ ข้อมูลนี้ยังไม่ใช่ทะเบียนตรวจที่แพทย์ยืนยันและยังไม่บันทึกลงระบบ</p><label for="procedureEntry">ชื่อการตรวจหรือหัตถการ</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 นัดนี้ต่อเนื่องจากครั้งไหน? (ถ้ามี)</summary>
-<p class="help">เลือกรายการนัดเดิมของบุคคลนี้เท่านั้น ข้อมูลความสัมพันธ์ยังไม่ถูกบันทึก</p>
-<div class="actions"><button type="button" id="relatedSearch" class="secondary">นัดที่เกี่ยวข้อง</button><button type="button" id="relatedAll" class="secondary">ดูนัดทั้งหมดของบุคคลนี้</button></div>
-<label for="relatedQuery">ค้นหานัดเก่า</label><input id="relatedQuery" placeholder="ค้นหาชื่อนัด โรงพยาบาล หรือแผนก">
-<label for="relatedSelect">เลือกนัดครั้งก่อนเพื่อเติมรายละเอียดอัตโนมัติ</label><select id="relatedSelect" disabled><option value="">ยังไม่ได้โหลดนัดเดิม</option></select>
-<p id="relatedStatus" class="help" role="status">เลือกบุคคลก่อนค้นหานัดเดิม</p></details>
+<p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
+<label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
+<div id="relatedCards" class="appointment-cards" role="group" aria-label="รายการนัดเดิม"></div>
+<button type="button" id="relatedMore" class="secondary hidden" style="width:100%">ดูนัดเพิ่มเติม</button>
+<p id="relatedStatus" class="help" role="status">เลือกบุคคลเพื่อค้นหานัดเดิม</p>
+<select id="relatedSelect" class="hidden" aria-label="นัดต้นทาง" disabled><option value="">ไม่เชื่อมนัดเดิม</option></select>
+<button type="button" id="relatedClear" class="secondary hidden">ไม่เชื่อมนัดเดิม</button>
+</details>
 <details id="contactRescheduleBox"><summary>☎️ ติดต่อโรงพยาบาลและเลื่อนนัด (อ่านข้อมูลจริง)</summary>
 <p class="help">ติดต่อเพื่อขอเลื่อนนัดได้ แต่ระบบจะไม่เปลี่ยนวันนัดเดิมจนกว่าโรงพยาบาลจะยืนยัน</p>
 <button type="button" id="contactLoad" class="secondary">ดูข้อมูลติดต่อของแผนกนี้</button><div id="contactDetails" role="status" class="help">ยังไม่ได้โหลดข้อมูลติดต่อ</div>
@@ -84,7 +87,7 @@ if(people.error==='unauthenticated'){
  retry.style.marginTop='12px';retry.addEventListener('click',()=>{window.liff.logout();window.liff.login({redirectUri:location.href});});
  status.append(document.createElement('br'),retry);
 }
-return;}const picker=document.getElementById('personPicker'),select=document.getElementById('personSelect');select.replaceChildren(new Option('เลือกบุคคล',''),...people.people.map(x=>new Option(x.name,x.id)));picker.classList.remove('hidden');if(memberId&&!people.people.some(x=>x.id===memberId))memberId='';if(memberId)select.value=memberId;document.getElementById('selectedPersonLabel').textContent=memberId?'เพิ่มนัดให้: '+select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';select.addEventListener('change',()=>{memberId=select.value;document.getElementById('selectedPersonLabel').textContent=memberId?'เพิ่มนัดให้: '+select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';authorizedCatalog=null;document.getElementById('review').disabled=true;document.getElementById('save').disabled=true;if(memberId)loadSelectedCatalog(window.liff,readEndpoint);else{refreshProviderPicker();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';}});if(!memberId){document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';return;}const catalogResult=await makeLiffProviderCatalogClient({liff:window.liff,endpoint:readEndpoint})(memberId);if(catalogResult.ok&&catalogResult.catalog.organizations.length){authorizedCatalog=catalogResult.catalog;refreshProviderPicker();syncProviderNames();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกโรงพยาบาลและตรวจทานนัด';document.getElementById('review').disabled=false;document.getElementById('save').disabled=true;document.getElementById('save').textContent='บันทึกนัด (ยังไม่เปิด)';}else{document.getElementById('connectionStatus').textContent='ยังไม่พร้อมบันทึก';document.getElementById('error').textContent='ยังโหลดทะเบียนโรงพยาบาลไม่ได้ กรุณาลองใหม่เมื่อระบบพร้อม';document.getElementById('save').disabled=true;}}catch{confirmClient=null;document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE ไม่สำเร็จ';document.getElementById('error').textContent='ไม่สามารถเชื่อมต่อ LINE ได้ กรุณาเปิดจาก LINE แล้วลองอีกครั้ง';}}
+return;}const picker=document.getElementById('personPicker'),select=document.getElementById('personSelect');select.replaceChildren(new Option('เลือกบุคคล',''),...people.people.map(x=>new Option(x.name,x.id)));picker.classList.remove('hidden');if(memberId&&!people.people.some(x=>x.id===memberId))memberId='';if(memberId)select.value=memberId;document.getElementById('selectedPersonLabel').textContent=memberId?'เพิ่มนัดให้: '+select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';select.addEventListener('change',()=>{memberId=select.value;document.getElementById('selectedPersonLabel').textContent=memberId?'เพิ่มนัดให้: '+select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';authorizedCatalog=null;relatedAllItems=[];sourceAppointments=new Map();relatedLoadGeneration++;$('relatedCards').replaceChildren();$('relatedClear').classList.add('hidden');document.getElementById('review').disabled=true;document.getElementById('save').disabled=true;if(memberId)loadSelectedCatalog(window.liff,readEndpoint);else{refreshProviderPicker();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';}});if(!memberId){document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';return;}const catalogResult=await makeLiffProviderCatalogClient({liff:window.liff,endpoint:readEndpoint})(memberId);if(catalogResult.ok&&catalogResult.catalog.organizations.length){authorizedCatalog=catalogResult.catalog;refreshProviderPicker();syncProviderNames();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกโรงพยาบาลและตรวจทานนัด';document.getElementById('review').disabled=false;document.getElementById('save').disabled=true;document.getElementById('save').textContent='บันทึกนัด (ยังไม่เปิด)';}else{document.getElementById('connectionStatus').textContent='ยังไม่พร้อมบันทึก';document.getElementById('error').textContent='ยังโหลดทะเบียนโรงพยาบาลไม่ได้ กรุณาลองใหม่เมื่อระบบพร้อม';document.getElementById('save').disabled=true;}}catch{confirmClient=null;document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE ไม่สำเร็จ';document.getElementById('error').textContent='ไม่สามารถเชื่อมต่อ LINE ได้ กรุณาเปิดจาก LINE แล้วลองอีกครั้ง';}}
 initializeLiff();
 // No fake catalog. A verified backend integration will invoke setAuthorizedCatalog after LINE authentication.
 let authorizedCatalog=null;
@@ -186,16 +189,44 @@ async function previewReadApi(action,parameters={}){
 let sourceAppointments=new Map();
 function refreshTopicSuggestions(){const topics=[...new Set([...sourceAppointments.values()].map(x=>String(x.care_topic||'').trim()).filter(Boolean))];$('careTopicSuggestions').replaceChildren(...topics.slice(0,100).map(x=>new Option(x)));}
 function applySourceAppointment(){const src=sourceAppointments.get($('relatedSelect').value);if(!src)return;const assign=(id,value)=>{if(value&&!$(id).value.trim())$(id).value=String(value)};assign('purpose',src.title);assign('care_topic',src.care_topic);assign('hospitalSearch',src.hospital_name);assign('unitSearch',src.department);assign('clinicianSearch',src.doctor_name);const catalog=authorizedCatalog;if(catalog){const org=catalog.organizations.find(x=>x.id===src.organization_id);if(org){$('providerOrg').value=org.id;comboState.hospital.selectedItem={value:org.id,label:org.display_name||org.name};refreshProviderPicker('providerOrg');$('hospitalSearch').value=org.display_name||org.name;}const unit=catalog.units.find(x=>x.id===src.service_unit_id);if(unit){$('providerUnit').value=unit.id;comboState.unit.selectedItem={value:unit.id,label:unit.name};refreshProviderPicker('providerUnit');$('unitSearch').value=unit.name;}const clinician=catalog.clinicians.find(x=>x.id===src.clinician_id);if(clinician){$('providerClinician').value=clinician.id;$('clinicianSearch').value=clinician.display_name||clinician.name;}syncProviderNames();} $('relatedStatus').textContent='เติมข้อมูลจากนัดครั้งก่อนแล้ว — ตรวจสอบและแก้ไขข้อมูลสำหรับครั้งใหม่ได้ โดยวันที่และเวลาจะไม่ถูกคัดลอก';}
-async function loadRelatedAppointments(mode='related'){
- const status=$('relatedStatus'),picker=$('relatedSelect'),chosenPerson=memberId;
+let relatedAllItems=[],relatedExpanded=false,relatedLoadGeneration=0;
+function thaiSourceDate(value){
+ const raw=String(value||'').slice(0,10);const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+ if(!match)return 'ไม่ระบุวันที่';
+ const [y,m,d]=[Number(match[1]),Number(match[2]),Number(match[3])];
+ const date=new Date(Date.UTC(y,m-1,d));if(date.getUTCFullYear()!==y||date.getUTCMonth()!==m-1||date.getUTCDate()!==d)return 'ไม่ระบุวันที่';
+ return d+' '+TH_MONTHS[m-1]+' '+(y+543);
+}
+function renderRelatedCards(){
+ const selected=$('relatedSelect').value,query=$('relatedQuery').value.trim().toLocaleLowerCase('th-TH');
+ const filtered=relatedAllItems.filter(a=>[a.title,a.hospital_name,a.department,a.care_topic,a.doctor_name,thaiSourceDate(a.planned_visit_date||a.appointment_at)].some(v=>String(v||'').toLocaleLowerCase('th-TH').includes(query)));
+ const visible=relatedExpanded?filtered:filtered.slice(0,3),container=$('relatedCards');container.replaceChildren();
+ for(const a of visible){
+  const button=document.createElement('button');button.type='button';button.className='appointment-card';button.setAttribute('aria-pressed',String(selected===a.id));
+  const title=document.createElement('strong');title.textContent=(selected===a.id?'✓ ':'')+(a.title||'นัดหมาย');
+  const detail=document.createElement('span');detail.textContent=thaiSourceDate(a.planned_visit_date||a.appointment_at)+' · '+(a.hospital_name||'ไม่ระบุโรงพยาบาล');
+  button.append(title,detail);
+  if(a.department){const department=document.createElement('span');department.textContent=a.department;button.append(department);}
+  button.addEventListener('click',()=>{$('relatedSelect').value=a.id;applySourceAppointment();renderRelatedCards();$('relatedClear').classList.remove('hidden');});
+  container.append(button);
+ }
+ $('relatedMore').classList.toggle('hidden',filtered.length<=3);
+ $('relatedMore').textContent=relatedExpanded?'แสดงน้อยลง':'ดูนัดเพิ่มเติม ('+(filtered.length-3)+')';
+ $('relatedStatus').textContent=filtered.length?'พบ '+filtered.length+' นัด'+(selected?' — เลือกนัดต้นทางแล้ว ตรวจสอบข้อมูลที่เติมด้านล่าง':' — เลือกนัดครั้งก่อนเพื่อเติมรายละเอียด'):'ไม่พบนัดเดิมที่ตรงกับคำค้น';
+}
+async function loadRelatedAppointments(){
+ const status=$('relatedStatus'),chosenPerson=memberId,sequence=++relatedLoadGeneration;
  if(!chosenPerson){status.textContent='กรุณาเลือกบุคคลก่อน';return;}
- status.textContent='กำลังอ่านนัดเดิมที่ได้รับสิทธิ์…';picker.disabled=true;
- const response=await previewReadApi('appointment_sources',{mode,query:$('relatedQuery').value.trim(),organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:$('providerClinician').value,careTopic:$('care_topic').value});
- if(chosenPerson!==memberId)return;
- picker.replaceChildren(new Option('เลือกนัดต้นทาง (ถ้ามี)',''));
+ status.textContent='กำลังโหลดนัดเดิมที่ได้รับสิทธิ์…';
+ const response=await previewReadApi('appointment_sources',{mode:'related',query:'',organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:$('providerClinician').value,careTopic:$('care_topic').value});
+ if(chosenPerson!==memberId||sequence!==relatedLoadGeneration)return;
  if(!response.ok){status.textContent='โหลดนัดเดิมไม่สำเร็จ ('+response.error+')';return;}
- sourceAppointments=new Map();for(const x of response.appointments||[]){if(typeof x.id!=='string')continue;sourceAppointments.set(x.id,x);picker.add(new Option([x.planned_visit_date||x.appointment_at||'',x.title||'นัดหมาย',x.hospital_name||''].filter(Boolean).join(' — '),x.id));}refreshTopicSuggestions();
- picker.disabled=false;status.textContent=response.appointments?.length?'พบ '+response.appointments.length+' นัด — เลือกนัดต้นทางได้':'ยังไม่พบนัดเดิมที่ตรงกับคำค้น';
+ sourceAppointments=new Map();relatedAllItems=[];
+ for(const a of response.appointments||[]){if(typeof a.id!=='string')continue;sourceAppointments.set(a.id,a);relatedAllItems.push(a);}
+ const picker=$('relatedSelect'),prior=picker.value;
+ picker.replaceChildren(new Option('ไม่เชื่อมนัดเดิม',''),...relatedAllItems.map(a=>new Option(a.title||'นัดหมาย',a.id)));picker.disabled=false;
+ if(sourceAppointments.has(prior))picker.value=prior;
+ refreshTopicSuggestions();relatedExpanded=false;renderRelatedCards();
 }
 async function loadRescheduleContacts(){
  const box=$('contactDetails'),org=$('providerOrg').value,unit=$('providerUnit').value,chosenPerson=memberId;
@@ -209,11 +240,11 @@ async function loadRescheduleContacts(){
  for(const [name,value] of parts){if(!value)continue;const p=document.createElement('p');p.textContent=name+': '+String(value);box.append(p);}
  if(!box.children.length)box.textContent='ยังไม่มีข้อมูลติดต่อที่ตรวจสอบแล้ว';
 }
-$('relatedSelect').addEventListener('change',applySourceAppointment);
-$('relatedSearch').addEventListener('click',()=>loadRelatedAppointments('related'));
-$('relatedAll').addEventListener('click',()=>loadRelatedAppointments('all'));
+$('relatedMore').addEventListener('click',()=>{relatedExpanded=!relatedExpanded;renderRelatedCards();});
+$('relatedClear').addEventListener('click',()=>{$('relatedSelect').value='';$('relatedClear').classList.add('hidden');renderRelatedCards();});
+$('relatedAppointmentBox').addEventListener('toggle',()=>{if($('relatedAppointmentBox').open&&memberId&&!relatedAllItems.length)loadRelatedAppointments();});
 $('contactLoad').addEventListener('click',loadRescheduleContacts);
-$('relatedQuery').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229){event.preventDefault();loadRelatedAppointments('all');}});
+$('relatedQuery').addEventListener('input',()=>{relatedExpanded=false;renderRelatedCards();});
 // Order fields by the patient's task, not the database schema.
 const editor=$('editor'),scenario=$('scenario');
 const sourceBox=$('relatedAppointmentBox');
