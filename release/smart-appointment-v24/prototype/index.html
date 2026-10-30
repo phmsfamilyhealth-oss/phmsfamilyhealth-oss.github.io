@@ -39,6 +39,7 @@
 <label for="medication_plan_notes">แผนยา</label><textarea id="medication_plan_notes" maxlength="1000" rows="2"></textarea>
 <label for="next_steps">สิ่งที่ต้องทำต่อ</label><textarea id="next_steps" maxlength="1000" rows="2"></textarea>
 <p class="help">บันทึกตามข้อมูลจริง ไม่ถือเป็นผลที่แพทย์ยืนยันโดยอัตโนมัติ</p></details>
+<details id="procedurePreviewBox"><summary>🧪 รายการตรวจหรือหัตถการ (ทดลอง)</summary><p class="help">พิมพ์รายการที่ทราบได้หลายข้อ ข้อมูลนี้ยังไม่ใช่ทะเบียนตรวจที่แพทย์ยืนยันและยังไม่บันทึกลงระบบ</p><label for="procedureEntry">ชื่อการตรวจหรือหัตถการ</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดเดิม (ทดลองอ่านข้อมูลจริง)</summary>
 <p class="help">เลือกรายการนัดเดิมของบุคคลนี้เท่านั้น ข้อมูลความสัมพันธ์ยังไม่ถูกบันทึก</p>
 <div class="actions"><button type="button" id="relatedSearch" class="secondary">นัดที่เกี่ยวข้อง</button><button type="button" id="relatedAll" class="secondary">ดูนัดทั้งหมดของบุคคลนี้</button></div>
