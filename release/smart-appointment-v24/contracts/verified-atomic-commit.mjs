@@ -10,7 +10,7 @@ export function makeVerifiedAtomicCommit(adapters){
   // PostgreSQL adapter MUST recheck rights, bind operationKey atomically and write prepared.row.
   const write=await adapters.commitInSingleTransaction({...command,preparedRow:prepared.row});
   if(!write?.appointmentId)return null;
-  const verified=await verifiedAppointmentReadback({appointmentId:write.appointmentId,actorId:command.actorId,subjectId:command.subjectId,familyId:command.familyId},adapters);
+  const verified=await verifiedAppointmentReadback({appointmentId:write.appointmentId,actorId:command.actorId,subjectId:command.subjectId,familyId:command.familyId,expectedRow:prepared.row},adapters);
   if(!verified.ok)return {appointmentId:write.appointmentId,authorizedReadback:false};
   return {appointmentId:write.appointmentId,authorizedReadback:true,idempotentReplay:write.idempotentReplay===true};
  };
