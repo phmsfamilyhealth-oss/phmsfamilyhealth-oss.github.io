@@ -6,7 +6,7 @@ CREATE SCHEMA private;
 CREATE TABLE public.appointments(
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),family_id uuid,family_person_id uuid,person_id uuid NOT NULL,created_by uuid,
  appointment_type text NOT NULL,visit_mode text,visit_time_known boolean NOT NULL DEFAULT true,status text,planned_visit_date date,
- appointment_at timestamptz,hospital_name text,department text,doctor_name text,note text,preparation_notes text
+ appointment_at timestamptz,hospital_name text,department text,doctor_name text,title text,note text,preparation_notes text
 );
 CREATE TABLE public.family_persons(id uuid PRIMARY KEY,family_id uuid NOT NULL,person_id uuid NOT NULL);
 CREATE TABLE public.appointment_tasks(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),appointment_id uuid REFERENCES public.appointments(id),task_type text NOT NULL,title text NOT NULL,instruction text,status text NOT NULL,created_by uuid);
