@@ -30,6 +30,14 @@ jobs:
                 curl --fail --location --silent --show-error --max-time 15 -o /tmp/phms-check "$base/$path"
               done
               grep -q 'name="phms-liff-id" content="2011619364-D0xazyre"' /tmp/phms-check
+              for attempt in $(seq 1 24); do
+                if grep -q 'id="prepEntry"' /tmp/phms-check && ! grep -q '<textarea id="prep"' /tmp/phms-check; then break; fi
+                sleep 5
+                curl --fail --location --silent --show-error --max-time 15 -o /tmp/phms-check "$base/$path?checklist-release=20261030"
+              done
+              grep -q 'id="prepEntry"' /tmp/phms-check
+              grep -q 'id="prepAdd"' /tmp/phms-check
+              if grep -q '<textarea id="prep"' /tmp/phms-check; then echo 'ERROR: old checklist still published'; exit 1; fi
             else
               grep -Eq 'export |import ' /tmp/phms-check
             fi
