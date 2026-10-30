@@ -44,7 +44,9 @@ jobs:
               if grep -q 'id="relatedAll"' /tmp/phms-check; then echo 'ERROR: legacy appointment dropdown controls still published'; exit 1; fi
               grep -q 'id="contactLoad"' /tmp/phms-check
               grep -q 'id="procedureAdd"' /tmp/phms-check
-              grep -q 'id="documents" multiple disabled' /tmp/phms-check
+              grep -q 'id="appointmentPhotoPicker"' /tmp/phms-check
+          grep -q 'id="appointmentPhotoList"' /tmp/phms-check
+          grep -q 'id="hasAppointmentPhotos"' /tmp/phms-check
               grep -q 'id="save" disabled' /tmp/phms-check
               if grep -q '<textarea id="prep"' /tmp/phms-check; then echo 'ERROR: old checklist still published'; exit 1; fi
             else
