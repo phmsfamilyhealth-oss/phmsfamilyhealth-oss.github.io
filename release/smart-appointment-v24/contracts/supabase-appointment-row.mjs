@@ -19,12 +19,15 @@ export function mapAppointmentInsert(command){
  if(d.preparation_notes!=null&&typeof d.preparation_notes!=='string')return {ok:false,error:'invalid_preparation_notes'};
  if(typeof d.preparation_notes==='string'&&d.preparation_notes.length>4000)return {ok:false,error:'appointment_text_too_long'};
  if((d.preparation_tasks||[]).length>0&&d.preparation_notes?.trim())return {ok:false,error:'checklist_dual_source_not_supported'};
+ const extras=d.extended_details??{};if(typeof extras!=='object'||extras===null||Array.isArray(extras)||Object.keys(extras).some(k=>!Object.hasOwn({"hospital_hn":80,"hospital_vn":80,"location_detail":240,"contact_phone":40,"care_topic":500,"coverage_type":100,"arrival_lead_minutes":4,"visit_outcome_notes":1000,"diagnosis_summary":1000,"treatment_summary":1000,"test_results_summary":1000,"medication_plan_notes":1000,"next_steps":1000,"walk_in_reason":500},k)))return {ok:false,error:'invalid_extended_details'};
+ if(extras.arrival_lead_minutes!==undefined&&(!/^\\d+$/.test(String(extras.arrival_lead_minutes))||Number(extras.arrival_lead_minutes)>1440))return {ok:false,error:'invalid_arrival_lead'};
  const limits=[['hospital_name',160],['department',160],['doctor_name',160],['title',80],['note',1000]];
  if(limits.some(([key,max])=>typeof d[key]==='string'&&d[key].length>max))return {ok:false,error:'appointment_text_too_long'};
  if((d.preparation_tasks||[]).some(t=>typeof t.instruction==='string'&&t.instruction.length>1000))return {ok:false,error:'checklist_instruction_too_long'};
  const row={family_id:command.familyId,family_person_id:command.subjectId,person_id:command.personId,created_by:command.actorId,
   preparation_tasks:(d.preparation_tasks||[]).map(t=>({title:t.title.trim(),instruction:typeof t.instruction==='string'?t.instruction:null})),
   hospital_name:d.hospital_name||null,department:d.department||null,doctor_name:d.doctor_name||null,
+  ...Object.fromEntries(Object.entries(extras).map(([k,v])=>[k,k==='arrival_lead_minutes'?Number(v):(typeof v==='string'?v.trim():v)])),
   title:d.title||null,note:d.note||null,preparation_notes:d.preparation_notes?.trim()||null,
   appointment_at:appointmentAt,planned_visit_date:v.planned_visit_date,
   visit_time_known:v.visit_time_known,visit_mode:v.visit_mode,status:v.status,appointment_type:command.appointmentType};
