@@ -1,5 +1,8 @@
 name: PHMS v2.4 Contract Regression
 on:
+  push:
+    branches:
+      - feature/phms-v24-smart-appointment-audit
   pull_request:
     paths:
       - 'supabase/functions/line-webhook/index.ts'
