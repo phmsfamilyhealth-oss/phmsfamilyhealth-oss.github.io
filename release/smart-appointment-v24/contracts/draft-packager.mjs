@@ -3,6 +3,11 @@
 export function prepareDraftForReview(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {ok:false,errors:['invalid_payload']};
   const clean = value => typeof value === 'string' ? value.trim() : '';
+  const extras=raw.extended_details??{};
+  if(typeof extras!=='object'||extras===null||Array.isArray(extras)||Object.keys(extras).some(k=>!Object.hasOwn({"hospital_hn":80,"hospital_vn":80,"location_detail":240,"contact_phone":40,"care_topic":500,"coverage_type":100,"arrival_lead_minutes":4,"visit_outcome_notes":1000,"diagnosis_summary":1000,"treatment_summary":1000,"test_results_summary":1000,"medication_plan_notes":1000,"next_steps":1000,"walk_in_reason":500},k)))return {ok:false,errors:['invalid_extended_details']};
+  if(Object.entries(extras).some(([key,value])=>typeof value!=='string'||value.trim().length>{"hospital_hn":80,"hospital_vn":80,"location_detail":240,"contact_phone":40,"care_topic":500,"coverage_type":100,"arrival_lead_minutes":4,"visit_outcome_notes":1000,"diagnosis_summary":1000,"treatment_summary":1000,"test_results_summary":1000,"medication_plan_notes":1000,"next_steps":1000,"walk_in_reason":500}[key]))return {ok:false,errors:['extended_details_too_long']};
+  if(extras.arrival_lead_minutes&&!/^(?:0|[1-9]\\d{0,3})$/.test(extras.arrival_lead_minutes))return {ok:false,errors:['invalid_arrival_lead']};
+  if(Number(extras.arrival_lead_minutes||0)>1440)return {ok:false,errors:['invalid_arrival_lead']};
   const structured=raw.preparation_items;
   if(structured!==undefined&&(!Array.isArray(structured)||structured.some(x=>!x||typeof x.title!=='string'||!['pending','completed'].includes(x.status))))return {ok:false,errors:['invalid_preparation_items']};
   const checklist = structured?structured.map(x=>clean(x.title)):clean(raw.prep).split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
@@ -25,7 +30,7 @@ export function prepareDraftForReview(raw) {
     time:raw.time_known===true?clean(raw.time):null,
     provider_selection:selection?{organizationId:clean(selection.organizationId),unitId:clean(selection.unitId),clinicianId:clean(selection.clinicianId)}:null,
     hospital_name:clean(raw.hospital), department:clean(raw.department),
-    doctor_name:clean(raw.doctor), title:clean(raw.purpose), note:clean(raw.additional_note),
+    doctor_name:clean(raw.doctor), title:clean(raw.purpose), note:clean(raw.additional_note), extended_details:Object.fromEntries(Object.entries(extras).map(([k,v])=>[k,v.trim()])),
     preparation_tasks:checklist.map((title,index)=>({title,sequence_no:index+1,status:structured?structured[index].status:'pending'})),
     document_metadata:docs.map(f=>({name:clean(f.name),type:f.type,size:f.size}))
   }};
