@@ -12329,6 +12329,18 @@ async function personDashboardMessages(u:string,k:string,id:string,title='👤 �
    ]}
   });
  }
+ // Keep the real LINE appointment flow; offer person-scoped LIFF pilot only to the household owner.
+ let appointmentPilotUri='';
+ if(access?.appointments?.create===true&&isHouseholdOwner){
+  try{
+   const ctx=one(await rpc(u,k,'phms_resolve_line_command_context',{
+    p_line_user_id:id,p_resource:'appointments',p_action:'create',p_require_person:true,p_required_scope:'any'
+   }));
+   const pid=String(ctx?.target_person_id||'');
+   if(/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(pid)&&ctx?.permission_granted===true)
+    appointmentPilotUri='https://liff.line.me/2011619364-D0xazyre?member='+encodeURIComponent(pid);
+  }catch(err){console.error('person_appointment_pilot_link_unavailable',String(err).slice(0,120))}
+ }
  if(access?.appointments?.view){
   const ap=sum?.appointments||{};
   cards.push({type:'bubble',size:'kilo',
@@ -12339,7 +12351,10 @@ async function personDashboardMessages(u:string,k:string,id:string,title='👤 �
    body:{type:'box',layout:'vertical',spacing:'xs',paddingAll:'12px',contents:aimPersonSummaryRows('appointments',ap)}, // PHMS_APPOINTMENT_SUMMARY_ADAPTIVE_LAYOUT_V1
    footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'10px',contents:[
     ...(Number(ap.count??ap.items?.length??0)>0?[{type:'button',color:'#AD762A',style:'primary',height:'md',action:{type:'postback',label:'📅 ดูนัดทั้งหมด',data:'รายการนัดของคนนี้ทุกช่วงเวลา 0'}}]:[]),
-    ...(access?.appointments?.create===true?[{type:'button',style:'primary',color:'#866337',height:'md',action:{type:'postback',label:'＋ เพิ่มนัด',data:'เพิ่มนัด'}}]:[])
+    ...(access?.appointments?.create===true?(appointmentPilotUri?[
+     {type:'button',style:'primary',color:'#866337',height:'md',action:{type:'uri',label:'＋ เพิ่มนัด (ฟอร์มใหม่)',uri:appointmentPilotUri}},
+     {type:'button',style:'secondary',height:'md',action:{type:'postback',label:'＋ เพิ่มผ่าน LINE',data:'เพิ่มนัด'}}
+    ]:[{type:'button',style:'primary',color:'#866337',height:'md',action:{type:'postback',label:'＋ เพิ่มนัด',data:'เพิ่มนัด'}}]):[])
    ]}
   });
  }
