@@ -5,7 +5,7 @@ const security={
  verifyLineIdentity:async()=>({userId:uid}),resolvePerson:async()=>({familyPersonId:fpid,familyId:fid}),isReleaseEnabled:async()=>true,
  centralCanAccess:async()=>true,verifyProviderBinding:async()=>true,
  resolveWriteIdentity:async()=>({personId:pid,appointmentType:'walk_in',familyPersonId:fpid,familyId:fid}),
- readAuthorizedAppointment:async()=>({id:'appointment1',family_id:fid,family_person_id:fpid,deleted_at:null})
+ readAuthorizedAppointment:async()=>({id:'appointment1',family_id:fid,family_person_id:fpid,deleted_at:null,hospital_name:'Test hospital'})
 };
 const draft={scenario:'walk_in',date:'2026-11-03',time_known:false,time:null,hospital:'Test hospital',prep:'Bring referral'};
 const mkRequest=()=>new Request('https://example.test/appointment-confirm',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer verified-line-token'},body:JSON.stringify({selectedPersonCode:'P1',operationKey:'55555555-5555-4555-8555-555555555555',draft})});
