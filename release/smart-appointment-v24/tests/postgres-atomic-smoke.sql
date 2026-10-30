@@ -6,10 +6,11 @@ CREATE SCHEMA private;
 CREATE TABLE public.appointments(
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),family_id uuid,family_person_id uuid,person_id uuid NOT NULL,created_by uuid,
  appointment_type text NOT NULL,visit_mode text,visit_time_known boolean NOT NULL DEFAULT true,status text,planned_visit_date date,
- appointment_at timestamptz,hospital_name text,department text,doctor_name text,title text,note text,preparation_notes text
+ appointment_at timestamptz,hospital_name text,department text,doctor_name text,title text,note text,preparation_notes text,
+ hospital_hn text,hospital_vn text,location_detail text,contact_phone text,care_topic text,coverage_type text,arrival_lead_minutes integer,visit_outcome_notes text,diagnosis_summary text,treatment_summary text,test_results_summary text,medication_plan_notes text,next_steps text,walk_in_reason text
 );
 CREATE TABLE public.family_persons(id uuid PRIMARY KEY,family_id uuid NOT NULL,person_id uuid NOT NULL);
-CREATE TABLE public.appointment_tasks(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),appointment_id uuid REFERENCES public.appointments(id),task_type text NOT NULL,title text NOT NULL,instruction text,status text NOT NULL,created_by uuid);
+CREATE TABLE public.appointment_tasks(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),appointment_id uuid REFERENCES public.appointments(id),task_type text NOT NULL,title text NOT NULL,instruction text,status text NOT NULL,completed_at timestamptz,completed_by uuid,created_by uuid);
 CREATE TABLE private.phms_appointment_release_gate(singleton boolean PRIMARY KEY,enabled_for_everyone boolean NOT NULL,allowed_actor_ids uuid[] NOT NULL DEFAULT '{}');
 INSERT INTO private.phms_appointment_release_gate VALUES(true,true,'{}');
 CREATE FUNCTION private.user_can_access_family_person(uuid,uuid,text,text) RETURNS boolean LANGUAGE sql AS $$ SELECT $1='11111111-1111-4111-8111-111111111111'::uuid AND $2='33333333-3333-4333-8333-333333333333'::uuid $$;
