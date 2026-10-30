@@ -332,7 +332,7 @@ async function previewReadApi(action,parameters={}){
  }catch{return {ok:false,error:'network_unavailable'};}
 }
 let sourceAppointments=new Map();
-function refreshTopicSuggestions(){const topics=[...new Set([...sourceAppointments.values()].map(x=>String(x.care_topic||'').trim()).filter(Boolean))];$('careTopicSuggestions').replaceChildren(...topics.slice(0,100).map(x=>new Option(x)));}
+function refreshTopicSuggestions(){renderCareTopicSuggestions();}
 let autoPurposeValue='',purposeManuallyEdited=false;
 function proposedFollowupTitle(title){
  const original=String(title||'นัดติดตาม').trim();
