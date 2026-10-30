@@ -15,7 +15,7 @@ export function mapAppointmentInsert(command){
   if(v.appointment_at){ return {ok:false,error:'untrusted_precomputed_timestamp'}; }
   else { const resolved=resolveBangkokAppointmentTime(v.local_appointment_datetime);if(!resolved.ok)return {ok:false,error:'timestamp_not_resolved'};appointmentAt=resolved.appointment_at; }
  }
- if(d.preparation_tasks!==undefined&&(!Array.isArray(d.preparation_tasks)||d.preparation_tasks.length>20||d.preparation_tasks.some(t=>!t||typeof t.title!=='string'||!t.title.trim()||t.title.length>160)))return {ok:false,error:'invalid_checklist'};
+ if(d.preparation_tasks!==undefined&&(!Array.isArray(d.preparation_tasks)||d.preparation_tasks.length>20||d.preparation_tasks.some(t=>!t||typeof t.title!=='string'||!t.title.trim()||t.title.length>160||(t.status!==undefined&&!['pending','completed'].includes(t.status)))))return {ok:false,error:'invalid_checklist'};
  if(d.preparation_notes!=null&&typeof d.preparation_notes!=='string')return {ok:false,error:'invalid_preparation_notes'};
  if(typeof d.preparation_notes==='string'&&d.preparation_notes.length>4000)return {ok:false,error:'appointment_text_too_long'};
  if((d.preparation_tasks||[]).length>0&&d.preparation_notes?.trim())return {ok:false,error:'checklist_dual_source_not_supported'};
@@ -30,7 +30,7 @@ export function mapAppointmentInsert(command){
  if(limits.some(([key,max])=>typeof d[key]==='string'&&d[key].length>max))return {ok:false,error:'appointment_text_too_long'};
  if((d.preparation_tasks||[]).some(t=>typeof t.instruction==='string'&&t.instruction.length>1000))return {ok:false,error:'checklist_instruction_too_long'};
  const row={family_id:command.familyId,family_person_id:command.subjectId,person_id:command.personId,created_by:command.actorId,
-  preparation_tasks:(d.preparation_tasks||[]).map(t=>({title:t.title.trim(),instruction:typeof t.instruction==='string'?t.instruction:null})),
+  preparation_tasks:(d.preparation_tasks||[]).map(t=>({title:t.title.trim(),instruction:typeof t.instruction==='string'?t.instruction:null,status:t.status==='completed'?'completed':'pending'})),
   hospital_name:d.hospital_name||null,department:d.department||null,doctor_name:d.doctor_name||null,
   ...Object.fromEntries(Object.entries(extras).map(([k,v])=>[k,k==='arrival_lead_minutes'?Number(v):(typeof v==='string'?v.trim():v)])),
   title:d.title||null,note:d.note||null,preparation_notes:d.preparation_notes?.trim()||null,
