@@ -46,8 +46,7 @@ BEGIN
   SELECT key INTO v_unknown_key FROM jsonb_object_keys(p_appointment) AS key
   WHERE key <> ALL(ARRAY['family_id','family_person_id','person_id','created_by',
     'appointment_type','visit_mode','visit_time_known','status','planned_visit_date',
-    'appointment_at','hospital_name','department','doctor_name','title','note',
-    'hospital_hn','hospital_vn','location_detail','contact_phone','care_topic','coverage_type','arrival_lead_minutes','visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps','walk_in_reason',
+    'appointment_at','hospital_name','department','doctor_name','title','note','hospital_hn','hospital_vn','location_detail','contact_phone','care_topic','coverage_type','arrival_lead_minutes','visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps','walk_in_reason',
     'preparation_notes','preparation_tasks']) LIMIT 1;
   IF v_unknown_key IS NOT NULL THEN RAISE EXCEPTION 'unsupported_appointment_field'; END IF;
   IF nullif(p_appointment->>'person_id','')::uuid IS DISTINCT FROM v_person
@@ -79,16 +78,6 @@ BEGIN
   IF p_appointment ? 'preparation_tasks' AND jsonb_typeof(p_appointment->'preparation_tasks') IS DISTINCT FROM 'array' THEN RAISE EXCEPTION 'invalid_checklist'; END IF;
   v_task_count := CASE WHEN jsonb_typeof(p_appointment->'preparation_tasks')='array' THEN jsonb_array_length(p_appointment->'preparation_tasks') ELSE 0 END;
   IF v_task_count > 20 THEN RAISE EXCEPTION 'checklist_too_long'; END IF;
-  IF p_appointment ? 'walk_in_reason' AND (p_appointment->>'walk_in_reason' NOT IN ('queue_full','hospital_advised','no_booking','urgent','other') OR p_appointment->>'visit_mode' <> 'walk_in') THEN RAISE EXCEPTION 'invalid_walk_in_reason'; END IF;
-  IF p_appointment ? 'arrival_lead_minutes' AND (p_appointment->>'arrival_lead_minutes' !~ '^\\d{1,4}(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) LOOP
-    IF jsonb_typeof(v_task) <> 'object' OR nullif(btrim(v_task->>'title'),'') IS NULL OR length(v_task->>'title') > 160
-    THEN RAISE EXCEPTION 'invalid_checklist_item'; END IF;
-  END LOOP;
-  -- Reject overlong fields instead of silently truncating medical appointment details.
-  IF length(p_appointment->>'hospital_name') > 160 OR length(p_appointment->>'department') > 160
-    OR length(p_appointment->>'doctor_name') > 160 OR length(p_appointment->>'title') > 80 OR length(p_appointment->>'note') > 1000
-    OR length(p_appointment->>'preparation_notes') > 4000
-  THEN RAISE EXCEPTION 'appointment_text_too_long'; END IF;
   IF p_appointment ? 'walk_in_reason' AND nullif(p_appointment->>'walk_in_reason','') IS NOT NULL AND (p_appointment->>'walk_in_reason' NOT IN ('queue_full','hospital_advised','no_booking','urgent','other') OR p_appointment->>'visit_mode' <> 'walk_in') THEN RAISE EXCEPTION 'invalid_walk_in_reason'; END IF;
   IF p_appointment ? 'arrival_lead_minutes' AND nullif(p_appointment->>'arrival_lead_minutes','') IS NOT NULL AND (p_appointment->>'arrival_lead_minutes' !~ '^[0-9]{1,3}$' OR (p_appointment->>'arrival_lead_minutes')::integer > 720) THEN RAISE EXCEPTION 'invalid_arrival_lead'; END IF;
   IF length(p_appointment->>'hospital_hn') > 80 THEN RAISE EXCEPTION 'appointment_text_too_long'; END IF;
@@ -104,6 +93,15 @@ BEGIN
   IF length(p_appointment->>'medication_plan_notes') > 1000 THEN RAISE EXCEPTION 'appointment_text_too_long'; END IF;
   IF length(p_appointment->>'next_steps') > 1000 THEN RAISE EXCEPTION 'appointment_text_too_long'; END IF;
   IF length(p_appointment->>'walk_in_reason') > 500 THEN RAISE EXCEPTION 'appointment_text_too_long'; END IF;
+  FOR v_task IN SELECT value FROM jsonb_array_elements(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) LOOP
+    IF jsonb_typeof(v_task) <> 'object' OR nullif(btrim(v_task->>'title'),'') IS NULL OR length(v_task->>'title') > 160
+    THEN RAISE EXCEPTION 'invalid_checklist_item'; END IF;
+  END LOOP;
+  -- Reject overlong fields instead of silently truncating medical appointment details.
+  IF length(p_appointment->>'hospital_name') > 160 OR length(p_appointment->>'department') > 160
+    OR length(p_appointment->>'doctor_name') > 160 OR length(p_appointment->>'title') > 80 OR length(p_appointment->>'note') > 1000
+    OR length(p_appointment->>'preparation_notes') > 4000
+  THEN RAISE EXCEPTION 'appointment_text_too_long'; END IF;
   FOR v_task IN SELECT value FROM jsonb_array_elements(COALESCE(p_appointment->'preparation_tasks','[]'::jsonb)) LOOP
     IF length(v_task->>'instruction') > 1000 THEN RAISE EXCEPTION 'checklist_instruction_too_long'; END IF;
   END LOOP;
