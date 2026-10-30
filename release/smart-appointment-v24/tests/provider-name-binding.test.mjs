@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {makePhmsPersistenceSecurity} from '../contracts/phms-persistence-security.mjs';
+const org='33333333-3333-4333-8333-333333333333';const unit='44444444-4444-4444-8444-444444444444';const doctor='55555555-5555-4555-8555-555555555555';
+const data={healthcare_organizations:[{id:org,name:'Hospital A',display_name:'Hospital A',deleted_at:null}],healthcare_service_units:[{id:unit,organization_id:org,name:'Cardiology',deleted_at:null}],healthcare_clinicians:[{id:doctor,organization_id:org,service_unit_id:unit,display_name:'Doctor A',deleted_at:null}]};
+const supabase={from:t=>({select:()=>({is:()=>({limit:async()=>({data:data[t],error:null})})})})};
+const verify=makePhmsPersistenceSecurity({supabase,centralCanAccess:async()=>true}).verifyProviderBinding;
+const valid={provider_selection:{organizationId:org,unitId:unit,clinicianId:doctor},hospital_name:'Hospital A',department:'Cardiology',doctor_name:'Doctor A'};
+test('verified provider identifiers and matching names pass',async()=>assert.equal(await verify(valid),true));
+test('different hospital text cannot be saved under verified organization ID',async()=>assert.equal(await verify({...valid,hospital_name:'Hospital B'}),false));
+test('different clinician text cannot be saved under verified clinician ID',async()=>assert.equal(await verify({...valid,doctor_name:'Doctor B'}),false));
+test('unselected department free text is rejected',async()=>assert.equal(await verify({...valid,provider_selection:{organizationId:org},doctor_name:''}),false));

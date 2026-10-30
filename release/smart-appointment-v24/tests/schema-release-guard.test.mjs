@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {canReleaseAppointmentSchema as ready} from '../contracts/schema-release-guard.mjs';
+test('all required write-path and historical DB gates present',()=>assert.equal(ready({installed:true,operations_ready:true,historical_check_ready:true}),true));
+test('release remains off when database migration, RPC or ledger is missing',()=>{for(const field of ['installed','operations_ready','historical_check_ready']){const row={installed:true,operations_ready:true,historical_check_ready:true};row[field]=false;assert.equal(ready(row),false,field)}});
+test('missing or malformed schema introspection fails closed',()=>{for(const value of [null,{}, {installed:1,operations_ready:true,historical_check_ready:true}])assert.equal(ready(value),false)});

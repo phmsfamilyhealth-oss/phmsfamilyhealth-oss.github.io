@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {makePhmsWriteIdentityResolver} from '../contracts/phms-write-identity-resolver.mjs';
+const actor='11111111-1111-4111-8111-111111111111',family='22222222-2222-4222-8222-222222222222',member='33333333-3333-4333-8333-333333333333',person='44444444-4444-4444-8444-444444444444';
+const db=record=>({from:table=>{assert.equal(table,'family_persons');return{select:()=>({eq:()=>({limit:async()=>({data:[record],error:null})})})}}});
+const good={id:member,family_id:family,person_id:person,status:'active'};
+test('reads trusted identity from family_persons with central create and view',async()=>{let rights=[];const resolve=makePhmsWriteIdentityResolver({supabase:db(good),centralCanAccess:async(a,p,r,action)=>{rights.push(action);return true},resolveAppointmentType:async()=> 'follow_up'});assert.deepEqual(await resolve(actor,member,family),{familyPersonId:member,familyId:family,personId:person,appointmentType:'follow_up'});assert.deepEqual(rights,['create','view'])});
+test('cross family identity is denied',async()=>{const resolve=makePhmsWriteIdentityResolver({supabase:db({...good,family_id:actor}),centralCanAccess:async()=>true,resolveAppointmentType:async()=> 'follow_up'});assert.equal(await resolve(actor,member,family),null)});
+test('invalid appointment type is not silently coerced',async()=>{const resolve=makePhmsWriteIdentityResolver({supabase:db(good),centralCanAccess:async()=>true,resolveAppointmentType:async()=> 'not_a_type'});assert.equal(await resolve(actor,member,family),null)});
+test('denied rights stop identity resolution',async()=>{const resolve=makePhmsWriteIdentityResolver({supabase:db(good),centralCanAccess:async()=>false,resolveAppointmentType:async()=> 'follow_up'});assert.equal(await resolve(actor,member,family),null)});
+
+test('unknown member status is rejected fail closed',async()=>{const resolve=makePhmsWriteIdentityResolver({supabase:db({...good,status:'pending'}),centralCanAccess:async()=>true,resolveAppointmentType:async()=> 'follow_up'});assert.equal(await resolve(actor,member,family),null)});
