@@ -195,7 +195,7 @@ function thaiSourceDate(value){
  if(!match)return 'ไม่ระบุวันที่';
  const [y,m,d]=[Number(match[1]),Number(match[2]),Number(match[3])];
  const date=new Date(Date.UTC(y,m-1,d));if(date.getUTCFullYear()!==y||date.getUTCMonth()!==m-1||date.getUTCDate()!==d)return 'ไม่ระบุวันที่';
- return d+' '+TH_MONTHS[m-1]+' '+(y+543);
+ return TH_DAYS[date.getUTCDay()]+' '+d+' '+['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][m-1]+' '+(y+543);
 }
 function renderRelatedCards(){
  const selected=$('relatedSelect').value,query=$('relatedQuery').value.trim().toLocaleLowerCase('th-TH');
