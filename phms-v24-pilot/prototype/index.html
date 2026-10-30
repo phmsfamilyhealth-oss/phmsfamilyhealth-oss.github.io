@@ -65,6 +65,7 @@
 #editor:not(.simple-ui) #review{width:100%}
 #editor:not(.simple-ui) #requiredLegend{background:transparent;padding:3px 0;font-size:.86rem}
 #editor:not(.simple-ui) .help{font-size:.88rem;line-height:1.5}
+.topic-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.topic-suggestions .topic-choice{min-height:42px;padding:8px 12px;border-radius:12px;font-size:.94rem;text-align:left;background:#f5ecdf;color:#30281d}.historical-finance{border:1px solid #e4d5c2;border-radius:12px;padding:12px;margin:10px 0;background:#fffdf9}.historical-finance summary{font-weight:700;cursor:pointer;font-size:1rem}.historical-finance .actions{flex-wrap:nowrap}.historical-finance .actions input{min-width:0;flex:1}.historical-finance .actions button{min-width:96px;padding:8px}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 โหมดทดลอง — ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -92,10 +93,10 @@
 <label for="location_detail">อาคาร ชั้น หรือห้องตรวจ</label><input id="location_detail" maxlength="240">
 <label for="contact_phone">เบอร์ติดต่อโรงพยาบาล</label><input id="contact_phone" inputmode="tel" maxlength="40"></details>
 <details><summary>🩺 เรื่องที่ติดตามรักษา</summary>
-<label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" list="careTopicSuggestions" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><datalist id="careTopicSuggestions"></datalist><p class="help">เลือกเรื่องที่เคยรักษา หรือพิมพ์เรื่องใหม่สำหรับนัดนี้ได้ (ยังไม่เพิ่มลงทะเบียนโรคกลาง)</p>
+<label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><p class="help">เลือกเรื่องที่เคยรักษา หรือพิมพ์เรื่องใหม่สำหรับนัดนี้ได้ (ยังไม่เพิ่มลงทะเบียนโรคกลาง)</p>
 <p class="help">รายละเอียดที่กรอกเองยังไม่ถือว่าแพทย์ยืนยัน</p></details>
 <details><summary>🚗 สิทธิรักษาและการเดินทาง</summary>
-<label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><input id="coverage_type" maxlength="100">
+<label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
 <label for="arrival_lead_minutes">ควรไปถึงก่อนนัดกี่นาที</label><input id="arrival_lead_minutes" type="number" min="0" max="720" step="5"></details>
 <details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล (ถ้ามี)</option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
 <details id="outcomeDetails" class="hidden"><summary>📋 บันทึกผลการไปโรงพยาบาล (ย้อนหลัง)</summary>
@@ -106,6 +107,8 @@
 <label for="medication_plan_notes">แผนยา</label><textarea id="medication_plan_notes" maxlength="1000" rows="2"></textarea>
 <label for="next_steps">สิ่งที่ต้องทำต่อ</label><textarea id="next_steps" maxlength="1000" rows="2"></textarea>
 <p class="help">บันทึกตามข้อมูลจริง ไม่ถือเป็นผลที่แพทย์ยืนยันโดยอัตโนมัติ</p></details>
+<details id="historicalExpenseBox" class="historical-finance hidden"><summary>💳 ค่าใช้จ่ายในการไปโรงพยาบาล</summary><p class="help">บันทึกรายการตามใบเสร็จ (ถ้ามี) — ยังไม่เชื่อมบันทึกจริง</p><label for="historicalExpenseAmount">ยอดจ่ายทั้งหมด (บาท)</label><input id="historicalExpenseAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="เช่น 350.00"><label for="historicalExpenseCoverage">ผู้ชำระเงิน</label><select id="historicalExpenseCoverage"><option value="">เลือก (ถ้าทราบ)</option><option value="self">จ่ายเอง</option><option value="insurance">ประกัน / สิทธิรักษา</option><option value="mixed">จ่ายร่วมกัน</option><option value="other">อื่น ๆ</option></select><label for="historicalExpenseNotes">รายละเอียดค่าใช้จ่าย (ถ้ามี)</label><textarea id="historicalExpenseNotes" rows="2" placeholder="เช่น ค่าตรวจ 200 บาท ค่ายา 150 บาท"></textarea></details>
+<details id="historicalMedicationBox" class="historical-finance hidden"><summary>💊 ยาที่ได้รับจากการไปครั้งนี้</summary><p class="help">เพิ่มยาทีละรายการตามฉลากยา (ถ้ามี) — ยังไม่บันทึกลงทะเบียนยา</p><label for="historicalMedName">ชื่อยา</label><div class="actions"><input id="historicalMedName" maxlength="160" placeholder="พิมพ์ชื่อยาตามฉลาก"><button type="button" id="historicalMedAdd">+ เพิ่มยา</button></div><div id="historicalMedItems" role="list"></div></details>
 <details id="procedurePreviewBox"><summary>🧪 รายการตรวจหรือหัตถการ (ทดลอง)</summary><p class="help">พิมพ์รายการที่ทราบได้หลายข้อ ข้อมูลนี้ยังไม่ใช่ทะเบียนตรวจที่แพทย์ยืนยันและยังไม่บันทึกลงระบบ</p><label for="procedureEntry">ชื่อการตรวจหรือหัตถการ</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดครั้งก่อน (ถ้ามี)</summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
@@ -261,8 +264,21 @@ function updateAppointmentPhotoVisibility(){
  $('historicalPhotoChoice').classList.toggle('hidden',!historical);
  $('appointmentPhotoPicker').classList.toggle('hidden',!(booked||(historical&&$('hasAppointmentPhotos').value==='yes')));
 }
+const historicalMeds=[];
+function renderHistoricalMeds(){
+ const list=$('historicalMedItems');list.replaceChildren();
+ historicalMeds.forEach((name,i)=>{const row=document.createElement('div');row.className='checklist-row';const input=document.createElement('input');input.value=name;input.maxLength=160;input.setAttribute('aria-label','ชื่อยารายการที่ '+(i+1));input.addEventListener('change',()=>{historicalMeds[i]=input.value.trim();});
+ const del=document.createElement('button');del.type='button';del.className='secondary';del.textContent='ลบ';del.addEventListener('click',()=>{historicalMeds.splice(i,1);renderHistoricalMeds();});row.append(input,del);list.append(row);});
+}
+$('historicalMedAdd').addEventListener('click',()=>{const value=$('historicalMedName').value.trim();if(!value)return;historicalMeds.push(value);$('historicalMedName').value='';renderHistoricalMeds();});
+function renderCareTopicSuggestions(){
+ const host=$('careTopicSuggestions');host.replaceChildren();
+ const options=Array.from(new Set((relatedAllItems||[]).map(a=>a.care_topic).filter(Boolean))).slice(0,8);
+ for(const value of options){const btn=document.createElement('button');btn.type='button';btn.className='topic-choice secondary';btn.textContent=value;btn.addEventListener('click',()=>{$('care_topic').value=value;});host.append(btn);}
+}
 function refresh(){
  updateAppointmentPhotoVisibility();
+ for(const panel of document.querySelectorAll('.historical-finance'))panel.classList.toggle('hidden',$('scenario').value!=='historical');
  const history=isPastAppointment(),optionalTime=$('scenario').value!=='booked';
  if(!optionalTime)$('known').value='yes';
  document.querySelector('label[for="known"]').classList.toggle('hidden',!optionalTime);
@@ -408,7 +424,7 @@ async function loadRelatedAppointments(){
  const picker=$('relatedSelect'),prior=picker.value;
  picker.replaceChildren(new Option('ไม่เชื่อมนัดเดิม',''),...relatedAllItems.map(a=>new Option(a.title||'นัดหมาย',a.id)));picker.disabled=false;
  if(sourceAppointments.has(prior))picker.value=prior;
- $('relatedAppointmentBox').hidden=relatedAllItems.length===0;if(!relatedAllItems.length){status.textContent='';return;}relatedAllItems.sort((a,b)=>String(b.planned_visit_date||b.appointment_at||'').localeCompare(String(a.planned_visit_date||a.appointment_at||'')));refreshTopicSuggestions();relatedExpanded=false;renderRelatedCards();
+ $('relatedAppointmentBox').hidden=relatedAllItems.length===0;if(!relatedAllItems.length){status.textContent='';return;}relatedAllItems.sort((a,b)=>String(b.planned_visit_date||b.appointment_at||'').localeCompare(String(a.planned_visit_date||a.appointment_at||'')));refreshTopicSuggestions();renderCareTopicSuggestions();relatedExpanded=false;renderRelatedCards();
 }
 async function loadRescheduleContacts(){
  const box=$('contactDetails'),org=$('providerOrg').value,unit=$('providerUnit').value,chosenPerson=memberId;
