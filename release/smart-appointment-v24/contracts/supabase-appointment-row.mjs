@@ -19,13 +19,13 @@ export function mapAppointmentInsert(command){
  if(d.preparation_notes!=null&&typeof d.preparation_notes!=='string')return {ok:false,error:'invalid_preparation_notes'};
  if(typeof d.preparation_notes==='string'&&d.preparation_notes.length>4000)return {ok:false,error:'appointment_text_too_long'};
  if((d.preparation_tasks||[]).length>0&&d.preparation_notes?.trim())return {ok:false,error:'checklist_dual_source_not_supported'};
- const limits=[['hospital_name',160],['department',160],['doctor_name',160],['note',1000]];
+ const limits=[['hospital_name',160],['department',160],['doctor_name',160],['title',80],['note',1000]];
  if(limits.some(([key,max])=>typeof d[key]==='string'&&d[key].length>max))return {ok:false,error:'appointment_text_too_long'};
  if((d.preparation_tasks||[]).some(t=>typeof t.instruction==='string'&&t.instruction.length>1000))return {ok:false,error:'checklist_instruction_too_long'};
  const row={family_id:command.familyId,family_person_id:command.subjectId,person_id:command.personId,created_by:command.actorId,
   preparation_tasks:(d.preparation_tasks||[]).map(t=>({title:t.title.trim(),instruction:typeof t.instruction==='string'?t.instruction:null})),
   hospital_name:d.hospital_name||null,department:d.department||null,doctor_name:d.doctor_name||null,
-  note:d.note||null,preparation_notes:d.preparation_notes?.trim()||null,
+  title:d.title||null,note:d.note||null,preparation_notes:d.preparation_notes?.trim()||null,
   appointment_at:appointmentAt,planned_visit_date:v.planned_visit_date,
   visit_time_known:v.visit_time_known,visit_mode:v.visit_mode,status:v.status,appointment_type:command.appointmentType};
  if(!row.appointment_type)return {ok:false,error:'appointment_type_required'};
