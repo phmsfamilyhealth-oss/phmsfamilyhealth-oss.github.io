@@ -8,3 +8,6 @@ test('reject oversize upload',()=>assert.equal(pack({...base,documents:[{name:'x
 test('reject more than five files',()=>assert.equal(pack({...base,documents:Array(6).fill({name:'x',type:'image/png',size:20})}).ok,false));
 test('reject excessive checklist entries',()=>assert.equal(pack({...base,prep:Array(21).fill('ยา').join('\n')}).ok,false));
 test('reject oversized checklist item',()=>assert.equal(pack({...base,prep:'x'.repeat(161)}).ok,false));
+test('structured tasks preserve completed and pending statuses individually',()=>{const r=pack({...base,preparation_items:[{title:'บัตรประชาชน',status:'completed'},{title:'ยา',status:'pending'}]});assert.equal(r.ok,true);assert.deepEqual(r.draft.preparation_tasks,[{title:'บัตรประชาชน',sequence_no:1,status:'completed'},{title:'ยา',sequence_no:2,status:'pending'}]);});
+test('empty and duplicate structured checklist tasks fail closed',()=>{assert.equal(pack({...base,preparation_items:[{title:'',status:'pending'}]}).ok,false);assert.equal(pack({...base,preparation_items:[{title:'ใบ นัด',status:'pending'},{title:'ใบ นัด',status:'completed'}]}).ok,false);});
+test('historical omitted preparation is zero tasks',()=>assert.deepEqual(pack({...base,scenario:'historical',prep:'',preparation_items:[]}).draft.preparation_tasks,[]));
