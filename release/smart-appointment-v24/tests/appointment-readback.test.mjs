@@ -8,3 +8,6 @@ test('cross-family row denied',async()=>assert.equal((await verify(q,{...deps,re
 test('cross-person row denied',async()=>assert.equal((await verify(q,{...deps,readAuthorizedAppointment:async()=>({...row,family_person_id:'other'})})).error,'readback_mismatch'));
 test('soft-deleted row denied',async()=>assert.equal((await verify(q,{...deps,readAuthorizedAppointment:async()=>({...row,deleted_at:'2026-10-01'})})).error,'readback_mismatch'));
 test('missing row denied',async()=>assert.equal((await verify(q,{...deps,readAuthorizedAppointment:async()=>null})).error,'readback_mismatch'));
+
+test('readback verifies all provided title and detailed fields',async()=>{const x=await verify({...q,expectedRow:{title:'ปวดเข่า',hospital_hn:'HN123',arrival_lead_minutes:30}}, {...deps,readAuthorizedAppointment:async()=>({...row,title:'ปวดเข่า',hospital_hn:'HN123',arrival_lead_minutes:30})});assert.equal(x.ok,true)});
+test('readback rejects a missing or changed detailed field',async()=>{const x=await verify({...q,expectedRow:{title:'ปวดเข่า',hospital_hn:'HN123'}},{...deps,readAuthorizedAppointment:async()=>({...row,title:'ปวดเข่า',hospital_hn:null})});assert.equal(x.error,'readback_content_mismatch')});
