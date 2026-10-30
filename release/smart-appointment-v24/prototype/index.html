@@ -29,8 +29,8 @@
 <p class="help">รายละเอียดที่กรอกเองยังไม่ถือว่าแพทย์ยืนยัน</p></details>
 <details><summary>🚗 สิทธิรักษาและการเดินทาง</summary>
 <label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><input id="coverage_type" maxlength="100">
-<label for="arrival_lead_minutes">ควรไปถึงก่อนนัดกี่นาที</label><input id="arrival_lead_minutes" type="number" min="0" max="1440" step="5"></details>
-<details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><textarea id="walk_in_reason" maxlength="500" rows="2"></textarea></details>
+<label for="arrival_lead_minutes">ควรไปถึงก่อนนัดกี่นาที</label><input id="arrival_lead_minutes" type="number" min="0" max="720" step="5"></details>
+<details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล (ถ้ามี)</option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
 <details id="outcomeDetails" class="hidden"><summary>📋 ผลหลังพบแพทย์ (จากข้อมูลที่มี)</summary>
 <label for="visit_outcome_notes">สรุปการพบแพทย์</label><textarea id="visit_outcome_notes" maxlength="1000" rows="2"></textarea>
 <label for="diagnosis_summary">การวินิจฉัยตามเอกสาร</label><textarea id="diagnosis_summary" maxlength="1000" rows="2"></textarea>
