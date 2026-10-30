@@ -33,3 +33,7 @@ test('doctor is optional without a fabricated clinician id and the review retain
  assert.match(html,/hospital:'โรงพยาบาล',department:'แผนก',doctor:'แพทย์'/);
  assert.match(html,/clinicianId:selectedClinicianId\(\)/);
 });
+
+test('selection closes results and keeps chosen label in same input',()=>{assert.match(html,/state\.selectedItem=item;state\.searchText=item\.label;input\.value=item\.label;closeCombo\(kind\)/);assert.match(html,/if\(!state\.isOpen\)\{closeCombo\(kind\);return;\}/);});
+test('escape and outside pointer close active results; focus reopens',()=>{assert.match(html,/e\.key==='Escape'\)\{closeCombo\(kind\)/);assert.match(html,/document\.addEventListener\('pointerdown'/);assert.match(html,/input\.addEventListener\('focus'/);});
+test('typing resets selection and Thai IME composition cannot confirm prematurely',()=>{assert.match(html,/if\(e\.isComposing\)return/);assert.match(html,/state\.searchText=input\.value;state\.selectedItem=null;state\.isOpen=true/);assert.match(html,/e\.keyCode!==229/);});
