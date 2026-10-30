@@ -39,8 +39,19 @@
 <label for="medication_plan_notes">แผนยา</label><textarea id="medication_plan_notes" maxlength="1000" rows="2"></textarea>
 <label for="next_steps">สิ่งที่ต้องทำต่อ</label><textarea id="next_steps" maxlength="1000" rows="2"></textarea>
 <p class="help">บันทึกตามข้อมูลจริง ไม่ถือเป็นผลที่แพทย์ยืนยันโดยอัตโนมัติ</p></details>
-<p class="help">การเลือกนัดเดิม เอกสาร งานมอบหมาย และแจ้งเตือนยังรอ API ที่ตรวจสิทธิ์ จึงไม่เปิดช่องกรอกที่ยังบันทึกไม่ได้</p>
-<input type="hidden" id="doctor"></div><label for="purpose">ชื่อนัดหมาย</label><input id="purpose" type="text" maxlength="80" placeholder="เช่น ปวดเข่า, ฟังผลเลือด, รับยาเดิม" autocomplete="off"><p class="help">ตั้งชื่อสั้น ๆ เพื่อให้รู้ว่าไปโรงพยาบาลเรื่องอะไร</p><label for="additionalNote">รายละเอียดเพิ่มเติม (ถ้ามี)</label><textarea id="additionalNote" maxlength="1000" rows="3" placeholder="อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม"></textarea>
+<details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดเดิม (ทดลองอ่านข้อมูลจริง)</summary>
+<p class="help">เลือกรายการนัดเดิมของบุคคลนี้เท่านั้น ข้อมูลความสัมพันธ์ยังไม่ถูกบันทึก</p>
+<div class="actions"><button type="button" id="relatedSearch" class="secondary">นัดที่เกี่ยวข้อง</button><button type="button" id="relatedAll" class="secondary">ดูนัดทั้งหมดของบุคคลนี้</button></div>
+<label for="relatedQuery">ค้นหานัดเก่า</label><input id="relatedQuery" placeholder="ค้นหาชื่อนัด โรงพยาบาล หรือแผนก">
+<label for="relatedSelect">นัดต้นทาง</label><select id="relatedSelect" disabled><option value="">ยังไม่ได้โหลดนัดเดิม</option></select>
+<p id="relatedStatus" class="help" role="status">เลือกบุคคลก่อนค้นหานัดเดิม</p></details>
+<details id="contactRescheduleBox"><summary>☎️ ติดต่อโรงพยาบาลและเลื่อนนัด (อ่านข้อมูลจริง)</summary>
+<p class="help">ติดต่อเพื่อขอเลื่อนนัดได้ แต่ระบบจะไม่เปลี่ยนวันนัดเดิมจนกว่าโรงพยาบาลจะยืนยัน</p>
+<button type="button" id="contactLoad" class="secondary">ดูข้อมูลติดต่อของแผนกนี้</button><div id="contactDetails" role="status" class="help">ยังไม่ได้โหลดข้อมูลติดต่อ</div>
+<label for="reschedulePhase">สถานะการเลื่อนนัด (ทดลอง)</label><select id="reschedulePhase"><option value="">ยังไม่ดำเนินการ</option><option value="requested">ต้องการเลื่อนนัด</option><option value="contact_pending">ติดต่อแล้ว รอยืนยัน</option><option value="confirmed">โรงพยาบาลยืนยันแล้ว</option></select>
+<p class="help">การเลือกสถานะนี้ยังไม่เปลี่ยนวันนัดหรือบันทึกข้อมูลในระบบ</p></details>
+<p class="help">เอกสาร งานมอบหมาย และแจ้งเตือนยังรอ API ตรวจสิทธิ์ จึงยังไม่เปิดการบันทึก</p>
+<input type="hidden" id="doctor"></div><label for="purpose">ชื่อนัดหมาย</label><input id="purpose" type="text" maxlength="80" placeholder="เช่น ปวดเข่า, ฟังผลเลือด, รับยาเดิม" autocomplete="off"><p class="help">ตั้งชื่อสั้น ๆ เพื่อให้รู้ว่าไปโรงพยาบาลเรื่องอะไร</p><label for="previsitSymptoms">อาการหรือเรื่องที่อยากบอกหมอ (ถ้ามี)</label><textarea id="previsitSymptoms" maxlength="1000" rows="2" placeholder="เช่น ปวดเข่ามา 3 วัน หรือมีคำถามเรื่องยา"></textarea><p class="help">ข้อมูลที่ผู้ใช้แจ้งเอง ยังไม่ใช่การวินิจฉัยจากแพทย์ และยังไม่บันทึกในโหมดทดลอง</p><label for="additionalNote">รายละเอียดเพิ่มเติม (ถ้ามี)</label><textarea id="additionalNote" maxlength="1000" rows="3" placeholder="อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม"></textarea>
 <div id="checklistBox"><label for="prepEntry">เตรียมอะไรไปบ้าง (Checklist)</label><div class="actions"><input id="prepEntry" maxlength="160" placeholder="พิมพ์รายการที่ต้องเตรียม"><button id="prepAdd" type="button">+ เพิ่ม</button></div><p id="prepProgress" role="status">เตรียมแล้ว 0/0 รายการ</p><div id="prepItems"></div></div><input type="hidden" id="prep">
 <p class="help">ชื่อโรงพยาบาล แผนก และแพทย์จะเติมอัตโนมัติจากทะเบียนที่ตรวจสอบแล้ว หากยังไม่มีชื่อแพทย์ในทะเบียน สามารถบันทึกนัดโดยไม่ระบุแพทย์ได้เมื่อเปิดระบบจริง</p>
 <p class="error" id="error" role="alert"></p><div class="actions"><button id="review" type="button" disabled>ตรวจทานข้อมูล</button></div>
