@@ -3,7 +3,11 @@
 export function prepareDraftForReview(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {ok:false,errors:['invalid_payload']};
   const clean = value => typeof value === 'string' ? value.trim() : '';
-  const checklist = clean(raw.prep).split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const structured=raw.preparation_items;
+  if(structured!==undefined&&(!Array.isArray(structured)||structured.some(x=>!x||typeof x.title!=='string'||!['pending','completed'].includes(x.status))))return {ok:false,errors:['invalid_preparation_items']};
+  const checklist = structured?structured.map(x=>clean(x.title)):clean(raw.prep).split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  if(checklist.some(x=>!x))return {ok:false,errors:['empty_checklist_item']};
+  if(new Set(checklist.map(x=>x.toLocaleLowerCase('th-TH'))).size!==checklist.length)return {ok:false,errors:['duplicate_checklist_item']};
   if (checklist.length > 20) return {ok:false, errors:['too_many_checklist_items']};
   if (checklist.some(item=>item.length>160)) return {ok:false,errors:['checklist_item_too_long']};
   if(raw.documents != null && !Array.isArray(raw.documents))return {ok:false,errors:['invalid_documents']};
@@ -20,7 +24,7 @@ export function prepareDraftForReview(raw) {
     provider_selection:selection?{organizationId:clean(selection.organizationId),unitId:clean(selection.unitId),clinicianId:clean(selection.clinicianId)}:null,
     hospital_name:clean(raw.hospital), department:clean(raw.department),
     doctor_name:clean(raw.doctor), note:clean(raw.purpose),
-    preparation_tasks:checklist.map((title,index)=>({title,sequence_no:index+1,status:'pending'})),
+    preparation_tasks:checklist.map((title,index)=>({title,sequence_no:index+1,status:structured?structured[index].status:'pending'})),
     document_metadata:docs.map(f=>({name:clean(f.name),type:f.type,size:f.size}))
   }};
 }
