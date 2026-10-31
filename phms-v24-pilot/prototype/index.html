@@ -481,6 +481,9 @@ function updateAppointmentPhotoVisibility(){
  $('appointmentPhotosSection').classList.toggle('hidden',mode==='walk_in');
  $('historicalPhotoChoice').classList.toggle('hidden',!historical);
  $('appointmentPhotoPicker').classList.toggle('hidden',!(booked||(historical&&$('hasAppointmentPhotos').value==='yes')));
+ const notice=$('filehelp');
+ if(notice&&photoFiles.length===0)notice.textContent='ยังไม่ได้เพิ่มรูป · 0/2 รูป';
+
 }
 const linkedVisitState={appointmentId:'',personId:''};
 function renderLinkedCareVisits(){
@@ -542,6 +545,16 @@ function refresh(){
  document.querySelector('label[for="known"]').classList.toggle('hidden',!optionalTime);
  $('known').classList.toggle('hidden',!optionalTime);
  $('timeRequired').hidden=optionalTime&&$('known').value!=='yes';
+ const timeLabel=document.querySelector('label[for="time"]');
+ const timeStar=$('timeRequired');
+ // This is the appointed time for booked visits, but an actual visit time for past records.
+ if(timeLabel&&timeStar){
+  const wording=$('scenario').value==='historical'?'เวลาที่ไปโรงพยาบาล':$('scenario').value==='walk_in'?'เวลาที่จะไปโรงพยาบาล':'เวลานัด';
+  timeLabel.replaceChildren(document.createTextNode('🕒 '+wording+' '),timeStar);
+ }
+ const knownLabel=document.querySelector('label[for="known"]');
+ if(knownLabel)knownLabel.textContent=history?'จำเวลาที่ไปโรงพยาบาลได้หรือไม่':'ทราบเวลาที่จะไปหรือไม่';
+
  checkDateRule();
  $('historicalGuide').classList.toggle('hidden',!history);
  $('previsitLabel').textContent=history?'ก่อนพบแพทย์ ไปด้วยเรื่องอะไร':'อาการหรือเรื่องที่อยากบอกหมอ';
