@@ -273,6 +273,11 @@
 #editor #addAppointmentPhoto{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;width:100%!important;min-height:78px!important;padding:12px!important;background:#fffdf9!important;color:#684c2d!important;border:1px dashed #c9b394!important;border-radius:12px!important;box-shadow:none!important;font-weight:650!important;gap:5px!important}
 #editor #addAppointmentPhoto.hidden{display:none!important}
 #editor #addAppointmentPhoto:focus-visible,#editor #appointmentChooseToday:focus-visible{outline:3px solid #947143!important;outline-offset:2px}
+/* Optional appointment details: consistent icons and quiet secondary action styling. */
+#editor #simpleExtras label{line-height:1.5}
+#editor #simpleExtras textarea{min-height:76px}
+#editor #checklistBox #prepAdd{min-height:48px!important;background:#f3e8d9!important;color:#533c25!important;border:1px solid #d8c6af!important;border-radius:11px!important}
+#editor #relatedAppointmentBox summary{cursor:pointer}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -671,6 +676,10 @@ function refresh(){
  $('previsitHelp').textContent=history?'บันทึกตามที่จำได้ ไม่ใช่การวินิจฉัยจากแพทย์':'ข้อมูลที่ผู้ใช้แจ้งเอง ยังไม่ใช่การวินิจฉัยจากแพทย์ และยังไม่บันทึกในโหมดทดลอง';
  $('additionalNoteLabel').textContent=history?'บันทึกเพิ่มเติมเกี่ยวกับการไปครั้งนี้':'รายละเอียดเพิ่มเติม';
  $('additionalNote').placeholder=history?'เช่น เรื่องที่ต้องติดตามหรือข้อมูลประกอบอื่น ๆ':'อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม';
+ for(const [id,icon] of [['previsitLabel','💬'],['additionalNoteLabel','📝']]){
+  const el=$(id);
+  if(el&&!el.textContent.trim().startsWith(icon))el.prepend(document.createTextNode(icon+' '));
+ }
  updateThaiDateTime(); $('checklistBox').classList.toggle('hidden',!!isPastAppointment());$('details').classList.toggle('hidden',$('detail').value!=='full');$('walkInDetails').classList.toggle('hidden',$('scenario').value!=='walk_in');$('outcomeDetails').classList.toggle('hidden',!isPastAppointment());const showTime=!optionalTime||$('known').value==='yes';$('timebox').classList.toggle('hidden',!showTime);/* keep entered time on mode toggles; hidden value is never submitted */}
 $('date').addEventListener('input',()=>{const src=sourceAppointments.get($('relatedSelect').value);if(src&&!purposeManuallyEdited&&$('purpose').value===autoPurposeValue){$('purpose').value='';applyFollowupTitle(src);}});$('date').addEventListener('input',()=>{checkDateRule();updateThaiDateTime();});$('date').addEventListener('change',refresh);$('time').addEventListener('input',updateThaiDateTime);$('time').addEventListener('change',updateThaiDateTime);$('known').addEventListener('change',refresh);$('detail').addEventListener('change',refresh);
 $('scenario').addEventListener('input',refresh);
@@ -824,10 +833,7 @@ function renderRelatedCards(){
  const chosen=relatedAllItems.find(a=>a.id===selected);
  const summary=$('relatedAppointmentBox').querySelector('summary');
  summary.textContent=chosen?'🔁 ใช้ข้อมูลจากนัดเดิม: '+(chosen.title||'นัดหมาย'):'🔁 ใช้ข้อมูลจากนัดเดิม (ถ้ามี)';
- if(typeof relatedChangeButton!=='undefined'){
-  relatedChangeButton.classList.toggle('hidden',!chosen);
-  relatedChangeButton.textContent=chosen?'เปลี่ยนนัดเดิม':'';
- }
+ summary.setAttribute('aria-label',chosen?'แตะเพื่อเปลี่ยนนัดเดิม: '+(chosen.title||'นัดหมาย'):'แตะเพื่อเลือกข้อมูลจากนัดเดิม');
 }
 async function loadRelatedAppointments(){
  const status=$('relatedStatus'),chosenPerson=memberId,sequence=++relatedLoadGeneration;
@@ -866,11 +872,8 @@ const editor=$('editor'),scenario=$('scenario');
 const sourceBox=$('relatedAppointmentBox');
 editor.insertBefore(sourceBox,$('date').previousElementSibling);
 sourceBox.open=false;sourceBox.hidden=!memberId;
-const relatedChangeButton=document.createElement('button');
-relatedChangeButton.type='button';relatedChangeButton.id='relatedChangeButton';
-relatedChangeButton.className='secondary hidden related-change-button';relatedChangeButton.textContent='เปลี่ยนนัดเดิม';
-sourceBox.after(relatedChangeButton);
-relatedChangeButton.addEventListener('click',()=>{sourceBox.open=true;$('relatedQuery').focus();});
+// Selecting an existing appointment updates the disclosure heading itself.
+// Reopen that heading to change or unlink; no detached button in additional information.
 sourceBox.querySelector('p.help').textContent='เลือกนัดเดิมเพื่อเติมข้อมูล หรือข้ามได้';
 
 // Three clearly visible appointment types; keep the original select as the single source of state.
@@ -920,6 +923,9 @@ $('historicalGuide').before(outcome);
 const outcomeExtras=document.createElement('details');outcomeExtras.id='outcomeExtras';outcomeExtras.className='progressive-extras';
 const outcomeSummary=document.createElement('summary');outcomeSummary.textContent='ผลตรวจและการรักษาเพิ่มเติม';outcomeExtras.append(outcomeSummary);outcome.append(outcomeExtras);
 moveRangeTo(document.querySelector('label[for="diagnosis_summary"]'),outcome.querySelector('p.help'),outcomeExtras);
+const prepLabel=document.querySelector('label[for="prepEntry"]');
+if(prepLabel)prepLabel.textContent='📋 สิ่งที่ต้องเตรียม';
+$('prepAdd').textContent='＋ เพิ่ม';
 const simpleExtras=document.createElement('details');simpleExtras.id='simpleExtras';simpleExtras.className='progressive-extras';
 const simpleSummary=document.createElement('summary');simpleExtras.append(simpleSummary);
 $('historicalGuide').before(simpleExtras);
