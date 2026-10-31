@@ -422,6 +422,29 @@
 /* One text run ensures the scenario emoji is never separated from its label by legacy flex rules. */
 #editor #scenarioFlow .scenario-option .scenario-copy{display:flex!important;flex-direction:column!important;align-items:flex-start!important}
 #editor #scenarioFlow .scenario-option .scenario-copy>strong{display:block!important;font-size:1rem!important;line-height:1.4!important;font-weight:700!important;white-space:normal!important;overflow-wrap:normal!important}
+
+/* PHMS selectable cards: distinguish tap-to-select from ordinary fields. */
+#editor{
+ --phms-card-border:#ac8760;
+ --phms-card-active-border:#79552c;
+}
+#editor .mode-choice,
+#editor .scenario-option,
+#editor .adaptive-provider-choice,
+#editor .prep-choice-card{
+ border:2px solid var(--phms-card-border)!important;
+}
+#editor .mode-choice[aria-pressed="true"],
+#editor .scenario-option[aria-pressed="true"],
+#editor .adaptive-provider-choice[aria-pressed="true"],
+#editor .prep-choice-card[aria-pressed="true"]{
+ border:2px solid var(--phms-card-active-border)!important;
+ background:#fff1db!important;
+}
+#editor .adaptive-provider-cards .adaptive-provider-choice{border-width:2px!important}
+#editor .adaptive-provider-cards .adaptive-provider-more{
+ border:2px dashed var(--phms-card-border)!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
