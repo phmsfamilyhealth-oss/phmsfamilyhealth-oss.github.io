@@ -190,7 +190,7 @@
 .same-day-notice.hidden{display:none!important}.same-day-notice.high-risk{background:#fff1f0;border-color:#d9958c;color:#8b241e}
 .same-day-notice p{margin:5px 0}.same-day-notice ul{padding-left:20px;margin:5px 0}
 /* Avoid a duplicated department text field under small card groups. */
-#unitSearch.adaptive-search-collapsed,#unitSearchResults.adaptive-search-collapsed{display:none!important}
+#unitSearch.adaptive-search-collapsed,#unitSearchResults.adaptive-search-collapsed,#hospitalSearch.adaptive-search-collapsed,#hospitalSearchResults.adaptive-search-collapsed{display:none!important}
 #unitQuickCards .adaptive-provider-more{border-style:dashed!important;background:#faf5ec!important}
 /* Header visually matches the LINE appointment card without duplicating patient data. */
 .phms-appointment-header{background:#fff8eb;border:1px solid #e5d4b8;border-top:6px solid #ae8958;border-radius:15px;padding:16px 18px;margin:14px 0;color:#302515}
@@ -278,6 +278,10 @@
 #editor #simpleExtras textarea{min-height:76px}
 #editor #checklistBox #prepAdd{min-height:48px!important;background:#f3e8d9!important;color:#533c25!important;border:1px solid #d8c6af!important;border-radius:11px!important}
 #editor #relatedAppointmentBox summary{cursor:pointer}
+#hospitalQuickCards .adaptive-provider-more{border-style:dashed!important;background:#faf5ec!important}
+#hospitalQuickCards .adaptive-provider-choice .adaptive-choice-th{display:block!important;font-weight:700!important;line-height:1.45!important}
+#hospitalQuickCards .adaptive-provider-choice .adaptive-choice-code{display:block!important;font-size:.84rem!important;font-weight:400!important;color:#6f604e!important;margin-top:3px!important}
+#hospitalQuickCards .adaptive-provider-choice{min-height:72px!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -430,7 +434,7 @@ if(term&&!matched.length){
 list.classList.toggle('hidden',!list.children.length);input.setAttribute('aria-expanded',String(!!list.children.length));}
 // PHMS adaptive selection: authorized catalog only, same hidden provider IDs.
 const adaptivePickers={};
-for(const kind of ['unit']){
+for(const kind of ['hospital','unit']){
  const search=document.getElementById(kind+'Search');
  const cards=document.createElement('div');
  cards.className='adaptive-provider-cards';cards.id=kind+'QuickCards';
@@ -475,7 +479,7 @@ function drawAdaptiveProviderCards(kind,choices){
  if(small){
   const other=document.createElement('button');other.type='button';
   other.className='adaptive-provider-choice adaptive-provider-more';
-  other.textContent='＋ แผนกอื่น / เพิ่มชื่อใหม่';
+  other.textContent=kind==='hospital'?'＋ โรงพยาบาลอื่น / ค้นหา':'＋ แผนกอื่น / เพิ่มชื่อใหม่';
   other.setAttribute('aria-expanded',String(ui.expanded));
   other.addEventListener('click',()=>{
    ui.expanded=!ui.expanded;
@@ -487,7 +491,7 @@ function drawAdaptiveProviderCards(kind,choices){
  ui.cards.classList.toggle('hidden',!small);
  ui.search.classList.toggle('adaptive-search-collapsed',small&&!ui.expanded);
  document.getElementById(kind+'SearchResults').classList.toggle('adaptive-search-collapsed',small&&!ui.expanded);
- ui.search.placeholder='🔎 ค้นหาหรือพิมพ์ชื่อแผนกใหม่';
+ ui.search.placeholder=kind==='hospital'?'🔎 ค้นหาหรือพิมพ์ชื่อโรงพยาบาล':'🔎 ค้นหาหรือพิมพ์ชื่อแผนกใหม่';
 
 }
 function refreshProviderPicker(changed=''){
@@ -499,6 +503,7 @@ function refreshProviderPicker(changed=''){
  fillOptions('providerUnit',state.units,'เลือกแผนก');document.getElementById('providerUnit').value=state.unitId;
  fillOptions('providerClinician',state.clinicians,'เลือกแพทย์');document.getElementById('providerClinician').value=state.clinicianId;
  for(const [kind,choices] of [['hospital',state.organizations],['unit',state.units],['clinician',state.clinicians]])renderCombo(kind,choices);
+ drawAdaptiveProviderCards('hospital',state.organizations);
  drawAdaptiveProviderCards('unit',state.units);
  document.getElementById('doctorHint').textContent=state.clinicians.length?'เลือกชื่อแพทย์จากทะเบียนหรือข้ามได้':'ไม่มีชื่อแพทย์ในทะเบียน — เว้นว่างได้';
 }
