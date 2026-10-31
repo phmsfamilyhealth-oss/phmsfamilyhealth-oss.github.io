@@ -259,6 +259,14 @@
 #editor .person-selection-controls button{min-height:44px!important;padding:8px 11px!important}
 #editor #personSelect.person-select-collapsed{display:none!important}
 @media(max-width:380px){#editor .person-selection-card{flex-wrap:wrap}}
+/* Compact icon-led controls share PHMS card visual language. */
+#editor .appointment-mode-bar{margin:8px 0 12px!important;gap:7px!important}
+#editor .appointment-mode-bar .mode-choices{gap:8px!important}
+#editor .appointment-mode-bar .mode-choice{min-height:56px!important;padding:10px!important;border-radius:12px!important;line-height:1.4!important}
+#editor .person-selection-card{padding:9px 12px!important;min-height:54px!important}
+#editor .person-selection-card strong{font-size:1.2rem!important;line-height:1.4!important}
+#editor #personPicker.embedded-person-picker{margin-bottom:4px!important}
+#editor #appointmentHeaderPerson[hidden]{display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -917,7 +925,7 @@ const modeBar=document.createElement('div');modeBar.className='appointment-mode-
 const modeLabel=document.createElement('p');modeLabel.textContent='⚙️ วิธีกรอกข้อมูล';modeLabel.className='mode-label';modeBar.append(modeLabel);
 const modeChoices=document.createElement('div');modeChoices.className='mode-choices';modeChoices.setAttribute('role','group');modeChoices.setAttribute('aria-label','วิธีกรอกข้อมูล');
 for(const [value,text] of [['simple','แบบง่าย'],['full','แบบละเอียด']]){
- const button=document.createElement('button');button.type='button';button.textContent=text;button.dataset.mode=value;button.className='mode-choice';
+ const button=document.createElement('button');button.type='button';button.textContent=(value==='simple'?'✨ ':'📋 ')+text;button.dataset.mode=value;button.className='mode-choice';
  button.addEventListener('click',()=>{$('detail').value=value;$('detail').dispatchEvent(new Event('change',{bubbles:true}));});
  modeChoices.append(button);
 }
@@ -1342,7 +1350,8 @@ decorateOptionalWording();
 // Keep the familiar LINE appointment header in sync with the authorized person selector.
 function syncAppointmentHeader(){
  const select=$('personSelect'),person=select.value?select.selectedOptions[0]?.textContent?.trim():'';
- $('appointmentHeaderPerson').textContent=person?'เพิ่มนัดให้: '+person:'ยังไม่ได้เลือกบุคคล';
+ $('appointmentHeaderPerson').textContent=person?'':'ยังไม่ได้เลือกบุคคล';
+ $('appointmentHeaderPerson').hidden=!!person;
 
 }
 $('personSelect').addEventListener('change',syncAppointmentHeader);
