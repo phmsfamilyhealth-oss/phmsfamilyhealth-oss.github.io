@@ -148,6 +148,7 @@ import {prepareDraftForReview} from '../contracts/draft-packager.mjs';
 import {providerPickerState} from '../contracts/provider-picker-state.mjs';
 import {makeLiffConfirmClient} from '../contracts/liff-confirm-client.mjs';
 import {makeLiffProviderCatalogClient} from '../contracts/liff-provider-catalog-client.mjs';
+import {historicalVisitDate,isEligibleSavedVisit,canHandoffSavedVisit,existingPHMSLineCommand} from '../contracts/linked-appointment-workflow.mjs';
 let confirmClient=null;let reviewedDraft=null;let memberId='';
 function resolveAppointmentMemberDeepLink(){
  const params=new URLSearchParams(location.search);
@@ -288,15 +289,9 @@ function updateAppointmentPhotoVisibility(){
  $('appointmentPhotoPicker').classList.toggle('hidden',!(booked||(historical&&$('hasAppointmentPhotos').value==='yes')));
 }
 const linkedVisitState={appointmentId:'',personId:''};
-function historicalVisitDate(item){
- const raw=String(item?.planned_visit_date||item?.appointment_at||'').slice(0,10);
- return /^\d{4}-\d{2}-\d{2}$/.test(raw)?raw:'';
-}
 function renderLinkedCareVisits(){
  const picker=$('linkedCareVisit'),previous=picker.value;
- const eligible=(relatedAllItems||[]).filter(a=>
-  /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(String(a.id||''))&&
-  historicalVisitDate(a)&&historicalVisitDate(a)<=bangkokToday());
+ const eligible=(relatedAllItems||[]).filter(a=>isEligibleSavedVisit(a,bangkokToday()));
  picker.replaceChildren(new Option('เลือกนัดที่บันทึกไว้แล้ว',''),...eligible.map(a=>
   new Option([thaiSourceDate(historicalVisitDate(a)),a.title||'นัดหมาย',a.hospital_name||''].filter(Boolean).join(' · '),a.id)));
  if(memberId===linkedVisitState.personId&&eligible.some(a=>a.id===previous))picker.value=previous;
@@ -309,7 +304,7 @@ function updateLinkedCareVisitActions(){
  const item=(relatedAllItems||[]).find(a=>a.id===chosen);
  const date=historicalVisitDate(item);
  const dateMatches=!$('date').value||date===$('date').value;
- const valid=!!item&&!!memberId&&linkedVisitState.personId===memberId&&dateMatches&&date<=bangkokToday();
+ const valid=canHandoffSavedVisit(item,{memberId,sourceMemberId:linkedVisitState.personId,formDate:$('date').value,today:bangkokToday()});
  $('linkedCareVisitActions').classList.toggle('hidden',!valid);
  $('linkedCareVisitStatus').textContent=!memberId?'กรุณาเลือกบุคคลก่อน':
  !relatedAllItems?.length?'ยังไม่มีนัดที่บันทึกไว้ให้เลือก — บันทึกนัดผ่าน LINE ก่อน':
@@ -322,10 +317,10 @@ $('linkedCareVisit').addEventListener('change',updateLinkedCareVisitActions);
 $('date').addEventListener('change',updateLinkedCareVisitActions);
 async function openExistingAppointmentWorkflow(kind){
  const uuid=linkedVisitState.appointmentId,item=(relatedAllItems||[]).find(a=>a.id===uuid);
- if(!item||!memberId||linkedVisitState.personId!==memberId||!uuid||historicalVisitDate(item)>bangkokToday()||($('date').value&&$('date').value!==historicalVisitDate(item))){updateLinkedCareVisitActions();return;}
+ if(!canHandoffSavedVisit(item,{memberId,sourceMemberId:linkedVisitState.personId,formDate:$('date').value,today:bangkokToday()})){updateLinkedCareVisitActions();return;}
  const summary=[thaiSourceDate(historicalVisitDate(item)),String(item.title||'นัดหมาย'),String(item.hospital_name||'')].filter(Boolean).join(' · ');
  if(!window.confirm('ยืนยันว่าเป็นนัดเดียวกันที่ต้องการเพิ่ม'+(kind==='medication'?'ยา':'ค่าใช้จ่าย')+'\n'+summary))return;
- const code=uuid.slice(0,12),command=(kind==='medication'?'เพิ่มยาจากนัด ':'ค่าใช้จ่ายนัด ')+code;
+ const command=existingPHMSLineCommand(uuid,kind);
  const message=kind==='medication'?'ระบบยา PHMS อาจยังไม่เปิดให้บันทึกจริงสำหรับบัญชีนี้':'';
  try{
   if(window.liff?.isInClient?.()&&typeof window.liff.sendMessages==='function'){
