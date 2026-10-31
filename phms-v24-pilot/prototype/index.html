@@ -184,7 +184,7 @@
 #editor .adaptive-option-grid .adaptive-provider-choice{min-height:64px!important;background:#fff!important;border:1px solid #d8cab7!important;border-radius:13px!important;font-size:1rem!important;text-align:center}
 #editor .adaptive-option-grid .adaptive-provider-choice[aria-pressed=true]{background:#fff2dc!important;border:2px solid #947143!important;color:#3f2b16!important}
 #editor .adaptive-option-host.hidden{display:none!important}
-</style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
+.adaptive-provider-choice .adaptive-choice-th{display:block;font-weight:700;line-height:1.45}.adaptive-provider-choice .adaptive-choice-code{display:block;font-size:.82rem;font-weight:500;color:#635b50;margin-top:3px}#unitQuickCards+.adaptive-select-search{margin-top:8px}</style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
@@ -355,7 +355,15 @@ function drawAdaptiveProviderCards(kind,choices){
   const btn=document.createElement('button');btn.type='button';btn.className='adaptive-provider-choice';
   const active=item.value===selected;
   btn.setAttribute('aria-pressed',String(active));
-  btn.textContent=(active?'✓ ':'')+(kind==='hospital'?'🏥 ':'🏷️ ')+item.label;
+  const full=String(item.label||'');
+  const match=full.match(/^(.*?)\s*\(([^()]+)\)\s*$/);
+  const th=match?match[1].trim():full;
+  const code=match?match[2].trim():'';
+  const symbol=/จักษุ|ตา/.test(th)?'👁️':/กระดูก|ข้อ|ออร์โธ/.test(th)?'🦴':/ทางเดินปัสสาวะ|ยูโร/.test(th)?'🩺':/หัวใจ/.test(th)?'❤️':/ทันต|ฟัน/.test(th)?'🦷':/เด็ก|กุมาร/.test(th)?'👶':'🏷️';
+  const name=document.createElement('span');name.className='adaptive-choice-th';name.textContent=(kind==='unit'?symbol+' ':'🏥 ')+th;
+  btn.append(name);
+  if(code){const sub=document.createElement('span');sub.className='adaptive-choice-code';sub.textContent='('+code+')';btn.append(sub);}
+  btn.setAttribute('aria-label',full);
   btn.addEventListener('click',()=>{
    const target=document.getElementById(kind==='hospital'?'providerOrg':'providerUnit');
    target.value=item.value;
