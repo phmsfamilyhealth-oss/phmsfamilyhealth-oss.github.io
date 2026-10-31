@@ -43,7 +43,7 @@ jobs:
               done
               grep -q 'id="prepEntry"' /tmp/phms-check
               grep -q 'id="prepAdd"' /tmp/phms-check
-              grep -q 'โหมดทดลอง — ยังบันทึกไม่ได้' /tmp/phms-check
+              grep -q 'แบบทดลอง · ยังบันทึกไม่ได้' /tmp/phms-check
               grep -q 'id="relatedCards"' /tmp/phms-check
               grep -q 'function thaiSourceDate' /tmp/phms-check
               grep -Fq 'TH_DAYS[date.getUTCDay()]' /tmp/phms-check
