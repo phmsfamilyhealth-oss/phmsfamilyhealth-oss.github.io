@@ -1109,7 +1109,7 @@ const modeBar=document.createElement('div');modeBar.className='appointment-mode-
 const modeLabel=document.createElement('p');modeLabel.textContent='⚙️ วิธีกรอกข้อมูล';modeLabel.className='mode-label';modeBar.append(modeLabel);
 const modeChoices=document.createElement('div');modeChoices.className='mode-choices';modeChoices.setAttribute('role','group');modeChoices.setAttribute('aria-label','วิธีกรอกข้อมูล');
 for(const [value,text] of [['simple','แบบง่าย'],['full','แบบละเอียด']]){
- const button=document.createElement('button');button.type='button';button.textContent=(value==='simple'?'✨ ':'📋 ')+text;button.dataset.mode=value;button.className='mode-choice';
+ const button=document.createElement('button');button.type='button';button.textContent=(value==='simple'?'✨ ':'🛠️ ')+text;button.dataset.mode=value;button.className='mode-choice';
  button.addEventListener('click',()=>{$('detail').value=value;$('detail').dispatchEvent(new Event('change',{bubbles:true}));});
  modeChoices.append(button);
 }
@@ -1506,7 +1506,7 @@ function updateProgressiveLayout(){
  $('scenarioFlowTitle').textContent='📅 นัดแบบไหน';
  $('mainFlowTitle').textContent='📝 ข้อมูลนัดหมาย';
  $('timeFlowTitle').textContent='🕒 วันและเวลา';
- $('extrasFlowTitle').textContent='📋 ข้อมูลเพิ่มเติม (ถ้ามี)';
+ $('extrasFlowTitle').textContent='🗂️ ข้อมูลเพิ่มเติม (ถ้ามี)';
  // Reveal the existing input groups only after a scenario card has been chosen.
  for(const id of ['mainFlow','timeFlow','extrasFlow'])$(id).classList.toggle('hidden',!scenarioChoiceMade);
  $('hospitalQuickCards').classList.toggle('hidden',!scenarioChoiceMade || $('hospitalQuickCards').children.length===0);
