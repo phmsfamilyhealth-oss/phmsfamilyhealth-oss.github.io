@@ -68,6 +68,64 @@
 .topic-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.topic-suggestions .topic-choice{min-height:42px;padding:8px 12px;border-radius:12px;font-size:.94rem;text-align:left;background:#f5ecdf;color:#30281d}.historical-finance{border:1px solid #e4d5c2;border-radius:12px;padding:12px;margin:10px 0;background:#fffdf9}.historical-finance summary{font-weight:700;cursor:pointer;font-size:1rem}.historical-finance .actions{flex-wrap:nowrap}.historical-finance .actions input{min-width:0;flex:1}.historical-finance .actions button{min-width:96px;padding:8px}
 #changeAppointmentPerson{min-height:38px;padding:6px 12px;font-size:.91rem;background:#eee3d5;color:#4f3822;margin:0 0 7px}#selectedPersonLabel{font-weight:700}
 .linked-care-actions{display:grid;grid-template-columns:1fr;gap:9px;margin:12px 0}.linked-care-actions button{min-height:54px;text-align:center;background:#5b432b;color:white}.linked-care-actions button:last-child{background:#eee3d5;color:#44331e}#historicalLinkedVisitSection h3{font-size:1.1rem;margin:3px 0 10px}#historicalLinkedVisitSection .help{font-size:.92rem;line-height:1.5}#linkedCareVisitStatus{font-weight:650}@media(min-width:640px){.linked-care-actions{grid-template-columns:1fr 1fr}}
+
+/* PHMS appointment v2.4: final elder-first structure (single form state). */
+.visually-hidden-form{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;clip-path:inset(50%)!important}
+#editor{padding:16px!important}
+#editor h2{font-size:1.2rem!important;margin:0 0 5px!important;color:#202020}
+#editor #requiredLegend{padding:0!important;margin:2px 0 9px!important;background:transparent!important;font-size:.91rem}
+#editor .person-banner{font-size:1rem;font-weight:700;padding:7px 0;margin:3px 0}
+#appointmentFlow{display:flex;flex-direction:column;gap:13px}
+.appointment-mode-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0}
+.appointment-mode-bar .mode-label{font-size:.95rem;font-weight:650;color:#2f2c28;margin:0}
+.mode-choices{display:flex;gap:4px;border-radius:12px;padding:3px;background:#f4eade}
+.mode-choice{border:0!important;background:transparent!important;color:#4d3e2c!important;padding:9px 12px!important;min-height:43px!important;border-radius:10px!important;white-space:nowrap;font-size:.97rem!important}
+.mode-choice[aria-pressed=true]{background:#5b432b!important;color:white!important;font-weight:700}
+.appointment-flow-section{min-width:0}
+#appointmentFlow .appointment-section-title{font-size:1.05rem!important;font-weight:750;color:#191919!important;border-radius:11px;background:#f8f0e3;padding:11px 13px!important;margin:8px 0 10px!important}
+#appointmentFlow label{font-size:1rem!important;color:#202020!important;margin:11px 0 6px!important}
+#appointmentFlow input,#appointmentFlow select,#appointmentFlow textarea{font-size:1.04rem;min-height:52px;border-radius:11px}
+#appointmentFlow input::placeholder,#appointmentFlow textarea::placeholder{color:#787878;opacity:1}
+#appointmentFlow .help{color:#555;font-size:.91rem;line-height:1.45;margin:6px 0}
+#scenarioFlow .scenario-grid{display:grid;grid-template-columns:1fr;gap:8px;margin:6px 0!important}
+#scenarioFlow .scenario-option{flex-direction:row!important;align-items:center!important;gap:11px!important;min-height:58px!important;padding:10px 12px!important;font-size:1rem!important}
+#scenarioFlow .scenario-option .scenario-copy small{display:block;font-size:.82rem;line-height:1.2}
+#scenarioFlow .scenario-option[aria-pressed=true]{background:#fff1da!important;color:#202020!important}
+#scenarioFlow #relatedAppointmentBox{border:1px solid #e6d7c4;padding:9px 12px;margin:8px 0!important}
+#scenarioFlow #relatedAppointmentBox>summary{font-size:.98rem}
+#scenarioFlow #relatedAppointmentBox .help{font-size:.85rem}
+#mainFlow #providerExtras,#extrasFlow .progressive-extras,#extrasFlow #outcomeDetails,#extrasFlow #historicalLinkedVisitSection,#extrasFlow #details>details{border:1px solid #e6d8c5!important;background:#fff!important;border-radius:12px;padding:12px;margin:10px 0}
+#mainFlow #providerExtras>summary,#extrasFlow .progressive-extras>summary,#extrasFlow #outcomeDetails>summary,#extrasFlow #details>details>summary{display:list-item!important;font-size:1rem!important;color:#242424!important;font-weight:700;line-height:1.45;cursor:pointer}
+#extrasFlow #details{display:flex;flex-direction:column;gap:1px}
+#extrasFlow #details.hidden{display:none!important}
+#extrasFlow #details .help{display:none}
+#extrasFlow #details>details[open]>summary,#mainFlow #providerExtras[open]>summary{margin-bottom:10px}
+#extrasFlow #historicalLinkedVisitSection{margin:8px 0!important;border:0!important;padding:0!important}
+#extrasFlow #historicalLinkedVisitSection>h3,#extrasFlow #historicalLinkedVisitSection>p.help:first-of-type{display:none}
+.filled-indicator{font-weight:650;font-size:.76rem;float:right;color:#655136;background:#f4ecdf;padding:3px 7px;border-radius:7px;margin-left:6px}
+.filled-indicator[hidden]{display:none!important}
+#extrasFlow #historicalGuide,#extrasFlow #previsitHelp,#extrasFlow #registryHelp,#extrasFlow #doctorHint{display:none!important}
+#extrasFlow #historicalLinkedVisitSection #linkedCareMedicationGate{display:none}
+#extrasFlow #historicalLinkedVisitSection p.help{font-size:.86rem}
+#extrasFlow #checklistBox.simple-walkin-checklist{display:none}
+#appointmentPhotoPicker>p.help{margin:5px 0!important}
+#appointmentPhotosSection{margin:8px 0}
+#filehelp{font-size:.89rem}
+#review{width:100%;margin-top:6px}
+#pilotNotice{padding:10px 13px!important;margin:9px 0!important}
+#connectionStatus{font-size:.92rem!important;padding:9px 12px!important;margin:8px 0!important}
+.native-picker-shell{position:relative;min-height:52px}
+.native-picker-shell>input{width:100%;min-height:52px}
+.native-picker-prompt{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:#505050;font-size:1rem;font-weight:500}
+.native-picker-prompt[hidden]{display:none}
+.native-picker-shell:focus-within .native-picker-prompt{display:none}
+#editor .error{font-size:.96rem}
+#editor .notice{font-size:.93rem}
+@media(min-width:610px){
+ #scenarioFlow .scenario-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #scenarioFlow .scenario-option{min-height:100px!important;flex-direction:column!important;align-items:flex-start!important}
+}
+@media(max-width:390px){#editor{padding:13px!important}#appointmentFlow{gap:10px}.mode-choice{padding:9px 10px!important}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 โหมดทดลอง — ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -355,7 +413,7 @@ function refresh(){
  $('previsitHelp').textContent=history?'บันทึกตามที่จำได้ ไม่ใช่การวินิจฉัยจากแพทย์':'ข้อมูลที่ผู้ใช้แจ้งเอง ยังไม่ใช่การวินิจฉัยจากแพทย์ และยังไม่บันทึกในโหมดทดลอง';
  $('additionalNoteLabel').textContent=history?'บันทึกเพิ่มเติมเกี่ยวกับการไปครั้งนี้ (ถ้ามี)':'รายละเอียดเพิ่มเติม (ถ้ามี)';
  $('additionalNote').placeholder=history?'เช่น เรื่องที่ต้องติดตามหรือข้อมูลประกอบอื่น ๆ':'อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม';
- updateThaiDateTime(); if(isPastAppointment())$('outcomeDetails').open=true; $('checklistBox').classList.toggle('hidden',!!isPastAppointment());$('details').classList.toggle('hidden',$('detail').value!=='full');$('walkInDetails').classList.toggle('hidden',$('scenario').value!=='walk_in');$('outcomeDetails').classList.toggle('hidden',!isPastAppointment());const showTime=!optionalTime||$('known').value==='yes';$('timebox').classList.toggle('hidden',!showTime);/* keep entered time on mode toggles; hidden value is never submitted */}
+ updateThaiDateTime(); $('checklistBox').classList.toggle('hidden',!!isPastAppointment());$('details').classList.toggle('hidden',$('detail').value!=='full');$('walkInDetails').classList.toggle('hidden',$('scenario').value!=='walk_in');$('outcomeDetails').classList.toggle('hidden',!isPastAppointment());const showTime=!optionalTime||$('known').value==='yes';$('timebox').classList.toggle('hidden',!showTime);/* keep entered time on mode toggles; hidden value is never submitted */}
 $('date').addEventListener('input',()=>{const src=sourceAppointments.get($('relatedSelect').value);if(src&&!purposeManuallyEdited&&$('purpose').value===autoPurposeValue){$('purpose').value='';applyFollowupTitle(src);}});$('date').addEventListener('input',()=>{checkDateRule();updateThaiDateTime();});$('date').addEventListener('change',refresh);$('time').addEventListener('input',updateThaiDateTime);$('time').addEventListener('change',updateThaiDateTime);$('known').addEventListener('change',refresh);$('detail').addEventListener('change',refresh);
 $('scenario').addEventListener('input',refresh);
 $('scenario').addEventListener('change',()=>{if($('scenario').value==='booked')$('known').value='yes';refresh();});
@@ -482,7 +540,7 @@ async function loadRelatedAppointments(){
  status.textContent='กำลังโหลดนัดเดิมที่ได้รับสิทธิ์…';
  const response=await previewReadApi('appointment_sources',{mode:'related',query:'',organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:$('providerClinician').value,careTopic:$('care_topic').value});
  if(chosenPerson!==memberId||sequence!==relatedLoadGeneration)return;
- if(!response.ok){relatedAllItems=[];renderLinkedCareVisits();status.textContent='ยังตรวจสอบประวัตินัดไม่ได้ ('+response.error+')';$('relatedAppointmentBox').hidden=false;return;}
+ if(!response.ok){relatedAllItems=[];renderLinkedCareVisits();status.textContent='ยังตรวจสอบประวัตินัดไม่ได้ กรุณาลองใหม่';$('relatedAppointmentBox').hidden=true;return;}
  sourceAppointments=new Map();relatedAllItems=[];
  for(const a of response.appointments||[]){if(typeof a.id!=='string')continue;sourceAppointments.set(a.id,a);relatedAllItems.push(a);}
  const picker=$('relatedSelect'),prior=picker.value;
@@ -515,7 +573,7 @@ sourceBox.open=false;sourceBox.hidden=!memberId;
 // Three clearly visible appointment types; keep the original select as the single source of state.
 const scenarioChoices=[
  ['booked','📅','นัดตามใบนัด','มีวันนัดจากโรงพยาบาล'],
- ['walk_in','🚶','ไปโรงพยาบาลเอง','อาการยังไม่หายหรืออยากพบแพทย์'],
+ ['walk_in','🚶','ไปโรงพยาบาลเอง','ไปเองโดยไม่มีใบนัด'],
  ['historical','📋','บันทึกย้อนหลัง','ไปโรงพยาบาลมาแล้ว']
 ];
 const scenarioGrid=document.createElement('div');scenarioGrid.className='scenario-grid';scenarioGrid.setAttribute('role','group');scenarioGrid.setAttribute('aria-label','เลือกรูปแบบการนัด');
@@ -529,34 +587,134 @@ for(const [value,symbol,name,description] of scenarioChoices){
 }
 function syncScenarioCards(){for(const button of scenarioGrid.children)button.setAttribute('aria-pressed',String(button.dataset.scenario===$('scenario').value));}
 $('scenario').addEventListener('change',syncScenarioCards);syncScenarioCards();
-// One set of inputs in both entry modes: disclosure never discards data.
-function moveFieldsIntoDisclosure(start,end,panel){
- let node=start;while(node){const next=node.nextSibling;panel.append(node);if(node===end)break;node=next;}
+// Reuse each existing input exactly once. Moving nodes keeps browser state and event listeners.
+function moveRangeTo(start,end,target){
+ if(!start||!end||!target)throw new Error('appointment_layout_missing_element');
+ let node=start,limit=0;
+ while(node&&limit++<80){const next=node.nextSibling;target.append(node);if(node===end)return;node=next;}
+ throw new Error('appointment_layout_invalid_range');
 }
+function moveLabelAndInput(labelFor,target,extra=[]){
+ const label=document.querySelector('label[for="'+labelFor+'"]'),input=$(labelFor);
+ if(!label||!input)throw new Error('appointment_field_missing_'+labelFor);
+ target.append(label,input);
+ for(const id of extra)target.append($(id));
+}
+function makeFlowSection(id,title){
+ const section=document.createElement('section');section.className='appointment-flow-section';section.id=id;
+ const heading=document.createElement('h3');heading.className='appointment-section-title';heading.id=id+'Title';heading.textContent=title;
+ section.append(heading);return section;
+}
+// Optional provider fields remain in the original picker and are only relocated once.
 const providerExtras=document.createElement('details');providerExtras.id='providerExtras';providerExtras.className='progressive-extras';
-const providerSummary=document.createElement('summary');providerSummary.textContent='แผนกและแพทย์ (ถ้ามี)';providerExtras.append(providerSummary);
+const providerSummary=document.createElement('summary');providerSummary.textContent='แผนกและแพทย์';providerExtras.append(providerSummary);
 const unitFieldLabel=document.querySelector('label[for="unitSearch"]');unitFieldLabel.before(providerExtras);
-moveFieldsIntoDisclosure(unitFieldLabel,$('doctorHint'),providerExtras);
-const outcome=$('outcomeDetails');$('historicalGuide').before(outcome);
+moveRangeTo(unitFieldLabel,$('doctorHint'),providerExtras);
+
+const outcome=$('outcomeDetails');
+$('historicalGuide').before(outcome);
 const outcomeExtras=document.createElement('details');outcomeExtras.id='outcomeExtras';outcomeExtras.className='progressive-extras';
-const outcomeSummary=document.createElement('summary');outcomeSummary.textContent='ผลตรวจ การรักษา และแผนยา (ถ้ามี)';outcomeExtras.append(outcomeSummary);outcome.append(outcomeExtras);
-moveFieldsIntoDisclosure(document.querySelector('label[for="diagnosis_summary"]'),outcome.querySelector('p.help'),outcomeExtras);
+const outcomeSummary=document.createElement('summary');outcomeSummary.textContent='ผลตรวจและการรักษาเพิ่มเติม';outcomeExtras.append(outcomeSummary);outcome.append(outcomeExtras);
+moveRangeTo(document.querySelector('label[for="diagnosis_summary"]'),outcome.querySelector('p.help'),outcomeExtras);
 const simpleExtras=document.createElement('details');simpleExtras.id='simpleExtras';simpleExtras.className='progressive-extras';
-const simpleSummary=document.createElement('summary');simpleSummary.textContent='อาการ รายละเอียด และสิ่งที่ต้องเตรียม (ถ้ามี)';simpleExtras.append(simpleSummary);
+const simpleSummary=document.createElement('summary');simpleExtras.append(simpleSummary);
 $('historicalGuide').before(simpleExtras);
-moveFieldsIntoDisclosure($('historicalGuide'),$('checklistBox'),simpleExtras);
-function updateProgressiveLayout(){
- const simple=$('detail').value==='simple';$('editor').classList.toggle('simple-ui',simple);document.body.classList.toggle('simple-entry',simple);
- const stepTitles=document.querySelectorAll('.appointment-section-title');const shift=memberId&&$('personPicker').classList.contains('hidden')?1:0;if(stepTitles.length>1){stepTitles[0].textContent=(2-shift)+'. วันและเวลา';stepTitles[1].textContent=(3-shift)+(simple?'. โรงพยาบาลและชื่อนัด':'. โรงพยาบาล แผนก แพทย์ และชื่อนัด');}
- for(const panel of [providerExtras,simpleExtras,outcomeExtras]){
-  const filled=Array.from(panel.querySelectorAll('input,textarea,select')).some(el=>el.type!=='hidden'&&!!String(el.value||'').trim());
-  if(simple){if(filled)panel.open=true;}else if(filled){panel.open=true;}
+moveRangeTo($('historicalGuide'),$('checklistBox'),simpleExtras);
+
+const editor=$('editor'),flowRoot=document.createElement('div');flowRoot.id='appointmentFlow';
+$('selectedPersonLabel').after(flowRoot);
+const modeBar=document.createElement('div');modeBar.className='appointment-mode-bar';
+const modeLabel=document.createElement('p');modeLabel.textContent='วิธีกรอก';modeLabel.className='mode-label';modeBar.append(modeLabel);
+const modeChoices=document.createElement('div');modeChoices.className='mode-choices';modeChoices.setAttribute('role','group');modeChoices.setAttribute('aria-label','วิธีกรอกข้อมูล');
+for(const [value,text] of [['simple','แบบง่าย'],['full','แบบละเอียด']]){
+ const button=document.createElement('button');button.type='button';button.textContent=text;button.dataset.mode=value;button.className='mode-choice';
+ button.addEventListener('click',()=>{$('detail').value=value;$('detail').dispatchEvent(new Event('change',{bubbles:true}));});
+ modeChoices.append(button);
+}
+modeBar.append(modeChoices);flowRoot.append(modeBar);
+const originalModeLabel=document.querySelector('label[for="detail"]');originalModeLabel.classList.add('visually-hidden-form');
+$('detail').classList.add('visually-hidden-form');$('detail').setAttribute('tabindex','-1');$('detail').setAttribute('aria-hidden','true');
+// Scenario selection remains a real form select so the existing validation and state stay intact.
+const scenarioSection=makeFlowSection('scenarioFlow','1. นัดแบบไหน');
+flowRoot.append(scenarioSection);
+const originalScenarioLabel=document.querySelector('label[for="scenario"]');originalScenarioLabel.classList.add('visually-hidden-form');
+scenarioSection.append(originalScenarioLabel,$('scenario'),scenarioGrid,sourceBox);
+const mainSection=makeFlowSection('mainFlow','2. นัดเรื่องอะไร ที่ไหน');flowRoot.append(mainSection);
+const purposeHelp=$('purpose').nextElementSibling;
+moveLabelAndInput('purpose',mainSection);
+if(purposeHelp?.classList.contains('help'))mainSection.append(purposeHelp);
+moveLabelAndInput('hospitalSearch',mainSection,['hospitalSearchResults','providerOrg']);
+mainSection.append(providerExtras);
+const timeSection=makeFlowSection('timeFlow','3. วันและเวลา');flowRoot.append(timeSection);
+moveLabelAndInput('date',timeSection,['dateRule','dateThaiPreview']);
+moveLabelAndInput('known',timeSection);
+timeSection.append($('timebox'),$('appointmentPhotosSection'));
+const extrasSection=makeFlowSection('extrasFlow','4. เพิ่มเติม (ถ้ามี)');flowRoot.append(extrasSection);
+// Detailed-mode categories; never clone patient inputs or create alternate state.
+const detailed=$('details');extrasSection.append(detailed);
+const hospDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#hospital_hn'));
+const careDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#care_topic'));
+if(careDetails&&hospDetails)detailed.prepend(careDetails,hospDetails);
+extrasSection.append(simpleExtras,$('outcomeDetails'));
+const linkedDisclosure=document.createElement('details');linkedDisclosure.className='progressive-extras';linkedDisclosure.id='linkedVisitDisclosure';
+const linkedSummary=document.createElement('summary');linkedSummary.textContent='ค่าใช้จ่ายและยาที่ได้รับ';linkedDisclosure.append(linkedSummary,$('historicalLinkedVisitSection'));
+extrasSection.append(linkedDisclosure);
+$('registryHelp').hidden=true;
+$('editor').querySelector('h2').textContent='กรอกข้อมูลนัดหมาย';
+$('requiredLegend').textContent='* จำเป็นต้องกรอก';
+const inPerson=$('selectedPersonLabel');inPerson.classList.add('person-banner');
+document.querySelector('label[for="purpose"]').textContent='ชื่อนัดหมาย';
+document.querySelector('label[for="hospitalSearch"]').innerHTML='โรงพยาบาล / สถานพยาบาล <span class="required-star" aria-label="จำเป็นต้องกรอก">*</span>';
+document.querySelector('label[for="unitSearch"]').textContent='แผนก / คลินิก';
+document.querySelector('label[for="clinicianSearch"]').textContent='แพทย์';
+const photoHelp=$('appointmentPhotoPicker').querySelector('p.help');
+if(photoHelp)photoHelp.textContent='ใส่ได้สูงสุด 2 รูป';
+$('filehelp').textContent='0/2 รูป';
+const sourceSummary=sourceBox.querySelector('summary');if(sourceSummary)sourceSummary.textContent='ใช้ข้อมูลจากนัดครั้งก่อน';
+const sourceInstruction=sourceBox.querySelector('p.help');if(sourceInstruction)sourceInstruction.textContent='เลือกนัดครั้งก่อนเพื่อช่วยเติมข้อมูล';
+const simpleSummaryText={booked:'อาการและสิ่งที่ต้องเตรียม',walk_in:'เหตุผลที่ไปและอาการ',historical:'อาการก่อนพบแพทย์'};
+const datePrompt=document.createElement('span');datePrompt.id='dateInputPrompt';datePrompt.className='native-picker-prompt';datePrompt.textContent='📅 แตะเพื่อเลือกวันที่';
+const dateShell=document.createElement('div');dateShell.className='native-picker-shell';$('date').before(dateShell);dateShell.append($('date'),datePrompt);
+const timePrompt=document.createElement('span');timePrompt.id='timeInputPrompt';timePrompt.className='native-picker-prompt';timePrompt.textContent='🕘 แตะเพื่อเลือกเวลา';
+const timeShell=document.createElement('div');timeShell.className='native-picker-shell';$('time').before(timeShell);timeShell.append($('time'),timePrompt);
+function syncPickerPrompts(){
+ datePrompt.hidden=!!$('date').value;
+ timePrompt.hidden=!!$('time').value;
+}
+$('date').addEventListener('input',syncPickerPrompts);$('date').addEventListener('change',syncPickerPrompts);
+$('time').addEventListener('input',syncPickerPrompts);$('time').addEventListener('change',syncPickerPrompts);
+// Section status badges: collapsed groups retain their values and indicate when populated.
+const optionalPanels=[providerExtras,simpleExtras,outcome,outcomeExtras,linkedDisclosure,...Array.from(detailed.querySelectorAll('details'))];
+function updateFilledIndicators(){
+ for(const panel of optionalPanels){
+  const summary=panel.querySelector(':scope > summary');if(!summary)continue;
+  let badge=summary.querySelector('.filled-indicator');
+  if(!badge){badge=document.createElement('span');badge.className='filled-indicator';badge.textContent='มีข้อมูลแล้ว';summary.append(badge);}
+  const filled=Array.from(panel.querySelectorAll('input:not([type=hidden]),textarea,select')).some(el=>{
+   if(el.disabled||el.type==='file')return false;
+   return el.tagName==='SELECT'?!!el.value:!!String(el.value||'').trim();
+  });
+  badge.hidden=!filled;
  }
 }
-$('detail').addEventListener('change',updateProgressiveLayout);updateProgressiveLayout();
-// Section markers preserve the original DOM order and all established form controls.
-function sectionHeading(beforeId,title){const field=$(beforeId);if(!field)return;const label=field.previousElementSibling;const anchor=label?.tagName==='LABEL'?label:field;const heading=document.createElement('h3');heading.className='appointment-section-title';heading.textContent=title;anchor.before(heading);}
-sectionHeading('date','2. วันและเวลา');
-sectionHeading('hospitalSearch','3. โรงพยาบาล แผนก แพทย์ และชื่อนัด');
+function updateProgressiveLayout(){
+ const simple=$('detail').value==='simple',mode=$('scenario').value;
+ editor.classList.toggle('simple-ui',simple);document.body.classList.toggle('simple-entry',simple);
+ for(const button of modeChoices.children)button.setAttribute('aria-pressed',String(button.dataset.mode===$('detail').value));
+ const shift=memberId&&$('personPicker').classList.contains('hidden')?0:1;
+ $('scenarioFlowTitle').textContent=(1+shift)+'. นัดแบบไหน';
+ $('mainFlowTitle').textContent=(2+shift)+'. นัดเรื่องอะไร ที่ไหน';
+ $('timeFlowTitle').textContent=(3+shift)+'. วันและเวลา';
+ $('extrasFlowTitle').textContent=(4+shift)+'. เพิ่มเติม (ถ้ามี)';
+ simpleSummary.textContent=simpleSummaryText[mode]||'ข้อมูลเพิ่มเติม';
+ linkedDisclosure.classList.toggle('hidden',mode!=='historical');
+ if(mode!=='historical')linkedDisclosure.open=false;
+ if(simple&&mode==='walk_in')$('checklistBox').classList.add('simple-walkin-checklist');
+ else $('checklistBox').classList.remove('simple-walkin-checklist');
+ syncPickerPrompts();updateFilledIndicators();
+}
+$('detail').addEventListener('change',updateProgressiveLayout);
+$('scenario').addEventListener('change',updateProgressiveLayout);
+editor.addEventListener('input',updateFilledIndicators);editor.addEventListener('change',updateFilledIndicators);
 updateProgressiveLayout();refresh();
 </script></body></html>
