@@ -636,10 +636,12 @@ function proposedFollowupTitle(title){
  const original=String(title||'นัดติดตาม').trim();
  const matched=/^(.*?)\s+(\d{1,3})\/(\d{2})$/.exec(original);
  const name=(matched?matched[1]:original).trim();
- const number=matched?Number(matched[2])+1:2;
- const dateYear=/^(\d{4})/.exec($('date').value||'')?.[1];
- const year=dateYear?Number(dateYear):new Date().getFullYear();
+ const dateYear=/^(\d{4})/.exec($('date').value||bangkokToday())?.[1];
+ const year=dateYear?Number(dateYear):Number(bangkokToday().slice(0,4));
  const suffix=String((year+543)%100).padStart(2,'0');
+ // Annual visit numbering resets at the Buddhist-calendar year boundary.
+ // A known same-year source may increment; never carry its count into a new year.
+ const number=matched?(matched[3]===suffix?Number(matched[2])+1:1):1;
  return (name+' '+number+'/'+suffix).slice(0,80);
 }
 function applyFollowupTitle(src){
