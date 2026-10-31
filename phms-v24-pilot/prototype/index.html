@@ -130,6 +130,8 @@
 .native-picker-shell.has-display-value>input::-webkit-datetime-edit{color:transparent}
 .native-picker-shell.has-display-value:focus-within>input::-webkit-datetime-edit{color:#202020}
 .native-picker-shell.has-display-value .native-picker-prompt{right:46px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.native-picker-shell .native-picker-prompt{max-width:calc(100% - 82px);font-size:clamp(.84rem,3.6vw,1rem)}
+.native-picker-shell.has-display-value:focus-within .native-picker-prompt{display:none}
 #dateThaiPreview,#timeThaiPreview{display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
@@ -698,8 +700,8 @@ const timePrompt=document.createElement('span');timePrompt.id='timeInputPrompt';
 const timeShell=document.createElement('div');timeShell.className='native-picker-shell';$('time').before(timeShell);timeShell.append($('time'),timePrompt);
 function syncPickerPrompts(){
  const dateText=thaiDateLabel($('date').value),timeValue=$('time').value;
- datePrompt.textContent=dateText||'📅 แตะเพื่อเลือกวันที่';
- timePrompt.textContent=timeValue?timeValue+' น.':'🕘 แตะเพื่อเลือกเวลา';
+ datePrompt.textContent='📅 '+(dateText||'แตะเพื่อเลือกวันที่');
+ timePrompt.textContent='🕒 '+(timeValue?timeValue+' น. ('+thaiSpokenTime(timeValue)+')':'แตะเพื่อเลือกเวลา');
  datePrompt.hidden=false;timePrompt.hidden=false;
  dateShell.classList.toggle('has-display-value',!!dateText);
  timeShell.classList.toggle('has-display-value',!!timeValue);
