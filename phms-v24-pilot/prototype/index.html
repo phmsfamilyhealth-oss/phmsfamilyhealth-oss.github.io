@@ -215,6 +215,26 @@
 /* Consistent subordinate, readable optional wording throughout appointment form. */
 #editor .optional-hint,#personPicker .optional-hint{font-size:.84em!important;font-weight:400!important;color:#80766A!important;letter-spacing:normal!important}
 #editor summary .optional-hint,#editor label .optional-hint{display:inline!important;white-space:nowrap!important}
+/* PHMS v2.4 Compact LINE Card — spacing only; keep elderly-readable font sizes. */
+#editor.unified-appointment-editor{padding:0 16px 18px!important;border-radius:17px!important}
+#editor .phms-appointment-header{margin:0 -16px 11px!important;padding:12px 16px 10px!important;background:#fff8ec!important;border-bottom:0!important}
+#editor .phms-appointment-header h1{font-size:clamp(1.35rem,4.7vw,1.7rem)!important;line-height:1.35}
+#editor #appointmentHeaderPerson{margin:3px 0 0!important;line-height:1.4}
+#editor #requiredLegend{margin:3px 0 9px!important;padding:0!important;background:transparent!important;font-size:.82rem}
+#editor #personPicker.embedded-person-picker{margin:0 0 9px!important}
+#editor #personPicker.embedded-person-picker label{margin:3px 0 5px!important}
+#editor #personPicker.embedded-person-picker select{min-height:50px!important}
+#editor .appointment-mode-bar{margin:7px 0 10px!important;padding:0!important}
+#editor .mode-choice{min-height:44px!important}
+#editor #scenarioFlowTitle{background:transparent!important;padding:5px 0 8px!important;border:0!important;border-radius:0!important}
+#editor #scenarioFlow{padding-top:0!important}
+#editor .scenario-grid{gap:8px!important}
+#editor .scenario-option{min-height:88px!important;padding:9px 10px!important;gap:5px!important}
+#editor .scenario-symbol{font-size:1.15rem!important}
+#editor .scenario-copy small{line-height:1.3!important}
+#editor #relatedAppointmentBox{margin:9px 0 3px!important;padding:10px 12px!important}
+#editor #relatedAppointmentBox summary{line-height:1.5}
+@media(max-width:390px){#editor.unified-appointment-editor{padding-left:12px!important;padding-right:12px!important}#editor .phms-appointment-header{margin-left:-12px!important;margin-right:-12px!important}#editor .scenario-option{padding:9px 6px!important}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
