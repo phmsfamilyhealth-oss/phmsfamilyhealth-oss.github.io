@@ -246,6 +246,12 @@
 #editor #scenarioFlow .scenario-option .scenario-copy strong{font-size:1rem!important;font-weight:700!important;line-height:1.35!important}
 #editor #scenarioFlow .scenario-option .scenario-copy small,#editor.simple-ui #scenarioFlow .scenario-option .scenario-copy small{display:block!important;font-size:.84rem!important;font-weight:400!important;line-height:1.35!important}
 #editor #scenarioFlow .scenario-symbol{font-size:1.18rem!important}
+/* Accessible vertical mode selection aligned to PHMS section headers. */
+#editor .appointment-mode-bar{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:9px!important;margin:12px 0 17px!important}
+#editor .appointment-mode-bar .mode-label{width:100%!important;background:#f8f0e3!important;color:#191919!important;font-size:1.05rem!important;font-weight:750!important;line-height:1.5!important;padding:11px 13px!important;border-radius:11px!important;margin:0!important}
+#editor .appointment-mode-bar .mode-choices{width:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;padding:0!important;background:transparent!important}
+#editor .appointment-mode-bar .mode-choice{width:100%!important;min-height:62px!important;border:1px solid #d9c8b2!important;border-radius:12px!important;background:#fff!important;color:#30251a!important;font-size:1rem!important;font-weight:700!important}
+#editor .appointment-mode-bar .mode-choice[aria-pressed="true"]{background:#fff2dc!important;border:2px solid #947143!important;color:#3f2b16!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -901,7 +907,7 @@ moveRangeTo($('historicalGuide'),$('checklistBox'),simpleExtras);
 const flowRoot=document.createElement('div');flowRoot.id='appointmentFlow';
 $('selectedPersonLabel').after(flowRoot);
 const modeBar=document.createElement('div');modeBar.className='appointment-mode-bar';
-const modeLabel=document.createElement('p');modeLabel.textContent='วิธีกรอก';modeLabel.className='mode-label';modeBar.append(modeLabel);
+const modeLabel=document.createElement('p');modeLabel.textContent='⚙️ วิธีกรอกข้อมูล';modeLabel.className='mode-label';modeBar.append(modeLabel);
 const modeChoices=document.createElement('div');modeChoices.className='mode-choices';modeChoices.setAttribute('role','group');modeChoices.setAttribute('aria-label','วิธีกรอกข้อมูล');
 for(const [value,text] of [['simple','แบบง่าย'],['full','แบบละเอียด']]){
  const button=document.createElement('button');button.type='button';button.textContent=text;button.dataset.mode=value;button.className='mode-choice';
