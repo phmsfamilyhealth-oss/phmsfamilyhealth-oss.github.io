@@ -252,6 +252,13 @@
 #editor .appointment-mode-bar .mode-choices{width:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;padding:0!important;background:transparent!important}
 #editor .appointment-mode-bar .mode-choice{width:100%!important;min-height:62px!important;border:1px solid #d9c8b2!important;border-radius:12px!important;background:#fff!important;color:#30251a!important;font-size:1rem!important;font-weight:700!important}
 #editor .appointment-mode-bar .mode-choice[aria-pressed="true"]{background:#fff2dc!important;border:2px solid #947143!important;color:#3f2b16!important}
+#editor .person-selection-card{display:flex;align-items:center;gap:12px;justify-content:space-between;border:1px solid #d9c6ae;border-radius:12px;padding:11px 13px;min-height:54px}
+#editor .person-selection-card.hidden,#editor .person-selection-controls.hidden{display:none!important}
+#editor .person-selection-card strong{font-size:1.18rem;overflow-wrap:anywhere}
+#editor .person-selection-controls{display:flex;gap:6px;flex-wrap:wrap}
+#editor .person-selection-controls button{min-height:44px!important;padding:8px 11px!important}
+#editor #personSelect.person-select-collapsed{display:none!important}
+@media(max-width:380px){#editor .person-selection-card{flex-wrap:wrap}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -363,7 +370,7 @@ if(people.error==='unauthenticated'){
  retry.style.marginTop='12px';retry.addEventListener('click',()=>{window.liff.logout();window.liff.login({redirectUri:location.href});});
  status.append(document.createElement('br'),retry);
 }
-return;}const picker=document.getElementById('personPicker'),select=document.getElementById('personSelect');select.replaceChildren(new Option('เลือกบุคคล',''),...people.people.map(x=>new Option(x.name,x.id)));picker.classList.remove('hidden');const requestedMember=memberId;if(memberId&&!people.people.some(x=>x.id===memberId))memberId='';if(memberId)select.value=memberId;picker.classList.remove('hidden');updateProgressiveLayout();document.getElementById('selectedPersonLabel').textContent=memberId?select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';if(memberId){const change=document.createElement('button');change.type='button';change.id='changeAppointmentPerson';change.className='secondary';change.textContent='เปลี่ยนบุคคล';change.addEventListener('click',()=>{picker.classList.remove('hidden');updateProgressiveLayout();picker.scrollIntoView({block:'start',behavior:'smooth'});});document.getElementById('selectedPersonLabel').after(change);}else if(requestedMember){document.getElementById('personStatus').textContent='ไม่พบสิทธิ์เพิ่มนัดให้บุคคลที่เปิดมา กรุณาเลือกบุคคลที่มีสิทธิ์';}select.addEventListener('change',()=>{memberId=select.value;picker.classList.remove('hidden');document.getElementById('selectedPersonLabel').textContent=memberId?select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';clearSourceFilled({personChanged:true});linkedVisitState.appointmentId='';linkedVisitState.personId='';$('linkedCareVisit').replaceChildren(new Option('เลือกนัดที่บันทึกไว้แล้ว',''));$('linkedCareVisitActions').classList.add('hidden');$('linkedCareVisitStatus').textContent='กำลังตรวจประวัตินัดของบุคคลนี้';clearAppointmentPhotos();$('hasAppointmentPhotos').value='';authorizedCatalog=null;relatedAllItems=[];sourceAppointments=new Map();relatedLoadGeneration++;$('relatedAppointmentBox').hidden=true;$('relatedCards').replaceChildren();$('relatedClear').classList.add('hidden');document.getElementById('review').disabled=true;document.getElementById('save').disabled=true;if(memberId){loadRelatedAppointments();loadSelectedCatalog(window.liff,readEndpoint);}else{refreshProviderPicker();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';}});if(!memberId){document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';return;}loadRelatedAppointments();const catalogResult=await makeLiffProviderCatalogClient({liff:window.liff,endpoint:readEndpoint})(memberId);if(catalogResult.ok&&catalogResult.catalog.organizations.length){authorizedCatalog=catalogResult.catalog;refreshProviderPicker();syncProviderNames();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกโรงพยาบาลและตรวจทานนัด';document.getElementById('review').disabled=false;document.getElementById('save').disabled=true;document.getElementById('save').textContent='บันทึกนัด (ยังไม่เปิด)';}else{document.getElementById('connectionStatus').textContent='ยังไม่พร้อมบันทึก';document.getElementById('error').textContent='ยังโหลดทะเบียนโรงพยาบาลไม่ได้ กรุณาลองใหม่เมื่อระบบพร้อม';document.getElementById('save').disabled=true;}}catch{confirmClient=null;document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE ไม่สำเร็จ';document.getElementById('error').textContent='ไม่สามารถเชื่อมต่อ LINE ได้ กรุณาเปิดจาก LINE แล้วลองอีกครั้ง';}}
+return;}const picker=document.getElementById('personPicker'),select=document.getElementById('personSelect');select.replaceChildren(new Option('เลือกบุคคล',''),...people.people.map(x=>new Option(x.name,x.id)));picker.classList.remove('hidden');const requestedMember=memberId;if(memberId&&!people.people.some(x=>x.id===memberId))memberId='';if(memberId)select.value=memberId;picker.classList.remove('hidden');updateProgressiveLayout();document.getElementById('selectedPersonLabel').textContent=memberId?select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';if(requestedMember&&!memberId){document.getElementById('personStatus').textContent='ไม่พบสิทธิ์เพิ่มนัดให้บุคคลที่เปิดมา กรุณาเลือกบุคคลที่มีสิทธิ์';}select.addEventListener('change',()=>{memberId=select.value;picker.classList.remove('hidden');document.getElementById('selectedPersonLabel').textContent=memberId?select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';clearSourceFilled({personChanged:true});linkedVisitState.appointmentId='';linkedVisitState.personId='';$('linkedCareVisit').replaceChildren(new Option('เลือกนัดที่บันทึกไว้แล้ว',''));$('linkedCareVisitActions').classList.add('hidden');$('linkedCareVisitStatus').textContent='กำลังตรวจประวัตินัดของบุคคลนี้';clearAppointmentPhotos();$('hasAppointmentPhotos').value='';authorizedCatalog=null;relatedAllItems=[];sourceAppointments=new Map();relatedLoadGeneration++;$('relatedAppointmentBox').hidden=true;$('relatedCards').replaceChildren();$('relatedClear').classList.add('hidden');document.getElementById('review').disabled=true;document.getElementById('save').disabled=true;if(memberId){loadRelatedAppointments();loadSelectedCatalog(window.liff,readEndpoint);}else{refreshProviderPicker();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';}});if(!memberId){document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';return;}loadRelatedAppointments();const catalogResult=await makeLiffProviderCatalogClient({liff:window.liff,endpoint:readEndpoint})(memberId);if(catalogResult.ok&&catalogResult.catalog.organizations.length){authorizedCatalog=catalogResult.catalog;refreshProviderPicker();syncProviderNames();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกโรงพยาบาลและตรวจทานนัด';document.getElementById('review').disabled=false;document.getElementById('save').disabled=true;document.getElementById('save').textContent='บันทึกนัด (ยังไม่เปิด)';}else{document.getElementById('connectionStatus').textContent='ยังไม่พร้อมบันทึก';document.getElementById('error').textContent='ยังโหลดทะเบียนโรงพยาบาลไม่ได้ กรุณาลองใหม่เมื่อระบบพร้อม';document.getElementById('save').disabled=true;}}catch{confirmClient=null;document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE ไม่สำเร็จ';document.getElementById('error').textContent='ไม่สามารถเชื่อมต่อ LINE ได้ กรุณาเปิดจาก LINE แล้วลองอีกครั้ง';}}
 initializeLiff();
 // No fake catalog. A verified backend integration will invoke setAuthorizedCatalog after LINE authentication.
 let authorizedCatalog=null;
@@ -1065,8 +1072,39 @@ const inPerson=$('selectedPersonLabel');inPerson.classList.add('person-banner');
 $('editor').prepend(document.querySelector('.phms-appointment-header'));
 $('editor').classList.add('unified-appointment-editor');
 $('editor').querySelector('h2').classList.add('visually-hidden');
+// The authorized select remains the only source of truth. A valid LINE deep link locks person switching.
+const personSelectionCard=document.createElement('div');
+personSelectionCard.id='personSelectionCard';personSelectionCard.className='person-selection-card hidden';
+const personSelectionName=document.createElement('strong');personSelectionName.id='personSelectionName';
+const personChange=document.createElement('button');personChange.type='button';personChange.className='secondary';personChange.textContent='เปลี่ยนคน';
+const personCancel=document.createElement('button');personCancel.type='button';personCancel.className='secondary';personCancel.textContent='ยกเลิก';
+const personSelectionControls=document.createElement('div');personSelectionControls.className='person-selection-controls';
+personSelectionControls.append(personChange,personCancel);
+personSelectionCard.append(personSelectionName,personSelectionControls);
+let editingAppointmentPerson=false;
+function authorizedLinePersonLocked(){
+ return !!resolveAppointmentMemberDeepLink()&&$('personSelect').value===resolveAppointmentMemberDeepLink();
+}
+function syncPersonSelectionCard(){
+ const select=$('personSelect'),selected=!!select.value,locked=authorizedLinePersonLocked();
+ personSelectionCard.classList.toggle('hidden',!selected);
+ personSelectionName.textContent=selected?'👤 '+select.selectedOptions[0].textContent.trim():'';
+ personSelectionControls.classList.toggle('hidden',locked);
+ select.classList.toggle('person-select-collapsed',selected&&(!editingAppointmentPerson||locked));
+ if(locked)editingAppointmentPerson=false;
+}
+personChange.addEventListener('click',()=>{editingAppointmentPerson=true;syncPersonSelectionCard();$('personSelect').focus();});
+personCancel.addEventListener('click',()=>{
+ if(authorizedLinePersonLocked())return;
+ editingAppointmentPerson=false;
+ const select=$('personSelect');select.value='';select.dispatchEvent(new Event('change',{bubbles:true}));
+ syncPersonSelectionCard();
+});
+$('personSelect').addEventListener('change',()=>{editingAppointmentPerson=false;syncPersonSelectionCard();});
+new MutationObserver(syncPersonSelectionCard).observe($('personSelect'),{childList:true});
 const personSection=$('personPicker');
 personSection.classList.add('embedded-person-picker');
+personSection.append(personSelectionCard);
 $('requiredLegend').after(personSection);
 personSection.querySelector('h2').textContent='';
 personSection.querySelector('label[for="personSelect"]').innerHTML='👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span>';
