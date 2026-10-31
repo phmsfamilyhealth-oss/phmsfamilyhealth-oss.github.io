@@ -267,6 +267,12 @@
 #editor .person-selection-card strong{font-size:1.2rem!important;line-height:1.4!important}
 #editor #personPicker.embedded-person-picker{margin-bottom:4px!important}
 #editor #appointmentHeaderPerson[hidden]{display:none!important}
+/* Consistent secondary actions for today's date and appointment photo uploads. */
+#editor #appointmentChooseToday{background:#fff!important;color:#684c2d!important;border:1px solid #d8c6af!important;font-weight:550!important;min-height:44px!important;padding:8px 12px!important;margin:7px 0 3px!important}
+#editor #appointmentChooseToday.hidden,#editor #appointmentChooseToday[hidden]{display:none!important}
+#editor #addAppointmentPhoto{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;width:100%!important;min-height:78px!important;padding:12px!important;background:#fffdf9!important;color:#684c2d!important;border:1px dashed #c9b394!important;border-radius:12px!important;box-shadow:none!important;font-weight:650!important;gap:5px!important}
+#editor #addAppointmentPhoto.hidden{display:none!important}
+#editor #addAppointmentPhoto:focus-visible,#editor #appointmentChooseToday:focus-visible{outline:3px solid #947143!important;outline-offset:2px}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -564,7 +570,7 @@ function renderAppointmentPhotos(){
   actions.append(view,remove);card.append(thumb,name,actions);list.append(card);
  });
  $('addAppointmentPhoto').classList.toggle('hidden',photoFiles.length>=2);
- $('addAppointmentPhoto').textContent=photoFiles.length?'+ เพิ่มอีกรูป':'+ เพิ่มรูปใบนัด';
+ $('addAppointmentPhoto').textContent=photoFiles.length?'📷 เพิ่มอีกรูป':'📷 เพิ่มรูปใบนัด';
  $('filehelp').textContent=photoFiles.length===2?'ครบ 2 รูปแล้ว':photoFiles.length+'/2 รูป';
 }
 function showAppointmentPhoto(index){if(!photoUrls[index])return;$('appointmentPhotoLarge').src=photoUrls[index];$('appointmentPhotoDialog').showModal();}
@@ -955,6 +961,15 @@ todayShortcut.addEventListener('click',()=>{
  $('date').dispatchEvent(new Event('input',{bubbles:true}));
  $('date').dispatchEvent(new Event('change',{bubbles:true}));
 });
+function syncTodayShortcut(){
+ const sameDay=$('date').value===bangkokToday();
+ todayShortcut.classList.toggle('hidden',sameDay);
+ todayShortcut.hidden=sameDay;
+ todayShortcut.textContent='📅 เลือกวันนี้';
+}
+$('date').addEventListener('input',syncTodayShortcut);
+$('date').addEventListener('change',syncTodayShortcut);
+syncTodayShortcut();
 // Same-day advisory uses only appointments already returned for the authorized person.
 const conflictNotice=document.createElement('div');
 conflictNotice.id='sameDayAppointmentNotice';conflictNotice.className='same-day-notice hidden';
