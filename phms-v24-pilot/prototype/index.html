@@ -138,6 +138,13 @@
 #editor #selectedPersonLabel.person-banner::before{content:"👤 เพิ่มนัดให้";display:block;font-size:.92rem;font-weight:650;color:#6b424e;margin-bottom:3px}
 #editor #changeAppointmentPerson{margin:0 0 12px;min-height:44px;padding:8px 14px;border:1px solid #d6b9c1;border-radius:11px;background:#fff5f6;color:#633a46;font-weight:650}
 #personPicker h2{font-size:1.16rem}
+.appointment-reset-button{display:block;width:100%;margin:14px 0 7px;min-height:48px!important;background:#f7f0e9!important;color:#694b34!important;border:1px solid #d7c2ab!important}
+.reset-appointment-dialog{border:1px solid #d8c4ad;border-radius:16px;padding:22px;max-width:min(92vw,420px);color:#29231d}
+.reset-appointment-dialog::backdrop{background:#0008}
+.reset-appointment-dialog h3{margin:0 0 8px;font-size:1.22rem}
+.reset-appointment-dialog p{line-height:1.6}
+.reset-dialog-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.reset-dialog-actions button{flex:1;min-width:120px}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -716,6 +723,54 @@ function syncPickerPrompts(){
 $('date').addEventListener('input',syncPickerPrompts);$('date').addEventListener('change',syncPickerPrompts);
 $('time').addEventListener('input',syncPickerPrompts);$('time').addEventListener('change',syncPickerPrompts);
 // Section status badges: collapsed groups retain their values and indicate when populated.
+// Reset only the current appointment draft; the selected authorized person remains unchanged.
+const resetButton=document.createElement('button');
+resetButton.type='button';resetButton.id='resetAppointmentDraft';resetButton.className='secondary appointment-reset-button';
+resetButton.textContent='↻ ล้างข้อมูลที่กรอก';
+resetButton.setAttribute('aria-label','ล้างข้อมูลนัดหมายที่กำลังกรอก');
+const resetConfirmation=document.createElement('dialog');
+resetConfirmation.id='resetAppointmentDialog';resetConfirmation.className='reset-appointment-dialog';
+resetConfirmation.innerHTML='<h3>ล้างข้อมูลที่กรอก?</h3><p>ข้อมูลนัดที่กำลังกรอก รูปใบนัด และรายการที่เพิ่มไว้จะถูกล้าง แต่ยังคงบุคคลที่เลือก และไม่ลบข้อมูลในระบบ</p><div class="reset-dialog-actions"><button type="button" id="cancelAppointmentReset" class="secondary">ยกเลิก</button><button type="button" id="confirmAppointmentReset">ล้างข้อมูล</button></div>';
+document.body.append(resetConfirmation);
+const resetActions=$('review').parentElement;
+resetActions.before(resetButton);
+function resetCurrentAppointmentDraft(){
+ // Never reset personSelect, memberId, login, catalog or authorized options.
+ clearSourceFilled({personChanged:true});
+ for(const el of editor.querySelectorAll('input,select,textarea')){
+  if(el.id==='personSelect'||el.id==='detail'||el.id==='scenario')continue;
+  if(el.type==='file'){el.value='';continue;}
+  if(el.type==='checkbox'||el.type==='radio'){el.checked=false;continue;}
+  el.value='';
+ }
+ for(const kind of ['hospital','unit','clinician']){
+  comboState[kind]={searchText:'',selectedItem:null,isOpen:false};
+  closeCombo(kind);
+ }
+ sourceFilled.clear();autoPurposeValue='';purposeManuallyEdited=false;
+ $('relatedSelect').value='';$('relatedQuery').value='';
+ relatedExpanded=false;$('relatedClear').classList.add('hidden');
+ $('relatedMore').classList.add('hidden');
+ renderRelatedCards();
+ linkedVisitState.appointmentId='';linkedVisitState.personId=memberId;
+ $('linkedCareVisit').value='';$('linkedCareVisitActions').classList.add('hidden');
+ clearAppointmentPhotos();
+ checklistItems=[];renderChecklist();
+ procedurePreviewItems=[];renderProcedurePreview();
+ $('hasAppointmentPhotos').value='';
+ $('contactDetails').textContent='ยังไม่ได้โหลดข้อมูลติดต่อ';
+ $('reschedulePhase').value='';
+ $('detail').value='simple';$('scenario').value='booked';$('known').value='yes';
+ for(const panel of editor.querySelectorAll('details'))panel.open=false;
+ reviewedDraft=null;$('confirmation').classList.add('hidden');editor.classList.remove('hidden');
+ $('error').textContent='';$('save').disabled=true;
+ refreshProviderPicker();syncProviderNames();refresh();updateProgressiveLayout();updateLinkedCareVisitActions();
+ $('purpose').focus({preventScroll:true});
+}
+resetButton.addEventListener('click',()=>{if(resetConfirmation.showModal)resetConfirmation.showModal();else if(window.confirm('ล้างข้อมูลที่กรอก โดยคงบุคคลที่เลือกไว้?'))resetCurrentAppointmentDraft();});
+$('cancelAppointmentReset').addEventListener('click',()=>resetConfirmation.close());
+$('confirmAppointmentReset').addEventListener('click',()=>{resetConfirmation.close();resetCurrentAppointmentDraft();});
+resetConfirmation.addEventListener('click',event=>{if(event.target===resetConfirmation)resetConfirmation.close();});
 const missingFields=document.createElement('p');missingFields.id='requiredFieldStatus';missingFields.className='help';missingFields.setAttribute('role','status');
 const reviewActions=$('review').parentElement;reviewActions.before(missingFields);
 function updateRequiredFieldStatus(){
