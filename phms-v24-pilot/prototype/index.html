@@ -958,8 +958,8 @@ const mainSection=makeFlowSection('mainFlow','2. นัดเรื่องอ�
 const purposeHelp=$('purpose').nextElementSibling;
 moveLabelAndInput('purpose',mainSection);
 if(purposeHelp?.classList.contains('help'))mainSection.append(purposeHelp);
-mainSection.append($('hospitalQuickCards'));
 moveLabelAndInput('hospitalSearch',mainSection,['hospitalSearchResults','providerOrg']);
+$('hospitalSearch').before($('hospitalQuickCards'));
 mainSection.append(providerExtras);
 const timeSection=makeFlowSection('timeFlow','3. วันและเวลา');flowRoot.append(timeSection);
 moveLabelAndInput('date',timeSection,['dateRule','dateThaiPreview']);
