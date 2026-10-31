@@ -235,6 +235,10 @@
 #editor #relatedAppointmentBox{margin:9px 0 3px!important;padding:10px 12px!important}
 #editor #relatedAppointmentBox summary{line-height:1.5}
 @media(max-width:390px){#editor.unified-appointment-editor{padding-left:12px!important;padding-right:12px!important}#editor .phms-appointment-header{margin-left:-12px!important;margin-right:-12px!important}#editor .scenario-option{padding:9px 6px!important}}
+/* Match person and appointment-type section heading hierarchy. */
+#editor #personPicker.embedded-person-picker label[for="personSelect"]{display:block!important;background:#f8f0e3!important;border-radius:11px!important;padding:11px 13px!important;margin:5px 0 10px!important;font-weight:750!important;font-size:1.05rem!important;line-height:1.5!important;color:#191919!important}
+#editor #personPicker.embedded-person-picker{margin-bottom:8px!important}
+#editor #personPicker.embedded-person-picker select{margin-top:0!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
