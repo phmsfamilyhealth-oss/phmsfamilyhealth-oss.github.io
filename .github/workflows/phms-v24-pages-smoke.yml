@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: '22'
       - name: Verify linked-care person, date, and command safety
-        run: node --test phms-v24-pilot/contracts/linked-appointment-workflow.test.mjs
+        run: node --test phms-v24-pilot/contracts/linked-appointment-workflow.test.mjs phms-v24-pilot/contracts/appointment-ux-structure.test.mjs
       - name: Confirm deployed HTTPS HTML and browser modules
         shell: bash
         run: |
