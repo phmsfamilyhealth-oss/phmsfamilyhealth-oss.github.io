@@ -212,6 +212,9 @@
 #editor #personPicker.embedded-person-picker h2:empty{display:none!important}
 #editor .visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 #connectionStatus.phms-connection-status:not([data-state="error"]):not([data-state="loading"]){display:none!important}
+/* Consistent subordinate, readable optional wording throughout appointment form. */
+#editor .optional-hint,#personPicker .optional-hint{font-size:.84em!important;font-weight:400!important;color:#80766A!important;letter-spacing:normal!important}
+#editor summary .optional-hint,#editor label .optional-hint{display:inline!important;white-space:nowrap!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1226,7 +1229,7 @@ function decorateOptionalWording(){
    for(const node of [...el.childNodes]){
     if(node.nodeType!==Node.TEXT_NODE)continue;
     const text=node.textContent||'';
-    const regex=/\s*\((ถ้ามี|ถ้าทราบ)\)/g;
+    const regex=/\s*\((ถ้ามี|ถ้าทราบ|ไม่บังคับ)\)/g;
     if(!regex.test(text))continue;
     regex.lastIndex=0;
     const fragment=document.createDocumentFragment();let start=0,match;
@@ -1248,6 +1251,18 @@ for(const [id,icon] of [['purpose','📝'],['hospitalSearch','🏥'],['unitSearc
  const span=document.createElement('span');span.className='field-icon';span.textContent=icon+' ';label.prepend(span);
 }
 providerSummary.textContent='🏷️ แผนกและแพทย์ (ถ้ามี)';
+decorateOptionalWording();
+// Titles are also updated dynamically when an existing appointment is selected.
+const optionalObserver=new MutationObserver(records=>{
+ for(const record of records){
+  const el=record.target.nodeType===Node.ELEMENT_NODE?record.target:record.target.parentElement;
+  if(!el||!el.closest('#editor'))continue;
+  const heading=el.closest('summary,label,h2,h3');
+  if(heading)decorateOptionalWording();
+ }
+});
+optionalObserver.observe($('relatedAppointmentBox').querySelector('summary'),{childList:true});
+optionalObserver.observe(providerSummary,{childList:true});
 decorateOptionalWording();
 // Keep the familiar LINE appointment header in sync with the authorized person selector.
 function syncAppointmentHeader(){
