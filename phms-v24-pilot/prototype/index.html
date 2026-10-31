@@ -163,6 +163,13 @@
 #editor .field-icon{font-size:1.02em;margin-right:3px}
 #editor .optional-hint{color:#71685d!important;font-size:.87em;font-weight:450}
 #editor .progressive-extras>summary,#editor #details>details>summary{color:#29241e}
+/* Adaptive quick cards for small authorized provider lists, with existing search preserved. */
+.adaptive-provider-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0}
+.adaptive-provider-cards.hidden{display:none!important}
+.adaptive-provider-choice{min-height:58px!important;padding:10px!important;border:1px solid #d7c6b0!important;border-radius:12px!important;background:#fff!important;color:#30261b!important;font-size:.97rem!important;text-align:center;overflow-wrap:anywhere;line-height:1.4}
+.adaptive-provider-choice[aria-pressed=true]{border:2px solid #856236!important;background:#fff2dc!important;font-weight:750}
+.adaptive-provider-more{color:#5b432b!important;background:#f8f0e5!important}
+@media(max-width:350px){.adaptive-provider-cards{grid-template-columns:1fr}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -287,6 +294,48 @@ function renderCombo(kind,choices){const input=document.getElementById(kind+'Sea
 if(term&&!matched.length){const msg=document.createElement('div');msg.className='unavailable';msg.textContent='ไม่พบรายการที่ตรงกัน';list.append(msg);}
 if(term&&!matched.some(x=>normalizedMasterName(x.label)===normalizedMasterName(term))){const add=document.createElement('button');add.type='button';add.disabled=true;add.textContent='+ เพิ่ม "'+term.slice(0,160)+'" เป็นรายการใหม่ — รอเปิดระบบตรวจสอบทะเบียน';list.append(add);}
 list.classList.toggle('hidden',!list.children.length);input.setAttribute('aria-expanded',String(!!list.children.length));}
+// PHMS adaptive selection: authorized catalog only, same hidden provider IDs.
+const adaptivePickers={};
+for(const kind of ['hospital','unit']){
+ const search=document.getElementById(kind+'Search');
+ const cards=document.createElement('div');
+ cards.className='adaptive-provider-cards';cards.id=kind+'QuickCards';
+ cards.setAttribute('role','group');
+ cards.setAttribute('aria-label',kind==='hospital'?'เลือกโรงพยาบาลจากรายการ':'เลือกแผนกจากรายการ');
+ search.before(cards);
+ adaptivePickers[kind]={cards,search,expanded:false};
+}
+function drawAdaptiveProviderCards(kind,choices){
+ const ui=adaptivePickers[kind];if(!ui)return;
+ const entries=Array.isArray(choices)?choices:[];
+ const selected=document.getElementById(kind==='hospital'?'providerOrg':'providerUnit').value;
+ const featured=entries.length<=8?entries:entries.slice(0,4);
+ ui.cards.replaceChildren();
+ for(const item of featured){
+  const btn=document.createElement('button');btn.type='button';btn.className='adaptive-provider-choice';
+  const active=item.value===selected;
+  btn.setAttribute('aria-pressed',String(active));
+  btn.textContent=(active?'✓ ':'')+(kind==='hospital'?'🏥 ':'🏷️ ')+item.label;
+  btn.addEventListener('click',()=>{
+   const target=document.getElementById(kind==='hospital'?'providerOrg':'providerUnit');
+   target.value=item.value;
+   comboState[kind].selectedItem=item;comboState[kind].searchText=item.label;
+   ui.search.value=item.label;closeCombo(kind);
+   refreshProviderPicker(kind==='hospital'?'providerOrg':'providerUnit');
+   syncProviderNames();
+   document.getElementById('editor').dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  ui.cards.append(btn);
+ }
+ if(entries.length>8){
+  const more=document.createElement('button');more.type='button';more.className='adaptive-provider-choice adaptive-provider-more';
+  more.textContent='🔎 ค้นหา'+(kind==='hospital'?'โรงพยาบาล':'แผนก')+'อื่น';
+  more.addEventListener('click',()=>{ui.search.focus();ui.search.scrollIntoView({block:'nearest'});});
+  ui.cards.append(more);
+ }
+ ui.cards.classList.toggle('hidden',!entries.length);
+ ui.search.placeholder=kind==='hospital'?'🔎 พิมพ์ค้นหาโรงพยาบาล':'🔎 พิมพ์ค้นหาแผนก';
+}
 function refreshProviderPicker(changed=''){
  const org=document.getElementById('providerOrg').value,unit=changed==='providerOrg'?'':document.getElementById('providerUnit').value,clinician=(changed==='providerOrg'||changed==='providerUnit')?'':document.getElementById('providerClinician').value;
  if(changed==='providerOrg'||changed==='providerUnit'){comboState.clinician.selectedItem=null;comboState.clinician.searchText='';document.getElementById('clinicianSearch').value='';document.getElementById('doctor').value='';closeCombo('clinician');}
@@ -296,6 +345,8 @@ function refreshProviderPicker(changed=''){
  fillOptions('providerUnit',state.units,'เลือกแผนก');document.getElementById('providerUnit').value=state.unitId;
  fillOptions('providerClinician',state.clinicians,'เลือกแพทย์');document.getElementById('providerClinician').value=state.clinicianId;
  for(const [kind,choices] of [['hospital',state.organizations],['unit',state.units],['clinician',state.clinicians]])renderCombo(kind,choices);
+ drawAdaptiveProviderCards('hospital',state.organizations);
+ drawAdaptiveProviderCards('unit',state.units);
  document.getElementById('doctorHint').textContent=state.clinicians.length?'เลือกชื่อแพทย์จากทะเบียนหรือข้ามได้':'ไม่มีชื่อแพทย์ในทะเบียน — เว้นว่างได้';
 }
 function selectedClinicianId(){return document.getElementById('providerClinician').value;}
