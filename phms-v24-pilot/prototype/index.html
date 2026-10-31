@@ -204,8 +204,16 @@
 #relatedCards .related-compact-card strong{line-height:1.4}#relatedCards .related-compact-card span{font-size:.87rem;color:#715e46;line-height:1.4}
 .related-change-button{width:auto!important;margin:-6px 0 14px;min-height:44px}
 #relatedAppointmentBox summary{overflow-wrap:anywhere}
+/* Single unified LINE-like appointment card, with no duplicate title or mode badge. */
+#editor.unified-appointment-editor{padding-top:0!important;overflow:hidden}
+#editor .phms-appointment-header{margin:0 -1px 14px!important;border:0!important;border-radius:0!important;border-top:0!important;border-bottom:1px solid #e6d8c2!important;padding:15px 17px!important;background:#fff8eb!important}
+#editor .phms-appointment-header h1{font-size:clamp(1.3rem,5vw,1.7rem)!important}
+#editor #appointmentHeaderPerson{font-size:.94rem;margin-top:5px!important;font-weight:550;color:#654e30}
+#editor #personPicker.embedded-person-picker h2:empty{display:none!important}
+#editor .visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#connectionStatus.phms-connection-status:not([data-state="error"]):not([data-state="loading"]){display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="นัดหมาย"><div class="phms-appointment-header-top"><h1>📅 นัดหมาย</h1><span id="appointmentHeaderMode">แบบง่าย</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p><p id="appointmentHeaderHint">เลือกบุคคลที่จะเพิ่มนัด</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -1013,11 +1021,15 @@ for(const id of optionalLabels){
 }
 $('purpose').required=true;
 const inPerson=$('selectedPersonLabel');inPerson.classList.add('person-banner');
+// Integrate the familiar LINE-style header into the single appointment editor card.
+$('editor').prepend(document.querySelector('.phms-appointment-header'));
+$('editor').classList.add('unified-appointment-editor');
+$('editor').querySelector('h2').classList.add('visually-hidden');
 const personSection=$('personPicker');
 personSection.classList.add('embedded-person-picker');
 $('requiredLegend').after(personSection);
-personSection.querySelector('h2').textContent='👤 เพิ่มนัดให้ใคร';
-personSection.querySelector('label[for="personSelect"]').textContent='เลือกบุคคลที่จะเพิ่มนัด';
+personSection.querySelector('h2').textContent='';
+personSection.querySelector('label[for="personSelect"]').innerHTML='👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span>';
 document.querySelector('label[for="purpose"]').innerHTML='ชื่อนัดหมาย <span class="required-star" aria-label="จำเป็นต้องกรอก">*</span>';
 document.querySelector('label[for="hospitalSearch"]').innerHTML='โรงพยาบาล / สถานพยาบาล <span class="required-star" aria-label="จำเป็นต้องกรอก">*</span>';
 document.querySelector('label[for="unitSearch"]').textContent='แผนก / คลินิก';
@@ -1241,8 +1253,7 @@ decorateOptionalWording();
 function syncAppointmentHeader(){
  const select=$('personSelect'),person=select.value?select.selectedOptions[0]?.textContent?.trim():'';
  $('appointmentHeaderPerson').textContent=person?'เพิ่มนัดให้: '+person:'ยังไม่ได้เลือกบุคคล';
- $('appointmentHeaderHint').textContent=person?'กรอกข้อมูลนัดหมายใหม่':'เลือกบุคคลที่จะเพิ่มนัด';
- $('appointmentHeaderMode').textContent=$('detail').value==='full'?'แบบละเอียด':'แบบง่าย';
+
 }
 $('personSelect').addEventListener('change',syncAppointmentHeader);
 $('detail').addEventListener('change',syncAppointmentHeader);
