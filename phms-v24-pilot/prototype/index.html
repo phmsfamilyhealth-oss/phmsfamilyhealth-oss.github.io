@@ -189,6 +189,9 @@
 .same-day-notice{margin:10px 0;padding:11px 13px;background:#fff6e8;color:#68461e;border:1px solid #e3cda9;border-radius:11px;line-height:1.5;font-size:.92rem}
 .same-day-notice.hidden{display:none!important}.same-day-notice.high-risk{background:#fff1f0;border-color:#d9958c;color:#8b241e}
 .same-day-notice p{margin:5px 0}.same-day-notice ul{padding-left:20px;margin:5px 0}
+/* Avoid a duplicated department text field under small card groups. */
+#unitSearch.adaptive-search-collapsed,#unitSearchResults.adaptive-search-collapsed{display:none!important}
+#unitQuickCards .adaptive-provider-more{border-style:dashed!important;background:#faf5ec!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -373,21 +376,33 @@ function drawAdaptiveProviderCards(kind,choices){
    const target=document.getElementById(kind==='hospital'?'providerOrg':'providerUnit');
    target.value=item.value;
    comboState[kind].selectedItem=item;comboState[kind].searchText=item.label;
-   ui.search.value=item.label;closeCombo(kind);
+   ui.search.value=item.label;ui.expanded=false;closeCombo(kind);
    refreshProviderPicker(kind==='hospital'?'providerOrg':'providerUnit');
    syncProviderNames();
    document.getElementById('editor').dispatchEvent(new Event('change',{bubbles:true}));
   });
   ui.cards.append(btn);
  }
- if(false && entries.length>6){
-  const more=document.createElement('button');more.type='button';more.className='adaptive-provider-choice adaptive-provider-more';
-  more.textContent='🔎 ค้นหา'+(kind==='hospital'?'โรงพยาบาล':'แผนก')+'อื่น';
-  more.addEventListener('click',()=>{ui.search.focus();ui.search.scrollIntoView({block:'nearest'});});
-  ui.cards.append(more);
+
+ // Six or fewer: cards only. The final card reveals the existing search field for a different/new name.
+ const small=entries.length<=6;
+ if(small){
+  const other=document.createElement('button');other.type='button';
+  other.className='adaptive-provider-choice adaptive-provider-more';
+  other.textContent='＋ แผนกอื่น / เพิ่มชื่อใหม่';
+  other.setAttribute('aria-expanded',String(ui.expanded));
+  other.addEventListener('click',()=>{
+   ui.expanded=!ui.expanded;
+   drawAdaptiveProviderCards(kind,entries);
+   if(ui.expanded){ui.search.focus();ui.search.scrollIntoView({block:'nearest'});}
+  });
+  ui.cards.append(other);
  }
- ui.cards.classList.toggle('hidden',!entries.length);
- ui.search.placeholder=kind==='hospital'?'🔎 พิมพ์ค้นหาโรงพยาบาล':'🔎 พิมพ์ค้นหาแผนก';
+ ui.cards.classList.toggle('hidden',!small);
+ ui.search.classList.toggle('adaptive-search-collapsed',small&&!ui.expanded);
+ document.getElementById(kind+'SearchResults').classList.toggle('adaptive-search-collapsed',small&&!ui.expanded);
+ ui.search.placeholder='🔎 ค้นหาหรือพิมพ์ชื่อแผนกใหม่';
+
 }
 function refreshProviderPicker(changed=''){
  const org=document.getElementById('providerOrg').value,unit=changed==='providerOrg'?'':document.getElementById('providerUnit').value,clinician=(changed==='providerOrg'||changed==='providerUnit')?'':document.getElementById('providerClinician').value;
