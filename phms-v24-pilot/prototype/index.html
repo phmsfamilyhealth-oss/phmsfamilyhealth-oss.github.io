@@ -145,6 +145,9 @@
 .reset-appointment-dialog p{line-height:1.6}
 .reset-dialog-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 .reset-dialog-actions button{flex:1;min-width:120px}
+/* Step 1 follows the same numbered section hierarchy even when LINE preselects the person. */
+#editor #selectedPersonLabel.person-banner::before{content:"1. 👤 เพิ่มนัดให้";font-size:1.05rem;font-weight:750}
+#personPicker h2{font-size:1.12rem}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -801,11 +804,11 @@ function updateProgressiveLayout(){
  const simple=$('detail').value==='simple',mode=$('scenario').value;
  editor.classList.toggle('simple-ui',simple);document.body.classList.toggle('simple-entry',simple);
  for(const button of modeChoices.children)button.setAttribute('aria-pressed',String(button.dataset.mode===$('detail').value));
- const shift=memberId&&$('personPicker').classList.contains('hidden')?0:1;
- $('scenarioFlowTitle').textContent=(1+shift)+'. นัดแบบไหน';
- $('mainFlowTitle').textContent=(2+shift)+'. นัดเรื่องอะไร ที่ไหน';
- $('timeFlowTitle').textContent=(3+shift)+'. วันและเวลา';
- $('extrasFlowTitle').textContent=(4+shift)+'. เพิ่มเติม (ถ้ามี)';
+ // The selected-person banner is always step 1, including LINE deep links.
+ $('scenarioFlowTitle').textContent='2. นัดแบบไหน';
+ $('mainFlowTitle').textContent='3. นัดเรื่องอะไร ที่ไหน';
+ $('timeFlowTitle').textContent='4. วันและเวลา';
+ $('extrasFlowTitle').textContent='5. เพิ่มเติม (ถ้ามี)';
  simpleSummary.textContent=simpleSummaryText[mode]||'ข้อมูลเพิ่มเติม';
  linkedDisclosure.classList.toggle('hidden',mode!=='historical');
  if(mode!=='historical')linkedDisclosure.open=false;
