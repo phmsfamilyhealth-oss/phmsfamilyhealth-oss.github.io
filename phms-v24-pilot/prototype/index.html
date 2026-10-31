@@ -174,6 +174,11 @@
 /* Date shortcut uses Bangkok local calendar day; keep date/time native and independent. */
 #appointmentChooseToday{min-height:44px!important;padding:7px 16px!important;margin:9px 0 3px;background:#f5eadb!important;color:#543c22!important;border:1px solid #d5bea1;border-radius:10px;font-weight:700}
 #appointmentChooseToday:focus-visible{outline:3px solid #947143;outline-offset:2px}
+/* Adaptive bounded-option cards, preserving canonical select and validation. */
+.adaptive-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 12px}
+.adaptive-select-hidden{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+.adaptive-option-host.hidden{display:none!important}
+.adaptive-select-search{margin:6px 0 9px}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -983,5 +988,46 @@ function updateProgressiveLayout(){
 $('detail').addEventListener('change',updateProgressiveLayout);
 $('scenario').addEventListener('change',updateProgressiveLayout);
 editor.addEventListener('input',()=>{updateFilledIndicators();updateRequiredFieldStatus();});editor.addEventListener('change',()=>{updateFilledIndicators();updateRequiredFieldStatus();});
+// Adaptive selection for existing bounded choices (no duplicate fields or new enum values).
+const adaptiveSelectIds=['known','hasAppointmentPhotos','coverage_type','walk_in_reason','reschedulePhase'];
+function installAdaptiveSelect(id){
+ const select=$(id);if(!select)return;
+ const host=document.createElement('div');host.className='adaptive-option-host';host.setAttribute('role','group');
+ host.setAttribute('aria-label',document.querySelector('label[for="'+id+'"]')?.textContent.trim()||'เลือกข้อมูล');
+ select.before(host);
+ const options=[...select.options].filter(o=>o.value&&!o.disabled);
+ if(options.length<=6){
+  host.classList.add('adaptive-option-grid');
+  for(const option of options){
+   const button=document.createElement('button');button.type='button';button.className='adaptive-provider-choice';
+   button.textContent=option.textContent;
+   button.dataset.choice=option.value;
+   button.addEventListener('click',()=>{select.value=option.value;select.dispatchEvent(new Event('change',{bubbles:true}));});
+   host.append(button);
+  }
+  select.classList.add('adaptive-select-hidden');
+ }else{
+  // Keep the authoritative select for existing validation, with a searchable filter.
+  const search=document.createElement('input');search.type='search';search.className='adaptive-select-search';
+  search.placeholder='🔎 ค้นหาและเลือกจากรายการ';search.setAttribute('aria-label','ค้นหา'+host.getAttribute('aria-label'));
+  host.append(search);
+  search.addEventListener('input',()=>{
+   const query=search.value.normalize('NFKC').toLocaleLowerCase('th-TH').trim();
+   for(const opt of select.options)opt.hidden=!!query&&!!opt.value&&!opt.textContent.normalize('NFKC').toLocaleLowerCase('th-TH').includes(query);
+  });
+ }
+ const sync=()=>{
+  for(const button of host.querySelectorAll('button[data-choice]')){
+   const active=button.dataset.choice===select.value;
+   button.setAttribute('aria-pressed',String(active));
+   button.textContent=(active?'✓ ':'')+([...select.options].find(o=>o.value===button.dataset.choice)?.textContent||'');
+  }
+  host.classList.toggle('hidden',select.classList.contains('hidden')||select.closest('.hidden')!==null);
+ };
+ select.addEventListener('change',sync);
+ new MutationObserver(sync).observe(select,{attributes:true,attributeFilter:['class']});
+ sync();
+}
+for(const id of adaptiveSelectIds)installAdaptiveSelect(id);
 updateProgressiveLayout();refresh();
 </script></body></html>
