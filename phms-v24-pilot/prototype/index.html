@@ -306,6 +306,19 @@
 #editor .phms-prep-guide{font-size:.88rem!important;color:#71685d!important;margin:4px 0 9px!important;line-height:1.45!important}
 #editor #simpleExtras #examPrepPanel{margin-top:14px!important}
 #editor #simpleExtras #examPrepPanel>summary{font-size:1rem!important}
+/* Compact progressive preparation choices - same underlying draft inputs. */
+#editor .prep-choice-intro{margin:8px 0 10px!important}
+#editor .prep-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:4px 0 11px}
+#editor .prep-choice-card{display:flex;flex-direction:column;text-align:left;align-items:flex-start;justify-content:center;gap:3px;min-height:82px;padding:11px!important;border:1px solid #ddc7ae!important;border-radius:11px!important;background:#fff!important;color:#34271b!important}
+#editor .prep-choice-card[aria-pressed="true"]{background:#fff1dc!important;border:2px solid #947143!important}
+#editor .prep-choice-card strong{font-size:.95rem;line-height:1.4}
+#editor .prep-choice-card small{font-size:.8rem;color:#6e6256;font-weight:400;line-height:1.35}
+#editor .prep-choice-filled{font-size:.76rem;color:#76592d}
+#editor .prep-choice-filled.hidden,#editor .prep-choice-content.hidden{display:none!important}
+#editor .prep-choice-content{border-top:1px solid #e8daca;padding:10px 0 5px;margin-top:8px}
+#editor .prep-choice-content textarea{min-height:75px}
+#editor .prep-choice-content label{margin:6px 0!important}
+#editor .prep-choice-content .phms-prep-guide{display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1114,6 +1127,57 @@ otherNoteLabel.after(otherNoteHelp);
 const procedureGuide=document.createElement('p');procedureGuide.className='help phms-prep-guide';
 procedureGuide.textContent='🩺 หากโรงพยาบาลสั่งเจาะเลือด เอกซเรย์ ตรวจตา หรือการตรวจอื่นก่อนพบแพทย์ ให้ใช้หมวด “รายการตรวจและหัตถการ” เดิม ไม่ต้องกรอกซ้ำ';
 simpleExtras.append(examPrepPanel,procedureGuide);
+// Four progressive choices reuse the actual fields and existing checklist; do not clone DOM IDs.
+const prepChoiceGrid=document.createElement('div');prepChoiceGrid.id='prepChoiceGrid';prepChoiceGrid.className='prep-choice-grid';
+const prepChoices=[
+ {key:'symptoms',icon:'💬',title:'อาการ / คำถามหมอ',hint:'จดไว้ถามหมอ'},
+ {key:'things',icon:'🎒',title:'สิ่งที่ต้องนำไป',hint:'ของที่ต้องเตรียม'},
+ {key:'instructions',icon:'🥣',title:'คำสั่งจากโรงพยาบาล',hint:'อาหาร น้ำ และอื่น ๆ'},
+ {key:'notes',icon:'📝',title:'บันทึกอื่น ๆ',hint:'รายละเอียดนัดนี้'}
+];
+const prepSections={};const prepButtons={};const prepOpen=new Set();
+for(const choice of prepChoices){
+ const button=document.createElement('button');button.type='button';button.className='prep-choice-card';button.setAttribute('aria-pressed','false');
+ const title=document.createElement('strong');title.textContent=choice.icon+' '+choice.title;
+ const hint=document.createElement('small');hint.textContent=choice.hint;
+ const indicator=document.createElement('span');indicator.className='prep-choice-filled hidden';indicator.textContent='มีข้อมูลแล้ว';
+ button.append(title,hint,indicator);prepChoiceGrid.append(button);prepButtons[choice.key]={button,indicator};
+ const section=document.createElement('section');section.id='prepSection-'+choice.key;section.className='prep-choice-content hidden';prepSections[choice.key]=section;
+ button.setAttribute('aria-controls',section.id);
+ button.addEventListener('click',()=>{
+  if(prepOpen.has(choice.key))prepOpen.delete(choice.key);else prepOpen.add(choice.key);
+  updatePrepChoices();
+ });
+}
+const moveNodes=(key,nodes)=>{for(const node of nodes)if(node)prepSections[key].append(node);};
+moveNodes('symptoms',[$('previsitLabel'),symptomHelp,$('previsitSymptoms'),$('previsitHelp')]);
+moveNodes('notes',[$('additionalNoteLabel'),otherNoteHelp,$('additionalNote')]);
+moveNodes('things',[$('checklistBox')]);
+examPrepPanel.open=true; // The main card controls visibility; no nested disclosure to open again.
+moveNodes('instructions',[examPrepLabel,examPrepChoice,examPrepDetailArea,examPrepHelp]);
+examPrepPanel.remove();
+procedureGuide.remove();
+const prepIntro=document.createElement('p');prepIntro.className='help prep-choice-intro';prepIntro.textContent='เลือกเฉพาะเรื่องที่ต้องการเพิ่ม';
+simpleExtras.prepend(prepIntro,prepChoiceGrid,...Object.values(prepSections));
+function updatePrepChoices(){
+ const filled={
+  symptoms:!!$('previsitSymptoms').value.trim(),
+  things:checklistItems.length>0,
+  instructions:!!examPrepChoice.value||!!examPrepDetails.value.trim(),
+  notes:!!$('additionalNote').value.trim()
+ };
+ for(const choice of prepChoices){
+  const key=choice.key,active=prepOpen.has(key);
+  prepSections[key].classList.toggle('hidden',!active);
+  prepButtons[key].button.setAttribute('aria-pressed',String(active));
+  prepButtons[key].indicator.classList.toggle('hidden',!filled[key]);
+ }
+}
+for(const field of ['previsitSymptoms','additionalNote','examPrepChoice','examPrepDetails']){
+ $(field).addEventListener('input',updatePrepChoices);$(field).addEventListener('change',updatePrepChoices);
+}
+new MutationObserver(updatePrepChoices).observe($('prepItems'),{childList:true,subtree:true});
+updatePrepChoices();
 const hospDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#hospital_hn'));
 const careDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#care_topic'));
 if(careDetails&&hospDetails)detailed.prepend(careDetails,hospDetails);
