@@ -621,7 +621,7 @@ const simpleSummary=document.createElement('summary');simpleExtras.append(simple
 $('historicalGuide').before(simpleExtras);
 moveRangeTo($('historicalGuide'),$('checklistBox'),simpleExtras);
 
-const editor=$('editor'),flowRoot=document.createElement('div');flowRoot.id='appointmentFlow';
+const flowRoot=document.createElement('div');flowRoot.id='appointmentFlow';
 $('selectedPersonLabel').after(flowRoot);
 const modeBar=document.createElement('div');modeBar.className='appointment-mode-bar';
 const modeLabel=document.createElement('p');modeLabel.textContent='วิธีกรอก';modeLabel.className='mode-label';modeBar.append(modeLabel);
