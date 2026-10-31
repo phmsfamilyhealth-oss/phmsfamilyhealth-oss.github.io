@@ -459,56 +459,6 @@
  color:#30251a!important;
 }
 
-/* Accessible, visually discoverable disclosures: shared appearance, independent state. */
-#editor #details>details>summary,
-#editor #simpleExtras>summary,
-#editor #providerExtras>summary,
-#editor #relatedAppointmentBox>summary,
-#editor #linkedVisitDisclosure>summary,
-#editor #contactRescheduleBox>summary{
- position:relative!important;
- display:flex!important;
- align-items:center!important;
- gap:8px!important;
- padding:13px 38px 13px 13px!important;
- min-height:58px!important;
- box-sizing:border-box!important;
- background:#faf5ec!important;
- border-radius:11px!important;
- color:#30251a!important;
- font-size:1rem!important;
- font-weight:700!important;
- cursor:pointer!important;
- list-style:none!important;
-}
-#editor #details>details>summary::-webkit-details-marker,
-#editor #simpleExtras>summary::-webkit-details-marker,
-#editor #providerExtras>summary::-webkit-details-marker,
-#editor #relatedAppointmentBox>summary::-webkit-details-marker,
-#editor #linkedVisitDisclosure>summary::-webkit-details-marker,
-#editor #contactRescheduleBox>summary::-webkit-details-marker{display:none!important}
-#editor #details>details>summary::after,
-#editor #simpleExtras>summary::after,
-#editor #providerExtras>summary::after,
-#editor #relatedAppointmentBox>summary::after,
-#editor #linkedVisitDisclosure>summary::after,
-#editor #contactRescheduleBox>summary::after{
- content:'⌄';position:absolute;right:13px;top:50%;transform:translateY(-55%);
- font-size:1.35rem;font-weight:700;color:#79552c;line-height:1;
-}
-#editor #details>details[open]>summary,
-#editor #simpleExtras[open]>summary,
-#editor #providerExtras[open]>summary,
-#editor #relatedAppointmentBox[open]>summary,
-#editor #linkedVisitDisclosure[open]>summary,
-#editor #contactRescheduleBox[open]>summary{background:#f5ead8!important}
-#editor #details>details[open]>summary::after,
-#editor #simpleExtras[open]>summary::after,
-#editor #providerExtras[open]>summary::after,
-#editor #relatedAppointmentBox[open]>summary::after,
-#editor #linkedVisitDisclosure[open]>summary::after,
-#editor #contactRescheduleBox[open]>summary::after{content:'⌃';transform:translateY(-44%)}
-#editor details>summary:focus-visible{outline:3px solid #947143!important;outline-offset:2px!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
