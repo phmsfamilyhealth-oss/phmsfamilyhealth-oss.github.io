@@ -866,48 +866,69 @@ const conflictNotice=document.createElement('div');
 conflictNotice.id='sameDayAppointmentNotice';conflictNotice.className='same-day-notice hidden';
 conflictNotice.setAttribute('role','status');
 $('dateRule').after(conflictNotice);
+function appointmentBangkokParts(a){
+ const planned=String(a.planned_visit_date||'').slice(0,10);
+ const raw=String(a.appointment_at||'');
+ // Timestamptz with an explicit offset/Z is an instant; convert it to Thai local date/time.
+ if(/(?:Z|[+-]\d{2}:\d{2})$/i.test(raw)){
+  const instant=new Date(raw);
+  if(!Number.isNaN(instant.getTime())){
+   const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(instant).map(p=>[p.type,p.value]));
+   return {date:planned||parts.year+'-'+parts.month+'-'+parts.day,time:parts.hour+':'+parts.minute};
+  }
+ }
+ return {date:planned||raw.slice(0,10),time:/T(\d{2}:\d{2})/.exec(raw)?.[1]||String(a.time||'').slice(0,5)};
+}
+const normalizeAppointmentPlace=v=>String(v||'').normalize('NFKC').replace(/^โรงพยาบาล|^รพ\.?/,'').replace(/\s+/g,'').replace(/\([^)]*\)/g,'').toLocaleLowerCase('th-TH');
 function sameDayAppointmentConflicts(){
  const date=$('date').value;
  if(!memberId||!date||!Array.isArray(relatedAllItems))return [];
- return relatedAllItems.filter(a=>String(a.planned_visit_date||a.appointment_at||'').slice(0,10)===date
-  &&a.status!=='cancelled'&&a.status!=='canceled');
+ return relatedAllItems.filter(a=>appointmentBangkokParts(a).date===date&&!['cancelled','canceled','deleted'].includes(String(a.status||'').toLowerCase()));
 }
 function updateSameDayAppointmentNotice(){
  const found=sameDayAppointmentConflicts();
  conflictNotice.replaceChildren();conflictNotice.classList.toggle('hidden',!found.length);
  if(!found.length)return;
- const hospital=$('hospital').value.trim().toLocaleLowerCase('th-TH');
- const title=$('purpose').value.trim().toLocaleLowerCase('th-TH');
- const time=$('time').value;
- const normalize=v=>String(v||'').trim().toLocaleLowerCase('th-TH');
- let red=false,duplicate=false;
+ const currentPlace=normalizeAppointmentPlace($('hospital').value||$('hospitalSearch').value);
+ const currentTitle=String($('purpose').value||'').trim().toLocaleLowerCase('th-TH');
+ const currentTime=$('scenario').value==='booked'||$('known').value==='yes'?$('time').value:'';
+ const currentUnit=String($('department').value||'').trim().toLocaleLowerCase('th-TH');
+ const reasons=new Set();
  for(const a of found){
-  const otherHospital=normalize(a.hospital_name),otherTitle=normalize(a.title);
-  const otherTime=String(a.appointment_at||'').match(/T(\d\d:\d\d)/)?.[1]||String(a.time||'').slice(0,5);
-  if(hospital&&otherHospital&&hospital!==otherHospital)red=true;
-  if(time&&otherTime&&time===otherTime)red=true;
-  if(hospital&&otherHospital===hospital&&title&&otherTitle===title
-    &&(!time||!otherTime||time===otherTime))duplicate=true;
+  const otherPlace=normalizeAppointmentPlace(a.hospital_name);
+  const otherTitle=String(a.title||'').trim().toLocaleLowerCase('th-TH');
+  const otherUnit=String(a.department||'').trim().toLocaleLowerCase('th-TH');
+  const otherTime=appointmentBangkokParts(a).time;
+  const differentPlace=!!currentPlace&&!!otherPlace&&currentPlace!==otherPlace;
+  const exactTime=!!currentTime&&!!otherTime&&currentTime===otherTime;
+  if(differentPlace)reasons.add('hospital');
+  if(exactTime)reasons.add('time');
+  if(currentTitle&&otherTitle===currentTitle&&currentPlace&&otherPlace===currentPlace&&(!currentUnit||!otherUnit||currentUnit===otherUnit)&&(!currentTime||!otherTime||exactTime))reasons.add('duplicate');
  }
- conflictNotice.classList.toggle('high-risk',red||duplicate);
+ const highRisk=reasons.size>0;
+ conflictNotice.classList.toggle('high-risk',highRisk);
  const header=document.createElement('strong');
- header.textContent=duplicate?'⚠️ อาจมีนัดนี้ในระบบแล้ว':red?'⚠️ มีนัดต่างโรงพยาบาลหรือเวลาชนกัน':'📅 มีนัดอื่นในวันนี้ '+found.length+' รายการ';
+ header.textContent=reasons.has('duplicate')?'⚠️ อาจมีนัดนี้ในระบบแล้ว':reasons.has('hospital')?'⚠️ มีนัดต่างโรงพยาบาลในวันเดียวกัน':reasons.has('time')?'⚠️ เวลานัดตรงกับนัดเดิม':'📅 มีนัดในวันนี้ '+found.length+' รายการ';
  conflictNotice.append(header);
- const detail=document.createElement('p');
- detail.textContent=duplicate?'กรุณาตรวจสอบนัดเดิมก่อนเพิ่มซ้ำ':red?'กรุณาตรวจสอบเวลาและการเดินทางก่อนเพิ่มนัดใหม่':'สามารถเพิ่มหลายแผนกในวันเดียวกันได้ กรุณาตรวจสอบก่อน';
- conflictNotice.append(detail);
+ const details=[];
+ if(reasons.has('hospital'))details.push('คนละโรงพยาบาล: เสี่ยงเดินทางไม่ทัน');
+ if(reasons.has('time'))details.push('เวลานัดชนกัน: กรุณาตรวจสอบ');
+ if(reasons.has('duplicate'))details.push('อาจเป็นนัดซ้ำ: ตรวจสอบนัดเดิมก่อนกรอกเพิ่ม');
+ if(!details.length)details.push('มีนัดอื่นในวันเดียวกัน สามารถเพิ่มหลายแผนกได้');
+ for(const message of details){const line=document.createElement('p');line.textContent=message;conflictNotice.append(line);}
  const list=document.createElement('ul');
  for(const a of found.slice(0,3)){
-  const li=document.createElement('li');
-  li.textContent=[String(a.appointment_at||'').match(/T(\d\d:\d\d)/)?.[1]||'',a.title||'นัดหมาย',a.hospital_name||''].filter(Boolean).join(' · ');
+  const li=document.createElement('li'),at=appointmentBangkokParts(a);
+  li.textContent=[at.time?at.time+' น.':'ไม่ระบุเวลา',a.title||'นัดหมาย',a.hospital_name||'ไม่ระบุโรงพยาบาล'].join(' · ');
   list.append(li);
  }
  conflictNotice.append(list);
- if(found.length>3){const p=document.createElement('p');p.textContent='และอีก '+(found.length-3)+' รายการ';conflictNotice.append(p);}
+ if(found.length>3){const line=document.createElement('p');line.textContent='และอีก '+(found.length-3)+' รายการ';conflictNotice.append(line);}
 }
-for(const id of ['date','time','purpose','hospitalSearch','providerOrg','scenario'])$(id)?.addEventListener('change',updateSameDayAppointmentNotice);
+for(const id of ['date','time','purpose','hospitalSearch','providerOrg','scenario','known','unitSearch'])$(id)?.addEventListener('input',updateSameDayAppointmentNotice);
+for(const id of ['date','time','purpose','hospitalSearch','providerOrg','scenario','known','unitSearch'])$(id)?.addEventListener('change',updateSameDayAppointmentNotice);
 moveLabelAndInput('known',timeSection);
-timeSection.append($('timebox'),$('appointmentPhotosSection'));
+timeSection.append($('timebox'),conflictNotice,$('appointmentPhotosSection'));
 const extrasSection=makeFlowSection('extrasFlow','4. เพิ่มเติม (ถ้ามี)');flowRoot.append(extrasSection);
 // Detailed-mode categories; never clone patient inputs or create alternate state.
 const detailed=$('details');extrasSection.append(detailed);
