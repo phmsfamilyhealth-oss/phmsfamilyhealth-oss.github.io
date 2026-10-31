@@ -1016,7 +1016,7 @@ todayShortcut.addEventListener('click',()=>{
  $('date').dispatchEvent(new Event('change',{bubbles:true}));
 });
 function syncTodayShortcut(){
- const sameDay=$('date').value===bangkokToday();
+ const sameDay=!!$('date').value;
  todayShortcut.classList.toggle('hidden',sameDay);
  todayShortcut.hidden=sameDay;
  todayShortcut.textContent='📅 เลือกวันนี้';
