@@ -36,7 +36,10 @@ test('detail mode shares existing controls and keeps data on display changes',()
  assert.match(script,/moveRangeTo\(unitFieldLabel,\$\('doctorHint'\),providerExtras\)/);
  assert.match(script,/linkedDisclosure\.classList\.toggle\('hidden',mode!=='historical'\)/);
  assert.match(script,/updateFilledIndicators\(\)/);
- assert.ok(!script.includes("clearAppointmentPhotos();refresh();"),'Scenario switches must not clear selected photos');
+ const switchStart=script.indexOf("$('scenario').addEventListener('change',()=>{");
+ const switchEnd=script.indexOf('});',switchStart);
+ assert.ok(switchStart>=0&&switchEnd>switchStart,'Scenario switch handler not found');
+ assert.ok(!script.slice(switchStart,switchEnd).includes('clearAppointmentPhotos'),'Scenario switches must not clear selected photos');
 });
 test('scenario-specific date, time and photo guards survive layout',()=>{
  assert.match(script,/function checkDateRule\(\)/);
