@@ -1259,5 +1259,13 @@ $('personSelect').addEventListener('change',syncAppointmentHeader);
 $('detail').addEventListener('change',syncAppointmentHeader);
 new MutationObserver(syncAppointmentHeader).observe($('personSelect'),{childList:true,attributes:true,subtree:false});
 syncAppointmentHeader();
+// Keep progress and failures visible; hide only the non-actionable LINE success banner.
+const connectionBanner=$('connectionStatus');
+function updateConnectionBanner(){
+ const t=connectionBanner.textContent||'';
+ connectionBanner.dataset.state=/กำลัง|โหลด|ตรวจสอบการเชื่อมต่อ/.test(t)?'loading':/ไม่สำเร็จ|ไม่พร้อม|ไม่ได้|ข้อผิดพลาด|ล้มเหลว/.test(t)?'error':'ready';
+}
+new MutationObserver(updateConnectionBanner).observe(connectionBanner,{childList:true,characterData:true,subtree:true});
+updateConnectionBanner();
 updateProgressiveLayout();refresh();syncChoiceCards();
 </script></body></html>
