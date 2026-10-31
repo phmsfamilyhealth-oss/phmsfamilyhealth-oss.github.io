@@ -1,0 +1,11 @@
+import test from "node:test";import assert from "node:assert/strict";
+import {buildWizardDraftRequest as build} from "./intake-wizard-adapter.mjs";
+const x={mode:"newly_received",productName:"Test medicine",strengthVerified:true,orderVerified:true,personAuthorized:true,familyAuthorized:true,doses:[{slot:"morning",amount:1,unit:"tablet"}]};
+test("uses existing draft RPC, not invented writer",()=>assert.equal(build(x,{lineUserId:"test-id"}).rpc,"phms_med_intake_wizard_save"));
+test("submits review without stock creation",()=>{const a=build(x,{lineUserId:"test-id",submit:true});assert.equal(a.args.p_submit,true);assert.equal(a.args.p_payload.product,"Test medicine")});
+test("unverified strength cannot submit",()=>assert.equal(build({...x,strengthVerified:false},{lineUserId:"test-id",submit:true}).ok,false));
+test("unverified order cannot submit",()=>assert.equal(build({...x,orderVerified:false},{lineUserId:"test-id",submit:true}).ok,false));
+test("draft permitted pending strength",()=>assert.equal(build({...x,strengthVerified:false},{lineUserId:"test-id"}).args.p_submit,false));
+test("authorization failure rejected",()=>assert.equal(build({...x,personAuthorized:false},{lineUserId:"test-id"}).ok,false));
+test("missing LINE identity rejected",()=>assert.equal(build(x,{}).ok,false));
+test("dose rules preserved in same draft",()=>assert.equal(build({...x,doses:[{slot:"morning",amount:2,unit:"tablet"},{slot:"evening",amount:1,unit:"tablet"}]},{lineUserId:"test-id"}).args.p_payload.dose_rules.length,2));
