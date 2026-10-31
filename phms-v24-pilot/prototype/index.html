@@ -282,6 +282,11 @@
 #hospitalQuickCards .adaptive-provider-choice .adaptive-choice-th{display:block!important;font-weight:700!important;line-height:1.45!important}
 #hospitalQuickCards .adaptive-provider-choice .adaptive-choice-code{display:block!important;font-size:.84rem!important;font-weight:400!important;color:#6f604e!important;margin-top:3px!important}
 #hospitalQuickCards .adaptive-provider-choice{min-height:72px!important}
+#editor #examPrepPanel{border:1px solid #e8daca;border-radius:12px;padding:12px;margin:10px 0}
+#editor #examPrepPanel summary{font-weight:700;cursor:pointer;min-height:44px}
+#editor #examPrepPanel label{display:block;margin:10px 0 5px}
+#editor #examPrepPanel textarea{min-height:76px}
+#editor #examPrepDetailArea.hidden{display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -306,7 +311,7 @@
 <details><summary>🏥 ข้อมูลโรงพยาบาลเพิ่มเติม</summary>
 <label for="hospital_hn">เลข HN (ถ้ามี)</label><input id="hospital_hn" maxlength="80">
 <label for="hospital_vn">เลข VN (ถ้ามี)</label><input id="hospital_vn" maxlength="80">
-<label for="location_detail">อาคาร ชั้น หรือห้องตรวจ</label><input id="location_detail" maxlength="240">
+<label for="location_detail">📍 จุดติดต่อ / ชั้น / อาคาร (ถ้ามี)</label><input id="location_detail" maxlength="240">
 <label for="contact_phone">เบอร์ติดต่อโรงพยาบาล</label><input id="contact_phone" inputmode="tel" maxlength="40"></details>
 <details><summary>🩺 เรื่องที่ติดตามรักษา</summary>
 <label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><p class="help">เลือกเรื่องที่เคยรักษา หรือพิมพ์เรื่องใหม่สำหรับนัดนี้ได้ (ยังไม่เพิ่มลงทะเบียนโรคกลาง)</p>
@@ -705,6 +710,11 @@ previewField('แพทย์',$('doctor').value.trim());
 previewField('รูปใบนัด',photoFiles.length?photoFiles.length+' รูป':'');
 previewField('อาการหรือเรื่องที่ไป',$('previsitSymptoms').value.trim());
 previewField('รายละเอียดเพิ่มเติม',$('additionalNote').value.trim());
+if($('detail').value==='full'&&examPrepChoice.value){
+ previewField('การเตรียมตัวก่อนตรวจ',examPrepChoice.selectedOptions[0].textContent);
+ if(['fasting','other'].includes(examPrepChoice.value))previewField('คำแนะนำก่อนตรวจ',examPrepDetails.value.trim());
+}
+
 if(!isPastAppointment()&&checklistItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='สิ่งที่ต้องเตรียม';const ul=document.createElement('ul');for(const item of checklistItems){const li=document.createElement('li');li.textContent=(item.status==='completed'?'☑ ':'☐ ')+item.title;ul.append(li);}dd.append(ul);dl.append(dt,dd);}{for(const [id,label] of Object.entries(detailNames)){const value=$(id).value.trim();if(!value)continue;if(id==='walk_in_reason'&&$('scenario').value!=='walk_in')continue;if(['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)&&!isPastAppointment())continue;const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=id==='arrival_lead_minutes'?value+' นาที':value;dl.append(dt,dd);}}if(procedurePreviewItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='รายการตรวจ (ทดลอง — ยังไม่บันทึก)';const ul=document.createElement('ul');for(const item of procedurePreviewItems){const li=document.createElement('li');li.textContent=item;ul.append(li);}dd.append(ul);dl.append(dt,dd);}if($('relatedSelect').value){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='นัดต้นทาง (ทดลอง)';dd.textContent=$('relatedSelect').selectedOptions[0]?.textContent||'';dl.append(dt,dd);}if($('reschedulePhase').value){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='สถานะขอเลื่อนนัด (ทดลอง)';dd.textContent=$('reschedulePhase').selectedOptions[0]?.textContent||'';dl.append(dt,dd);}reviewedDraft={...v,provider_selection:{organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:selectedClinicianId()},hospital:$('hospital').value,department:$('department').value,doctor:$('doctor').value,purpose:$('purpose').value,additional_note:$('additionalNote').value,prep:isPastAppointment()?'':$('prep').value,preparation_items:isPastAppointment()?[]:checklistItems.map(x=>({...x})),extended_details:Object.fromEntries(Object.keys(detailNames).filter(id=>$(id).value.trim()&&(id!=='walk_in_reason'||$('scenario').value==='walk_in')&&(!['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)||isPastAppointment())).map(id=>[id,$(id).value.trim()])),documents:[...$('documents').files].map(f=>({name:f.name,type:f.type,size:f.size}))};if(packaged.draft.document_metadata.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='ไฟล์แนบ';dd.textContent=packaged.draft.document_metadata.map(f=>f.name).join(', ');dl.append(dt,dd)}$('editor').classList.add('hidden');$('confirmation').classList.remove('hidden');window.scrollTo(0,0)});
 $('save').addEventListener('click',async()=>{if(!confirmClient||!reviewedDraft)return;const button=$('save');button.disabled=true;button.textContent='กำลังตรวจสอบและบันทึก…';const result=await confirmClient({selectedPersonCode:memberId,draft:reviewedDraft});if(result.ok){button.textContent='บันทึกสำเร็จ';$('saveStatus').textContent='บันทึกนัดแล้ว เลขอ้างอิง: '+result.appointmentId;$('back').disabled=true;}else{button.textContent='ลองบันทึกอีกครั้ง';button.disabled=false;$('saveStatus').textContent='ยังไม่บันทึกนัด: '+result.error;}});
 $('back').addEventListener('click',()=>{if($('back').disabled)return;$('confirmation').classList.add('hidden');$('editor').classList.remove('hidden')});
@@ -786,7 +796,7 @@ function clearSourceFilled({personChanged=false}={}){
   }
  }
  if(personChanged){
-  for(const id of ['hospital_hn','hospital_vn','location_detail','contact_phone','coverage_type','arrival_lead_minutes','previsitSymptoms','additionalNote','visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps','walk_in_reason','reschedulePhase']){
+  for(const id of ['examPrepChoice','examPrepDetails','hospital_hn','hospital_vn','location_detail','contact_phone','coverage_type','arrival_lead_minutes','previsitSymptoms','additionalNote','visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps','walk_in_reason','reschedulePhase']){
    if($(id))$(id).value='';
   }
   $('relatedSelect').value='';$('relatedQuery').value='';
@@ -1053,6 +1063,22 @@ timeSection.append($('timebox'),conflictNotice,$('appointmentPhotosSection'));
 const extrasSection=makeFlowSection('extrasFlow','4. เพิ่มเติม (ถ้ามี)');flowRoot.append(extrasSection);
 // Detailed-mode categories; never clone patient inputs or create alternate state.
 const detailed=$('details');extrasSection.append(detailed);
+// Optional pre-examination instructions. This is pilot-only until the backend contract supports it.
+const examPrepPanel=document.createElement('details');examPrepPanel.id='examPrepPanel';
+const examPrepSummary=document.createElement('summary');examPrepSummary.textContent='🥣 การเตรียมตัวก่อนตรวจ (ถ้ามี)';
+const examPrepLabel=document.createElement('label');examPrepLabel.htmlFor='examPrepChoice';examPrepLabel.textContent='คำแนะนำจากโรงพยาบาล';
+const examPrepChoice=document.createElement('select');examPrepChoice.id='examPrepChoice';
+for(const [value,label] of [['','ไม่ได้ระบุ'],['fasting','งดอาหาร / น้ำ ตามคำสั่งโรงพยาบาล'],['normal','ไม่ต้องงดอาหารและน้ำ'],['other','มีคำแนะนำอื่น']])examPrepChoice.add(new Option(label,value));
+const examPrepDetailsLabel=document.createElement('label');examPrepDetailsLabel.htmlFor='examPrepDetails';examPrepDetailsLabel.textContent='📝 รายละเอียดตามใบนัด / คำสั่งโรงพยาบาล';
+const examPrepDetails=document.createElement('textarea');examPrepDetails.id='examPrepDetails';examPrepDetails.rows=2;examPrepDetails.maxLength=600;examPrepDetails.placeholder='ระบุข้อความตามที่โรงพยาบาลแจ้งเท่านั้น';
+const examPrepDetailArea=document.createElement('div');examPrepDetailArea.id='examPrepDetailArea';examPrepDetailArea.append(examPrepDetailsLabel,examPrepDetails);
+const examPrepHelp=document.createElement('p');examPrepHelp.className='help';examPrepHelp.textContent='ไม่ต้องคาดเดาเวลางดอาหารหรือน้ำ หากไม่แน่ใจให้ตรวจสอบกับโรงพยาบาล · ข้อมูลนี้ยังไม่บันทึกจริงในรุ่นทดลอง';
+examPrepPanel.append(examPrepSummary,examPrepLabel,examPrepChoice,examPrepDetailArea,examPrepHelp);
+function syncExamPrep(){
+ examPrepDetailArea.classList.toggle('hidden',!['fasting','other'].includes(examPrepChoice.value));
+}
+examPrepChoice.addEventListener('change',syncExamPrep);syncExamPrep();
+detailed.append(examPrepPanel);
 const hospDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#hospital_hn'));
 const careDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#care_topic'));
 if(careDetails&&hospDetails)detailed.prepend(careDetails,hospDetails);
