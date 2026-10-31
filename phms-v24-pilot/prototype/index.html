@@ -287,6 +287,11 @@
 #editor #examPrepPanel label{display:block;margin:10px 0 5px}
 #editor #examPrepPanel textarea{min-height:76px}
 #editor #examPrepDetailArea.hidden{display:none!important}
+/* Nested pre-exam panel belongs to the same optional section, not a second full-sized card. */
+#editor #simpleExtras #examPrepPanel{margin:12px 0 2px!important;padding:0!important;border:0!important;border-top:1px solid #e8daca!important;border-radius:0!important}
+#editor #simpleExtras #examPrepPanel summary{padding:12px 0 4px!important;min-height:44px!important;display:list-item!important;font-size:.98rem!important;font-weight:650!important}
+#editor #simpleExtras>summary{min-height:48px!important;display:list-item!important;padding:10px 12px!important;line-height:1.4!important}
+#editor #simpleExtras{padding:0 12px 12px!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1065,7 +1070,7 @@ const extrasSection=makeFlowSection('extrasFlow','4. เพิ่มเติม
 const detailed=$('details');extrasSection.append(detailed);
 // Optional pre-examination instructions. This is pilot-only until the backend contract supports it.
 const examPrepPanel=document.createElement('details');examPrepPanel.id='examPrepPanel';
-const examPrepSummary=document.createElement('summary');examPrepSummary.textContent='🥣 การเตรียมตัวก่อนตรวจ (ถ้ามี)';
+const examPrepSummary=document.createElement('summary');examPrepSummary.textContent='🥣 คำแนะนำก่อนตรวจ';
 const examPrepLabel=document.createElement('label');examPrepLabel.htmlFor='examPrepChoice';examPrepLabel.textContent='คำแนะนำจากโรงพยาบาล';
 const examPrepChoice=document.createElement('select');examPrepChoice.id='examPrepChoice';
 for(const [value,label] of [['','ไม่ได้ระบุ'],['fasting','งดอาหาร / น้ำ ตามคำสั่งโรงพยาบาล'],['normal','ไม่ต้องงดอาหารและน้ำ'],['other','มีคำแนะนำอื่น']])examPrepChoice.add(new Option(label,value));
@@ -1078,7 +1083,7 @@ function syncExamPrep(){
  examPrepDetailArea.classList.toggle('hidden',!['fasting','other'].includes(examPrepChoice.value));
 }
 examPrepChoice.addEventListener('change',syncExamPrep);syncExamPrep();
-detailed.append(examPrepPanel);
+simpleExtras.append(examPrepPanel);
 const hospDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#hospital_hn'));
 const careDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#care_topic'));
 if(careDetails&&hospDetails)detailed.prepend(careDetails,hospDetails);
@@ -1287,7 +1292,7 @@ function updateProgressiveLayout(){
  missingFields.classList.toggle('hidden',!scenarioChoiceMade);
  resetActions.classList.toggle('hidden',!scenarioChoiceMade);
  syncScenarioCards();
- simpleSummary.textContent=simpleSummaryText[mode]||'ข้อมูลเพิ่มเติม';
+ simpleSummary.textContent='💬 '+(simpleSummaryText[mode]||'อาการและสิ่งที่ต้องเตรียม');
  linkedDisclosure.classList.toggle('hidden',mode!=='historical');
  if(mode!=='historical')linkedDisclosure.open=false;
  if(simple&&mode==='walk_in')$('checklistBox').classList.add('simple-walkin-checklist');
