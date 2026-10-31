@@ -159,6 +159,10 @@
 #appointmentFlow .appointment-flow-section.hidden{display:none!important}
 #resetAppointmentDraft.hidden,#requiredFieldStatus.hidden,#editor .actions.hidden{display:none!important}
 #scenarioFlow .scenario-option[aria-pressed=true]{box-shadow:inset 0 0 0 1px #947143}
+/* Icon-plus-label hierarchy with legible subdued optional markers. */
+#editor .field-icon{font-size:1.02em;margin-right:3px}
+#editor .optional-hint{color:#71685d!important;font-size:.87em;font-weight:450}
+#editor .progressive-extras>summary,#editor #details>details>summary{color:#29241e}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -711,6 +715,43 @@ $('registryHelp').hidden=true;
 $('editor').querySelector('h2').textContent='กรอกข้อมูลนัดหมาย';
 $('requiredLegend').textContent='* จำเป็นต้องกรอก';
 // One person-picker control in step 1; reuse the authorized select and its listeners.
+// Lightweight visual language: meaningful icons, subtle optional hints, no changed field IDs.
+const fieldDecorations=[
+ ['purpose','📝'],['hospitalSearch','🏥'],['date','📅'],['time','🕒'],
+ ['unitSearch','🏷️'],['clinicianSearch','🩺'],['care_topic','🩺'],
+ ['previsitSymptoms','💬'],['additionalNote','📝'],['documents','📷'],
+ ['coverage_type','🪪'],['contact_phone','☎️'],['procedureEntry','🧪']
+];
+for(const [id,icon] of fieldDecorations){
+ const label=document.querySelector('label[for="'+id+'"]');
+ if(!label||label.dataset.phmsDecorated)continue;
+ label.dataset.phmsDecorated='1';
+ const span=document.createElement('span');span.className='field-icon';span.textContent=icon+' ';
+ label.prepend(span);
+}
+const optionalLabels=[
+ 'unitSearch','clinicianSearch','care_topic','previsitSymptoms','additionalNote',
+ 'hospital_hn','hospital_vn','location_detail','contact_phone','coverage_type',
+ 'arrival_lead_minutes','procedureEntry'
+];
+for(const id of optionalLabels){
+ const label=document.querySelector('label[for="'+id+'"]');
+ if(!label||label.querySelector('.optional-hint')||label.querySelector('.required-star'))continue;
+ const raw=label.textContent.trim();
+ if(!raw.includes('(ถ้ามี)')&&!raw.includes('(ถ้าทราบ)')){
+  const hint=document.createElement('span');hint.className='optional-hint';hint.textContent=' (ถ้ามี)';label.append(hint);
+ }else{
+  // Preserve wording while styling only the optional qualifier.
+  for(const child of [...label.childNodes]){
+   if(child.nodeType!==Node.TEXT_NODE)continue;
+   const m=child.textContent.match(/\s*\((ถ้ามี|ถ้าทราบ)\)/);
+   if(!m)continue;
+   const rest=child.textContent.split(m[0]);const hint=document.createElement('span');
+   hint.className='optional-hint';hint.textContent=' ('+m[1]+')';
+   child.textContent=rest[0];child.after(hint,document.createTextNode(rest.slice(1).join(m[0])));
+  }
+ }
+}
 const inPerson=$('selectedPersonLabel');inPerson.classList.add('person-banner');
 const personSection=$('personPicker');
 personSection.classList.add('embedded-person-picker');
