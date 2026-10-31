@@ -326,7 +326,7 @@ if(term&&!matched.length){
 list.classList.toggle('hidden',!list.children.length);input.setAttribute('aria-expanded',String(!!list.children.length));}
 // PHMS adaptive selection: authorized catalog only, same hidden provider IDs.
 const adaptivePickers={};
-for(const kind of ['hospital','unit']){
+for(const kind of ['unit']){
  const search=document.getElementById(kind+'Search');
  const cards=document.createElement('div');
  cards.className='adaptive-provider-cards';cards.id=kind+'QuickCards';
@@ -339,7 +339,7 @@ function drawAdaptiveProviderCards(kind,choices){
  const ui=adaptivePickers[kind];if(!ui)return;
  const entries=Array.isArray(choices)?choices:[];
  const selected=document.getElementById(kind==='hospital'?'providerOrg':'providerUnit').value;
- const featured=entries.length<=8?entries:entries.slice(0,4);
+ const featured=entries.length<=6?entries:[];
  ui.cards.replaceChildren();
  for(const item of featured){
   const btn=document.createElement('button');btn.type='button';btn.className='adaptive-provider-choice';
@@ -357,7 +357,7 @@ function drawAdaptiveProviderCards(kind,choices){
   });
   ui.cards.append(btn);
  }
- if(entries.length>8){
+ if(false && entries.length>6){
   const more=document.createElement('button');more.type='button';more.className='adaptive-provider-choice adaptive-provider-more';
   more.textContent='🔎 ค้นหา'+(kind==='hospital'?'โรงพยาบาล':'แผนก')+'อื่น';
   more.addEventListener('click',()=>{ui.search.focus();ui.search.scrollIntoView({block:'nearest'});});
@@ -375,7 +375,6 @@ function refreshProviderPicker(changed=''){
  fillOptions('providerUnit',state.units,'เลือกแผนก');document.getElementById('providerUnit').value=state.unitId;
  fillOptions('providerClinician',state.clinicians,'เลือกแพทย์');document.getElementById('providerClinician').value=state.clinicianId;
  for(const [kind,choices] of [['hospital',state.organizations],['unit',state.units],['clinician',state.clinicians]])renderCombo(kind,choices);
- drawAdaptiveProviderCards('hospital',state.organizations);
  drawAdaptiveProviderCards('unit',state.units);
  document.getElementById('doctorHint').textContent=state.clinicians.length?'เลือกชื่อแพทย์จากทะเบียนหรือข้ามได้':'ไม่มีชื่อแพทย์ในทะเบียน — เว้นว่างได้';
 }
