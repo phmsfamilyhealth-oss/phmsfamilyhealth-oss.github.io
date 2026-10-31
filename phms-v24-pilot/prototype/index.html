@@ -184,7 +184,9 @@
 #editor .adaptive-option-grid .adaptive-provider-choice{min-height:64px!important;background:#fff!important;border:1px solid #d8cab7!important;border-radius:13px!important;font-size:1rem!important;text-align:center}
 #editor .adaptive-option-grid .adaptive-provider-choice[aria-pressed=true]{background:#fff2dc!important;border:2px solid #947143!important;color:#3f2b16!important}
 #editor .adaptive-option-host.hidden{display:none!important}
-.adaptive-provider-choice .adaptive-choice-th{display:block;font-weight:700;line-height:1.45}.adaptive-provider-choice .adaptive-choice-code{display:block;font-size:.82rem;font-weight:500;color:#635b50;margin-top:3px}#unitQuickCards+.adaptive-select-search{margin-top:8px}</style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
+.adaptive-provider-choice .adaptive-choice-th{display:block;font-weight:700;line-height:1.45}.adaptive-provider-choice .adaptive-choice-code{display:block;font-size:.82rem;font-weight:500;color:#635b50;margin-top:3px}#unitQuickCards+.adaptive-select-search{margin-top:8px}#editor label .optional-hint,#editor summary .optional-hint,#editor h2 .optional-hint,#editor h3 .optional-hint{font-size:.82em!important;font-weight:450!important;color:#71685d!important;white-space:nowrap}
+#editor label .field-icon{display:inline-block;margin-right:4px}
+</style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
@@ -1075,5 +1077,38 @@ function syncChoiceCards(){
 $('known').addEventListener('change',syncChoiceCards);
 $('hasAppointmentPhotos').addEventListener('change',syncChoiceCards);
 $('scenario').addEventListener('change',syncChoiceCards);
+// Normalize optional wording after dynamic headings/labels have been finalized.
+function decorateOptionalWording(){
+ const roots=[$('editor'),$('personPicker')].filter(Boolean);
+ for(const root of roots){
+  for(const el of root.querySelectorAll('label,summary,h2,h3')){
+   if(el.querySelector('.required-star'))continue;
+   // Only decorate explicit optional qualifiers; preserve any existing badges and child inputs.
+   for(const node of [...el.childNodes]){
+    if(node.nodeType!==Node.TEXT_NODE)continue;
+    const text=node.textContent||'';
+    const regex=/\\s*\\((ถ้ามี|ถ้าทราบ)\\)/g;
+    if(!regex.test(text))continue;
+    regex.lastIndex=0;
+    const fragment=document.createDocumentFragment();let start=0,match;
+    while((match=regex.exec(text))){
+     if(match.index>start)fragment.append(document.createTextNode(text.slice(start,match.index)));
+     const hint=document.createElement('span');hint.className='optional-hint';hint.textContent=' ('+match[1]+')';fragment.append(hint);start=regex.lastIndex;
+    }
+    if(start<text.length)fragment.append(document.createTextNode(text.slice(start)));
+    node.replaceWith(fragment);
+   }
+  }
+ }
+}
+for(const [id,icon] of [['purpose','📝'],['hospitalSearch','🏥'],['unitSearch','🏷️'],['clinicianSearch','👨‍⚕️']]){
+ const label=document.querySelector('label[for="'+id+'"]');
+ if(!label)continue;
+ const existing=label.querySelector('.field-icon');
+ if(existing){existing.textContent=icon+' ';continue;}
+ const span=document.createElement('span');span.className='field-icon';span.textContent=icon+' ';label.prepend(span);
+}
+providerSummary.textContent='🏷️ แผนกและแพทย์ (ถ้ามี)';
+decorateOptionalWording();
 updateProgressiveLayout();refresh();syncChoiceCards();
 </script></body></html>
