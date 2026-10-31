@@ -192,8 +192,16 @@
 /* Avoid a duplicated department text field under small card groups. */
 #unitSearch.adaptive-search-collapsed,#unitSearchResults.adaptive-search-collapsed{display:none!important}
 #unitQuickCards .adaptive-provider-more{border-style:dashed!important;background:#faf5ec!important}
+/* Header visually matches the LINE appointment card without duplicating patient data. */
+.phms-appointment-header{background:#fff8eb;border:1px solid #e5d4b8;border-top:6px solid #ae8958;border-radius:15px;padding:16px 18px;margin:14px 0;color:#302515}
+.phms-appointment-header-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.phms-appointment-header h1{font-size:clamp(1.45rem,5vw,1.85rem);margin:0!important;line-height:1.35}
+#appointmentHeaderMode{font-size:.83rem;color:#694d2d;background:#f3e8d6;border-radius:20px;padding:5px 10px;font-weight:650}
+#appointmentHeaderPerson{font-weight:750;font-size:1.05rem;margin:9px 0 2px;overflow-wrap:anywhere}
+#appointmentHeaderHint{font-size:.91rem;color:#6b5b47;margin:0}
+.phms-connection-status{padding:8px 12px;font-size:.85rem;margin:6px 0 12px}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
+<header class="phms-appointment-header" aria-label="นัดหมาย"><div class="phms-appointment-header-top"><h1>📅 นัดหมาย</h1><span id="appointmentHeaderMode">แบบง่าย</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p><p id="appointmentHeaderHint">เลือกบุคคลที่จะเพิ่มนัด</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -1206,5 +1214,16 @@ for(const [id,icon] of [['purpose','📝'],['hospitalSearch','🏥'],['unitSearc
 }
 providerSummary.textContent='🏷️ แผนกและแพทย์ (ถ้ามี)';
 decorateOptionalWording();
+// Keep the familiar LINE appointment header in sync with the authorized person selector.
+function syncAppointmentHeader(){
+ const select=$('personSelect'),person=select.value?select.selectedOptions[0]?.textContent?.trim():'';
+ $('appointmentHeaderPerson').textContent=person?'เพิ่มนัดให้: '+person:'ยังไม่ได้เลือกบุคคล';
+ $('appointmentHeaderHint').textContent=person?'กรอกข้อมูลนัดหมายใหม่':'เลือกบุคคลที่จะเพิ่มนัด';
+ $('appointmentHeaderMode').textContent=$('detail').value==='full'?'แบบละเอียด':'แบบง่าย';
+}
+$('personSelect').addEventListener('change',syncAppointmentHeader);
+$('detail').addEventListener('change',syncAppointmentHeader);
+new MutationObserver(syncAppointmentHeader).observe($('personSelect'),{childList:true,attributes:true,subtree:false});
+syncAppointmentHeader();
 updateProgressiveLayout();refresh();syncChoiceCards();
 </script></body></html>
