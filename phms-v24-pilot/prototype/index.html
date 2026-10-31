@@ -155,6 +155,10 @@
 #editor #personPicker.embedded-person-picker h2{font-size:1.05rem!important;font-weight:750;color:#191919!important;background:#f8f0e3;border-radius:11px;padding:11px 13px;margin:8px 0 10px!important}
 #editor #personPicker.embedded-person-picker label{font-size:1rem;font-weight:650;margin:9px 0 6px;color:#202020}
 #editor #personPicker.embedded-person-picker select{min-height:54px;border:1px solid #b8aa99;border-radius:11px;background:#fff;color:#202020;width:100%}
+/* Progressive disclosure: the user chooses a scenario before entering its fields. */
+#appointmentFlow .appointment-flow-section.hidden{display:none!important}
+#resetAppointmentDraft.hidden,#requiredFieldStatus.hidden,#editor .actions.hidden{display:none!important}
+#scenarioFlow .scenario-option[aria-pressed=true]{box-shadow:inset 0 0 0 1px #947143}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -619,16 +623,17 @@ const scenarioChoices=[
  ['walk_in','🚶','ไปโรงพยาบาลเอง','ไปเองโดยไม่มีใบนัด'],
  ['historical','📋','บันทึกย้อนหลัง','ไปโรงพยาบาลมาแล้ว']
 ];
+let scenarioChoiceMade=false;
 const scenarioGrid=document.createElement('div');scenarioGrid.className='scenario-grid';scenarioGrid.setAttribute('role','group');scenarioGrid.setAttribute('aria-label','เลือกรูปแบบการนัด');
 $('scenario').classList.add('scenario-original');$('scenario').before(scenarioGrid);
 for(const [value,symbol,name,description] of scenarioChoices){
  const button=document.createElement('button');button.type='button';button.className='scenario-option';button.dataset.scenario=value;
  const icon=document.createElement('span');icon.className='scenario-symbol';icon.textContent=symbol;
  const words=document.createElement('span');words.className='scenario-copy';const heading=document.createElement('strong');heading.textContent=name;const sub=document.createElement('small');sub.textContent=description;words.append(heading,sub);button.append(icon,words);
- button.addEventListener('click',()=>{$('scenario').value=value;$('scenario').dispatchEvent(new Event('change',{bubbles:true}));});
+ button.addEventListener('click',()=>{scenarioChoiceMade=true;$('scenario').value=value;$('scenario').dispatchEvent(new Event('change',{bubbles:true}));});
  scenarioGrid.append(button);
 }
-function syncScenarioCards(){for(const button of scenarioGrid.children)button.setAttribute('aria-pressed',String(button.dataset.scenario===$('scenario').value));}
+function syncScenarioCards(){for(const button of scenarioGrid.children)button.setAttribute('aria-pressed',String(scenarioChoiceMade&&button.dataset.scenario===$('scenario').value));}
 $('scenario').addEventListener('change',syncScenarioCards);syncScenarioCards();
 // Reuse each existing input exactly once. Moving nodes keeps browser state and event listeners.
 function moveRangeTo(start,end,target){
@@ -776,7 +781,7 @@ function resetCurrentAppointmentDraft(){
  $('hasAppointmentPhotos').value='';
  $('contactDetails').textContent='ยังไม่ได้โหลดข้อมูลติดต่อ';
  $('reschedulePhase').value='';
- $('detail').value='simple';$('scenario').value='booked';$('known').value='yes';
+ $('detail').value='simple';$('scenario').value='booked';$('known').value='yes';scenarioChoiceMade=false;syncScenarioCards();
  for(const panel of editor.querySelectorAll('details'))panel.open=false;
  reviewedDraft=null;$('confirmation').classList.add('hidden');editor.classList.remove('hidden');
  $('error').textContent='';$('save').disabled=true;
@@ -822,6 +827,12 @@ function updateProgressiveLayout(){
  $('mainFlowTitle').textContent='3. นัดเรื่องอะไร ที่ไหน';
  $('timeFlowTitle').textContent='4. วันและเวลา';
  $('extrasFlowTitle').textContent='5. เพิ่มเติม (ถ้ามี)';
+ // Reveal the existing input groups only after a scenario card has been chosen.
+ for(const id of ['mainFlow','timeFlow','extrasFlow'])$(id).classList.toggle('hidden',!scenarioChoiceMade);
+ resetButton.classList.toggle('hidden',!scenarioChoiceMade);
+ missingFields.classList.toggle('hidden',!scenarioChoiceMade);
+ resetActions.classList.toggle('hidden',!scenarioChoiceMade);
+ syncScenarioCards();
  simpleSummary.textContent=simpleSummaryText[mode]||'ข้อมูลเพิ่มเติม';
  linkedDisclosure.classList.toggle('hidden',mode!=='historical');
  if(mode!=='historical')linkedDisclosure.open=false;
