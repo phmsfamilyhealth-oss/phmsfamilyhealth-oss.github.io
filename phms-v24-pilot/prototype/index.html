@@ -120,7 +120,7 @@
 <button id="openCanonicalMedication" type="button" class="secondary">💊 เพิ่มยาจากนัดนี้</button>
 </div>
 <p class="help">ต้องเป็นนัดเดียวกับที่ไปโรงพยาบาลจริง หากเป็นนัดใหม่ที่ยังไม่ได้บันทึก กรุณาบันทึกนัดผ่าน LINE ก่อนจึงจะผูกข้อมูลได้</p>
-<p class="help" id="linkedCareMedicationGate">ระบบยาแบบละเอียดใช้ทะเบียนยา คำสั่งใช้ยา คลังยา และประวัติการใช้ยาเดิม โดยยังอยู่ภายใต้การตรวจสิทธิ์และการเปิดใช้งานของ PHMS</p>
+<p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
 <details id="procedurePreviewBox"><summary>🧪 รายการตรวจหรือหัตถการ (ทดลอง)</summary><p class="help">พิมพ์รายการที่ทราบได้หลายข้อ ข้อมูลนี้ยังไม่ใช่ทะเบียนตรวจที่แพทย์ยืนยันและยังไม่บันทึกลงระบบ</p><label for="procedureEntry">ชื่อการตรวจหรือหัตถการ</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดครั้งก่อน (ถ้ามี)</summary>
