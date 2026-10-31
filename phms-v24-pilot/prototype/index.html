@@ -171,6 +171,9 @@
 .adaptive-provider-more{color:#5b432b!important;background:#f8f0e5!important}
 @media(max-width:350px){.adaptive-provider-cards{grid-template-columns:1fr}}
 .combo-results .local-name-option{background:#fff5e6!important;color:#4e361e!important;font-weight:700;border-top:1px solid #dfc9a7}
+/* Date shortcut uses Bangkok local calendar day; keep date/time native and independent. */
+#appointmentChooseToday{min-height:44px!important;padding:7px 16px!important;margin:9px 0 3px;background:#f5eadb!important;color:#543c22!important;border:1px solid #d5bea1;border-radius:10px;font-weight:700}
+#appointmentChooseToday:focus-visible{outline:3px solid #947143;outline-offset:2px}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -786,6 +789,16 @@ moveLabelAndInput('hospitalSearch',mainSection,['hospitalSearchResults','provide
 mainSection.append(providerExtras);
 const timeSection=makeFlowSection('timeFlow','3. วันและเวลา');flowRoot.append(timeSection);
 moveLabelAndInput('date',timeSection,['dateRule','dateThaiPreview']);
+const todayShortcut=document.createElement('button');
+todayShortcut.type='button';todayShortcut.id='appointmentChooseToday';todayShortcut.className='secondary today-shortcut';
+todayShortcut.textContent='📅 วันนี้';
+todayShortcut.setAttribute('aria-label','เลือกวันที่วันนี้');
+$('dateRule').before(todayShortcut);
+todayShortcut.addEventListener('click',()=>{
+ $('date').value=bangkokToday();
+ $('date').dispatchEvent(new Event('input',{bubbles:true}));
+ $('date').dispatchEvent(new Event('change',{bubbles:true}));
+});
 moveLabelAndInput('known',timeSection);
 timeSection.append($('timebox'),$('appointmentPhotosSection'));
 const extrasSection=makeFlowSection('extrasFlow','4. เพิ่มเติม (ถ้ามี)');flowRoot.append(extrasSection);
