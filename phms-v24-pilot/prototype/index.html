@@ -179,6 +179,11 @@
 .adaptive-select-hidden{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
 .adaptive-option-host.hidden{display:none!important}
 .adaptive-select-search{margin:6px 0 9px}
+/* Uniform two-choice cards; only show matching follow-on fields. */
+#editor .adaptive-option-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#editor .adaptive-option-grid .adaptive-provider-choice{min-height:64px!important;background:#fff!important;border:1px solid #d8cab7!important;border-radius:13px!important;font-size:1rem!important;text-align:center}
+#editor .adaptive-option-grid .adaptive-provider-choice[aria-pressed=true]{background:#fff2dc!important;border:2px solid #947143!important;color:#3f2b16!important}
+#editor .adaptive-option-host.hidden{display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -728,7 +733,7 @@ for(const [value,symbol,name,description] of scenarioChoices){
  const button=document.createElement('button');button.type='button';button.className='scenario-option';button.dataset.scenario=value;
  const icon=document.createElement('span');icon.className='scenario-symbol';icon.textContent=symbol;
  const words=document.createElement('span');words.className='scenario-copy';const heading=document.createElement('strong');heading.textContent=name;const sub=document.createElement('small');sub.textContent=description;words.append(heading,sub);button.append(icon,words);
- button.addEventListener('click',()=>{scenarioChoiceMade=true;$('scenario').value=value;$('scenario').dispatchEvent(new Event('change',{bubbles:true}));});
+ button.addEventListener('click',()=>{if($('scenario').value!==value&&value!=='booked')$('known').value='';scenarioChoiceMade=true;$('scenario').value=value;$('scenario').dispatchEvent(new Event('change',{bubbles:true}));});
  scenarioGrid.append(button);
 }
 function syncScenarioCards(){for(const button of scenarioGrid.children)button.setAttribute('aria-pressed',String(scenarioChoiceMade&&button.dataset.scenario===$('scenario').value));}
@@ -1022,12 +1027,30 @@ function installAdaptiveSelect(id){
    button.setAttribute('aria-pressed',String(active));
    button.textContent=(active?'✓ ':'')+([...select.options].find(o=>o.value===button.dataset.choice)?.textContent||'');
   }
-  host.classList.toggle('hidden',select.classList.contains('hidden')||select.closest('.hidden')!==null);
+  if(id!=='known'&&id!=='hasAppointmentPhotos')host.classList.toggle('hidden',select.closest('.hidden')!==null);
  };
  select.addEventListener('change',sync);
  new MutationObserver(sync).observe(select,{attributes:true,attributeFilter:['class']});
  sync();
 }
 for(const id of adaptiveSelectIds)installAdaptiveSelect(id);
-updateProgressiveLayout();refresh();
+function syncChoiceCards(){
+ for(const id of ['known','hasAppointmentPhotos']){
+  const select=$(id),host=select.previousElementSibling;
+  if(!host?.classList.contains('adaptive-option-host'))continue;
+  const show=id==='known'?$('scenario').value!=='booked':$('scenario').value==='historical';
+  host.classList.toggle('hidden',!show);
+  for(const button of host.querySelectorAll('button[data-choice]')){
+   const active=select.value===button.dataset.choice;
+   const option=[...select.options].find(o=>o.value===button.dataset.choice);
+   const symbol=id==='known'?(button.dataset.choice==='yes'?'🕒 ':'❔ '):(button.dataset.choice==='yes'?'📷 ':'🚫 ');
+   button.setAttribute('aria-pressed',String(active));
+   button.textContent=(active?'✓ ':'')+symbol+(option?.textContent||'');
+  }
+ }
+}
+$('known').addEventListener('change',syncChoiceCards);
+$('hasAppointmentPhotos').addEventListener('change',syncChoiceCards);
+$('scenario').addEventListener('change',syncChoiceCards);
+updateProgressiveLayout();refresh();syncChoiceCards();
 </script></body></html>
