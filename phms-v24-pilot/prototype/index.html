@@ -146,7 +146,7 @@
 .reset-dialog-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 .reset-dialog-actions button{flex:1;min-width:120px}
 /* Step 1 follows the same numbered section hierarchy even when LINE preselects the person. */
-#editor #selectedPersonLabel.person-banner::before{content:"1. 👤 เพิ่มนัดให้";font-size:1.05rem;font-weight:750}
+#editor #selectedPersonLabel.person-banner::before{content:"👤 เพิ่มนัดให้ใคร";font-size:1.05rem;font-weight:750}
 #personPicker h2{font-size:1.12rem}
 /* One unified numbered person step. The existing authorized select remains the only input. */
 #editor #selectedPersonLabel,#editor #changeAppointmentPerson{display:none!important}
@@ -756,7 +756,7 @@ const inPerson=$('selectedPersonLabel');inPerson.classList.add('person-banner');
 const personSection=$('personPicker');
 personSection.classList.add('embedded-person-picker');
 $('requiredLegend').after(personSection);
-personSection.querySelector('h2').textContent='1. 👤 เพิ่มนัดให้';
+personSection.querySelector('h2').textContent='👤 เพิ่มนัดให้ใคร';
 personSection.querySelector('label[for="personSelect"]').textContent='เลือกบุคคลที่จะเพิ่มนัด';
 document.querySelector('label[for="purpose"]').textContent='ชื่อนัดหมาย';
 document.querySelector('label[for="hospitalSearch"]').innerHTML='โรงพยาบาล / สถานพยาบาล <span class="required-star" aria-label="จำเป็นต้องกรอก">*</span>';
@@ -864,10 +864,10 @@ function updateProgressiveLayout(){
  editor.classList.toggle('simple-ui',simple);document.body.classList.toggle('simple-entry',simple);
  for(const button of modeChoices.children)button.setAttribute('aria-pressed',String(button.dataset.mode===$('detail').value));
  // The selected-person banner is always step 1, including LINE deep links.
- $('scenarioFlowTitle').textContent='2. นัดแบบไหน';
- $('mainFlowTitle').textContent='3. นัดเรื่องอะไร ที่ไหน';
- $('timeFlowTitle').textContent='4. วันและเวลา';
- $('extrasFlowTitle').textContent='5. เพิ่มเติม (ถ้ามี)';
+ $('scenarioFlowTitle').textContent='📅 นัดแบบไหน';
+ $('mainFlowTitle').textContent='📝 ข้อมูลนัดหมาย';
+ $('timeFlowTitle').textContent='🕒 วันและเวลา';
+ $('extrasFlowTitle').textContent='📋 ข้อมูลเพิ่มเติม (ถ้ามี)';
  // Reveal the existing input groups only after a scenario card has been chosen.
  for(const id of ['mainFlow','timeFlow','extrasFlow'])$(id).classList.toggle('hidden',!scenarioChoiceMade);
  resetButton.classList.toggle('hidden',!scenarioChoiceMade);
