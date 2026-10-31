@@ -298,6 +298,11 @@
 #editor #details>details[open],#editor #simpleExtras[open]{padding-bottom:13px!important}
 #editor #details>details[open]>summary,#editor #simpleExtras[open]>summary{margin-bottom:10px!important}
 #editor #details>details .filled-indicator,#editor #simpleExtras .filled-indicator{font-size:.76rem!important;font-weight:500!important;white-space:nowrap!important}
+/* Shared group layout: the same node is a sibling of all detailed panels. */
+#editor #details>details#simpleExtras{box-sizing:border-box!important;border:1px solid #e8d6bf!important;border-radius:13px!important;margin:0 0 12px!important;padding:0 14px!important;min-height:58px!important;background:#fff!important}
+#editor #details>details#simpleExtras>summary{min-height:58px!important;padding:16px 0!important;margin:0!important;font-size:1rem!important;line-height:1.5!important;font-weight:700!important;display:list-item!important}
+#editor #details>details#simpleExtras:not([open]){height:58px!important;min-height:58px!important;overflow:hidden!important}
+#editor #details>details#simpleExtras[open]{height:auto!important;padding-bottom:13px!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1094,6 +1099,7 @@ const hospDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#ho
 const careDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#care_topic'));
 if(careDetails&&hospDetails)detailed.prepend(careDetails,hospDetails);
 extrasSection.append(simpleExtras,$('outcomeDetails'));
+// Simple mode keeps this panel outside detailed groups; detailed mode moves the same node inside the same details list.
 const linkedDisclosure=document.createElement('details');linkedDisclosure.className='progressive-extras';linkedDisclosure.id='linkedVisitDisclosure';
 const linkedSummary=document.createElement('summary');linkedSummary.textContent='ค่าใช้จ่ายและยาที่ได้รับ';linkedDisclosure.append(linkedSummary,$('historicalLinkedVisitSection'));
 extrasSection.append(linkedDisclosure);
@@ -1285,6 +1291,8 @@ function updateFilledIndicators(){
 function updateProgressiveLayout(){
  const simple=$('detail').value==='simple',mode=$('scenario').value;
  editor.classList.toggle('simple-ui',simple);document.body.classList.toggle('simple-entry',simple);
+ if(simple){if(simpleExtras.parentElement!==extrasSection)extrasSection.insertBefore(simpleExtras,$('outcomeDetails'));}
+ else if(simpleExtras.parentElement!==detailed)detailed.append(simpleExtras);
  for(const button of modeChoices.children)button.setAttribute('aria-pressed',String(button.dataset.mode===$('detail').value));
  // The selected-person banner is always step 1, including LINE deep links.
  $('scenarioFlowTitle').textContent='📅 นัดแบบไหน';
