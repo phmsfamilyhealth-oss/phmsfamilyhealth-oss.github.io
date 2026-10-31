@@ -303,6 +303,9 @@
 #editor #details>details#simpleExtras>summary{min-height:58px!important;padding:16px 0!important;margin:0!important;font-size:1rem!important;line-height:1.5!important;font-weight:700!important;display:list-item!important}
 #editor #details>details#simpleExtras:not([open]){height:58px!important;min-height:58px!important;overflow:hidden!important}
 #editor #details>details#simpleExtras[open]{height:auto!important;padding-bottom:13px!important}
+#editor .phms-prep-guide{font-size:.88rem!important;color:#71685d!important;margin:4px 0 9px!important;line-height:1.45!important}
+#editor #simpleExtras #examPrepPanel{margin-top:14px!important}
+#editor #simpleExtras #examPrepPanel>summary{font-size:1rem!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1081,20 +1084,36 @@ const extrasSection=makeFlowSection('extrasFlow','4. เพิ่มเติม
 const detailed=$('details');extrasSection.append(detailed);
 // Optional pre-examination instructions. This is pilot-only until the backend contract supports it.
 const examPrepPanel=document.createElement('details');examPrepPanel.id='examPrepPanel';
-const examPrepSummary=document.createElement('summary');examPrepSummary.textContent='🥣 คำแนะนำก่อนตรวจ';
-const examPrepLabel=document.createElement('label');examPrepLabel.htmlFor='examPrepChoice';examPrepLabel.textContent='คำแนะนำจากโรงพยาบาล';
+const examPrepSummary=document.createElement('summary');examPrepSummary.textContent='🥣 คำสั่งเตรียมตัวจากโรงพยาบาล';
+const examPrepLabel=document.createElement('label');examPrepLabel.htmlFor='examPrepChoice';examPrepLabel.textContent='โรงพยาบาลแจ้งให้เตรียมตัวอย่างไร';
 const examPrepChoice=document.createElement('select');examPrepChoice.id='examPrepChoice';
-for(const [value,label] of [['','ไม่ได้ระบุ'],['fasting','งดอาหาร / น้ำ ตามคำสั่งโรงพยาบาล'],['normal','ไม่ต้องงดอาหารและน้ำ'],['other','มีคำแนะนำอื่น']])examPrepChoice.add(new Option(label,value));
+for(const [value,label] of [['','ไม่ได้ระบุ'],['fasting','มีคำสั่งงดอาหารหรือเครื่องดื่ม'],['normal','โรงพยาบาลแจ้งว่าไม่ต้องงดอาหารหรือน้ำ'],['other','มีคำแนะนำอื่น']])examPrepChoice.add(new Option(label,value));
 const examPrepDetailsLabel=document.createElement('label');examPrepDetailsLabel.htmlFor='examPrepDetails';examPrepDetailsLabel.textContent='📝 รายละเอียดตามใบนัด / คำสั่งโรงพยาบาล';
-const examPrepDetails=document.createElement('textarea');examPrepDetails.id='examPrepDetails';examPrepDetails.rows=2;examPrepDetails.maxLength=600;examPrepDetails.placeholder='ระบุข้อความตามที่โรงพยาบาลแจ้งเท่านั้น';
+const examPrepDetails=document.createElement('textarea');examPrepDetails.id='examPrepDetails';examPrepDetails.rows=2;examPrepDetails.maxLength=600;examPrepDetails.placeholder='เช่น งดอาหารหลัง 22:00 น. ดื่มน้ำเปล่าได้ หรือกลั้นปัสสาวะก่อนตรวจ ตามคำสั่งจริง';
 const examPrepDetailArea=document.createElement('div');examPrepDetailArea.id='examPrepDetailArea';examPrepDetailArea.append(examPrepDetailsLabel,examPrepDetails);
-const examPrepHelp=document.createElement('p');examPrepHelp.className='help';examPrepHelp.textContent='ไม่ต้องคาดเดาเวลางดอาหารหรือน้ำ หากไม่แน่ใจให้ตรวจสอบกับโรงพยาบาล · ข้อมูลนี้ยังไม่บันทึกจริงในรุ่นทดลอง';
+const examPrepHelp=document.createElement('p');examPrepHelp.className='help';examPrepHelp.textContent='ใช้คำสั่งที่ได้รับจริงเท่านั้น ไม่เดาเวลางดอาหาร น้ำ หรือการเตรียมร่างกาย · รุ่นทดลองยังไม่บันทึกข้อมูลนี้';
 examPrepPanel.append(examPrepSummary,examPrepLabel,examPrepChoice,examPrepDetailArea,examPrepHelp);
 function syncExamPrep(){
  examPrepDetailArea.classList.toggle('hidden',!['fasting','other'].includes(examPrepChoice.value));
 }
 examPrepChoice.addEventListener('change',syncExamPrep);syncExamPrep();
-simpleExtras.append(examPrepPanel);
+// Keep the existing single checklist and procedure registry; provide clear navigation rather than duplicate entries.
+const prepItemsLabel=document.querySelector('label[for="prepEntry"]');
+if(prepItemsLabel)prepItemsLabel.textContent='🎒 สิ่งที่ต้องนำไป / เตรียมก่อนออกจากบ้าน';
+const prepPrompt=document.createElement('p');prepPrompt.className='help phms-prep-guide';
+prepPrompt.textContent='เช่น บัตรประชาชน ยาประจำตัว สมุดบันทึกความดันหรือน้ำตาล และตรวจยาที่ใกล้หมด';
+if(prepItemsLabel)prepItemsLabel.after(prepPrompt);
+const symptomLabel=$('previsitLabel');
+const symptomHelp=document.createElement('p');symptomHelp.className='help phms-prep-guide';
+symptomHelp.textContent='จดอาการที่เป็นอยู่ และคำถามที่จะถามแพทย์';
+symptomLabel.after(symptomHelp);
+const otherNoteLabel=$('additionalNoteLabel');
+const otherNoteHelp=document.createElement('p');otherNoteHelp.className='help phms-prep-guide';
+otherNoteHelp.textContent='ใช้สำหรับเรื่องอื่นเกี่ยวกับนัดนี้ ไม่ต้องกรอกซ้ำกับอาการหรือรายการที่ต้องนำไป';
+otherNoteLabel.after(otherNoteHelp);
+const procedureGuide=document.createElement('p');procedureGuide.className='help phms-prep-guide';
+procedureGuide.textContent='🩺 หากโรงพยาบาลสั่งเจาะเลือด เอกซเรย์ ตรวจตา หรือการตรวจอื่นก่อนพบแพทย์ ให้ใช้หมวด “รายการตรวจและหัตถการ” เดิม ไม่ต้องกรอกซ้ำ';
+simpleExtras.append(examPrepPanel,procedureGuide);
 const hospDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#hospital_hn'));
 const careDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#care_topic'));
 if(careDetails&&hospDetails)detailed.prepend(careDetails,hospDetails);
@@ -1306,7 +1325,7 @@ function updateProgressiveLayout(){
  missingFields.classList.toggle('hidden',!scenarioChoiceMade);
  resetActions.classList.toggle('hidden',!scenarioChoiceMade);
  syncScenarioCards();
- simpleSummary.textContent='📝 '+(simpleSummaryText[mode]||'อาการและสิ่งที่ต้องเตรียม');
+ simpleSummary.textContent='📋 เตรียมตัวและเรื่องที่จะบอกหมอ';
  linkedDisclosure.classList.toggle('hidden',mode!=='historical');
  if(mode!=='historical')linkedDisclosure.open=false;
  if(simple&&mode==='walk_in')$('checklistBox').classList.add('simple-walkin-checklist');
