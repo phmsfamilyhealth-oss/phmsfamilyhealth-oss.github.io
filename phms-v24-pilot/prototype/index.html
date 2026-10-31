@@ -200,6 +200,10 @@
 #appointmentHeaderPerson{font-weight:750;font-size:1.05rem;margin:9px 0 2px;overflow-wrap:anywhere}
 #appointmentHeaderHint{font-size:.91rem;color:#6b5b47;margin:0}
 .phms-connection-status{padding:8px 12px;font-size:.85rem;margin:6px 0 12px}
+#relatedCards .related-compact-card{display:flex;flex-direction:column;gap:5px;padding:12px 14px!important;min-height:60px;text-align:left}
+#relatedCards .related-compact-card strong{line-height:1.4}#relatedCards .related-compact-card span{font-size:.87rem;color:#715e46;line-height:1.4}
+.related-change-button{width:auto!important;margin:-6px 0 14px;min-height:44px}
+#relatedAppointmentBox summary{overflow-wrap:anywhere}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="นัดหมาย"><div class="phms-appointment-header-top"><h1>📅 นัดหมาย</h1><span id="appointmentHeaderMode">แบบง่าย</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p><p id="appointmentHeaderHint">เลือกบุคคลที่จะเพิ่มนัด</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -730,19 +734,31 @@ function thaiSourceDate(value){
 function renderRelatedCards(){
  const selected=$('relatedSelect').value,query=$('relatedQuery').value.trim().toLocaleLowerCase('th-TH');
  const filtered=relatedAllItems.filter(a=>[a.title,a.hospital_name,a.department,a.care_topic,a.doctor_name,thaiSourceDate(a.planned_visit_date||a.appointment_at)].some(v=>String(v||'').toLocaleLowerCase('th-TH').includes(query)));
- const visible=relatedExpanded?filtered:filtered.slice(0,3),container=$('relatedCards');container.replaceChildren();
+ const visible=relatedExpanded?filtered:filtered.slice(0,2),container=$('relatedCards');container.replaceChildren();
  for(const a of visible){
-  const button=document.createElement('button');button.type='button';button.className='appointment-card';button.setAttribute('aria-pressed',String(selected===a.id));
-  const title=document.createElement('strong');title.textContent=(selected===a.id?'✓ ':'')+(a.title||'นัดหมาย');
-  const detail=document.createElement('span');detail.textContent=thaiSourceDate(a.planned_visit_date||a.appointment_at);
-  button.append(title,detail);const hospital=document.createElement('span');hospital.textContent=a.hospital_name||'ไม่ระบุโรงพยาบาล';button.append(hospital);
-  if(a.department){const department=document.createElement('span');department.textContent=a.department;button.append(department);}
-  button.addEventListener('click',()=>{$('relatedSelect').value=a.id;applySourceAppointment();renderRelatedCards();$('relatedClear').classList.remove('hidden');});
+  const button=document.createElement('button');button.type='button';button.className='appointment-card related-compact-card';
+  button.setAttribute('aria-pressed',String(selected===a.id));
+  const title=document.createElement('strong');title.textContent=a.title||'นัดหมาย';
+  const detail=document.createElement('span');
+  detail.textContent=thaiSourceDate(a.planned_visit_date||a.appointment_at)+' · '+(a.hospital_name||'ไม่ระบุโรงพยาบาล');
+  button.append(title,detail);
+  button.addEventListener('click',()=>{
+   $('relatedSelect').value=a.id;applySourceAppointment();
+   $('relatedClear').classList.remove('hidden');relatedExpanded=false;
+   $('relatedAppointmentBox').open=false;renderRelatedCards();
+  });
   container.append(button);
  }
- $('relatedMore').classList.toggle('hidden',filtered.length<=3);
- $('relatedMore').textContent=relatedExpanded?'แสดงน้อยลง':'ดูนัดเพิ่มเติม ('+(filtered.length-3)+')';
- $('relatedStatus').textContent=filtered.length?'พบ '+filtered.length+' นัด'+(selected?' — เลือกนัดต้นทางแล้ว ตรวจสอบข้อมูลที่เติมด้านล่าง':' — เลือกนัดครั้งก่อนเพื่อเติมรายละเอียด'):'ไม่พบนัดเดิมที่ตรงกับคำค้น';
+ $('relatedMore').classList.toggle('hidden',filtered.length<=2);
+ $('relatedMore').textContent=relatedExpanded?'แสดงน้อยลง':'ดูนัดเพิ่มเติม ('+(filtered.length-2)+')';
+ $('relatedStatus').textContent=filtered.length?'พบนัด '+filtered.length+' รายการ · เลือกนัดเดิมเพื่อเติมข้อมูล':'ไม่พบนัดเดิมที่ตรงกับคำค้น';
+ const chosen=relatedAllItems.find(a=>a.id===selected);
+ const summary=$('relatedAppointmentBox').querySelector('summary');
+ summary.textContent=chosen?'🔁 ใช้ข้อมูลจากนัดเดิม: '+(chosen.title||'นัดหมาย'):'🔁 ใช้ข้อมูลจากนัดเดิม (ถ้ามี)';
+ if(typeof relatedChangeButton!=='undefined'){
+  relatedChangeButton.classList.toggle('hidden',!chosen);
+  relatedChangeButton.textContent=chosen?'เปลี่ยนนัดเดิม':'';
+ }
 }
 async function loadRelatedAppointments(){
  const status=$('relatedStatus'),chosenPerson=memberId,sequence=++relatedLoadGeneration;
@@ -781,6 +797,13 @@ const editor=$('editor'),scenario=$('scenario');
 const sourceBox=$('relatedAppointmentBox');
 editor.insertBefore(sourceBox,$('date').previousElementSibling);
 sourceBox.open=false;sourceBox.hidden=!memberId;
+const relatedChangeButton=document.createElement('button');
+relatedChangeButton.type='button';relatedChangeButton.id='relatedChangeButton';
+relatedChangeButton.className='secondary hidden related-change-button';relatedChangeButton.textContent='เปลี่ยนนัดเดิม';
+sourceBox.after(relatedChangeButton);
+relatedChangeButton.addEventListener('click',()=>{sourceBox.open=true;$('relatedQuery').focus();});
+sourceBox.querySelector('p.help').textContent='เลือกนัดเดิมเพื่อเติมข้อมูล หรือข้ามได้';
+
 // Three clearly visible appointment types; keep the original select as the single source of state.
 const scenarioChoices=[
  ['booked','📅','นัดตามใบนัด','มีวันนัดจากโรงพยาบาล'],
