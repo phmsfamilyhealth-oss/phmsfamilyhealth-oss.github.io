@@ -159,8 +159,8 @@
 <label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
 <label for="arrival_lead_minutes">ควรไปถึงก่อนนัดกี่นาที</label><input id="arrival_lead_minutes" type="number" min="0" max="720" step="5"></details>
 <details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล (ถ้ามี)</option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
-<details id="outcomeDetails" class="hidden"><summary>📋 บันทึกผลการไปโรงพยาบาล (ย้อนหลัง)</summary>
-<label for="visit_outcome_notes">ผลการไปพบแพทย์และคำแนะนำ (ถ้าทราบ)</label><textarea id="visit_outcome_notes" maxlength="1000" rows="2"></textarea>
+<details id="outcomeDetails" class="hidden"><summary>📋 ผลการไปพบแพทย์</summary>
+<label for="visit_outcome_notes">หมอบอกว่าอย่างไร หรือรักษาอะไร</label><textarea id="visit_outcome_notes" maxlength="1000" rows="2"></textarea>
 <label for="diagnosis_summary">การวินิจฉัยตามเอกสาร</label><textarea id="diagnosis_summary" maxlength="1000" rows="2"></textarea>
 <label for="treatment_summary">การรักษาที่ได้รับ</label><textarea id="treatment_summary" maxlength="1000" rows="2"></textarea>
 <label for="test_results_summary">ผลตรวจ</label><textarea id="test_results_summary" maxlength="1000" rows="2"></textarea>
@@ -177,10 +177,10 @@
 <button id="openCanonicalFinance" type="button" class="secondary">💰 ค่าใช้จ่ายของนัดนี้</button>
 <button id="openCanonicalMedication" type="button" class="secondary">💊 เพิ่มยาจากนัดนี้</button>
 </div>
-<p class="help">ต้องเป็นนัดเดียวกับที่ไปโรงพยาบาลจริง หากเป็นนัดใหม่ที่ยังไม่ได้บันทึก กรุณาบันทึกนัดผ่าน LINE ก่อนจึงจะผูกข้อมูลได้</p>
+<p class="help">ยังไม่มีนัดที่บันทึกไว้? ต้องบันทึกนัดก่อนจึงจะเพิ่มค่าใช้จ่ายหรือยาได้</p>
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
-<details id="procedurePreviewBox"><summary>🧪 รายการตรวจหรือหัตถการ (ทดลอง)</summary><p class="help">พิมพ์รายการที่ทราบได้หลายข้อ ข้อมูลนี้ยังไม่ใช่ทะเบียนตรวจที่แพทย์ยืนยันและยังไม่บันทึกลงระบบ</p><label for="procedureEntry">ชื่อการตรวจหรือหัตถการ</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
+<details id="procedurePreviewBox"><summary>🧪 รายการตรวจและหัตถการ</summary><p class="help">พิมพ์รายการที่ทราบได้หลายข้อ ข้อมูลนี้ยังไม่ใช่ทะเบียนตรวจที่แพทย์ยืนยันและยังไม่บันทึกลงระบบ</p><label for="procedureEntry">ชื่อการตรวจหรือหัตถการ</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดครั้งก่อน (ถ้ามี)</summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
@@ -188,14 +188,14 @@
 <button type="button" id="relatedMore" class="secondary hidden" style="width:100%">ดูนัดเพิ่มเติม</button>
 <select id="relatedSelect" class="hidden" aria-label="นัดต้นทาง" disabled><option value="">ไม่เชื่อมนัดเดิม</option></select>
 </details>
-<details id="contactRescheduleBox"><summary>☎️ ติดต่อโรงพยาบาลและเลื่อนนัด (อ่านข้อมูลจริง)</summary>
+<details id="contactRescheduleBox"><summary>☎️ ติดต่อโรงพยาบาลและเลื่อนนัด</summary>
 <p class="help">ติดต่อเพื่อขอเลื่อนนัดได้ แต่ระบบจะไม่เปลี่ยนวันนัดเดิมจนกว่าโรงพยาบาลจะยืนยัน</p>
 <button type="button" id="contactLoad" class="secondary">ดูข้อมูลติดต่อของแผนกนี้</button><div id="contactDetails" role="status" class="help">ยังไม่ได้โหลดข้อมูลติดต่อ</div>
 <label for="reschedulePhase">สถานะการเลื่อนนัด (ทดลอง)</label><select id="reschedulePhase"><option value="">ยังไม่ดำเนินการ</option><option value="requested">ต้องการเลื่อนนัด</option><option value="contact_pending">ติดต่อแล้ว รอยืนยัน</option><option value="confirmed">โรงพยาบาลยืนยันแล้ว</option></select>
 <p class="help">การเลือกสถานะนี้ยังไม่เปลี่ยนวันนัดหรือบันทึกข้อมูลในระบบ</p></details>
 <p class="help">เอกสาร งานมอบหมาย และแจ้งเตือนยังรอ API ตรวจสิทธิ์ จึงยังไม่เปิดการบันทึก</p>
 <input type="hidden" id="doctor"></div><label for="purpose">ชื่อนัดหมาย</label><input id="purpose" type="text" maxlength="80" placeholder="เช่น ปวดเข่า, ฟังผลเลือด, รับยาเดิม" autocomplete="off"><p class="help">ตั้งชื่อสั้น ๆ เพื่อให้รู้ว่าไปโรงพยาบาลเรื่องอะไร</p><p id="historicalGuide" class="help hidden" role="status">บันทึกการไปพบแพทย์ย้อนหลัง: ระบุเหตุผลที่ไปและผลหลังพบแพทย์ตามข้อมูลที่ทราบ ไม่ต้องกรอกเรื่องที่อยากบอกแพทย์ในอนาคต</p><label id="previsitLabel" for="previsitSymptoms">อาการหรือเรื่องที่อยากบอกหมอ (ถ้ามี)</label><textarea id="previsitSymptoms" maxlength="1000" rows="2" placeholder="เช่น ปวดเข่ามา 3 วัน หรือมีคำถามเรื่องยา"></textarea><p id="previsitHelp" class="help">ข้อมูลที่ผู้ใช้แจ้งเอง ยังไม่ใช่การวินิจฉัยจากแพทย์ และยังไม่บันทึกในโหมดทดลอง</p><label id="additionalNoteLabel" for="additionalNote">รายละเอียดเพิ่มเติม (ถ้ามี)</label><textarea id="additionalNote" maxlength="1000" rows="3" placeholder="อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม"></textarea>
-<div id="checklistBox"><label for="prepEntry">เตรียมอะไรไปบ้าง (Checklist)</label><div class="actions"><input id="prepEntry" maxlength="160" placeholder="พิมพ์รายการที่ต้องเตรียม"><button id="prepAdd" type="button">+ เพิ่ม</button></div><p id="prepProgress" role="status">เตรียมแล้ว 0/0 รายการ</p><div id="prepItems"></div></div><input type="hidden" id="prep">
+<div id="checklistBox"><label for="prepEntry">สิ่งที่ต้องเตรียม</label><div class="actions"><input id="prepEntry" maxlength="160" placeholder="พิมพ์รายการที่ต้องเตรียม"><button id="prepAdd" type="button">+ เพิ่ม</button></div><p id="prepProgress" role="status">เตรียมแล้ว 0/0 รายการ</p><div id="prepItems"></div></div><input type="hidden" id="prep">
 <p class="help" id="registryHelp">ชื่อโรงพยาบาล แผนก และแพทย์จะเติมอัตโนมัติจากทะเบียนที่ตรวจสอบแล้ว หากยังไม่มีชื่อแพทย์ในทะเบียน สามารถบันทึกนัดโดยไม่ระบุแพทย์ได้เมื่อเปิดระบบจริง</p>
 <p class="error" id="error" role="alert"></p><div class="actions"><button id="review" type="button" disabled>ตรวจทานข้อมูล</button></div>
 </section>
@@ -303,7 +303,7 @@ function bangkokToday(){const parts=new Intl.DateTimeFormat('en-US',{timeZone:'A
 function checkDateRule(){
  const today=bangkokToday(),past=$('scenario').value==='historical',date=$('date').value;
  $('date').min=past?'':today;$('date').max=past?today:'';
- $('dateRule').textContent=past?'บันทึกย้อนหลัง: เลือกได้ถึงวันนี้เท่านั้น':'นัดใหม่: เลือกวันนี้หรือวันข้างหน้าเท่านั้น';
+ $('dateRule').textContent=past?'เลือกได้ถึงวันนี้':'เลือกวันนี้หรือวันข้างหน้า';
  const message=date&&(past?date>today:date<today)?(past?'วันที่นี้ยังมาไม่ถึง กรุณาเลือกวันนี้หรือวันที่ผ่านมาแล้ว':'วันที่นี้ผ่านไปแล้ว กรุณาเลือกวันนี้หรือวันข้างหน้า'):'';
  $('date').setCustomValidity(message);
  $('dateRule').textContent=message||$('dateRule').textContent;
@@ -326,7 +326,7 @@ function renderAppointmentPhotos(){
  });
  $('addAppointmentPhoto').classList.toggle('hidden',photoFiles.length>=2);
  $('addAppointmentPhoto').textContent=photoFiles.length?'+ เพิ่มอีกรูป':'+ เพิ่มรูปใบนัด';
- $('filehelp').textContent=photoFiles.length===2?'ครบ 2 รูปแล้ว · ยังไม่บันทึกรูปจริง':photoFiles.length+' / 2 รูป · ดูและลบรูปได้ · ยังไม่บันทึกรูปจริง';
+ $('filehelp').textContent=photoFiles.length===2?'ครบ 2 รูปแล้ว':photoFiles.length+'/2 รูป';
 }
 function showAppointmentPhoto(index){if(!photoUrls[index])return;$('appointmentPhotoLarge').src=photoUrls[index];$('appointmentPhotoDialog').showModal();}
 $('closeAppointmentPhoto').addEventListener('click',()=>$('appointmentPhotoDialog').close());
@@ -408,10 +408,10 @@ function refresh(){
  $('timeRequired').hidden=optionalTime&&$('known').value!=='yes';
  checkDateRule();
  $('historicalGuide').classList.toggle('hidden',!history);
- $('previsitLabel').textContent=history?'ก่อนพบแพทย์ มีอาการหรือไปด้วยเรื่องอะไร (ถ้าจำได้)':'อาการหรือเรื่องที่อยากบอกหมอ (ถ้ามี)';
+ $('previsitLabel').textContent=history?'ก่อนพบแพทย์ ไปด้วยเรื่องอะไร':'อาการหรือเรื่องที่อยากบอกหมอ';
  $('previsitSymptoms').placeholder=history?'เช่น ไปเพราะปวดเข่า หรือไปติดตามผลตรวจ':'เช่น ปวดเข่ามา 3 วัน หรือมีคำถามเรื่องยา';
  $('previsitHelp').textContent=history?'บันทึกตามที่จำได้ ไม่ใช่การวินิจฉัยจากแพทย์':'ข้อมูลที่ผู้ใช้แจ้งเอง ยังไม่ใช่การวินิจฉัยจากแพทย์ และยังไม่บันทึกในโหมดทดลอง';
- $('additionalNoteLabel').textContent=history?'บันทึกเพิ่มเติมเกี่ยวกับการไปครั้งนี้ (ถ้ามี)':'รายละเอียดเพิ่มเติม (ถ้ามี)';
+ $('additionalNoteLabel').textContent=history?'บันทึกเพิ่มเติมเกี่ยวกับการไปครั้งนี้':'รายละเอียดเพิ่มเติม';
  $('additionalNote').placeholder=history?'เช่น เรื่องที่ต้องติดตามหรือข้อมูลประกอบอื่น ๆ':'อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม';
  updateThaiDateTime(); $('checklistBox').classList.toggle('hidden',!!isPastAppointment());$('details').classList.toggle('hidden',$('detail').value!=='full');$('walkInDetails').classList.toggle('hidden',$('scenario').value!=='walk_in');$('outcomeDetails').classList.toggle('hidden',!isPastAppointment());const showTime=!optionalTime||$('known').value==='yes';$('timebox').classList.toggle('hidden',!showTime);/* keep entered time on mode toggles; hidden value is never submitted */}
 $('date').addEventListener('input',()=>{const src=sourceAppointments.get($('relatedSelect').value);if(src&&!purposeManuallyEdited&&$('purpose').value===autoPurposeValue){$('purpose').value='';applyFollowupTitle(src);}});$('date').addEventListener('input',()=>{checkDateRule();updateThaiDateTime();});$('date').addEventListener('change',refresh);$('time').addEventListener('input',updateThaiDateTime);$('time').addEventListener('change',updateThaiDateTime);$('known').addEventListener('change',refresh);$('detail').addEventListener('change',refresh);
@@ -621,7 +621,7 @@ function makeFlowSection(id,title){
 }
 // Optional provider fields remain in the original picker and are only relocated once.
 const providerExtras=document.createElement('details');providerExtras.id='providerExtras';providerExtras.className='progressive-extras';
-const providerSummary=document.createElement('summary');providerSummary.textContent='แผนกและแพทย์';providerExtras.append(providerSummary);
+const providerSummary=document.createElement('summary');providerSummary.textContent='แผนกและแพทย์ (ถ้ามี)';providerExtras.append(providerSummary);
 const unitFieldLabel=document.querySelector('label[for="unitSearch"]');unitFieldLabel.before(providerExtras);
 moveRangeTo(unitFieldLabel,$('doctorHint'),providerExtras);
 
@@ -651,7 +651,7 @@ $('detail').classList.add('visually-hidden-form');$('detail').setAttribute('tabi
 // Scenario selection remains a real form select so the existing validation and state stay intact.
 const scenarioSection=makeFlowSection('scenarioFlow','1. นัดแบบไหน');
 flowRoot.append(scenarioSection);
-const originalScenarioLabel=document.querySelector('label[for="scenario"]');originalScenarioLabel.classList.add('visually-hidden-form');
+const originalScenarioLabel=document.querySelector('label[for="scenario"]');originalScenarioLabel.classList.add('visually-hidden-form');$('scenario').setAttribute('tabindex','-1');$('scenario').setAttribute('aria-hidden','true');
 scenarioSection.append(originalScenarioLabel,$('scenario'),scenarioGrid,sourceBox);
 const mainSection=makeFlowSection('mainFlow','2. นัดเรื่องอะไร ที่ไหน');flowRoot.append(mainSection);
 const purposeHelp=$('purpose').nextElementSibling;
