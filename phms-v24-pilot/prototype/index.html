@@ -488,7 +488,7 @@ function drawAdaptiveProviderCards(kind,choices){
   });
   ui.cards.append(other);
  }
- ui.cards.classList.toggle('hidden',!small);
+ ui.cards.classList.toggle('hidden',!small || !scenarioChoiceMade);
  ui.search.classList.toggle('adaptive-search-collapsed',small&&!ui.expanded);
  document.getElementById(kind+'SearchResults').classList.toggle('adaptive-search-collapsed',small&&!ui.expanded);
  ui.search.placeholder=kind==='hospital'?'🔎 ค้นหาหรือพิมพ์ชื่อโรงพยาบาล':'🔎 ค้นหาหรือพิมพ์ชื่อแผนกใหม่';
@@ -958,6 +958,7 @@ const mainSection=makeFlowSection('mainFlow','2. นัดเรื่องอ�
 const purposeHelp=$('purpose').nextElementSibling;
 moveLabelAndInput('purpose',mainSection);
 if(purposeHelp?.classList.contains('help'))mainSection.append(purposeHelp);
+mainSection.append($('hospitalQuickCards'));
 moveLabelAndInput('hospitalSearch',mainSection,['hospitalSearchResults','providerOrg']);
 mainSection.append(providerExtras);
 const timeSection=makeFlowSection('timeFlow','3. วันและเวลา');flowRoot.append(timeSection);
@@ -1255,6 +1256,7 @@ function updateProgressiveLayout(){
  $('extrasFlowTitle').textContent='📋 ข้อมูลเพิ่มเติม (ถ้ามี)';
  // Reveal the existing input groups only after a scenario card has been chosen.
  for(const id of ['mainFlow','timeFlow','extrasFlow'])$(id).classList.toggle('hidden',!scenarioChoiceMade);
+ $('hospitalQuickCards').classList.toggle('hidden',!scenarioChoiceMade || $('hospitalQuickCards').children.length===0);
  resetButton.classList.toggle('hidden',!scenarioChoiceMade);
  missingFields.classList.toggle('hidden',!scenarioChoiceMade);
  resetActions.classList.toggle('hidden',!scenarioChoiceMade);
