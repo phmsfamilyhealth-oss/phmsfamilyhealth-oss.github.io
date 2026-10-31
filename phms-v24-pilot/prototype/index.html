@@ -126,6 +126,11 @@
  #scenarioFlow .scenario-option{min-height:100px!important;flex-direction:column!important;align-items:flex-start!important}
 }
 @media(max-width:390px){#editor{padding:13px!important}#appointmentFlow{gap:10px}.mode-choice{padding:9px 10px!important}}
+/* Show the selected date/time inside the native iOS picker without changing its underlying value. */
+.native-picker-shell.has-display-value>input::-webkit-datetime-edit{color:transparent}
+.native-picker-shell.has-display-value:focus-within>input::-webkit-datetime-edit{color:#202020}
+.native-picker-shell.has-display-value .native-picker-prompt{right:46px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#dateThaiPreview,#timeThaiPreview{display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -294,10 +299,10 @@ function thaiSpokenTime(value){
 }
 function updateThaiDateTime(){
  const dateText=thaiDateLabel($('date').value),datePreview=$('dateThaiPreview');
- datePreview.hidden=!dateText;datePreview.textContent=dateText?'📅 '+dateText:'';
- const timeText=thaiSpokenTime($('time').value),timePreview=$('timeThaiPreview');
- const visible=$('known').value==='yes'&&!!timeText;
- timePreview.hidden=!visible;timePreview.textContent=visible?'🕒 '+$('time').value+' น. ('+timeText+')':'';
+ datePreview.hidden=true;datePreview.textContent='';
+ const timePreview=$('timeThaiPreview');
+ timePreview.hidden=true;timePreview.textContent='';
+ if(typeof syncPickerPrompts==='function')syncPickerPrompts();
 }
 function bangkokToday(){const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));return p.year+'-'+p.month+'-'+p.day;}
 function checkDateRule(){
@@ -692,10 +697,14 @@ const dateShell=document.createElement('div');dateShell.className='native-picker
 const timePrompt=document.createElement('span');timePrompt.id='timeInputPrompt';timePrompt.className='native-picker-prompt';timePrompt.textContent='🕘 แตะเพื่อเลือกเวลา';
 const timeShell=document.createElement('div');timeShell.className='native-picker-shell';$('time').before(timeShell);timeShell.append($('time'),timePrompt);
 function syncPickerPrompts(){
- datePrompt.hidden=!!$('date').value;
- timePrompt.hidden=!!$('time').value;
- dateShell.classList.toggle('is-empty',!$('date').value);
- timeShell.classList.toggle('is-empty',!$('time').value);
+ const dateText=thaiDateLabel($('date').value),timeValue=$('time').value;
+ datePrompt.textContent=dateText||'📅 แตะเพื่อเลือกวันที่';
+ timePrompt.textContent=timeValue?timeValue+' น.':'🕘 แตะเพื่อเลือกเวลา';
+ datePrompt.hidden=false;timePrompt.hidden=false;
+ dateShell.classList.toggle('has-display-value',!!dateText);
+ timeShell.classList.toggle('has-display-value',!!timeValue);
+ dateShell.classList.toggle('is-empty',!dateText);
+ timeShell.classList.toggle('is-empty',!timeValue);
 }
 $('date').addEventListener('input',syncPickerPrompts);$('date').addEventListener('change',syncPickerPrompts);
 $('time').addEventListener('input',syncPickerPrompts);$('time').addEventListener('change',syncPickerPrompts);
