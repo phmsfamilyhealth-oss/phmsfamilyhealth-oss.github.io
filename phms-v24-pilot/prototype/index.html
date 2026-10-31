@@ -418,6 +418,10 @@
 @media(max-width:380px){
  #editor .adaptive-provider-cards .adaptive-provider-choice{min-height:68px!important;padding:9px 7px!important}
 }
+
+/* One text run ensures the scenario emoji is never separated from its label by legacy flex rules. */
+#editor #scenarioFlow .scenario-option .scenario-copy{display:flex!important;flex-direction:column!important;align-items:flex-start!important}
+#editor #scenarioFlow .scenario-option .scenario-copy>strong{display:block!important;font-size:1rem!important;line-height:1.4!important;font-weight:700!important;white-space:normal!important;overflow-wrap:normal!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1033,8 +1037,7 @@ const scenarioGrid=document.createElement('div');scenarioGrid.className='scenari
 $('scenario').classList.add('scenario-original');$('scenario').before(scenarioGrid);
 for(const [value,symbol,name,description] of scenarioChoices){
  const button=document.createElement('button');button.type='button';button.className='scenario-option';button.dataset.scenario=value;
- const icon=document.createElement('span');icon.className='scenario-symbol';icon.textContent=symbol;
- const words=document.createElement('span');words.className='scenario-copy';const heading=document.createElement('strong');heading.textContent=name;const sub=document.createElement('small');sub.textContent=description;const headingRow=document.createElement('span');headingRow.className='scenario-heading-row';headingRow.append(icon,heading);words.append(headingRow,sub);button.append(words);
+ const words=document.createElement('span');words.className='scenario-copy';const heading=document.createElement('strong');heading.textContent=symbol+' '+name;const sub=document.createElement('small');sub.textContent=description;words.append(heading,sub);button.append(words);
  button.addEventListener('click',()=>{if($('scenario').value!==value&&value!=='booked')$('known').value='';scenarioChoiceMade=true;$('scenario').value=value;$('scenario').dispatchEvent(new Event('change',{bubbles:true}));});
  scenarioGrid.append(button);
 }
