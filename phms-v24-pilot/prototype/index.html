@@ -170,6 +170,7 @@
 .adaptive-provider-choice[aria-pressed=true]{border:2px solid #856236!important;background:#fff2dc!important;font-weight:750}
 .adaptive-provider-more{color:#5b432b!important;background:#f8f0e5!important}
 @media(max-width:350px){.adaptive-provider-cards{grid-template-columns:1fr}}
+.combo-results .local-name-option{background:#fff5e6!important;color:#4e361e!important;font-weight:700;border-top:1px solid #dfc9a7}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <h1>📅 เพิ่มนัดหมาย</h1><p class="notice" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -292,7 +293,33 @@ const comboState=Object.fromEntries(['hospital','unit','clinician'].map(kind=>[k
 function closeCombo(kind){comboState[kind].isOpen=false;const input=document.getElementById(kind+'Search');document.getElementById(kind+'SearchResults').classList.add('hidden');input.setAttribute('aria-expanded','false');}
 function renderCombo(kind,choices){const input=document.getElementById(kind+'Search'),list=document.getElementById(kind+'SearchResults'),state=comboState[kind];list.replaceChildren();if(!state.isOpen){closeCombo(kind);return;}const term=state.searchText.trim();const matched=choices.filter(x=>masterMatches(x,term)).slice(0,40);for(const item of matched){const button=document.createElement('button');button.type='button';button.setAttribute('role','option');button.textContent=item.label;button.addEventListener('click',()=>{const select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');select.value=item.value;state.selectedItem=item;state.searchText=item.label;input.value=item.label;closeCombo(kind);if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});list.append(button);}
 if(term&&!matched.length){const msg=document.createElement('div');msg.className='unavailable';msg.textContent='ไม่พบรายการที่ตรงกัน';list.append(msg);}
-if(term&&!matched.some(x=>normalizedMasterName(x.label)===normalizedMasterName(term))){const add=document.createElement('button');add.type='button';add.disabled=true;add.textContent='+ เพิ่ม "'+term.slice(0,160)+'" เป็นรายการใหม่ — รอเปิดระบบตรวจสอบทะเบียน';list.append(add);}
+if(term&&!matched.length){
+ const add=document.createElement('button');add.type='button';add.className='local-name-option';
+ add.textContent='＋ ใช้ชื่อ "'+term.slice(0,160)+'" สำหรับนัดนี้';
+ add.addEventListener('click',()=>{
+  const label=term.slice(0,160);
+  state.selectedItem=null;state.searchText=label;input.value=label;
+  const select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');
+  select.value='';
+  if(kind==='hospital'){
+   document.getElementById('hospital').value=label;
+   for(const dependent of ['unit','clinician']){
+    comboState[dependent].selectedItem=null;comboState[dependent].searchText='';
+    document.getElementById(dependent+'Search').value='';
+   }
+   document.getElementById('department').value='';
+   document.getElementById('doctor').value='';
+   refreshProviderPicker('providerOrg');
+  }else if(kind==='unit'){
+   document.getElementById('department').value=label;
+   comboState.clinician.selectedItem=null;comboState.clinician.searchText='';
+   document.getElementById('clinicianSearch').value='';document.getElementById('doctor').value='';
+   refreshProviderPicker('providerUnit');
+  }else document.getElementById('doctor').value=label;
+  closeCombo(kind);document.getElementById('editor').dispatchEvent(new Event('change',{bubbles:true}));
+ });
+ list.append(add);
+}
 list.classList.toggle('hidden',!list.children.length);input.setAttribute('aria-expanded',String(!!list.children.length));}
 // PHMS adaptive selection: authorized catalog only, same hidden provider IDs.
 const adaptivePickers={};
