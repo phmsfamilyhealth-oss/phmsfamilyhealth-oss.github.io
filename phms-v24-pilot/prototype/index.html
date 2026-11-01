@@ -501,6 +501,29 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  background:transparent!important;
  list-style:revert!important;
 }
+
+/* iOS LINE WebView: one visible Thai date/time display, native picker stays tappable. */
+#editor .native-picker-shell{position:relative!important;isolation:isolate!important;min-height:56px!important;overflow:hidden!important;background:#fff!important;border:1px solid #bca487!important;border-radius:12px!important}
+#editor .native-picker-shell>input[type="date"],
+#editor .native-picker-shell>input[type="time"]{
+ position:absolute!important;inset:0!important;display:block!important;
+ width:100%!important;height:100%!important;min-height:0!important;
+ padding:0!important;margin:0!important;border:0!important;border-radius:0!important;
+ opacity:0!important;-webkit-text-fill-color:transparent!important;
+ z-index:2!important;cursor:pointer!important;
+}
+#editor .native-picker-shell>.native-picker-prompt{
+ position:relative!important;display:flex!important;align-items:center!important;
+ left:auto!important;right:auto!important;top:auto!important;transform:none!important;
+ width:100%!important;max-width:100%!important;min-height:56px!important;
+ padding:12px 16px!important;box-sizing:border-box!important;
+ white-space:normal!important;overflow-wrap:break-word!important;
+ overflow:visible!important;font-size:16px!important;line-height:1.4!important;
+ color:#3f3427!important;pointer-events:none!important;z-index:1!important;
+}
+#editor .native-picker-shell:focus-within>.native-picker-prompt,
+#editor .native-picker-shell.has-display-value:focus-within>.native-picker-prompt{display:flex!important}
+#editor .native-picker-shell:focus-within{outline:2px solid #947143!important;outline-offset:1px!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
