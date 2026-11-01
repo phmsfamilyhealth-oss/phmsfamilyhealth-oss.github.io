@@ -853,10 +853,6 @@ function syncHospitalHn(){
   status.textContent='ไม่พบ HN ในทะเบียน สามารถกรอกเองได้ (ไม่เพิ่มเข้าทะเบียนกลาง)';
  }
 }
-const hnStatus=document.createElement('p');hnStatus.id='hospitalHnStatus';hnStatus.className='help hospital-hn-status';hnStatus.setAttribute('role','status');
-document.getElementById('hospital_hn').after(hnStatus);
-document.getElementById('hospital_hn').addEventListener('input',()=>{hnEdited=true;hnAutoValue='';hnStatus.textContent='HN ที่กรอกเองสำหรับนัดนี้ ยังไม่เพิ่มเข้าทะเบียนกลาง';});
-document.getElementById('personSelect').addEventListener('change',()=>{hnSelectionKey='';hnEdited=false;hnAutoValue='';document.getElementById('hospital_hn').value='';syncHospitalHn();});
 function syncProviderNames(){
  if(!authorizedCatalog)return;
  const org=authorizedCatalog.organizations.find(x=>x.id===document.getElementById('providerOrg').value);
@@ -1865,4 +1861,14 @@ function updateConnectionBanner(){
 new MutationObserver(updateConnectionBanner).observe(connectionBanner,{childList:true,characterData:true,subtree:true});
 updateConnectionBanner();
 updateProgressiveLayout();refresh();syncChoiceCards();
+// HN enhancement must never prevent the main appointment form from initializing.
+try{
+ const hnStatus=document.createElement('p');hnStatus.id='hospitalHnStatus';hnStatus.className='help hospital-hn-status';hnStatus.setAttribute('role','status');
+document.getElementById('hospital_hn').after(hnStatus);
+document.getElementById('hospital_hn').addEventListener('input',()=>{hnEdited=true;hnAutoValue='';hnStatus.textContent='HN ที่กรอกเองสำหรับนัดนี้ ยังไม่เพิ่มเข้าทะเบียนกลาง';});
+document.getElementById('personSelect').addEventListener('change',()=>{hnSelectionKey='';hnEdited=false;hnAutoValue='';document.getElementById('hospital_hn').value='';syncHospitalHn();});
+
+ syncHospitalHn();
+}catch(error){console.warn('optional_hn_initialization_failed',error);}
+
 </script></body></html>
