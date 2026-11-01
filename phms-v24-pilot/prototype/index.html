@@ -1555,7 +1555,12 @@ personCancel.addEventListener('click',()=>{
  const select=$('personSelect');select.value='';select.dispatchEvent(new Event('change',{bubbles:true}));
  syncPersonSelectionCard();
 });
-$('personSelect').addEventListener('change',()=>{editingAppointmentPerson=false;syncPersonSelectionCard();});
+$('personSelect').addEventListener('change',()=>{
+ editingAppointmentPerson=false;
+ resetCurrentAppointmentDraft(); // Clear prior person's draft and collapse dependent sections.
+ syncPersonSelectionCard();
+ if(!$('personSelect').value)$('personSelect').focus({preventScroll:true});
+});
 new MutationObserver(syncPersonSelectionCard).observe($('personSelect'),{childList:true});
 const personSection=$('personPicker');
 personSection.classList.add('embedded-person-picker');
@@ -1680,11 +1685,11 @@ function updateProgressiveLayout(){
  $('timeFlowTitle').textContent='🕒 วันและเวลา';
  $('extrasFlowTitle').textContent='🗂️ ข้อมูลเพิ่มเติม (ถ้ามี)';
  // Reveal the existing input groups only after a scenario card has been chosen.
- for(const id of ['mainFlow','timeFlow','extrasFlow'])$(id).classList.toggle('hidden',!scenarioChoiceMade);
+ for(const id of ['mainFlow','timeFlow','extrasFlow'])$(id).classList.toggle('hidden',!scenarioChoiceMade || !$('personSelect').value);
  $('hospitalQuickCards').classList.toggle('hidden',!scenarioChoiceMade || $('hospitalQuickCards').children.length===0);
- resetButton.classList.toggle('hidden',!scenarioChoiceMade);
- missingFields.classList.toggle('hidden',!scenarioChoiceMade);
- resetActions.classList.toggle('hidden',!scenarioChoiceMade);
+ resetButton.classList.toggle('hidden',!scenarioChoiceMade || !$('personSelect').value);
+ missingFields.classList.toggle('hidden',!scenarioChoiceMade || !$('personSelect').value);
+ resetActions.classList.toggle('hidden',!scenarioChoiceMade || !$('personSelect').value);
  syncScenarioCards();
  simpleSummary.textContent='📋 เตรียมตัวและเรื่องที่จะบอกหมอ';
  linkedDisclosure.classList.toggle('hidden',mode!=='historical');
