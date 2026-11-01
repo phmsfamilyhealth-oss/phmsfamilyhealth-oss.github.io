@@ -524,6 +524,15 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor .native-picker-shell:focus-within>.native-picker-prompt,
 #editor .native-picker-shell.has-display-value:focus-within>.native-picker-prompt{display:flex!important}
 #editor .native-picker-shell:focus-within{outline:2px solid #947143!important;outline-offset:1px!important}
+
+/* Compact appointment-type choices; elderly-readable type and adequate targets retained. */
+#editor #scenarioFlow .scenario-option{min-height:72px!important;padding:9px 11px!important;gap:3px!important}
+#editor #scenarioFlow .scenario-grid{gap:9px!important}
+#editor #scenarioFlow .scenario-copy{gap:3px!important}
+#editor #scenarioFlow .scenario-copy>strong{font-size:1rem!important;line-height:1.35!important}
+#editor #scenarioFlow .scenario-copy>small{font-size:.875rem!important;line-height:1.3!important}
+#editor .appointment-mode-bar .mode-hint{margin:7px 2px 0!important;color:#6e6256!important;font-size:.875rem!important;line-height:1.4!important}
+@media(min-width:610px){#editor #scenarioFlow .scenario-option{min-height:72px!important}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1187,12 +1196,13 @@ $('selectedPersonLabel').after(flowRoot);
 const modeBar=document.createElement('div');modeBar.className='appointment-mode-bar';
 const modeLabel=document.createElement('p');modeLabel.textContent='⚙️ วิธีกรอกข้อมูล';modeLabel.className='mode-label';modeBar.append(modeLabel);
 const modeChoices=document.createElement('div');modeChoices.className='mode-choices';modeChoices.setAttribute('role','group');modeChoices.setAttribute('aria-label','วิธีกรอกข้อมูล');
+const modeHint=document.createElement('p');modeHint.className='help mode-hint';modeHint.textContent='เริ่มด้วยแบบง่ายได้เลย เปลี่ยนเป็นแบบละเอียดเมื่อจำเป็น';
 for(const [value,text] of [['simple','แบบง่าย'],['full','แบบละเอียด']]){
  const button=document.createElement('button');button.type='button';button.textContent=(value==='simple'?'✨ ':'🛠️ ')+text;button.dataset.mode=value;button.className='mode-choice';
  button.addEventListener('click',()=>{$('detail').value=value;$('detail').dispatchEvent(new Event('change',{bubbles:true}));});
  modeChoices.append(button);
 }
-modeBar.append(modeChoices);flowRoot.append(modeBar);
+modeBar.append(modeChoices,modeHint);flowRoot.append(modeBar);
 const originalModeLabel=document.querySelector('label[for="detail"]');originalModeLabel.classList.add('visually-hidden-form');
 $('detail').classList.add('visually-hidden-form');$('detail').setAttribute('tabindex','-1');$('detail').setAttribute('aria-hidden','true');
 // Scenario selection remains a real form select so the existing validation and state stay intact.
