@@ -601,6 +601,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
 /* Person-first gate: hidden appointment sections stay hidden despite layout CSS. */
 #editor #mainFlow[hidden],#editor #timeFlow[hidden],#editor #extrasFlow[hidden]{display:none!important}
+#editor .hospital-hn-status{font-size:.875rem!important;color:#665747!important;margin:4px 0 10px!important;line-height:1.4!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -829,6 +830,33 @@ function refreshProviderPicker(changed=''){
 function selectedClinicianId(){return document.getElementById('providerClinician').value;}
 for(const kind of ['hospital','unit','clinician']){const input=document.getElementById(kind+'Search');input.addEventListener('input',e=>{if(e.isComposing)return;const state=comboState[kind],select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');state.searchText=input.value;state.selectedItem=null;state.isOpen=true;select.value='';if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});input.addEventListener('focus',()=>{comboState[kind].searchText=input.value;comboState[kind].isOpen=true;refreshProviderPicker();});input.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCombo(kind);return;}if(e.key==='ArrowDown'){e.preventDefault();document.getElementById(kind+'SearchResults').querySelector('button:not(:disabled)')?.focus();}if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){const first=document.getElementById(kind+'SearchResults').querySelector('button:not(:disabled)');if(first){e.preventDefault();first.click();}}});}
 document.addEventListener('pointerdown',event=>{for(const kind of ['hospital','unit','clinician']){if(event.target!==document.getElementById(kind+'Search')&&!document.getElementById(kind+'SearchResults').contains(event.target))closeCombo(kind);}});
+let hnSelectionKey='',hnAutoValue='',hnEdited=false;
+function syncHospitalHn(){
+ const field=document.getElementById('hospital_hn');
+ const status=document.getElementById('hospitalHnStatus');
+ if(!field||!status)return;
+ const person=document.getElementById('personSelect')?.value||'';
+ const org=document.getElementById('providerOrg')?.value||'';
+ const key=person&&org?person+'|'+org:'';
+ if(key!==hnSelectionKey){
+  hnSelectionKey=key;hnAutoValue='';hnEdited=false;field.value='';
+ }
+ if(!key){status.textContent='เลือกบุคคลและโรงพยาบาลก่อน ระบบจึงจะค้นหา HN';return;}
+ if(hnEdited){status.textContent='HN ที่แก้ไขเองสำหรับนัดนี้ ยังไม่บันทึกลงทะเบียนกลาง';return;}
+ const entries=authorizedCatalog?.personHospitalHns;
+ const row=Array.isArray(entries)?entries.find(x=>x.organizationId===org):null;
+ if(row&&typeof row.value==='string'&&row.value.length<=80){
+  field.value=row.value;hnAutoValue=row.value;
+  status.textContent=row.verified?'✓ เติม HN จากทะเบียนของบุคคลและโรงพยาบาลนี้':'เติม HN จากทะเบียนแล้ว · โปรดตรวจสอบเลขกับบัตรโรงพยาบาล';
+ }else{
+  field.value='';hnAutoValue='';
+  status.textContent='ไม่พบ HN ในทะเบียน สามารถกรอกเองได้ (ไม่เพิ่มเข้าทะเบียนกลาง)';
+ }
+}
+const hnStatus=document.createElement('p');hnStatus.id='hospitalHnStatus';hnStatus.className='help hospital-hn-status';hnStatus.setAttribute('role','status');
+document.getElementById('hospital_hn').after(hnStatus);
+document.getElementById('hospital_hn').addEventListener('input',()=>{hnEdited=true;hnAutoValue='';hnStatus.textContent='HN ที่กรอกเองสำหรับนัดนี้ ยังไม่เพิ่มเข้าทะเบียนกลาง';});
+document.getElementById('personSelect').addEventListener('change',()=>{hnSelectionKey='';hnEdited=false;hnAutoValue='';document.getElementById('hospital_hn').value='';syncHospitalHn();});
 function syncProviderNames(){
  if(!authorizedCatalog)return;
  const org=authorizedCatalog.organizations.find(x=>x.id===document.getElementById('providerOrg').value);
@@ -838,6 +866,7 @@ function syncProviderNames(){
  document.getElementById('hospital').value=org?(org.display_name||org.name):local('hospital');
  document.getElementById('department').value=unit?.name||local('unit');
  document.getElementById('doctor').value=clinician?.display_name||local('clinician');
+ syncHospitalHn();
 }
 // Registry remains disconnected until the protected API supplies a verified, authorized catalog.
 const $=id=>document.getElementById(id), ids=['detail','scenario','date','known','time','hospital','department','doctor','purpose','additionalNote','prep'];
