@@ -533,6 +533,21 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #scenarioFlow .scenario-copy>small{font-size:.875rem!important;line-height:1.3!important}
 #editor .appointment-mode-bar .mode-hint{margin:7px 2px 0!important;color:#6e6256!important;font-size:.875rem!important;line-height:1.4!important}
 @media(min-width:610px){#editor #scenarioFlow .scenario-option{min-height:72px!important}}
+
+/* Compact opening flow: avoid three-item flex row and oversized desktop scenario rules. */
+#editor .appointment-mode-bar{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;margin:0!important}
+#editor .appointment-mode-bar .mode-label{margin:0 0 7px!important}
+#editor .appointment-mode-bar .mode-choices{width:100%!important}
+#editor .appointment-mode-bar .mode-hint{margin:5px 2px 0!important;font-size:.875rem!important;line-height:1.3!important}
+#editor #appointmentFlow{gap:7px!important}
+#editor #scenarioFlow{margin:0!important;padding:0!important}
+#editor #scenarioFlow .appointment-section-title{margin:2px 0 5px!important}
+#editor #scenarioFlow .scenario-grid{margin:0!important;gap:8px!important}
+#editor #scenarioFlow .scenario-option{min-height:64px!important;padding:7px 9px!important;gap:2px!important;box-sizing:border-box!important}
+#editor #scenarioFlow .scenario-copy{gap:1px!important}
+#editor #scenarioFlow .scenario-copy>strong{font-size:1rem!important;line-height:1.3!important}
+#editor #scenarioFlow .scenario-copy>small{font-size:.875rem!important;line-height:1.25!important}
+@media(min-width:610px){#editor #scenarioFlow .scenario-option{min-height:64px!important}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
