@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
 
 const page=readFileSync(new URL('../prototype/index.html',import.meta.url),'utf8');
 const script=page.split('<script type="module">')[1]?.split('</script>')[0]||'';
@@ -70,4 +71,13 @@ test('LINE-selected authorized person is shown in the header without a second pe
  assert.ok(modules[3].includes('authorizedLineSelection'));
  assert.ok(modules[3].includes('picker.hidden=true'));
  assert.ok(modules[3].includes("select.addEventListener('change',sync)"));
+});
+
+test('all three appointment browser modules parse as JavaScript',()=>{
+ const scripts=page.split('<script type="module">').slice(1).map(fragment=>fragment.split('</script>')[0]);
+ assert.equal(scripts.length,3);
+ for(const [index,source] of scripts.entries()){
+  const result=spawnSync(process.execPath,['--check','--input-type=module'],{input:source,encoding:'utf8'});
+  assert.equal(result.status,0,'Invalid script module '+(index+1)+': '+result.stderr);
+ }
 });
