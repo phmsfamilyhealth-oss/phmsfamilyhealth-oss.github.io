@@ -130,5 +130,5 @@ test('real person-header fallback execution hides repeated selection only when L
  const unselected=render({fromLine:true});
  assert.equal(unselected.picker.hidden,false,'Do not hide picker without verified selection');
  assert.equal(unselected.header.textContent,'ยังไม่ได้เลือกบุคคล');
- assert.doesNotMatch(page,/<h2>1\\. เลือกบุคคลที่จะเพิ่มนัด<\\/h2>/);
+ assert.ok(!page.includes('<h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2>'));
 });
