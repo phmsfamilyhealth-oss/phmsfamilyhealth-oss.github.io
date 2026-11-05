@@ -37,7 +37,7 @@ try {
   await page.route('https://static.line-scdn.net/liff/edge/2/sdk.js',route=>route.fulfill({
    status:200,contentType:'text/javascript',
    body:`window.liff={
-    init:async()=>{},isLoggedIn:()=>true,isInClient:()=>true,
+    init:async()=>{},isLoggedIn:()=>true,isInClient:()=>${scenario==='line-selected'?'true':'false'},
     getIDToken:()=> 'synthetic-identity-token',
     login:()=>{},logout:()=>{},sendMessages:async()=>{}
    }`
@@ -45,7 +45,7 @@ try {
   await page.route('**/functions/v1/phms-v24-appointment-read',async route=>{
    let data={};try{data=JSON.parse(route.request().postData()||'{}')}catch{}
    const body=data.action==='person_options'
-    ?{ok:true,people:[{id:member,name:'ยายปุ'}],activePersonId:member}
+    ?{ok:true,people:[{id:member,name:'ยายปุ'}],activePersonId:scenario==='line-selected'?member:null}
     :data.action==='provider_catalog'
       ?{ok:true,catalog:{organizations:[],units:[],clinicians:[]}}
       :{ok:true,items:[]};
