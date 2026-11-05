@@ -1881,7 +1881,7 @@ try{
  let requested=params.get('member')||'';
  if(!requested){
   const state=params.get('liff.state')||'';
-  requested=new URLSearchParams(state.includes('?')?state.slice(state.indexOf('?')+1):state.replace(/^\\/?\\?/, '')).get('member')||'';
+  requested=new URLSearchParams(state.includes('?')?state.slice(state.indexOf('?')+1):state.replace(/^\//,'')).get('member')||'';
  }
  if(!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(requested))requested='';
  function sync(){
