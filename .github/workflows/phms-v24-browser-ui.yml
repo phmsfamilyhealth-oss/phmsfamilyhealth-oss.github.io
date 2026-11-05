@@ -1,0 +1,25 @@
+name: PHMS v2.4 real browser UI boot
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'phms-v24-pilot/**'
+      - '.github/workflows/phms-v24-browser-ui.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Chromium test runtime
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps --only-shell chromium
+      - name: Test real appointment JavaScript boot and LINE person selection
+        run: node phms-v24-pilot/contracts/browser-ux-smoke.mjs
