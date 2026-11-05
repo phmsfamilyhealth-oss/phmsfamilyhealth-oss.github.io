@@ -603,6 +603,76 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
 /* Person-first gate: hidden appointment sections stay hidden despite layout CSS. */
 #editor #mainFlow[hidden],#editor #timeFlow[hidden],#editor #extrasFlow[hidden]{display:none!important}
+
+/* PHMS v2.4 | elderly-friendly prep status and checklist controls (2026-11-05).
+   Preserve the same checklist model and mobile LINE LIFF flow. */
+#editor .prep-choice-card .prep-choice-filled{
+  display:inline-flex!important;align-self:flex-start!important;position:static!important;float:none!important;
+  max-width:100%!important;box-sizing:border-box!important;margin:5px 0 0!important;padding:3px 8px!important;
+  border-radius:7px!important;background:#f4ecdf!important;color:#65452c!important;
+  font-size:.8rem!important;font-weight:650!important;line-height:1.4!important
+}
+#editor .prep-choice-card .prep-choice-filled.hidden{display:none!important}
+#editor .filled-indicator{
+  display:table!important;position:static!important;float:none!important;clear:both!important;
+  max-width:100%!important;box-sizing:border-box!important;margin:5px 0 0 auto!important;
+  padding:4px 9px!important;line-height:1.4!important;text-align:center!important;
+  color:#5c452e!important;background:#f4ecdf!important;border-radius:8px!important
+}
+#editor .filled-indicator[hidden]{display:none!important}
+/* Previously a fixed 58px clipped the status when the disclosure was collapsed. */
+#editor #details>details#simpleExtras:not([open]){
+  height:auto!important;min-height:58px!important;overflow:visible!important
+}
+#editor #checklistBox .checklist-row{
+  display:grid!important;grid-template-columns:30px minmax(0,1fr) 76px!important;
+  align-items:center!important;gap:9px!important;margin:0!important;padding:10px 0!important;
+  border-bottom:1px solid #ece1d4!important
+}
+#editor #checklistBox .checklist-row:last-child{border-bottom:0!important}
+#editor #checklistBox .checklist-row input[type=checkbox]{
+  width:26px!important;height:26px!important;min-height:26px!important;margin:0!important;
+  accent-color:#79552c!important
+}
+#editor #checklistBox .checklist-row textarea.checklist-name{
+  box-sizing:border-box!important;display:block!important;width:100%!important;min-width:0!important;
+  min-height:54px!important;height:54px!important;max-height:100px!important;
+  padding:7px 5px!important;margin:0!important;border:1px solid transparent!important;
+  border-radius:8px!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;color:#30251a!important;
+  font:inherit!important;font-size:1rem!important;line-height:1.45!important;
+  resize:none!important;overflow-y:auto!important
+}
+#editor #checklistBox .checklist-row textarea.checklist-name:focus-visible{
+  border-color:#9b7951!important;outline:2px solid #ac8760!important;outline-offset:1px!important;
+  background:#fffaf3!important
+}
+#editor #checklistBox .checklist-row button.checklist-delete{
+  box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;
+  justify-content:center!important;gap:5px!important;width:76px!important;min-width:0!important;
+  min-height:48px!important;padding:7px 8px!important;
+  border:1px solid #b77a85!important;border-radius:10px!important;
+  color:#8c3146!important;background:#fff2f3!important;font-size:.92rem!important;
+  font-weight:700!important;line-height:1.25!important
+}
+#editor #checklistBox .checklist-row button.checklist-delete svg{
+  display:block!important;flex:none!important;width:17px!important;height:17px!important
+}
+#editor #checklistBox .checklist-row button.checklist-delete:hover{
+  background:#fce3e7!important
+}
+#editor #checklistBox .checklist-row button.checklist-delete:focus-visible{
+  outline:3px solid #8c3146!important;outline-offset:2px!important
+}
+@media(max-width:380px){
+  #editor #checklistBox .checklist-row{
+    grid-template-columns:28px minmax(0,1fr) 68px!important;gap:6px!important
+  }
+  #editor #checklistBox .checklist-row button.checklist-delete{
+    width:68px!important;padding:6px 5px!important;font-size:.88rem!important
+  }
+}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -864,7 +934,33 @@ function resetChecklistToDefaults(){
  renderChecklist();
 }
 function isPastAppointment(){return $('scenario').value==='historical';}
-function renderChecklist(){const list=$('prepItems');list.replaceChildren();for(const [index,item] of checklistItems.entries()){const row=document.createElement('div');row.className='checklist-row';const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=item.status==='completed';checkbox.setAttribute('aria-label','เตรียมแล้ว: '+item.title);checkbox.addEventListener('change',()=>{item.status=checkbox.checked?'completed':'pending';renderChecklist();});const name=document.createElement('input');name.value=item.title;name.maxLength=160;name.setAttribute('aria-label','แก้ไขรายการที่ '+(index+1));name.addEventListener('change',()=>{const v=name.value.trim();if(!v||checklistItems.some((x,i)=>i!==index&&x.title.toLocaleLowerCase('th-TH')===v.toLocaleLowerCase('th-TH'))){name.value=item.title;return;}item.title=v;renderChecklist();});const remove=document.createElement('button');remove.type='button';remove.className='checklist-delete';remove.textContent='🗑️';remove.title='ลบรายการ';remove.setAttribute('aria-label','ลบ '+item.title);remove.addEventListener('click',()=>{checklistItems.splice(index,1);renderChecklist();});row.append(checkbox,name,remove);list.append(row);} $('prepProgress').textContent='เตรียมแล้ว '+checklistItems.filter(x=>x.status==='completed').length+'/'+checklistItems.length+' รายการ';$('prep').value=checklistItems.map(x=>x.title).join('\\n');}
+function renderChecklist(){
+ const list=$('prepItems');list.replaceChildren();
+ for(const [index,item] of checklistItems.entries()){
+  const row=document.createElement('div');row.className='checklist-row';
+  const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=item.status==='completed';
+  checkbox.setAttribute('aria-label','เตรียมแล้ว: '+item.title);
+  checkbox.addEventListener('change',()=>{item.status=checkbox.checked?'completed':'pending';renderChecklist();});
+  // An editable two-line field keeps the original change/save behavior without hiding long Thai titles.
+  const name=document.createElement('textarea');name.className='checklist-name';name.rows=2;
+  name.value=item.title;name.maxLength=160;name.setAttribute('aria-label','แก้ไขรายการที่ '+(index+1));
+  name.addEventListener('change',()=>{
+   const v=name.value.replace(/\s*\n\s*/g,' ').trim();
+   if(!v||checklistItems.some((x,i)=>i!==index&&x.title.toLocaleLowerCase('th-TH')===v.toLocaleLowerCase('th-TH'))){name.value=item.title;return;}
+   item.title=v;renderChecklist();
+  });
+  const remove=document.createElement('button');remove.type='button';remove.className='checklist-delete';
+  remove.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v7m4-7v7"/></svg><span>ลบ</span>';
+  remove.title='ลบรายการ';remove.setAttribute('aria-label','ลบ '+item.title);
+  remove.addEventListener('click',()=>{
+   if(!window.confirm('ต้องการลบรายการนี้หรือไม่?\n'+item.title))return;
+   checklistItems.splice(index,1);renderChecklist();
+  });
+  row.append(checkbox,name,remove);list.append(row);
+ }
+ $('prepProgress').textContent='เตรียมแล้ว '+checklistItems.filter(x=>x.status==='completed').length+'/'+checklistItems.length+' รายการ';
+ $('prep').value=checklistItems.map(x=>x.title).join('\n');
+}
 function addChecklistItem(){const v=$('prepEntry').value.trim();if(!v||v.length>160||checklistItems.length>=20||checklistItems.some(x=>x.title.toLocaleLowerCase('th-TH')===v.toLocaleLowerCase('th-TH')))return;checklistItems.push({title:v,status:'pending'});$('prepEntry').value='';renderChecklist();}
 $('prepAdd').addEventListener('click',addChecklistItem);$('prepEntry').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229){event.preventDefault();addChecklistItem();}});
 resetChecklistToDefaults(); // Initialize once per new form, before the prep-card UI is assembled.
@@ -1494,13 +1590,14 @@ function updatePrepChoices(){
   const key=choice.key,active=prepOpen.has(key);
   prepSections[key].classList.toggle('hidden',!active);
   prepButtons[key].button.setAttribute('aria-pressed',String(active));
+  prepButtons[key].indicator.textContent=key==='things'?'มี '+checklistItems.length+' รายการ':'มีข้อมูลแล้ว';
   prepButtons[key].indicator.classList.toggle('hidden',!filled[key]);
  }
 }
 for(const field of ['previsitSymptoms','additionalNote','examPrepChoice','examPrepDetails']){
  $(field).addEventListener('input',updatePrepChoices);$(field).addEventListener('change',updatePrepChoices);
 }
-new MutationObserver(updatePrepChoices).observe($('prepItems'),{childList:true,subtree:true});
+new MutationObserver(()=>{updatePrepChoices();updateFilledIndicators();}).observe($('prepItems'),{childList:true,subtree:true});
 updatePrepChoices();
 const hospDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#hospital_hn'));
 const careDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#care_topic'));
@@ -1709,6 +1806,11 @@ function updateFilledIndicators(){
    if(el.disabled||el.type==='file')return false;
    return el.tagName==='SELECT'?!!el.value:!!String(el.value||'').trim();
   });
+  if(panel===simpleExtras){
+   const prepCount=checklistItems.length+Number(!!$('previsitSymptoms').value.trim())+
+    Number(!!examPrepChoice.value||!!examPrepDetails.value.trim())+Number(!!$('additionalNote').value.trim());
+   badge.textContent=prepCount?'มี '+prepCount+' รายการ':'มีข้อมูลแล้ว';
+  }
   badge.hidden=!filled;
  }
 }
