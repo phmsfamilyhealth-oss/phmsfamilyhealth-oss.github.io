@@ -66,8 +66,8 @@ try {
     cards:document.querySelectorAll('#scenarioFlow .scenario-option').length,
     modeChoices:document.querySelectorAll('.appointment-mode-bar .mode-choice').length,
     simpleMode: id('editor')?.classList.contains('simple-ui'),
-    originalModeSelectVisible:visible('detail'),
-    rawOldHeaderVisible:!!document.querySelector('#editor>h2')&&getComputedStyle(document.querySelector('#editor>h2')).display!=='none',
+    originalModeSelectVisible:visible('detail')&&!id('detail')?.classList.contains('visually-hidden-form'),
+    rawOldHeaderVisible:!!document.querySelector('#editor>h2')&&!document.querySelector('#editor>h2').classList.contains('visually-hidden'),
     saveDisabled:id('save')?.disabled===true,
     bodyText:document.body.textContent.slice(0,250)
    };
