@@ -89,6 +89,42 @@ try {
    // The fresh direct entry still requires choosing a person.
    assert.equal(state.pickerVisible,true);
   }
+  // Default preparation items belong to every NEW appointment, not to the UI
+  // render cycle. Verify edit/delete survive mode/scenario switches.
+  const checklistValues=()=>page.locator('#prepItems .checklist-row input[aria-label^="แก้ไขรายการ"]').evaluateAll(rows=>rows.map(x=>x.value));
+  assert.deepEqual(await checklistValues(),[
+   '🪪 บัตรประชาชน',
+   '📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)'
+  ],'Two Thai preparation defaults must be present on first load');
+  assert.equal(await page.locator('#prepItems .checklist-row input[type="checkbox"]:checked').count(),0,'Initial items must be pending, not completed');
+  if(scenario==='line-selected'){
+   await page.locator('#scenarioFlow .scenario-option[data-scenario="booked"]').click();
+   await page.locator('#simpleExtras summary').click();
+   await page.locator('#prepChoiceGrid .prep-choice-card').nth(1).click();
+   await page.locator('#prepItems .checklist-row input[aria-label^="แก้ไขรายการ"]').first().fill('🪪 บัตรประชาชน (ตัวจริง)');
+   await page.locator('#prepItems .checklist-row input[aria-label^="แก้ไขรายการ"]').first().dispatchEvent('change');
+   assert.deepEqual(await checklistValues(),[
+    '🪪 บัตรประชาชน (ตัวจริง)',
+    '📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)'
+   ],'Default items must remain editable');
+   await page.locator('#prepItems .checklist-row button.checklist-delete').first().click();
+   assert.deepEqual(await checklistValues(),['📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)'],'Deleted default must disappear');
+   await page.locator('#prepEntry').fill('💊 ยาประจำตัว');
+   await page.locator('#prepAdd').click();
+   assert.deepEqual(await checklistValues(),['📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)','💊 ยาประจำตัว']);
+   await page.locator('.appointment-mode-bar .mode-choice[data-mode="full"]').click();
+   await page.locator('.appointment-mode-bar .mode-choice[data-mode="simple"]').click();
+   await page.locator('#scenarioFlow .scenario-option[data-scenario="walk_in"]').click();
+   await page.locator('#scenarioFlow .scenario-option[data-scenario="booked"]').click();
+   assert.deepEqual(await checklistValues(),['📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)','💊 ยาประจำตัว'],'Mode/type changes must not re-seed deleted defaults');
+   await page.locator('#resetAppointmentDraft').click();
+   await page.locator('#confirmAppointmentReset').click();
+   assert.deepEqual(await checklistValues(),[
+    '🪪 บัตรประชาชน',
+    '📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)'
+   ],'Explicit clear begins a fresh form with editable defaults');
+   console.log('BROWSER_PREPARATION_DEFAULTS_PASS');
+  }
   await context.close();
  }
  console.log('BROWSER_UI_SMOKE_PASS');
