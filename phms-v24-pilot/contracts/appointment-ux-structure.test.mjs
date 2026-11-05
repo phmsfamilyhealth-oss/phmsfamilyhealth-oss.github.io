@@ -81,3 +81,16 @@ test('all three appointment browser modules parse as JavaScript',()=>{
   assert.equal(result.status,0,'Invalid script module '+(index+1)+': '+result.stderr);
  }
 });
+
+test('LINE context restores the authorized selected person without asking twice',()=>{
+ assert.ok(script.includes("activePersonId:allowed.some(x=>x.id===data.activePersonId)?data.activePersonId:''"));
+ assert.ok(script.includes("window.liff?.isInClient?.()&&people.activePersonId&&people.people.some(x=>x.id===people.activePersonId)"));
+ assert.ok(script.includes("memberId=people.activePersonId;"));
+ assert.ok(script.includes("authorizedPersonFromLine=true;"));
+ assert.ok(script.includes("select.dataset.phmsLinePerson=authorizedPersonFromLine?'1':'0'"));
+ assert.ok(script.includes("authorizedPersonFromLine&&selected===memberId"));
+ assert.ok(page.includes("select.dataset.phmsLinePerson==='1'&&window.liff?.isInClient?.()"));
+ assert.ok(script.includes("authorizedPersonFromLine=false;select.dataset.phmsLinePerson='0'"));
+ assert.ok(script.includes("if(memberId&&!people.people.some(x=>x.id===memberId))memberId=''"),'Unauthorized URL must never preselect');
+ assert.ok(page.includes('id="save" disabled'),'No write release during UAT');
+});
