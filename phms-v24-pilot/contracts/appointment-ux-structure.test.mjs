@@ -132,3 +132,16 @@ test('real person-header fallback execution hides repeated selection only when L
  assert.equal(unselected.header.textContent,'ยังไม่ได้เลือกบุคคล');
  assert.ok(!page.includes('<h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2>'));
 });
+
+test('two editable preparation defaults seed once per new appointment draft',()=>{
+ assert.ok(script.includes("'🪪 บัตรประชาชน'"));
+ assert.ok(script.includes("'📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)'"));
+ assert.ok(script.includes('function resetChecklistToDefaults()'));
+ assert.ok(script.includes("checklistItems=DEFAULT_APPOINTMENT_CHECKLIST.map(title=>({title,status:'pending'}))"));
+ assert.equal(script.split('resetChecklistToDefaults();').length-1,2,'Only initial draft and explicit full reset/person-change may re-seed defaults');
+ assert.ok(script.includes("checklistItems.splice(index,1);renderChecklist()"),'User delete stays available');
+ assert.ok(script.includes("item.title=v;renderChecklist()"),'User edit stays available');
+ assert.ok(script.includes("checklistItems.push({title:v,status:'pending'})"),'User can add new items');
+ assert.ok(!script.includes("checklistItems=[];renderChecklist();"),'Full reset must initialize a fresh draft with defaults');
+ assert.ok(script.includes("preparation_items:isPastAppointment()?[]:checklistItems.map(x=>({...x}))"),'Review continues to use only the items retained by the user');
+});
