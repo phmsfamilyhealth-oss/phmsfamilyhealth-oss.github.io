@@ -605,7 +605,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #mainFlow[hidden],#editor #timeFlow[hidden],#editor #extrasFlow[hidden]{display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
-<section id="personPicker" class="box hidden"><h2>1. เลือกบุคคลที่จะเพิ่มนัด</h2><label for="personSelect">สมาชิกครอบครัวที่คุณมีสิทธิ์เพิ่มนัด <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
+<section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
 <label for="scenario">รูปแบบการนัด <span class="required-star" aria-label="จำเป็นต้องกรอก">*</span></label><select id="scenario"><option value="booked">นัดตามวันและเวลาที่โรงพยาบาลแจ้ง</option><option value="walk_in">ไปโรงพยาบาลโดยไม่ได้นัด (Walk-in)</option><option value="historical">บันทึกวันที่ไปมาแล้ว</option></select>
@@ -1557,7 +1557,9 @@ personSelectionCard.append(personSelectionName,personSelectionControls);
 let editingAppointmentPerson=false;
 function authorizedLinePersonLocked(){
  const selected=$('personSelect').value,requested=resolveAppointmentMemberDeepLink();
- return !!selected&&((!!requested&&selected===requested)||(authorizedPersonFromLine&&selected===memberId));
+ // The select is populated exclusively from permission-filtered person_options.
+ // Any already chosen person inside the LINE client should not be asked for again.
+ return !!selected&&((!!requested&&selected===requested)||(authorizedPersonFromLine&&selected===memberId)||window.liff?.isInClient?.()===true);
 }
 function syncPersonSelectionCard(){
  const select=$('personSelect'),selected=!!select.value,locked=authorizedLinePersonLocked();
@@ -1898,7 +1900,7 @@ try{
   const name=selected?.textContent?.trim()||'';
   header.textContent=name?'👤 เพิ่มนัดให้: '+name:'ยังไม่ได้เลือกบุคคล';
   header.hidden=false;
-  const authorizedLineSelection=!!selected&&((!!requested&&select.value===requested)||(select.dataset.phmsLinePerson==='1'&&window.liff?.isInClient?.()));
+  const authorizedLineSelection=!!selected&&((!!requested&&select.value===requested)||(select.dataset.phmsLinePerson==='1')||window.liff?.isInClient?.()===true);
   if(authorizedLineSelection){
    picker.hidden=true;
    picker.classList.add('hidden');
@@ -1908,7 +1910,7 @@ try{
   }
  }
  select.addEventListener('change',sync);
- new MutationObserver(sync).observe(select,{childList:true});
+ new MutationObserver(sync).observe(select,{childList:true,attributes:true,subtree:false});
  window.addEventListener('pageshow',sync);
  sync();
 })();
