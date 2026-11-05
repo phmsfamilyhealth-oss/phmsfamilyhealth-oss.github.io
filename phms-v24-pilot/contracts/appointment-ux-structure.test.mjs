@@ -24,7 +24,7 @@ test('elder-first flow has one set of source fields and the correct order',()=>{
   "moveLabelAndInput('hospitalSearch',mainSection",
   "const timeSection=makeFlowSection('timeFlow'",
   "moveLabelAndInput('date',timeSection",
-  "timeSection.append($('timebox'),$('appointmentPhotosSection'))",
+  "timeSection.append($('timebox'),conflictNotice,$('appointmentPhotosSection'))",
   "const extrasSection=makeFlowSection('extrasFlow'"
  ]);
  for(const id of ['purpose','hospitalSearch','date','time','known','documents','personSelect'])assert.match(page,new RegExp('id="'+id+'"'));
@@ -55,4 +55,19 @@ test('pilot remains fail-closed for persistence and retains canonical handoffs',
  assert.match(page,/id="openCanonicalMedication"/);
  assert.match(script,/canHandoffSavedVisit/);
  assert.match(script,/existingPHMSLineCommand/);
+});
+
+test('LINE-selected authorized person is shown in the header without a second person step',()=>{
+ assert.ok(script.includes('function resolveAppointmentMemberDeepLink()'));
+ assert.ok(script.includes('people.people.some(x=>x.id===memberId)'));
+ assert.ok(script.includes('if(memberId)select.value=memberId;'));
+ assert.ok(script.includes('personSection.hidden=locked'));
+ assert.ok(script.includes("personSection.classList.toggle('hidden',locked)"));
+ assert.ok(script.includes("👤 เพิ่มนัดให้: '+person"));
+ assert.ok(page.includes('#personPicker[hidden]'));
+ const modules=page.split('<script type="module">');
+ assert.equal(modules.length,4,'Main module, auxiliary module and independent safety-net must remain');
+ assert.ok(modules[3].includes('authorizedLineSelection'));
+ assert.ok(modules[3].includes('picker.hidden=true'));
+ assert.ok(modules[3].includes("select.addEventListener('change',sync)"));
 });
