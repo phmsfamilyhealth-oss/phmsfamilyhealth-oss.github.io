@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
+import vm from 'node:vm';
 
 const page=readFileSync(new URL('../prototype/index.html',import.meta.url),'utf8');
 const script=page.split('<script type="module">')[1]?.split('</script>')[0]||'';
@@ -93,4 +94,41 @@ test('LINE context restores the authorized selected person without asking twice'
  assert.ok(script.includes("authorizedPersonFromLine=false;select.dataset.phmsLinePerson='0'"));
  assert.ok(script.includes("if(memberId&&!people.people.some(x=>x.id===memberId))memberId=''"),'Unauthorized URL must never preselect');
  assert.ok(page.includes('id="save" disabled'),'No write release during UAT');
+});
+
+test('real person-header fallback execution hides repeated selection only when LINE person is already chosen',()=>{
+ const inline=page.split('<script type="module">')[3]?.split('</script>')[0];
+ assert.ok(inline?.includes('authorizedLineSelection'),'UI fallback missing');
+ const uuid='11111111-1111-4111-8111-111111111111';
+ const render=({person='',fromLine=false,member='',active=false}={})=>{
+  const callbacks={};
+  const picker={hidden:false,classList:{add(){},remove(){}}};
+  const header={textContent:'ยังไม่ได้เลือกบุคคล',hidden:false};
+  const select={
+   value:person,options:[{value:'',textContent:'เลือกบุคคล'},{value:uuid,textContent:'ยายปุ'}],
+   dataset:{phmsLinePerson:active?'1':'0'},addEventListener(name,callback){callbacks[name]=callback}
+  };
+  const fake={
+   document:{getElementById(id){return {personSelect:select,personPicker:picker,appointmentHeaderPerson:header}[id]}},
+   window:{liff:{isInClient(){return fromLine}},addEventListener(){}},
+   location:{search:member?'?member='+member:''},
+   URLSearchParams,
+   MutationObserver:class{observe(){}}
+  };
+  vm.runInNewContext(inline,fake);
+  return {header,picker,select,callbacks};
+ };
+ const chosenLine=render({person:uuid,fromLine:true});
+ assert.equal(chosenLine.header.textContent,'👤 เพิ่มนัดให้: ยายปุ');
+ assert.equal(chosenLine.picker.hidden,true,'in-LINE preselected person must never see picker twice');
+ const selectedByAuthorizedContext=render({person:uuid,fromLine:false,active:true});
+ assert.equal(selectedByAuthorizedContext.picker.hidden,true);
+ const chosenDeepLink=render({person:uuid,member:uuid});
+ assert.equal(chosenDeepLink.picker.hidden,true);
+ const direct=render({person:uuid});
+ assert.equal(direct.picker.hidden,false,'Direct link must retain a person-change control');
+ const unselected=render({fromLine:true});
+ assert.equal(unselected.picker.hidden,false,'Do not hide picker without verified selection');
+ assert.equal(unselected.header.textContent,'ยังไม่ได้เลือกบุคคล');
+ assert.doesNotMatch(page,/<h2>1\\. เลือกบุคคลที่จะเพิ่มนัด<\\/h2>/);
 });
