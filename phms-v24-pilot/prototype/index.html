@@ -1236,7 +1236,7 @@ function syncScenarioCards(){
  $('personFirstHint')?.classList.toggle('hidden',allowed);
  // The person is the primary gate; never leave an old appointment visible after deselection.
  if(!allowed){
-  for(const id of ['mainFlow','timeFlow','extrasFlow']){$(id).classList.add('hidden');$(id).hidden=true;}
+  for(const id of ['mainFlow','timeFlow','extrasFlow']){const node=$(id);if(!node)continue;node.classList.add('hidden');node.hidden=true;}
   for(const id of ['requiredFieldStatus','resetAppointmentDraft']){const node=$(id);if(node)node.classList.add('hidden');}
  }
  for(const button of scenarioGrid.children){
@@ -1246,7 +1246,7 @@ function syncScenarioCards(){
 }
 $('personSelect').addEventListener('change',syncScenarioCards);
 new MutationObserver(syncScenarioCards).observe($('personSelect'),{childList:true});
-$('scenario').addEventListener('change',syncScenarioCards);syncScenarioCards();
+$('scenario').addEventListener('change',syncScenarioCards); // Initial sync runs after flow sections are created, via updateProgressiveLayout().
 // Reuse each existing input exactly once. Moving nodes keeps browser state and event listeners.
 function moveRangeTo(start,end,target){
  if(!start||!end||!target)throw new Error('appointment_layout_missing_element');
