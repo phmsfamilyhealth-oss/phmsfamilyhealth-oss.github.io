@@ -139,7 +139,9 @@ test('two editable preparation defaults seed once per new appointment draft',()=
  assert.ok(script.includes('function resetChecklistToDefaults()'));
  assert.ok(script.includes("checklistItems=DEFAULT_APPOINTMENT_CHECKLIST.map(title=>({title,status:'pending'}))"));
  assert.equal(script.split('resetChecklistToDefaults();').length-1,2,'Only initial draft and explicit full reset/person-change may re-seed defaults');
- assert.ok(script.includes("checklistItems.splice(index,1);renderChecklist()"),'User delete stays available');
+ assert.ok(script.includes("remove.addEventListener('click',()=>removeChecklistItem(item))"),'Delete button calls immediate removal');
+ assert.ok(script.includes("checklistItems.splice(index,1);\n renderChecklist();"),'Delete removes only the selected item and refreshes the list');
+ assert.ok(!script.includes('checklistUndo')&&!script.includes('เลิกทำ')&&!script.includes('askChecklistDelete'),'Checklist has no undo button or confirmation dialog');
  assert.ok(script.includes("item.title=v;renderChecklist()"),'User edit stays available');
  assert.ok(script.includes("checklistItems.push({title:v,status:'pending'})"),'User can add new items');
  assert.ok(!script.includes("checklistItems=[];renderChecklist();"),'Full reset must initialize a fresh draft with defaults');
