@@ -743,6 +743,37 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .phms-checklist-delete-dialog #confirmChecklistDelete{background:#963749!important;border:1px solid #963749!important;color:#fff!important}
 .phms-checklist-delete-dialog .checklist-delete-actions button:focus-visible{outline:3px solid #72512e!important;outline-offset:3px!important}
 
+
+/* PHMS checklist direct-delete + undo (no native dialog, better for LINE iOS). */
+#editor .phms-checklist-undo{
+ box-sizing:border-box!important;display:flex!important;align-items:center!important;
+ justify-content:space-between!important;gap:10px!important;
+ width:100%!important;margin:12px 0 6px!important;padding:10px 12px!important;
+ background:#fff5e7!important;border:1px solid #d8c0a0!important;
+ border-radius:12px!important;color:#3b2b1b!important
+}
+#editor .phms-checklist-undo.hidden,
+#editor .phms-checklist-undo[hidden]{display:none!important}
+#editor .phms-checklist-undo-text{
+ min-width:0!important;flex:1 1 auto!important;
+ font-size:.94rem!important;line-height:1.45!important;
+ overflow-wrap:anywhere!important
+}
+#editor .phms-checklist-undo-button{
+ flex:0 0 auto!important;min-height:48px!important;min-width:94px!important;
+ padding:9px 12px!important;background:#fff!important;
+ border:1.5px solid #906d46!important;border-radius:10px!important;
+ color:#583c23!important;font-size:1rem!important;font-weight:700!important;
+ line-height:1.3!important
+}
+#editor .phms-checklist-undo-button:focus-visible{
+ outline:3px solid #79552c!important;outline-offset:2px!important
+}
+@media(max-width:360px){
+ #editor .phms-checklist-undo{gap:6px!important;padding:8px!important}
+ #editor .phms-checklist-undo-button{min-width:88px!important;padding:8px!important}
+}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -999,55 +1030,55 @@ const DEFAULT_APPOINTMENT_CHECKLIST=Object.freeze([
  '📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)'
 ]);
 let checklistItems=[];
-// Use a PHMS-branded dialog instead of the iOS native confirm (URL / English buttons).
-const checklistDeleteDialog=document.createElement('dialog');
-checklistDeleteDialog.id='checklistDeleteDialog';
-checklistDeleteDialog.className='phms-checklist-delete-dialog';
-checklistDeleteDialog.setAttribute('aria-labelledby','checklistDeleteTitle');
-checklistDeleteDialog.setAttribute('aria-describedby','checklistDeleteItem checklistDeleteHelp');
-checklistDeleteDialog.innerHTML='<h3 id="checklistDeleteTitle">ลบรายการนี้?</h3>'+
- '<p id="checklistDeleteItem" class="checklist-delete-item"></p>'+
- '<p id="checklistDeleteHelp" class="checklist-delete-help">รายการนี้จะถูกนำออกจากสิ่งที่ต้องเตรียม</p>'+
- '<div class="checklist-delete-actions">'+
- '<button id="cancelChecklistDelete" type="button">ยกเลิก</button>'+
- '<button id="confirmChecklistDelete" type="button">ลบรายการ</button></div>';
-document.body.append(checklistDeleteDialog);
-let pendingChecklistDelete=null;
-let checklistDeleteTrigger=null;
-function closeChecklistDeleteDialog(){
- if(typeof checklistDeleteDialog.close==='function'&&checklistDeleteDialog.open)checklistDeleteDialog.close();
- else checklistDeleteDialog.removeAttribute('open');
+// PHMS checklist: delete directly, with an always-available Thai undo action.
+// The item and its completion status remain recoverable until this draft is reset.
+const checklistDeleteHistory=[];
+const checklistUndoNotice=document.createElement('div');
+checklistUndoNotice.id='checklistUndoNotice';
+checklistUndoNotice.className='phms-checklist-undo hidden';
+checklistUndoNotice.hidden=true;
+checklistUndoNotice.setAttribute('role','status');
+checklistUndoNotice.setAttribute('aria-live','polite');
+const checklistUndoMessage=document.createElement('span');
+checklistUndoMessage.className='phms-checklist-undo-text';
+const checklistUndoButton=document.createElement('button');
+checklistUndoButton.type='button';
+checklistUndoButton.className='phms-checklist-undo-button';
+checklistUndoButton.textContent='↶ เลิกทำ';
+checklistUndoNotice.append(checklistUndoMessage,checklistUndoButton);
+$('prepItems').after(checklistUndoNotice);
+function syncChecklistUndo(){
+ const last=checklistDeleteHistory[checklistDeleteHistory.length-1];
+ checklistUndoNotice.hidden=!last;
+ checklistUndoNotice.classList.toggle('hidden',!last);
+ if(last)checklistUndoMessage.textContent='ลบ “'+last.item.title+'” แล้ว';
+ else checklistUndoMessage.textContent='';
 }
-function askChecklistDelete(item,trigger){
- pendingChecklistDelete=item;
- checklistDeleteTrigger=trigger;
- $('checklistDeleteItem').textContent=item.title;
- if(typeof checklistDeleteDialog.showModal==='function')checklistDeleteDialog.showModal();
- else checklistDeleteDialog.setAttribute('open','');
- $('cancelChecklistDelete').focus({preventScroll:true});
-}
-$('cancelChecklistDelete').addEventListener('click',closeChecklistDeleteDialog);
-$('confirmChecklistDelete').addEventListener('click',()=>{
- const item=pendingChecklistDelete;
+function removeChecklistItem(item){
  const index=checklistItems.indexOf(item);
- closeChecklistDeleteDialog();
  if(index<0)return;
  checklistItems.splice(index,1);
+ checklistDeleteHistory.push({item,index});
  renderChecklist();
- const remaining=$('prepItems').querySelectorAll('.checklist-delete');
- (remaining[Math.min(index,remaining.length-1)]||$('prepAdd')).focus({preventScroll:true});
-});
-checklistDeleteDialog.addEventListener('close',()=>{
- if(checklistDeleteTrigger?.isConnected)checklistDeleteTrigger.focus({preventScroll:true});
- pendingChecklistDelete=null;
- checklistDeleteTrigger=null;
-});
-checklistDeleteDialog.addEventListener('click',event=>{
- if(event.target===checklistDeleteDialog)closeChecklistDeleteDialog();
+ syncChecklistUndo();
+ checklistUndoButton.focus({preventScroll:true});
+}
+checklistUndoButton.addEventListener('click',()=>{
+ const last=checklistDeleteHistory.pop();
+ if(!last)return;
+ const index=Math.min(last.index,checklistItems.length);
+ checklistItems.splice(index,0,last.item);
+ renderChecklist();
+ syncChecklistUndo();
+ const restored=$('prepItems').querySelectorAll('.checklist-row input[type="checkbox"]')[index];
+ if(restored)restored.focus({preventScroll:true});
+ else $('prepAdd').focus({preventScroll:true});
 });
 function resetChecklistToDefaults(){
  checklistItems=DEFAULT_APPOINTMENT_CHECKLIST.map(title=>({title,status:'pending'}));
+ checklistDeleteHistory.length=0;
  renderChecklist();
+ syncChecklistUndo();
 }
 function isPastAppointment(){return $('scenario').value==='historical';}
 function renderChecklist(){
@@ -1068,7 +1099,7 @@ function renderChecklist(){
   const remove=document.createElement('button');remove.type='button';remove.className='checklist-delete';
   remove.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v7m4-7v7"/></svg><span>ลบ</span>';
   remove.title='ลบรายการ';remove.setAttribute('aria-label','ลบ '+item.title);
-  remove.addEventListener('click',()=>askChecklistDelete(item,remove));
+  remove.addEventListener('click',()=>removeChecklistItem(item));
   row.append(checkbox,name,remove);list.append(row);
  }
  $('prepProgress').textContent='เตรียมแล้ว '+checklistItems.filter(x=>x.status==='completed').length+'/'+checklistItems.length+' รายการ';
