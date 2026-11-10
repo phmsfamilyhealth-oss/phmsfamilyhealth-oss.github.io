@@ -154,7 +154,9 @@ try {
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),0);
    await page.locator('.mode-choice[data-mode="full"]').click();
    // Journey location photos belong ONLY to detailed mode and have a separate 5-photo cap.
-   await page.locator('#details > details').first().locator('summary').click();
+   const hospitalDetail=page.locator('#details > details').first();
+   if(!(await hospitalDetail.evaluate(el=>el.open)))await hospitalDetail.locator(':scope > summary').click();
+   assert.ok(await page.locator('#primaryJourneyGallery').isVisible(),'The primary photo editor must be visible in detailed mode');
    const journeyPng=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9VFYDj8AAAAASUVORK5CYII=','base64');
    const journeyFile=(name)=>({name,mimeType:'image/png',buffer:journeyPng});
    await page.locator('#primaryJourneyFileInput').setInputFiles(
