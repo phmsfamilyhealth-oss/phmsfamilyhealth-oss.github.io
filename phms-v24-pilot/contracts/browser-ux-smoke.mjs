@@ -151,6 +151,8 @@ try {
    assert.equal(await page.locator('#hospital_vn').inputValue(),'','Returning to a hospital must not restore a stale VN');
    // No hospital workflow is prefilled. A caregiver may add and order multiple stops.
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),0);
+   await page.locator('.mode-choice[data-mode="full"]').click();
+   await page.locator('#visitStepsDetails > summary').click();
    await page.locator('#visitStepAdd').click();
    await page.locator('#visitStepAdd').click();
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),2);
@@ -161,6 +163,7 @@ try {
    assert.deepEqual(await stopNames.evaluateAll(xs=>xs.map(x=>x.value)),['เอกซเรย์','เจาะเลือด']);
    await page.locator('#visitStepsList .visit-stop-card').first().locator('button.phms-delete-button').click();
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),1,'One stop is removable without deleting the other');
+   await page.locator('.mode-choice[data-mode="simple"]').click();
    const getSummaryGeometry=async()=>page.locator('#simpleExtras>summary').evaluate(summary=>{
     const label=summary.querySelector(':scope > .phms-summary-label');
     const badge=summary.querySelector(':scope > .filled-indicator');
