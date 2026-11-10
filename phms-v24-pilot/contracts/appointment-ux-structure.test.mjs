@@ -139,11 +139,26 @@ test('two editable preparation defaults seed once per new appointment draft',()=
  assert.ok(script.includes('function resetChecklistToDefaults()'));
  assert.ok(script.includes("checklistItems=DEFAULT_APPOINTMENT_CHECKLIST.map(title=>({title,status:'pending'}))"));
  assert.equal(script.split('resetChecklistToDefaults();').length-1,2,'Only initial draft and explicit full reset/person-change may re-seed defaults');
- assert.ok(script.includes("remove.addEventListener('click',()=>removeChecklistItem(item))"),'Delete button calls immediate removal');
+ assert.ok(script.includes("makePhmsDeleteButton('ลบ '+item.title,()=>removeChecklistItem(item))"),'Checklist uses shared immediate-delete control');
  assert.ok(script.includes("checklistItems.splice(index,1);\n renderChecklist();"),'Delete removes only the selected item and refreshes the list');
  assert.ok(!script.includes('checklistUndo')&&!script.includes('เลิกทำ')&&!script.includes('askChecklistDelete'),'Checklist has no undo button or confirmation dialog');
  assert.ok(script.includes("item.title=v;renderChecklist()"),'User edit stays available');
  assert.ok(script.includes("checklistItems.push({title:v,status:'pending'})"),'User can add new items');
  assert.ok(!script.includes("checklistItems=[];renderChecklist();"),'Full reset must initialize a fresh draft with defaults');
  assert.ok(script.includes("preparation_items:isPastAppointment()?[]:checklistItems.map(x=>({...x}))"),'Review continues to use only the items retained by the user');
+});
+
+test('shared PHMS delete action is consistent across every local-draft removal',()=>{
+ assert.ok(page.includes('PHMS DELETE ACTION v1'),'Shared visual tokens must be present');
+ assert.ok(page.includes('button.phms-delete-button .phms-delete-face'),'The accessible delete pill must have one shared style');
+ assert.ok(page.includes('width:66px!important;height:32px!important'),'Visible delete pill must stay compact');
+ assert.ok(page.includes('height:44px!important;min-height:44px!important'),'Delete target must remain easy to tap');
+ assert.ok(script.includes('function makePhmsDeleteButton(label,handler)'),'Do not create a second competing delete style');
+ assert.equal((script.match(/const remove=makePhmsDeleteButton\(/g)||[]).length,3,'Checklist, photo and procedure use shared button');
+ assert.ok(script.includes("makePhmsDeleteButton('ลบรูปใบนัด '+(index+1)"),'Photo removal uses shared delete action');
+ assert.ok(script.includes("makePhmsDeleteButton('ลบรายการตรวจ '+item"),'Procedure removal uses shared delete action');
+ assert.ok(script.includes("view.className='secondary phms-photo-view'"),'Photo preview stays visually distinct from delete');
+ assert.ok(!script.includes("remove.textContent='🗑️'"),'Emoji-only deletion is not acceptable');
+ assert.ok(!script.includes("remove.className='photo-remove'"),'Old large picture delete button must not reappear');
+ assert.ok(!script.includes('checklistUndo')&&!script.includes('askChecklistDelete'),'Local draft deletion stays immediate and without undo');
 });
