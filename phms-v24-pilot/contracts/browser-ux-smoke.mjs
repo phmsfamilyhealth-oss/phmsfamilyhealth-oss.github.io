@@ -91,7 +91,7 @@ try {
   }
   // Default preparation items belong to every NEW appointment, not to the UI
   // render cycle. Verify edit/delete survive mode/scenario switches.
-  const checklistValues=()=>page.locator('#prepItems .checklist-row input[aria-label^="แก้ไขรายการ"]').evaluateAll(rows=>rows.map(x=>x.value));
+  const checklistValues=()=>page.locator('#prepItems .checklist-row textarea[aria-label^="แก้ไขรายการ"]').evaluateAll(rows=>rows.map(x=>x.value));
   assert.deepEqual(await checklistValues(),[
    '🪪 บัตรประชาชน',
    '📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)'
@@ -101,14 +101,34 @@ try {
    await page.locator('#scenarioFlow .scenario-option[data-scenario="booked"]').click();
    await page.locator('#simpleExtras summary').click();
    await page.locator('#prepChoiceGrid .prep-choice-card').nth(1).click();
-   await page.locator('#prepItems .checklist-row input[aria-label^="แก้ไขรายการ"]').first().fill('🪪 บัตรประชาชน (ตัวจริง)');
-   await page.locator('#prepItems .checklist-row input[aria-label^="แก้ไขรายการ"]').first().dispatchEvent('change');
+   await page.locator('#prepItems .checklist-row textarea[aria-label^="แก้ไขรายการ"]').first().fill('🪪 บัตรประชาชน (ตัวจริง)');
+   await page.locator('#prepItems .checklist-row textarea[aria-label^="แก้ไขรายการ"]').first().dispatchEvent('change');
    assert.deepEqual(await checklistValues(),[
     '🪪 บัตรประชาชน (ตัวจริง)',
     '📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)'
    ],'Default items must remain editable');
-   await page.locator('#prepItems .checklist-row button.checklist-delete').first().click();
+   await page.locator('#prepItems .checklist-row button.phms-delete-button').first().click();
    assert.deepEqual(await checklistValues(),['📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)'],'Deleted default must disappear');
+   const buttonDimensions=await page.locator('#prepItems .phms-delete-button').first().evaluate(button=>{
+    const face=button.querySelector('.phms-delete-face');
+    return {text:face.textContent.trim(),hit:button.getBoundingClientRect().height,pill:face.getBoundingClientRect().height,bg:getComputedStyle(face).backgroundColor};
+   });
+   assert.equal(buttonDimensions.text,'ลบ');
+   assert.ok(buttonDimensions.hit>=44,'Delete touch target must be at least 44px high');
+   assert.ok(buttonDimensions.pill<=34,'Visible delete pill should be compact');
+   assert.equal(buttonDimensions.bg,'rgb(255, 242, 243)','All delete pills use the same pink background');
+   const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9VFYDj8AAAAASUVORK5CYII=','base64');
+   await page.locator('#documents').setInputFiles({name:'appointment-test.png',mimeType:'image/png',buffer:png});
+   assert.equal(await page.locator('#appointmentPhotoList .appointment-photo-item').count(),1,'Photo is visible after selecting it');
+   assert.equal((await page.locator('#appointmentPhotoList .phms-delete-face').first().textContent()).trim(),'ลบ');
+   await page.locator('#appointmentPhotoList .phms-photo-view').click();
+   assert.equal(await page.locator('#appointmentPhotoDialog').evaluate(el=>el.open),true,'Preview is not deletion');
+   await page.locator('#closeAppointmentPhoto').click();
+   assert.equal(await page.locator('#appointmentPhotoList .appointment-photo-item').count(),1);
+   await page.locator('#appointmentPhotoList .phms-delete-button').click();
+   assert.equal(await page.locator('#appointmentPhotoList .appointment-photo-item').count(),0,'Delete immediately removes the draft photo');
+   assert.equal(await page.locator('#checklistUndoNotice').count(),0,'No undo banner should return');
+
    await page.locator('#prepEntry').fill('💊 ยาประจำตัว');
    await page.locator('#prepAdd').click();
    assert.deepEqual(await checklistValues(),['📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)','💊 ยาประจำตัว']);
