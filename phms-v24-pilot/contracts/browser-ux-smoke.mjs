@@ -238,6 +238,12 @@ try {
    await page.locator('.mode-choice[data-mode="simple"]').click();
    assert.ok(await page.locator('#details').evaluate(x=>x.classList.contains('hidden')),'Journey editing stays hidden in simple mode');
    assert.equal(await page.locator('#primaryJourneyPhotoCount').textContent(),'4/5 รูป','Switching modes preserves detailed photo draft');
+   assert.ok(await page.locator('#simpleJourneyGuide').isVisible(),'Elder route guide is visible in Simple mode without exposing editing fields');
+   await page.locator('#simpleJourneyOpen').click();
+   assert.ok(await page.locator('#journeyElderPreviewDialog').isVisible(),'Simple mode opens the same read-only guide');
+   assert.equal(await page.locator('#journeyElderPreviewDialog .phms-journey-elder-card').count(),2,'The main point and one remaining step are visible');
+   assert.equal(await page.locator('#journeyElderPreviewDialog button.phms-delete-button').count(),0,'No editing controls in the Simple guide');
+   await page.locator('#journeyElderPreviewDialog .phms-journey-elder-close').click();
    const getSummaryGeometry=async()=>page.locator('#simpleExtras>summary').evaluate(summary=>{
     const label=summary.querySelector(':scope > .phms-summary-label');
     const badge=summary.querySelector(':scope > .filled-indicator');
