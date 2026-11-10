@@ -872,6 +872,30 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  #editor #appointmentFlow summary.phms-summary-status-line>.filled-indicator{font-size:.72rem!important;padding:3px 6px!important}
 }
 
+
+/* Optional patient-day route list, separate from the primary hospital check-in. */
+#editor #visitStepsDetails .visit-stop-card{
+ padding:12px!important;margin:10px 0!important;border:1px solid #d7b99b!important;
+ border-radius:12px!important;background:#fffdf9!important
+}
+#editor #visitStepsDetails .visit-stop-card .visit-stop-heading{
+ display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;
+ font-weight:700!important;color:#463323!important
+}
+#editor #visitStepsDetails .visit-stop-card label{margin:8px 0 4px!important;font-size:.95rem!important}
+#editor #visitStepsDetails .visit-stop-card input,
+#editor #visitStepsDetails .visit-stop-card select{
+ min-height:44px!important;width:100%!important;box-sizing:border-box!important
+}
+#editor #visitStepsDetails .visit-stop-actions{
+ display:flex!important;gap:6px!important;align-items:center!important;justify-content:flex-end!important;
+ flex-wrap:wrap!important;margin-top:8px!important
+}
+#editor #visitStepsDetails .visit-stop-actions .visit-move{
+ min-height:44px!important;padding:6px 10px!important;font-size:.9rem!important
+}
+#editor #visitStepAdd{margin-top:8px!important;min-height:44px!important}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -896,8 +920,15 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <details><summary>🏥 ข้อมูลโรงพยาบาลเพิ่มเติม</summary>
 <label for="hospital_hn">เลข HN (ถ้ามี)</label><input id="hospital_hn" maxlength="80">
 <label for="hospital_vn">เลข VN (ถ้ามี)</label><input id="hospital_vn" maxlength="80">
-<label for="location_detail">📍 จุดติดต่อ / ชั้น / อาคาร (ถ้ามี)</label><input id="location_detail" maxlength="240">
+<label for="location_detail">📍 จุดติดต่อหลัก (ถ้ามี)</label><input id="location_detail" maxlength="240" placeholder="เช่น อาคารผู้ป่วยนอก ชั้น 2 จุดยื่นใบนัด">
 <label for="contact_phone">เบอร์ติดต่อโรงพยาบาล</label><input id="contact_phone" inputmode="tel" maxlength="40"></details>
+<details id="visitStepsDetails" class="visit-steps-detail">
+ <summary>🧭 ขั้นตอนในวันนัด (ถ้ามี)</summary>
+ <p class="help">เพิ่มเฉพาะขั้นตอนที่ระบุในใบนัด เช่น เจาะเลือด เอกซเรย์ หรือยื่นใบนัด</p>
+ <div id="visitStepsList" aria-live="polite"></div>
+ <button id="visitStepAdd" class="secondary" type="button">＋ เพิ่มขั้นตอน</button>
+ <p class="help" id="visitStepsHelp">จัดเรียงได้ตามลำดับที่ต้องไปจริง จุดติดต่อแต่ละขั้นตอนอาจอยู่คนละอาคารหรือชั้น</p>
+</details>
 <details><summary>🩺 เรื่องที่ติดตามรักษา</summary>
 <label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><p class="help">เลือกเรื่องที่เคยรักษา หรือพิมพ์เรื่องใหม่สำหรับนัดนี้ได้ (ยังไม่เพิ่มลงทะเบียนโรคกลาง)</p>
 <p class="help">รายละเอียดที่กรอกเองยังไม่ถือว่าแพทย์ยืนยัน</p></details>
@@ -1093,6 +1124,7 @@ function drawAdaptiveProviderCards(kind,choices){
 
 }
 let lastHnSelectedOrganizationId='';
+let lastLocationSelectedServiceUnitId='';
 function refreshProviderPicker(changed=''){
  const org=document.getElementById('providerOrg').value,unit=changed==='providerOrg'?'':document.getElementById('providerUnit').value,clinician=(changed==='providerOrg'||changed==='providerUnit')?'':document.getElementById('providerClinician').value;
  if(changed==='providerOrg'||changed==='providerUnit'){comboState.clinician.selectedItem=null;comboState.clinician.searchText='';document.getElementById('clinicianSearch').value='';document.getElementById('doctor').value='';closeCombo('clinician');}
@@ -1112,6 +1144,11 @@ function refreshProviderPicker(changed=''){
  if(resolvedOrganizationId!==lastHnSelectedOrganizationId){
   lastHnSelectedOrganizationId=resolvedOrganizationId;
   document.getElementById('providerOrg').dispatchEvent(new Event('change',{bubbles:true}));
+ }
+ const resolvedUnitId=document.getElementById('providerUnit').value;
+ if(resolvedUnitId!==lastLocationSelectedServiceUnitId){
+  lastLocationSelectedServiceUnitId=resolvedUnitId;
+  document.getElementById('providerUnit').dispatchEvent(new Event('change',{bubbles:true}));
  }
 }
 function selectedClinicianId(){return document.getElementById('providerClinician').value;}
@@ -2234,76 +2271,127 @@ new MutationObserver(updateConnectionBanner).observe(connectionBanner,{childList
 updateConnectionBanner();
 updateProgressiveLayout();refresh();syncChoiceCards();
 </script><script type="module">
-// HN belongs to one PERSON + one HOSPITAL; VN belongs to one VISIT.
-// The protected read API enforces person-scoped access before releasing identifiers.
+// Optional location synchronizer. Existing protected API validates LINE identity and
+// person-scoped appointment read access. Never read another person's history.
 try{
  const person=document.getElementById('personSelect');
  const org=document.getElementById('providerOrg');
+ const unit=document.getElementById('providerUnit');
  const hn=document.getElementById('hospital_hn');
  const vn=document.getElementById('hospital_vn');
- if(person&&org&&hn&&vn){
+ const location=document.getElementById('location_detail');
+ if(person&&org&&unit&&hn&&vn&&location){
   const note=document.createElement('p');note.className='help';
   note.id='hospitalHnSyncNote';note.setAttribute('role','status');
-  note.textContent='เลือกบุคคลและโรงพยาบาล ระบบจะค้นหา HN ให้';
-  hn.after(note);
+  note.textContent='เลือกบุคคลและโรงพยาบาล ระบบจะค้นหา HN ให้';hn.after(note);
   const vnNote=document.createElement('p');vnNote.className='help';
   vnNote.id='hospitalVnVisitNote';
-  vnNote.textContent='VN เป็นเลขการมารับบริการครั้งนี้ หากยังไม่ได้รับเลขให้เว้นว่าง';
-  vn.after(vnNote);
-  let generation=0,selectedKey='',manual=false;
+  vnNote.textContent='VN เป็นเลขการมารับบริการครั้งนี้ หากยังไม่มีเลขให้เว้นว่าง';vn.after(vnNote);
+  const locNote=document.createElement('p');locNote.className='help';
+  locNote.id='hospitalLocationSyncNote';locNote.setAttribute('role','status');
+  locNote.textContent='เลือกโรงพยาบาลและแผนกเพื่อค้นหาจุดติดต่อ';location.after(locNote);
+  let generation=0,hnKey='',locationKey='',hnManual=false,locationManual=false;
   hn.addEventListener('input',()=>{
-   manual=true;
-   note.textContent='HN ที่แก้ไขใช้เฉพาะนัดนี้ ไม่เปลี่ยนทะเบียนกลาง';
+   hnManual=true;note.textContent='HN ที่แก้ไขใช้เฉพาะนัดนี้ ไม่เปลี่ยนทะเบียนกลาง';
   });
-  const update=async()=>{
-   const personId=person.value,organizationId=org.value;
-   const nextKey=personId+'|'+organizationId,iteration=++generation;
-   if(selectedKey!==nextKey){
-    selectedKey=nextKey;manual=false;hn.value='';
-    vn.value=''; // Never carry a previous visit number to another person or hospital.
-   }
-   if(!personId||!organizationId){
-    note.textContent='เลือกบุคคลและโรงพยาบาล ระบบจะค้นหา HN ให้';
-    return;
-   }
-   if(manual)return; // A deliberate edit wins over an in-flight or repeated lookup.
-   note.textContent='กำลังค้นหา HN จากทะเบียน…';
-   const token=window.liff?.getIDToken?.();
+  location.addEventListener('input',()=>{
+   locationManual=true;locNote.textContent='ใช้จุดติดต่อที่แก้ไขสำหรับนัดนี้ ไม่เปลี่ยนทะเบียนกลาง';
+  });
+  const trim=x=>typeof x==='string'?x.trim():'';
+  const makeLocation=(record)=>{
+   if(trim(record?.location_detail))return trim(record.location_detail).slice(0,240);
+   return [trim(record?.contact_point),trim(record?.building_name),
+           trim(record?.floor_label)?'ชั้น '+trim(record.floor_label):'']
+    .filter(Boolean).join(' · ').slice(0,240);
+  };
+  const read=async(action,personCode,token,params={})=>{
    const endpoint=document.querySelector('meta[name="phms-read-api"]')?.content;
-   if(!token||!endpoint){
-    note.textContent='ยังไม่เชื่อมต่อทะเบียน สามารถกรอก HN สำหรับนัดนี้ได้';
+   if(!endpoint)return null;
+   const response=await fetch(endpoint,{
+    method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},
+    body:JSON.stringify({action,selectedPersonCode:personCode,...params})
+   });
+   const data=await response.json();
+   return response.ok&&data?.ok===true?data:null;
+  };
+  const refresh=async()=>{
+   const personCode=person.value,orgId=org.value,unitId=unit.value,iteration=++generation;
+   const nextHnKey=personCode+'|'+orgId;
+   const nextLocationKey=personCode+'|'+orgId+'|'+unitId;
+   if(hnKey!==nextHnKey){
+    hnKey=nextHnKey;hnManual=false;hn.value='';vn.value='';
+    note.textContent='กำลังตรวจสอบ HN ของโรงพยาบาลที่เลือก';
+   }
+   if(locationKey!==nextLocationKey){
+    locationKey=nextLocationKey;locationManual=false;location.value='';
+    location.dataset.phmsSource='';
+   }
+   if(!personCode||!orgId){
+    note.textContent='เลือกบุคคลและโรงพยาบาล ระบบจะค้นหา HN ให้';
+    locNote.textContent='เลือกโรงพยาบาลและแผนกเพื่อค้นหาจุดติดต่อ';return;
+   }
+   if(!unitId)locNote.textContent='เลือกแผนกเพื่อดึงจุดติดต่อหลัก';
+   const token=window.liff?.getIDToken?.();
+   if(!token){
+    if(!hnManual)note.textContent='ยังไม่เชื่อมต่อทะเบียน สามารถกรอก HN สำหรับนัดนี้ได้';
+    if(!locationManual)locNote.textContent='ยังไม่เชื่อมต่อทะเบียน สามารถกรอกจุดติดต่อเองได้';
     return;
    }
+   const isCurrent=()=>iteration===generation&&person.value===personCode&&org.value===orgId&&unit.value===unitId;
    try{
-    const response=await fetch(endpoint,{
-     method:'POST',
-     headers:{'content-type':'application/json',authorization:'Bearer '+token},
-     body:JSON.stringify({action:'provider_catalog',selectedPersonCode:personId})
-    });
-    const data=await response.json();
-    if(iteration!==generation||selectedKey!==person.value+'|'+org.value||manual)return;
-    if(!response.ok||data?.ok!==true){
-     note.textContent='ไม่สามารถโหลด HN ได้ สามารถกรอกเลขสำหรับนัดนี้เอง';
+    const data=await read('provider_catalog',personCode,token);
+    if(!isCurrent())return;
+    if(!data){
+     if(!hnManual)note.textContent='ไม่สามารถโหลด HN ได้ สามารถกรอกเองได้';
+     if(!locationManual)locNote.textContent='ไม่สามารถโหลดจุดติดต่อได้ สามารถกรอกเองได้';
      return;
     }
-    const matches=(data.catalog?.personHospitalHns||[]).filter(item=>item.organizationId===organizationId&&typeof item.value==='string'&&item.value.trim());
-    if(matches.length===1){
-     hn.value=matches[0].value.trim();
-     note.textContent=matches[0].verified
-      ?'เติม HN จากทะเบียนกลางแล้ว (แก้ไขเฉพาะนัดนี้ได้)'
+    if(!hnManual){
+     const matches=(data.catalog?.personHospitalHns||[]).filter(x=>x.organizationId===orgId&&trim(x.value));
+     if(matches.length===1){
+      hn.value=trim(matches[0].value);
+      note.textContent=matches[0].verified?'เติม HN จากทะเบียนกลางแล้ว (แก้ไขเฉพาะนัดนี้ได้)'
       :'เติม HN จากทะเบียนกลางแล้ว โปรดตรวจสอบกับบัตรโรงพยาบาล';
+     }else note.textContent='ยังไม่พบ HN ในทะเบียนกลาง สามารถกรอกเองได้';
+    }
+    if(!unitId||locationManual)return;
+    const matches=(data.catalog?.units||[]).filter(x=>x.id===unitId&&x.organization_id===orgId);
+    const selected=matches.length===1?matches[0]:null;
+    const masterLocation=makeLocation(selected);
+    if(selected?.is_verified===true&&masterLocation){
+     location.value=masterLocation;location.dataset.phmsSource='master';
+     locNote.textContent='เติมจุดติดต่อจากทะเบียนแผนกแล้ว (แก้ไขสำหรับนัดนี้ได้)';
+     location.dispatchEvent(new Event('change',{bubbles:true}));
+     return;
+    }
+    // Only same authorized person + exact hospital + exact department.
+    // A prior visit's location is a suggestion, never verified master data.
+    const old=await read('appointment_sources',personCode,token,{mode:'all',organizationId:orgId,unitId});
+    if(!isCurrent()||locationManual)return;
+    const options=(old?.appointments||[]).filter(x=>
+      x.organization_id===orgId&&x.service_unit_id===unitId&&trim(x.location_detail));
+    options.sort((a,b)=>String(b.appointment_at||b.created_at||'').localeCompare(String(a.appointment_at||a.created_at||'')));
+    if(options.length){
+     location.value=trim(options[0].location_detail).slice(0,240);
+     location.dataset.phmsSource='previous';
+     locNote.textContent='นำจากนัดเดิมของแผนกนี้ โปรดตรวจสอบกับใบนัดล่าสุด';
+     location.dispatchEvent(new Event('change',{bubbles:true}));
     }else{
-     note.textContent='ยังไม่พบ HN ในทะเบียนกลาง สามารถกรอกสำหรับนัดนี้เองได้';
+     locNote.textContent=masterLocation?'ทะเบียนแผนกยังไม่ยืนยันจุดติดต่อ กรุณาตรวจสอบและกรอกเอง'
+      :'ไม่พบจุดติดต่อในทะเบียนหรือนัดเดิม สามารถกรอกเองได้';
     }
    }catch{
-    if(iteration===generation&&!manual)note.textContent='ค้นหา HN ไม่สำเร็จ สามารถกรอกเองได้';
+    if(!isCurrent())return;
+    if(!hnManual)note.textContent='ค้นหา HN ไม่สำเร็จ สามารถกรอกเองได้';
+    if(!locationManual)locNote.textContent='ค้นหาจุดติดต่อไม่สำเร็จ สามารถกรอกเองได้';
    }
   };
-  person.addEventListener('change',update);
-  org.addEventListener('change',update);
-  if(person.value&&org.value)update();
+  person.addEventListener('change',refresh);
+  org.addEventListener('change',refresh);
+  unit.addEventListener('change',refresh);
+  if(person.value||org.value||unit.value)refresh();
  }
-}catch(error){console.warn('hn_optional_unavailable',error);}
+}catch(error){console.warn('hospital_detail_sync_unavailable',error);}
 </script><script type="module">
 // Independent presentation safety-net: keep LINE person identity visible even if
 // optional progressive-layout enhancement fails. Authorization stays in the read API.
