@@ -154,7 +154,7 @@ try {
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),0);
    await page.locator('.mode-choice[data-mode="full"]').click();
    // Journey location photos belong ONLY to detailed mode and have a separate 5-photo cap.
-   const hospitalDetail=page.locator('#hospitalLocationDetails');
+   const hospitalDetail=page.locator('#primaryLocationDetails');
    const detailInitiallyOpen=await hospitalDetail.evaluate(el=>el.open);
    if(!detailInitiallyOpen)await hospitalDetail.locator(':scope > summary').click();
    assert.ok(await page.locator('#primaryJourneyPhotos').isVisible(),'The detailed photo editor wrapper must be visible');
