@@ -935,6 +935,30 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor .phms-journey-review-images{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0!important}
 #editor .phms-journey-review-images img{width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #d7c0a8}
 
+
+/* Mobile, read-only journey preview: separated from any editing form. */
+#editor .phms-journey-preview-actions{padding:10px 0 14px}
+#editor .phms-journey-preview-actions>button{min-height:48px!important;padding:10px 13px!important;width:100%!important;background:#f4e8d8!important;border:1px solid #c3a482!important;color:#4b3521!important;font-size:1rem!important}
+.phms-journey-elder-dialog{border:0;border-radius:17px;padding:18px;margin:auto;width:min(94vw,540px);max-height:min(90dvh,900px);box-sizing:border-box;overflow-y:auto;background:#fffefa;color:#28231e;box-shadow:0 20px 70px #271e1770;font-size:1rem;line-height:1.6}
+.phms-journey-elder-dialog::backdrop{background:rgba(29,26,24,.65)}
+.phms-journey-elder-heading h2{font-size:1.3rem;margin:0 0 4px;line-height:1.4}
+.phms-journey-elder-heading p{margin:0 0 12px;color:#625447;font-size:.93rem}
+.phms-journey-elder-close{min-height:44px;padding:8px 16px;margin:0 0 12px!important;border-radius:10px;background:#f6eadd;color:#543b29;border:1px solid #b79574}
+.phms-journey-elder-card{border:1px solid #d4b493;border-radius:12px;padding:14px;margin:12px 0;background:#fffdf9}
+.phms-journey-elder-card h3{font-size:1.15rem;margin:0 0 9px;line-height:1.45;color:#352616}
+.phms-journey-elder-card h4{font-size:1.01rem;margin:12px 0 4px}
+.phms-journey-elder-field{margin:5px 0;overflow-wrap:anywhere}
+.phms-journey-elder-card ol{margin:4px 0 12px;padding-inline-start:23px}
+.phms-journey-elder-card li{margin:6px 0}
+.phms-journey-elder-photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.phms-journey-elder-photo{display:flex;flex-direction:column;align-items:stretch;min-height:44px;border:1px solid #d6bb9e;border-radius:10px;background:#fff;padding:7px;color:#30251c;gap:5px;font:inherit}
+.phms-journey-elder-photo img{width:100%;height:120px;object-fit:cover;border-radius:7px}
+.phms-journey-elder-photo span{font-size:.93rem;overflow-wrap:anywhere;text-align:start}
+.phms-journey-elder-done{display:flex;align-items:center;gap:11px;padding:10px 0 0;cursor:pointer;font-weight:650;min-height:44px;font-size:1rem}
+.phms-journey-elder-done input{width:26px;height:26px;flex:none;accent-color:#6a503a}
+.phms-journey-elder-footnote{font-size:.94rem;color:#6c4b31;margin:13px 0 2px}
+.phms-journey-elder-empty{color:#6c5140;padding:12px}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -983,6 +1007,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  <div class="phms-journey-warning-actions"><button id="journeyKeepAfterReview" type="button" class="secondary">ตรวจแล้ว ใช้ต่อ</button><button id="journeyClearOldRoute" type="button" class="secondary">ล้างรูปและขั้นตอน</button></div>
 </div>
 </details>
+<div class="phms-journey-preview-actions">
+ <button id="showJourneyElderPreview" class="secondary" type="button">👁️ ดูคำแนะนำสำหรับผู้ไปโรงพยาบาล</button>
+ <p class="help">ดูตัวอย่างก่อนบันทึก รูปใน Pilot ยังไม่ซิงค์ข้ามเครื่อง</p>
+</div>
 <details><summary>🩺 เรื่องที่ติดตามรักษา</summary>
 <label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><p class="help">เลือกเรื่องที่เคยรักษา หรือพิมพ์เรื่องใหม่สำหรับนัดนี้ได้ (ยังไม่เพิ่มลงทะเบียนโรคกลาง)</p>
 <p class="help">รายละเอียดที่กรอกเองยังไม่ถือว่าแพทย์ยืนยัน</p></details>
@@ -1555,8 +1583,9 @@ const visitStepKinds=['ยื่นใบนัด / ลงทะเบียน
 const visitStepsHints=document.createElement('datalist');visitStepsHints.id='phmsVisitStepKinds';
 for(const value of visitStepKinds){const option=document.createElement('option');option.value=value;visitStepsHints.append(option);}
 $('visitStepsDetails').append(visitStepsHints);
-const newVisitStop=()=>({title:'',place:'',time:'',directions:'',note:'',instructions:[],photos:[],coverId:null});
+const newVisitStop=()=>({id:crypto.randomUUID(),title:'',place:'',time:'',directions:'',note:'',instructions:[],photos:[],coverId:null});
 function ensureVisitStop(stop){
+ stop.id??=crypto.randomUUID();
  stop.instructions??=[];stop.photos??=[];stop.coverId??=null;
  stop.directions??='';stop.note??='';return stop;
 }
@@ -1566,6 +1595,7 @@ function clearJourneyGallery(gallery){
 }
 function renderMainJourneyPhotos(){mainJourneyPhotoUI.render();}
 function clearJourneyDraft(){
+ journeyProgress.clear();
  ++journeyImageGeneration;
  clearJourneyGallery(primaryJourney);
  for(const stop of visitStops)clearJourneyGallery(stop);
@@ -1816,6 +1846,85 @@ $('personSelect').addEventListener('change',()=>{
  journeyPreviousContext='';refreshJourneyWarning();
 });
 renderVisitStops();
+
+/* Read-only patient/carer viewer; a non-persistent preview of the same drafted steps. */
+const journeyElderDialog=document.createElement('dialog');
+journeyElderDialog.id='journeyElderPreviewDialog';journeyElderDialog.className='phms-journey-elder-dialog';
+journeyElderDialog.setAttribute('aria-label','วันนี้ต้องไปไหนบ้าง');
+document.body.append(journeyElderDialog);
+const journeyProgress=new Set();
+function buildElderJourneyViewer(){
+ journeyElderDialog.replaceChildren();
+ const head=document.createElement('header');head.className='phms-journey-elder-heading';
+ const title=document.createElement('h2');title.textContent='🧭 วันนี้ต้องไปไหนบ้าง';
+ const subtitle=document.createElement('p');subtitle.textContent='ตัวอย่างคำแนะนำสำหรับผู้ไปโรงพยาบาล · ยังไม่ได้บันทึกนัดจริง';
+ head.append(title,subtitle);
+ const close=document.createElement('button');close.type='button';close.className='secondary phms-journey-elder-close';
+ close.textContent='✕ ปิด';close.addEventListener('click',()=>journeyElderDialog.close());
+ const list=document.createElement('div');list.className='phms-journey-elder-list';
+ const formatRow=(label,value,parent)=>{
+  if(!value||!String(value).trim())return;
+  const p=document.createElement('p');p.className='phms-journey-elder-field';
+  const b=document.createElement('strong');b.textContent=label+' ';
+  p.append(b,document.createTextNode(String(value).trim()));parent.append(p);
+ };
+ const photos=(gallery,node)=>{
+  if(!gallery.photos?.length)return;
+  const galleryEl=document.createElement('div');galleryEl.className='phms-journey-elder-photos';
+  for(const [i,photo] of gallery.photos.entries()){
+   const button=document.createElement('button');button.type='button';
+   button.className='phms-journey-elder-photo';button.setAttribute('aria-label','ดูรูป '+(i+1)+' '+(photo.caption||''));
+   const image=document.createElement('img');image.src=photo.url;image.alt=photo.caption||'รูปประกอบสถานที่ '+(i+1);
+   const caption=document.createElement('span');caption.textContent=photo.caption||'รูป '+(i+1);
+   button.append(image,caption);button.addEventListener('click',()=>showJourneyImage(photo));
+   galleryEl.append(button);
+  }
+  node.append(galleryEl);
+ };
+ const main=$('location_detail').value.trim();
+ if(main||$('location_directions').value.trim()||primaryJourney.photos.length){
+  const card=document.createElement('section');card.className='phms-journey-elder-card';
+  const h=document.createElement('h3');h.textContent='📍 จุดติดต่อหลัก';card.append(h);
+  formatRow('สถานที่:',main,card);
+  formatRow('วิธีเดิน:',$('location_directions').value,card);
+  formatRow('หมายเหตุ:',$('location_note').value,card);
+  photos(primaryJourney,card);list.append(card);
+ }
+ for(const [i,step] of visitStops.entries()){
+  const card=document.createElement('section');card.className='phms-journey-elder-card';
+  const h=document.createElement('h3');h.textContent=(i+1)+'. '+(step.title.trim()||'ยังไม่ได้ระบุขั้นตอน');
+  card.append(h);
+  formatRow('ไปที่:',step.place,card);
+  formatRow('เวลา:',step.time?step.time+' น.':'',card);
+  formatRow('วิธีเดิน:',step.directions,card);
+  if(step.instructions.length){
+   const h4=document.createElement('h4');h4.textContent='วิธีทำ';card.append(h4);
+   const ol=document.createElement('ol');
+   for(const txt of step.instructions){if(!txt.trim())continue;const li=document.createElement('li');li.textContent=txt;ol.append(li);}
+   card.append(ol);
+  }
+  formatRow('เพิ่มเติม:',step.note,card);
+  photos(step,card);
+  const done=document.createElement('label');done.className='phms-journey-elder-done';
+  const check=document.createElement('input');check.type='checkbox';check.checked=journeyProgress.has(step.id);
+  const span=document.createElement('span');span.textContent='ทำขั้นตอนนี้แล้ว';
+  check.addEventListener('change',()=>{if(check.checked)journeyProgress.add(step.id);else journeyProgress.delete(step.id);});
+  done.append(check,span);card.append(done);list.append(card);
+ }
+ if(!list.childElementCount){
+  const p=document.createElement('p');p.textContent='ยังไม่มีข้อมูลสถานที่หรือขั้นตอน กรุณากรอกในแบบละเอียดก่อน';
+  p.className='phms-journey-elder-empty';list.append(p);
+ }
+ const footer=document.createElement('p');footer.className='phms-journey-elder-footnote';
+ footer.textContent='ตำแหน่งและลำดับอาจเปลี่ยนได้ โปรดตรวจสอบกับใบนัดและเจ้าหน้าที่โรงพยาบาล';
+ journeyElderDialog.append(head,close,list,footer);
+}
+$('showJourneyElderPreview').addEventListener('click',()=>{
+ buildElderJourneyViewer();
+ if(typeof journeyElderDialog.showModal==='function')journeyElderDialog.showModal();
+});
+journeyElderDialog.addEventListener('click',event=>{if(event.target===journeyElderDialog)journeyElderDialog.close();});
+
 let sourceAppointments=new Map();
 function refreshTopicSuggestions(){renderCareTopicSuggestions();}
 let autoPurposeValue='',purposeManuallyEdited=false;
