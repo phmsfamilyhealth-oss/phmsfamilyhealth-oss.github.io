@@ -1649,10 +1649,16 @@ async function prepareJourneyImage(file){
   const ctx=canvas.getContext('2d');
   if(!ctx)throw Error('อุปกรณ์ไม่รองรับการย่อรูป');
   ctx.drawImage(img,0,0,canvas.width,canvas.height);
-  const blob=await new Promise(done=>canvas.toBlob(done,'image/jpeg',.82));
+  let quality=.82,blob=null;
+  do{
+   blob=await new Promise(done=>canvas.toBlob(done,'image/jpeg',quality));
+   quality-=.12;
+  }while(blob&&blob.size>2*1024*1024&&quality>=.34);
   canvas.width=0;canvas.height=0;
-  if(!blob)throw Error('แปลงรูปไม่สำเร็จ');
+  if(!blob||blob.size>2*1024*1024)
+   throw Error('รูปซับซ้อนหรือมีรายละเอียดมากเกินไป กรุณาเลือกรูปที่เล็กลง');
   // Re-encoding via canvas strips nonessential EXIF/location metadata.
+  // Keep private storage payloads below its 2 MB server-side cap.
   return {id:'journey-image-'+(++journeyImageSeq),name:file.name,
     blob,url:URL.createObjectURL(blob),caption:''};
  }finally{URL.revokeObjectURL(raw);}
