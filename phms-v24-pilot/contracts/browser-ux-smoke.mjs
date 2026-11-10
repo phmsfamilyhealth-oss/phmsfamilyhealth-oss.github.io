@@ -103,8 +103,28 @@ try {
   assert.equal(await page.locator('#prepItems .checklist-row input[type="checkbox"]:checked').count(),0,'Initial items must be pending, not completed');
   if(scenario==='line-selected'){
    await page.locator('#scenarioFlow .scenario-option[data-scenario="booked"]').click();
+   const getSummaryGeometry=async()=>page.locator('#simpleExtras>summary').evaluate(summary=>{
+    const label=summary.querySelector(':scope > .phms-summary-label');
+    const badge=summary.querySelector(':scope > .filled-indicator');
+    const header=summary.getBoundingClientRect(),l=label?.getBoundingClientRect(),b=badge?.getBoundingClientRect();
+    return {status:badge?.textContent?.trim(),shown:badge&&!badge.hidden,
+     flex:getComputedStyle(summary).display,headerHeight:header.height,
+     badgeWithin:!!b&&b.left>=header.left&&b.right<=header.right+.5&&b.top>=header.top&&b.bottom<=header.bottom+.5,
+     sameRow:!!l&&!!b&&Math.abs((l.top+l.bottom)/2-(b.top+b.bottom)/2)<3,
+     badgeLeft:b?.left,labelRight:l?.right};
+   });
+   let statusLine=await getSummaryGeometry();
+   assert.equal(statusLine.status,'มีข้อมูล','All disclosure badges use one exact label');
+   assert.ok(statusLine.shown&&statusLine.flex==='flex'&&statusLine.badgeWithin&&statusLine.sameRow,'Status stays on the title line');
+   assert.ok(statusLine.headerHeight<=70,'Disclosure must not gain a second badge row');
+   await page.setViewportSize({width:320,height:700});
+   statusLine=await getSummaryGeometry();
+   assert.ok(statusLine.badgeWithin&&statusLine.sameRow&&statusLine.headerHeight<=70,'At 320px the badge stays on the same title row');
+   await page.setViewportSize({width:390,height:844});
    await page.locator('#simpleExtras summary').click();
    await page.locator('#prepChoiceGrid .prep-choice-card').nth(1).click();
+   const statuses=await page.locator('#editor .filled-indicator:not([hidden]), #editor .prep-choice-filled:not(.hidden)').evaluateAll(nodes=>nodes.map(el=>el.textContent.trim()));
+   assert.ok(statuses.length>0&&statuses.every(text=>text==='มีข้อมูล'),'All populated disclosures and prep choices say มีข้อมูล');
    await page.locator('#prepItems .checklist-row textarea[aria-label^="แก้ไขรายการ"]').first().fill('🪪 บัตรประชาชน (ตัวจริง)');
    await page.locator('#prepItems .checklist-row textarea[aria-label^="แก้ไขรายการ"]').first().dispatchEvent('change');
    assert.deepEqual(await checklistValues(),[
