@@ -717,36 +717,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 
 
-/* PHMS checklist direct-delete + undo (no native dialog, better for LINE iOS). */
-#editor .phms-checklist-undo{
- box-sizing:border-box!important;display:flex!important;align-items:center!important;
- justify-content:space-between!important;gap:10px!important;
- width:100%!important;margin:12px 0 6px!important;padding:10px 12px!important;
- background:#fff5e7!important;border:1px solid #d8c0a0!important;
- border-radius:12px!important;color:#3b2b1b!important
-}
-#editor .phms-checklist-undo.hidden,
-#editor .phms-checklist-undo[hidden]{display:none!important}
-#editor .phms-checklist-undo-text{
- min-width:0!important;flex:1 1 auto!important;
- font-size:.94rem!important;line-height:1.45!important;
- overflow-wrap:anywhere!important
-}
-#editor .phms-checklist-undo-button{
- flex:0 0 auto!important;min-height:48px!important;min-width:94px!important;
- padding:9px 12px!important;background:#fff!important;
- border:1.5px solid #906d46!important;border-radius:10px!important;
- color:#583c23!important;font-size:1rem!important;font-weight:700!important;
- line-height:1.3!important
-}
-#editor .phms-checklist-undo-button:focus-visible{
- outline:3px solid #79552c!important;outline-offset:2px!important
-}
-@media(max-width:360px){
- #editor .phms-checklist-undo{gap:6px!important;padding:8px!important}
- #editor .phms-checklist-undo-button{min-width:88px!important;padding:8px!important}
-}
-
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1003,55 +973,19 @@ const DEFAULT_APPOINTMENT_CHECKLIST=Object.freeze([
  '📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)'
 ]);
 let checklistItems=[];
-// PHMS checklist: delete directly, with an always-available Thai undo action.
-// The item and its completion status remain recoverable until this draft is reset.
-const checklistDeleteHistory=[];
-const checklistUndoNotice=document.createElement('div');
-checklistUndoNotice.id='checklistUndoNotice';
-checklistUndoNotice.className='phms-checklist-undo hidden';
-checklistUndoNotice.hidden=true;
-checklistUndoNotice.setAttribute('role','status');
-checklistUndoNotice.setAttribute('aria-live','polite');
-const checklistUndoMessage=document.createElement('span');
-checklistUndoMessage.className='phms-checklist-undo-text';
-const checklistUndoButton=document.createElement('button');
-checklistUndoButton.type='button';
-checklistUndoButton.className='phms-checklist-undo-button';
-checklistUndoButton.textContent='↶ เลิกทำ';
-checklistUndoNotice.append(checklistUndoMessage,checklistUndoButton);
-$('prepItems').after(checklistUndoNotice);
-function syncChecklistUndo(){
- const last=checklistDeleteHistory[checklistDeleteHistory.length-1];
- checklistUndoNotice.hidden=!last;
- checklistUndoNotice.classList.toggle('hidden',!last);
- if(last)checklistUndoMessage.textContent='ลบ “'+last.item.title+'” แล้ว';
- else checklistUndoMessage.textContent='';
-}
+// Delete checklist entries directly, without an alert, confirmation, or undo bar.
 function removeChecklistItem(item){
  const index=checklistItems.indexOf(item);
  if(index<0)return;
  checklistItems.splice(index,1);
- checklistDeleteHistory.push({item,index});
  renderChecklist();
- syncChecklistUndo();
- checklistUndoButton.focus({preventScroll:true});
+ // Keep keyboard focus on the next accessible item if available.
+ const remaining=$('prepItems').querySelectorAll('.checklist-delete');
+ (remaining[Math.min(index,remaining.length-1)]||$('prepAdd')).focus({preventScroll:true});
 }
-checklistUndoButton.addEventListener('click',()=>{
- const last=checklistDeleteHistory.pop();
- if(!last)return;
- const index=Math.min(last.index,checklistItems.length);
- checklistItems.splice(index,0,last.item);
- renderChecklist();
- syncChecklistUndo();
- const restored=$('prepItems').querySelectorAll('.checklist-row input[type="checkbox"]')[index];
- if(restored)restored.focus({preventScroll:true});
- else $('prepAdd').focus({preventScroll:true});
-});
 function resetChecklistToDefaults(){
  checklistItems=DEFAULT_APPOINTMENT_CHECKLIST.map(title=>({title,status:'pending'}));
- checklistDeleteHistory.length=0;
  renderChecklist();
- syncChecklistUndo();
 }
 function isPastAppointment(){return $('scenario').value==='historical';}
 // Fit an editable title to its actual Thai line wrapping, including when the phone rotates.
