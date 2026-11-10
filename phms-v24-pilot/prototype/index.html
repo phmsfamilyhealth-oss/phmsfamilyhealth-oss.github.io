@@ -725,6 +725,25 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 
 
+
+/* PHMS DELETE ACTION v1 — 44px hit target / 32px visible pink delete pill. */
+#editor button.phms-delete-button{box-sizing:border-box!important;display:inline-flex!important;flex:0 0 auto!important;align-self:center!important;align-items:center!important;justify-content:center!important;width:68px!important;min-width:68px!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#8c3146!important;font-size:.9rem!important;font-weight:700!important}
+#editor button.phms-delete-button .phms-delete-face{display:inline-flex!important;box-sizing:border-box!important;align-items:center!important;justify-content:center!important;gap:4px!important;width:66px!important;height:32px!important;min-height:32px!important;padding:4px 5px!important;border:1px solid #b77a85!important;border-radius:9px!important;background:#fff2f3!important;color:#8c3146!important;white-space:nowrap!important}
+#editor button.phms-delete-button svg{width:16px!important;height:16px!important;flex:none!important;stroke:currentColor!important}
+#editor button.phms-delete-button:hover .phms-delete-face{background:#fce3e7!important}
+#editor button.phms-delete-button:focus-visible{outline:3px solid #8c3146!important;outline-offset:2px!important}
+#editor button.phms-delete-button:disabled{opacity:.5!important;cursor:not-allowed!important}
+#editor #procedureItems .phms-procedure-row{display:grid!important;grid-template-columns:minmax(0,1fr) 68px!important;align-items:center!important;gap:8px!important;margin:0!important;padding:6px 0!important;border-bottom:1px solid #ece1d4!important}
+#editor #procedureItems .phms-procedure-row:last-child{border-bottom:0!important}
+#editor #procedureItems .phms-procedure-row input{min-width:0!important;width:100%!important;margin:0!important}
+#editor .appointment-photo-list{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important;margin:12px 0!important}
+#editor .appointment-photo-item{display:grid!important;grid-template-columns:100px minmax(0,1fr)!important;grid-template-rows:auto 1fr!important;gap:7px 10px!important;align-items:center!important;min-width:0!important;padding:10px!important;border:1px solid #d8c4ac!important;border-radius:12px!important;background:#fff!important}
+#editor .appointment-photo-item>img{grid-column:1!important;grid-row:1 / span 2!important;width:100%!important;height:112px!important;object-fit:contain!important;border-radius:9px!important;background:#f8f4ef!important}
+#editor .appointment-photo-item>p{grid-column:2!important;grid-row:1!important;min-width:0!important;margin:0!important;font-size:.92rem!important;line-height:1.5!important;color:#30251a!important;overflow-wrap:anywhere!important}
+#editor .appointment-photo-item .appointment-photo-actions{grid-column:2!important;grid-row:2!important;display:grid!important;grid-template-columns:minmax(0,1fr) 68px!important;gap:6px!important;align-items:center!important;flex-wrap:nowrap!important;min-width:0!important}
+#editor .appointment-photo-actions button.phms-photo-view{box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;height:44px!important;min-height:44px!important;margin:0!important;padding:5px 3px!important;border:1px solid #c9ad8b!important;border-radius:10px!important;background:#f3e8d9!important;color:#533c25!important;font-size:.91rem!important;font-weight:700!important;white-space:nowrap!important}
+#editor .appointment-photo-actions button.phms-photo-view:focus-visible{outline:3px solid #79552c!important;outline-offset:2px!important}
+@media(max-width:380px){#editor button.phms-delete-button{width:62px!important;min-width:62px!important;font-size:.88rem!important}#editor button.phms-delete-button .phms-delete-face{width:60px!important;padding:4px 3px!important}#editor #procedureItems .phms-procedure-row{grid-template-columns:minmax(0,1fr) 62px!important;gap:5px!important}#editor .appointment-photo-item{grid-template-columns:86px minmax(0,1fr)!important;gap:7px 8px!important}#editor .appointment-photo-item>img{height:104px!important}#editor .appointment-photo-item .appointment-photo-actions{grid-template-columns:minmax(0,1fr) 62px!important;gap:5px!important}#editor .appointment-photo-actions button.phms-photo-view{font-size:.88rem!important}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -980,6 +999,14 @@ const DEFAULT_APPOINTMENT_CHECKLIST=Object.freeze([
  '🪪 บัตรประชาชน',
  '📅 ใบนัด (ตรวจสอบวันเวลาอีกครั้ง)'
 ]);
+// Shared PHMS delete presentation; deletion permissions and lifecycle remain with each caller.
+const PHMS_DELETE_ICON='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v7m4-7v7"/></svg>';
+function makePhmsDeleteButton(label,handler){
+ const button=document.createElement('button');button.type='button';button.className='phms-delete-button';
+ button.setAttribute('aria-label',label);
+ button.innerHTML='<span class="phms-delete-face">'+PHMS_DELETE_ICON+'<span>ลบ</span></span>';
+ button.addEventListener('click',handler);return button;
+}
 let checklistItems=[];
 // Delete checklist entries directly, without an alert, confirmation, or undo bar.
 function removeChecklistItem(item){
@@ -1029,10 +1056,7 @@ function renderChecklist(){
    if(!v||checklistItems.some((x,i)=>i!==index&&x.title.toLocaleLowerCase('th-TH')===v.toLocaleLowerCase('th-TH'))){name.value=item.title;return;}
    item.title=v;renderChecklist();
   });
-  const remove=document.createElement('button');remove.type='button';remove.className='checklist-delete';
-  remove.innerHTML='<span class="checklist-delete-face"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v7m4-7v7"/></svg><span>ลบ</span></span>';
-  remove.title='ลบรายการ';remove.setAttribute('aria-label','ลบ '+item.title);
-  remove.addEventListener('click',()=>removeChecklistItem(item));
+  const remove=makePhmsDeleteButton('ลบ '+item.title,()=>removeChecklistItem(item));
   row.append(checkbox,name,remove);list.append(row);
   resizeChecklistName(name);
  }
@@ -1090,8 +1114,11 @@ function renderAppointmentPhotos(){
   const thumb=document.createElement('img');thumb.src=photoUrls[index];thumb.alt='ดูรูปใบนัด '+(index+1);thumb.addEventListener('click',()=>showAppointmentPhoto(index));
   const name=document.createElement('p');name.textContent='รูป '+(index+1)+' · '+file.name;
   const actions=document.createElement('div');actions.className='appointment-photo-actions';
-  const view=document.createElement('button');view.type='button';view.className='secondary';view.textContent='ดูรูป';view.addEventListener('click',()=>showAppointmentPhoto(index));
-  const remove=document.createElement('button');remove.type='button';remove.className='photo-remove';remove.textContent='ลบ';remove.addEventListener('click',()=>{URL.revokeObjectURL(photoUrls[index]);photoFiles.splice(index,1);photoUrls.splice(index,1);renderAppointmentPhotos();});
+  const view=document.createElement('button');view.type='button';view.className='secondary phms-photo-view';view.textContent='ดูรูป';
+  view.setAttribute('aria-label','ดูรูปใบนัด '+(index+1));view.addEventListener('click',()=>showAppointmentPhoto(index));
+  const remove=makePhmsDeleteButton('ลบรูปใบนัด '+(index+1),()=>{
+   URL.revokeObjectURL(photoUrls[index]);photoFiles.splice(index,1);photoUrls.splice(index,1);renderAppointmentPhotos();
+  });
   actions.append(view,remove);card.append(thumb,name,actions);list.append(card);
  });
  $('addAppointmentPhoto').classList.toggle('hidden',photoFiles.length>=2);
@@ -1232,10 +1259,12 @@ let procedurePreviewItems=[];
 function renderProcedurePreview(){
  const list=$('procedureItems');list.replaceChildren();
  for(const [index,item] of procedurePreviewItems.entries()){
-  const row=document.createElement('div');row.className='checklist-row';
+  const row=document.createElement('div');row.className='checklist-row phms-procedure-row';
   const input=document.createElement('input');input.value=item;input.maxLength=160;input.setAttribute('aria-label','แก้ไขรายการตรวจที่ '+(index+1));
   input.addEventListener('change',()=>{const name=input.value.trim(),key=name.normalize('NFKC').toLocaleLowerCase('th-TH');if(!name||procedurePreviewItems.some((x,i)=>i!==index&&x.normalize('NFKC').toLocaleLowerCase('th-TH')===key)){input.value=item;return;}procedurePreviewItems[index]=name;renderProcedurePreview();});
-  const remove=document.createElement('button');remove.type='button';remove.className='checklist-delete';remove.textContent='🗑️';remove.setAttribute('aria-label','ลบรายการตรวจ '+item);remove.addEventListener('click',()=>{procedurePreviewItems.splice(index,1);renderProcedurePreview();});
+  const remove=makePhmsDeleteButton('ลบรายการตรวจ '+item,()=>{
+   procedurePreviewItems.splice(index,1);renderProcedurePreview();
+  });
   row.append(input,remove);list.append(row);
  }
  $('procedureStatus').textContent='รายการตรวจ '+procedurePreviewItems.length+' ข้อ — ยังไม่บันทึก';
