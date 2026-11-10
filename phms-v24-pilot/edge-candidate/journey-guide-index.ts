@@ -37,7 +37,9 @@ async function authorize(req,raw,write){
    return {error:reply(404,{ok:false,error:'person_not_found'})};
   const units=await db.sql.unsafe("select id from public.healthcare_service_units where id=$1::uuid and organization_id=$2::uuid and deleted_at is null limit 1",[raw.unitId,raw.organizationId]);
   if(units.length!==1)return {error:reply(400,{ok:false,error:'invalid_provider'})};
-  return {actorId:actor.userId,familyId:data[0].family_id,orgId:raw.organizationId,unitId:raw.unitId};
+  const canSaveTemplate=env('PHMS_JOURNEY_WRITE_ENABLED')==='true'&&
+  await db.rights.centralCanAccess(actor.userId,raw.selectedPersonCode,'appointments','create')===true;
+  return {actorId:actor.userId,familyId:data[0].family_id,orgId:raw.organizationId,unitId:raw.unitId,canSaveTemplate};
  }catch{return {error:reply(503,{ok:false,error:'service_unavailable'})};}
 }
 async function ownedTemplate(ctx,id){
@@ -49,7 +51,7 @@ async function ownedTemplate(ctx,id){
 async function getTemplate(ctx){
  const rows=await db.sql.unsafe("select id,version,title,main_location,steps,updated_at from private.phms_journey_templates where family_id=$1::uuid and organization_id=$2::uuid and service_unit_id=$3::uuid limit 1",
   [ctx.familyId,ctx.orgId,ctx.unitId]);
- if(rows.length!==1)return reply(200,{ok:true,template:null});
+ if(rows.length!==1)return reply(200,{ok:true,template:null,canSaveTemplate:ctx.canSaveTemplate===true});
  const row=rows[0],photos=[];
  const stored=await db.sql.unsafe("select id,step_key,position,caption,file_name,storage_path from private.phms_journey_photos where template_id=$1::uuid order by step_key,position",[row.id]);
  for(const photo of stored){
@@ -59,7 +61,7 @@ async function getTemplate(ctx){
  }
  return reply(200,{ok:true,template:{id:row.id,version:row.version,title:row.title,
   mainLocation:row.main_location,steps:row.steps,updatedAt:row.updated_at,
-  source:'family',photos,photoUrlExpiresSeconds:120}});
+  source:'family',photos,photoUrlExpiresSeconds:120},canSaveTemplate:ctx.canSaveTemplate===true});
 }
 async function saveTemplate(ctx,raw){
  const parsed=normalizeJourneyDraft(raw.template);
@@ -103,6 +105,44 @@ async function putPhoto(ctx,raw){
   return reply(409,{ok:false,error:'photo_limit'});
  }
 }
+
+async function reorderPhotos(ctx,raw){
+ if(!isUUID(raw.templateId)||!Array.isArray(raw.photos)||raw.photos.length>205||
+    !Number.isInteger(raw.expectedVersion)||raw.expectedVersion<1)return reply(400,{ok:false,error:'invalid_photo_manifest'});
+ const owner=await ownedTemplate(ctx,raw.templateId);
+ if(!owner)return reply(404,{ok:false,error:'template_not_found'});
+ if(owner.version!==raw.expectedVersion)return reply(409,{ok:false,error:'version_conflict'});
+ const ids=new Set(),positions=new Set(),provided=new Map();
+ for(const x of raw.photos){
+  if(!x||!isUUID(x.photoId)||ids.has(x.photoId)||
+     !Number.isInteger(x.position)||x.position<1||x.position>5||
+     typeof x.stepKey!=='string'||typeof x.caption!=='string'||x.caption.length>140||
+     !(x.stepKey==='primary'||isUUID(x.stepKey)&&owner.steps.some(y=>y.id===x.stepKey)))
+   return reply(400,{ok:false,error:'invalid_photo_manifest'});
+  const positionKey=x.stepKey+'|'+x.position;
+  if(positions.has(positionKey))return reply(400,{ok:false,error:'duplicate_photo_position'});
+  positions.add(positionKey);ids.add(x.photoId);provided.set(x.photoId,x);
+ }
+ // All stored photo IDs must be accounted for; clients delete unwanted photos first.
+ const initial=await db.sql.unsafe("select id,template_id,step_key,position,storage_path,caption,file_name,byte_size,created_by,created_at from private.phms_journey_photos where template_id=$1::uuid",[raw.templateId]);
+ if(initial.length!==raw.photos.length||initial.some(x=>!ids.has(x.id)))return reply(409,{ok:false,error:'photo_manifest_conflict'});
+ // Transaction prevents transient duplicate positions when photos 1 and 2 are swapped.
+ try{
+  await db.sql.begin(async tx=>{
+   const locks=await tx.unsafe("select version from private.phms_journey_templates where id=$1::uuid for update",[raw.templateId]);
+   if(locks.length!==1||locks[0].version!==raw.expectedVersion)throw Error('version_conflict');
+   const records=await tx.unsafe("select id,template_id,step_key,position,storage_path,caption,file_name,byte_size,created_by,created_at from private.phms_journey_photos where template_id=$1::uuid for update",[raw.templateId]);
+   if(records.length!==provided.size||records.some(x=>!provided.has(x.id)))throw Error('photo_manifest_conflict');
+   await tx.unsafe("delete from private.phms_journey_photos where template_id=$1::uuid",[raw.templateId]);
+   for(const row of records){
+    const next=provided.get(row.id);
+    await tx.unsafe("insert into private.phms_journey_photos(id,template_id,step_key,position,storage_path,caption,file_name,byte_size,created_by,created_at) values($1::uuid,$2::uuid,$3,$4::integer,$5,$6,$7,$8::integer,$9::uuid,$10::timestamptz)",
+     [row.id,row.template_id,next.stepKey,next.position,row.storage_path,next.caption,row.file_name,row.byte_size,row.created_by,row.created_at]);
+   }
+  });
+ }catch{return reply(409,{ok:false,error:'photo_manifest_conflict'})}
+ return reply(200,{ok:true,photoCount:raw.photos.length});
+}
 async function deletePhoto(ctx,raw){
  if(!isUUID(raw.templateId)||!isUUID(raw.photoId))return reply(400,{ok:false,error:'invalid_request'});
  const owner=await ownedTemplate(ctx,raw.templateId);if(!owner)return reply(404,{ok:false,error:'template_not_found'});
@@ -126,7 +166,7 @@ Deno.serve(async request=>{
  let raw;
  try{const source=await request.text();if(new TextEncoder().encode(source).length>2900000)return cors(reply(413,{ok:false,error:'payload_too_large'}));raw=JSON.parse(source)}
  catch{return cors(reply(400,{ok:false,error:'invalid_request'}))}
- if(!raw||!['template_get','template_save','photo_put','photo_delete'].includes(raw.action))return cors(reply(400,{ok:false,error:'unsupported_action'}));
+ if(!raw||!['template_get','template_save','photo_put','photo_delete','photo_reorder'].includes(raw.action))return cors(reply(400,{ok:false,error:'unsupported_action'}));
  const write=raw.action!=='template_get';
  if(write&&env('PHMS_JOURNEY_WRITE_ENABLED')!=='true')return cors(reply(404,{ok:false,error:'feature_not_released'}));
  const ctx=await authorize(request,raw,write);
@@ -135,6 +175,7 @@ Deno.serve(async request=>{
   if(raw.action==='template_get')return cors(await getTemplate(ctx));
   if(raw.action==='template_save')return cors(await saveTemplate(ctx,raw));
   if(raw.action==='photo_put')return cors(await putPhoto(ctx,raw));
+  if(raw.action==='photo_reorder')return cors(await reorderPhotos(ctx,raw));
   return cors(await deletePhoto(ctx,raw));
  }catch{return cors(reply(503,{ok:false,error:'service_unavailable'}))}
 });
