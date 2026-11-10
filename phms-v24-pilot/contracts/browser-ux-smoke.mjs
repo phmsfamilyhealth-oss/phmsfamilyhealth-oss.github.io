@@ -64,6 +64,22 @@ try {
       :{ok:true,items:[]};
    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:JSON.stringify(body)});
   });
+  const journeyActions=[];
+  let photoSerial=40;
+  await page.route('**/functions/v1/phms-v24-journey-guide',async route=>{
+   let data={};try{data=JSON.parse(route.request().postData()||'{}')}catch{}
+   journeyActions.push(data);
+   const id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
+   const body=data.action==='template_get'
+    ?{ok:true,template:null,canSaveTemplate:scenario==='line-selected'}
+    :data.action==='template_save'
+    ?{ok:true,id:id(1),version:1}
+    :data.action==='photo_put'
+    ?{ok:true,id:id(++photoSerial)}
+    :{ok:true};
+   await route.fulfill({status:200,contentType:'application/json',
+    headers:{'Access-Control-Allow-Origin':'*'},body:JSON.stringify(body)});
+  });
   // An older versioned test URL must forward to live HTML, not freeze an outdated UI.
   const aliasUrl=base.replace('/index.html','/index-photo-equal-20261110.html');
   const versioned=await page.request.get(aliasUrl);
@@ -207,6 +223,13 @@ try {
    assert.ok(!(await viewer.isVisible()),'Patient guide closes cleanly');
    await page.locator('#visitStepsList .visit-stop-card').first().locator('.visit-stop-heading button.phms-delete-button').click();
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),1,'One stop is removable without deleting the other');
+   await page.waitForFunction(()=>!document.getElementById('journeySavePanel').hidden);
+   await page.locator('#journeySaveTemplate').click();
+   await page.waitForFunction(()=>document.getElementById('journeySaveStatus').textContent.includes('บันทึกเส้นทางประจำของครอบครัวแล้ว'));
+   assert.equal(journeyActions.filter(x=>x.action==='template_save').length,1,'Authorized family route save is explicit');
+   assert.equal(journeyActions.filter(x=>x.action==='photo_put').length,6,'Each of the six point photos uploaded individually');
+   assert.equal(journeyActions.filter(x=>x.action==='photo_reorder').length,2,'Image ordering is rechecked before and after upload');
+   assert.equal(journeyActions.filter(x=>x.action==='template_save')[0].template.steps[0].time,'','A reusable route never copies appointment-specific time');
    await page.locator('.mode-choice[data-mode="simple"]').click();
    assert.ok(await page.locator('#details').evaluate(x=>x.classList.contains('hidden')),'Journey editing stays hidden in simple mode');
    assert.equal(await page.locator('#primaryJourneyPhotoCount').textContent(),'4/5 รูป','Switching modes preserves detailed photo draft');
