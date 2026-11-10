@@ -167,7 +167,7 @@ try {
     return {mode:document.getElementById('detail').value,chain:list};
    });
    console.log('PHMS_JOURNEY_GALLERY_DIAGNOSTIC',JSON.stringify(galleryDebug));
-   assert.ok(await page.locator('#primaryJourneyGallery').isVisible(),'The primary photo editor must be visible in detailed mode');
+   assert.ok(await page.locator('#primaryJourneyPhotos').isVisible(),'The detailed photo editor wrapper must be visible');
    const journeyPng=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9VFYDj8AAAAASUVORK5CYII=','base64');
    const journeyFile=(name)=>({name,mimeType:'image/png',buffer:journeyPng});
    await page.locator('#primaryJourneyFileInput').setInputFiles(
