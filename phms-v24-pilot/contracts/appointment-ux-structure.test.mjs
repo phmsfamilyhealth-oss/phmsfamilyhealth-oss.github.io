@@ -169,7 +169,7 @@ test('journey guide image controls are detailed-mode only and fail closed on pri
  assert.ok(page.includes('id="visitStepsDetails"'),'Journey steps reuse the existing advanced section');
  assert.ok(script.includes('const JOURNEY_PHOTO_MAX=5'),'Each location has a strict five-photo cap');
  assert.ok(script.includes('function prepareJourneyImage(file)'),'Images are processed on-device');
- assert.ok(script.includes("canvas.toBlob(done,'image/jpeg',.82)"),'EXIF stripped by image recompression');
+ assert.ok(script.includes("canvas.toBlob(done,'image/jpeg',quality)"),'EXIF stripped by adaptive JPEG recompression');
  assert.ok(script.includes('makeStopGallery(stop'),'Each stop has its own photo gallery');
  assert.ok(script.includes('stop.instructions.push('),'Instruction substeps are editable');
  assert.ok(script.includes('clearJourneyDraft()'),'Draft reset must release private photos');
