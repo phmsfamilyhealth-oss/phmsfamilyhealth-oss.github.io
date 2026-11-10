@@ -155,7 +155,9 @@ try {
    await page.locator('.mode-choice[data-mode="full"]').click();
    // Journey location photos belong ONLY to detailed mode and have a separate 5-photo cap.
    const hospitalDetail=page.locator('#details > details').first();
-   if(!(await hospitalDetail.evaluate(el=>el.open)))await hospitalDetail.locator(':scope > summary').click();
+   const detailInitiallyOpen=await hospitalDetail.evaluate(el=>el.open);
+   if(!detailInitiallyOpen)await hospitalDetail.locator(':scope > summary').click();
+   console.log('PHMS_LOCATION_DETAIL_OPEN',JSON.stringify({before:detailInitiallyOpen,after:await hospitalDetail.evaluate(el=>el.open)}));
    const galleryDebug=await page.locator('#primaryJourneyGallery').evaluate(node=>{
     const list=[];let el=node;
     while(el&&list.length<13){
