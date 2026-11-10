@@ -112,18 +112,22 @@ try {
     const badge=summary.querySelector(':scope > .filled-indicator');
     const header=summary.getBoundingClientRect(),l=label?.getBoundingClientRect(),b=badge?.getBoundingClientRect();
     return {status:badge?.textContent?.trim(),shown:badge&&!badge.hidden,
+     labelText:label?.textContent?.trim(),labelFits:!!label&&label.scrollWidth<=label.clientWidth+1,
      flex:getComputedStyle(summary).display,headerHeight:header.height,
      badgeWithin:!!b&&b.left>=header.left&&b.right<=header.right+.5&&b.top>=header.top&&b.bottom<=header.bottom+.5,
      sameRow:!!l&&!!b&&Math.abs((l.top+l.bottom)/2-(b.top+b.bottom)/2)<3,
      badgeLeft:b?.left,labelRight:l?.right};
    });
    let statusLine=await getSummaryGeometry();
+   assert.equal(statusLine.labelText,'📋 เตรียมก่อนพบหมอ','Preparation heading uses the short, consistent Thai name');
+   assert.ok(statusLine.labelFits,'Preparation heading must be fully visible next to its badge on iPhone');
    assert.equal(statusLine.status,'มีข้อมูล','All disclosure badges use one exact label');
    assert.ok(statusLine.shown&&statusLine.flex==='flex'&&statusLine.badgeWithin&&statusLine.sameRow,'Status stays on the title line');
    assert.ok(statusLine.headerHeight<=70,'Disclosure must not gain a second badge row');
    await page.setViewportSize({width:320,height:700});
    statusLine=await getSummaryGeometry();
    assert.ok(statusLine.badgeWithin&&statusLine.sameRow&&statusLine.headerHeight<=70,'At 320px the badge stays on the same title row');
+   assert.ok(statusLine.labelFits,'At 320px preparation title must not be clipped');
    await page.setViewportSize({width:390,height:844});
    await page.locator('#simpleExtras summary').click();
    await page.locator('#prepChoiceGrid .prep-choice-card').nth(1).click();
