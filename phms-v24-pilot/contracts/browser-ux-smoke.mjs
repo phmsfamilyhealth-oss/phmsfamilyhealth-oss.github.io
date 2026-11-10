@@ -121,6 +121,14 @@ try {
    await page.locator('#documents').setInputFiles({name:'appointment-test.png',mimeType:'image/png',buffer:png});
    assert.equal(await page.locator('#appointmentPhotoList .appointment-photo-item').count(),1,'Photo is visible after selecting it');
    assert.equal((await page.locator('#appointmentPhotoList .phms-delete-face').first().textContent()).trim(),'ลบ');
+   const photoActionSizes=await page.locator('#appointmentPhotoList .appointment-photo-actions').evaluate(actions=>{
+    const view=actions.querySelector('.phms-photo-view').getBoundingClientRect();
+    const remove=actions.querySelector('.phms-delete-button').getBoundingClientRect();
+    return {viewWidth:view.width,deleteWidth:remove.width,viewHeight:view.height,deleteHeight:remove.height};
+   });
+   assert.ok(Math.abs(photoActionSizes.viewWidth-photoActionSizes.deleteWidth)<1,'Photo View and Delete must have equal width');
+   assert.ok(Math.abs(photoActionSizes.viewHeight-photoActionSizes.deleteHeight)<1,'Photo View and Delete must have equal height');
+   assert.ok(photoActionSizes.viewHeight>=44,'Photo actions remain accessible on iPhone');
    await page.locator('#appointmentPhotoList .phms-photo-view').click();
    assert.equal(await page.locator('#appointmentPhotoDialog').evaluate(el=>el.open),true,'Preview is not deletion');
    await page.locator('#closeAppointmentPhoto').click();
