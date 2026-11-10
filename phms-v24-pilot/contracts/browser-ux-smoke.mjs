@@ -140,7 +140,7 @@ try {
    assert.equal(buttonDimensions.text,'ลบ');
    assert.ok(buttonDimensions.hit>=44,'Delete touch target must be at least 44px high');
    assert.ok(buttonDimensions.pill<=34,'Visible delete pill should be compact');
-   assert.equal(buttonDimensions.bg,'rgb(255, 242, 243)','All delete pills use the same pink background');
+   assert.ok(['rgb(255, 242, 243)','rgb(252, 227, 231)'].includes(buttonDimensions.bg),'Delete pill uses the standard pink or its hovered shade');
    const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9VFYDj8AAAAASUVORK5CYII=','base64');
    await page.locator('#documents').setInputFiles({name:'appointment-test.png',mimeType:'image/png',buffer:png});
    assert.equal(await page.locator('#appointmentPhotoList .appointment-photo-item').count(),1,'Photo is visible after selecting it');
