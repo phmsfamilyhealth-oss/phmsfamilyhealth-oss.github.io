@@ -937,8 +937,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
 
 /* Mobile, read-only journey preview: separated from any editing form. */
-#editor .phms-journey-preview-actions{padding:10px 0 14px}
-#editor .phms-journey-preview-actions>button{min-height:48px!important;padding:10px 13px!important;width:100%!important;background:#f4e8d8!important;border:1px solid #c3a482!important;color:#4b3521!important;font-size:1rem!important}
 .phms-journey-elder-dialog{border:0;border-radius:17px;padding:18px;margin:auto;width:min(94vw,540px);max-height:min(90dvh,900px);box-sizing:border-box;overflow-y:auto;background:#fffefa;color:#28231e;box-shadow:0 20px 70px #271e1770;font-size:1rem;line-height:1.6}
 .phms-journey-elder-dialog::backdrop{background:rgba(29,26,24,.65)}
 .phms-journey-elder-heading h2{font-size:1.3rem;margin:0 0 4px;line-height:1.4}
@@ -1003,7 +1001,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <label for="contact_phone">เบอร์ติดต่อโรงพยาบาล (ถ้ามี)</label><input id="contact_phone" inputmode="tel" maxlength="40">
 </details>
 <details id="primaryLocationDetails">
- <summary>📍 จุดติดต่อหลัก (ถ้ามี)</summary>
+ <summary>📍 จุดติดต่อหลัก</summary>
  <div id="journeySavedTemplate" class="phms-journey-template-suggestion hidden" hidden>
   <p id="journeySavedTemplateSummary">มีเส้นทางที่ครอบครัวเคยบันทึกไว้</p>
   <button id="journeyApplyTemplate" type="button" class="secondary">🔁 ใช้เส้นทางเดิม</button>
@@ -1022,7 +1020,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </div>
 </details>
 <details id="visitStepsDetails" class="visit-steps-detail">
- <summary>🧭 ขั้นตอนในวันนัด (ถ้ามี)</summary>
+ <summary>🧭 ขั้นตอนในวันนัด</summary>
  <p class="help">เพิ่มเฉพาะขั้นตอนที่ระบุในใบนัด เช่น เจาะเลือด เอกซเรย์ หรือยื่นใบนัด</p>
  <div id="visitStepsList" aria-live="polite"></div>
  <button id="visitStepAdd" class="secondary" type="button">＋ เพิ่มขั้นตอน</button>
@@ -1036,10 +1034,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="journeySavePanel" class="phms-journey-template-save hidden" hidden>
  <button id="journeySaveTemplate" class="secondary" type="button">💾 บันทึกเส้นทางนี้ไว้ใช้ครั้งหน้า</button>
  <p id="journeySaveStatus" class="help" role="status">บันทึกเป็นเส้นทางประจำของครอบครัว ไม่เปลี่ยนทะเบียนโรงพยาบาล</p>
-</div>
-<div class="phms-journey-preview-actions">
- <button id="showJourneyElderPreview" class="secondary" type="button">👁️ ดูคำแนะนำสำหรับผู้ไปโรงพยาบาล</button>
- <p class="help">ดูตัวอย่างก่อนบันทึก รูปใน Pilot ยังไม่ซิงค์ข้ามเครื่อง</p>
 </div>
 <details><summary>🩺 เรื่องที่ติดตามรักษา</summary>
 <label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><p class="help">เลือกเรื่องที่เคยรักษา หรือพิมพ์เรื่องใหม่สำหรับนัดนี้ได้ (ยังไม่เพิ่มลงทะเบียนโรคกลาง)</p>
@@ -2093,16 +2087,6 @@ function buildElderJourneyViewer(){
  footer.textContent='ตำแหน่งและลำดับอาจเปลี่ยนได้ โปรดตรวจสอบกับใบนัดและเจ้าหน้าที่โรงพยาบาล';
  journeyElderDialog.append(head,close,list,footer);
 }
-$('showJourneyElderPreview').addEventListener('click',()=>{
- if(journeyNeedsReview){
-  $('journeySaveStatus').textContent='กรุณาตรวจสอบเส้นทางและรูปหลังเปลี่ยนโรงพยาบาลหรือแผนกก่อนเปิดดู';
-  $('primaryLocationDetails').open=true;
-  $('primaryLocationDetails').scrollIntoView({block:'start',behavior:'auto'});
-  return;
- }
- buildElderJourneyViewer();
- if(typeof journeyElderDialog.showModal==='function')journeyElderDialog.showModal();
-});
 journeyElderDialog.addEventListener('click',event=>{if(event.target===journeyElderDialog)journeyElderDialog.close();});
 
 let sourceAppointments=new Map();
