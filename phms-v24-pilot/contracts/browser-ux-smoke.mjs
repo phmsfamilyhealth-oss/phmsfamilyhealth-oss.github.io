@@ -224,8 +224,13 @@ try {
    await page.locator('#visitStepsList .visit-stop-card').first().locator('.visit-stop-heading button.phms-delete-button').click();
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),1,'One stop is removable without deleting the other');
    await page.waitForFunction(()=>!document.getElementById('journeySavePanel').hidden);
+   if(await page.locator('#journeyContextWarning').isVisible()){
+    await page.locator('#journeyKeepAfterReview').click();
+   }
    await page.locator('#journeySaveTemplate').click();
-   await page.waitForFunction(()=>document.getElementById('journeySaveStatus').textContent.includes('บันทึกเส้นทางประจำของครอบครัวแล้ว'));
+   await page.waitForTimeout(1200);
+   const saveStatus=await page.locator('#journeySaveStatus').textContent();
+   assert.match(saveStatus,/บันทึกเส้นทางประจำของครอบครัวแล้ว/,'Unexpected journey save status: '+saveStatus+'; actions='+journeyActions.map(x=>x.action).join(','));
    assert.equal(journeyActions.filter(x=>x.action==='template_save').length,1,'Authorized family route save is explicit');
    assert.equal(journeyActions.filter(x=>x.action==='photo_put').length,6,'Each of the six point photos uploaded individually');
    assert.equal(journeyActions.filter(x=>x.action==='photo_reorder').length,2,'Image ordering is rechecked before and after upload');
