@@ -125,6 +125,7 @@ try {
    assert.equal(await hospitalButtons.count(),2,'Synthetic authorized hospital cards must load');
    await hospitalButtons.nth(0).click();
    await page.waitForFunction(()=>document.getElementById('hospital_hn').value==='HN-TEST-A');
+   if(!(await page.locator('#providerExtras').evaluate(x=>x.open)))await page.locator('#providerExtras > summary').click();
    await page.locator('#unitQuickCards .adaptive-provider-choice:not(.adaptive-provider-more)').first().click();
    await page.waitForFunction(()=>document.getElementById('location_detail').value==='อาคาร A ชั้น 2 ช่องยื่นใบนัด');
    assert.match(await page.locator('#hospitalLocationSyncNote').textContent(),/ทะเบียนแผนก/,'Verified master location has provenance');
