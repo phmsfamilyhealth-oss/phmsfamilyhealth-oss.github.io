@@ -209,6 +209,9 @@ try {
    assert.equal(await stops.nth(1).locator('input[aria-label^="วิธีทำข้อ"]').first().inputValue(),'กดบัตรคิว','Substep follows its parent');
    assert.deepEqual(await stopNames.evaluateAll(xs=>xs.map(x=>x.value)),['เอกซเรย์','เจาะเลือด']);
    assert.deepEqual(await stopNames.evaluateAll(xs=>xs.map(x=>x.value)),['เอกซเรย์','เจาะเลือด']);
+   // A different hospital's route must not be displayed until the caregiver reviews it.
+   assert.ok(await page.locator('#journeyContextWarning').isVisible(),'Changing hospital requires route review');
+   await page.locator('#journeyKeepAfterReview').click();
    // Patient/carer preview is read-only and keeps progress separate from the editable draft.
    await page.locator('#showJourneyElderPreview').click();
    const viewer=page.locator('#journeyElderPreviewDialog');
