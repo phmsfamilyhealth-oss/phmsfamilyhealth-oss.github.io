@@ -1092,6 +1092,7 @@ function drawAdaptiveProviderCards(kind,choices){
  ui.search.placeholder=kind==='hospital'?'🔎 ค้นหาหรือพิมพ์ชื่อโรงพยาบาล':'🔎 ค้นหาหรือพิมพ์ชื่อแผนกใหม่';
 
 }
+let lastHnSelectedOrganizationId='';
 function refreshProviderPicker(changed=''){
  const org=document.getElementById('providerOrg').value,unit=changed==='providerOrg'?'':document.getElementById('providerUnit').value,clinician=(changed==='providerOrg'||changed==='providerUnit')?'':document.getElementById('providerClinician').value;
  if(changed==='providerOrg'||changed==='providerUnit'){comboState.clinician.selectedItem=null;comboState.clinician.searchText='';document.getElementById('clinicianSearch').value='';document.getElementById('doctor').value='';closeCombo('clinician');}
@@ -1104,6 +1105,14 @@ function refreshProviderPicker(changed=''){
  drawAdaptiveProviderCards('hospital',state.organizations);
  drawAdaptiveProviderCards('unit',state.units);
  document.getElementById('doctorHint').textContent=state.clinicians.length?'เลือกชื่อแพทย์จากทะเบียนหรือข้ามได้':'ไม่มีชื่อแพทย์ในทะเบียน — เว้นว่างได้';
+ // Cards and search set the hidden organization ID programmatically; a native change
+ // event is not fired by .value=. Notify the authorized HN synchronizer exactly
+ // once per actual hospital switch (including switching to an unregistered name).
+ const resolvedOrganizationId=document.getElementById('providerOrg').value;
+ if(resolvedOrganizationId!==lastHnSelectedOrganizationId){
+  lastHnSelectedOrganizationId=resolvedOrganizationId;
+  document.getElementById('providerOrg').dispatchEvent(new Event('change',{bubbles:true}));
+ }
 }
 function selectedClinicianId(){return document.getElementById('providerClinician').value;}
 for(const kind of ['hospital','unit','clinician']){const input=document.getElementById(kind+'Search');input.addEventListener('input',e=>{if(e.isComposing)return;const state=comboState[kind],select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');state.searchText=input.value;state.selectedItem=null;state.isOpen=true;select.value='';if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});input.addEventListener('focus',()=>{comboState[kind].searchText=input.value;comboState[kind].isOpen=true;refreshProviderPicker();});input.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCombo(kind);return;}if(e.key==='ArrowDown'){e.preventDefault();document.getElementById(kind+'SearchResults').querySelector('button:not(:disabled)')?.focus();}if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){const first=document.getElementById(kind+'SearchResults').querySelector('button:not(:disabled)');if(first){e.preventDefault();first.click();}}});}
@@ -2225,30 +2234,73 @@ new MutationObserver(updateConnectionBanner).observe(connectionBanner,{childList
 updateConnectionBanner();
 updateProgressiveLayout();refresh();syncChoiceCards();
 </script><script type="module">
+// HN belongs to one PERSON + one HOSPITAL; VN belongs to one VISIT.
+// The protected read API enforces person-scoped access before releasing identifiers.
 try{
- const person=document.getElementById('personSelect'),org=document.getElementById('providerOrg'),hn=document.getElementById('hospital_hn');
- if(person&&org&&hn){
-  const note=document.createElement('p');note.className='help';note.textContent='เลือกบุคคลและโรงพยาบาลเพื่อค้นหา HN';hn.after(note);
-  let counter=0,key='',manual=false;
-  hn.addEventListener('input',()=>{manual=true;note.textContent='HN ที่กรอกเองจะไม่เพิ่มเข้าทะเบียนกลาง';});
+ const person=document.getElementById('personSelect');
+ const org=document.getElementById('providerOrg');
+ const hn=document.getElementById('hospital_hn');
+ const vn=document.getElementById('hospital_vn');
+ if(person&&org&&hn&&vn){
+  const note=document.createElement('p');note.className='help';
+  note.id='hospitalHnSyncNote';note.setAttribute('role','status');
+  note.textContent='เลือกบุคคลและโรงพยาบาล ระบบจะค้นหา HN ให้';
+  hn.after(note);
+  const vnNote=document.createElement('p');vnNote.className='help';
+  vnNote.id='hospitalVnVisitNote';
+  vnNote.textContent='VN เป็นเลขการมารับบริการครั้งนี้ หากยังไม่ได้รับเลขให้เว้นว่าง';
+  vn.after(vnNote);
+  let generation=0,selectedKey='',manual=false;
+  hn.addEventListener('input',()=>{
+   manual=true;
+   note.textContent='HN ที่แก้ไขใช้เฉพาะนัดนี้ ไม่เปลี่ยนทะเบียนกลาง';
+  });
   const update=async()=>{
-   const nextKey=person.value+'|'+org.value,iteration=++counter;
-   if(key!==nextKey){key=nextKey;manual=false;hn.value='';}
-   if(!person.value||!org.value){note.textContent='เลือกบุคคลและโรงพยาบาลเพื่อค้นหา HN';return;}
-   note.textContent='กำลังค้นหา HN…';
+   const personId=person.value,organizationId=org.value;
+   const nextKey=personId+'|'+organizationId,iteration=++generation;
+   if(selectedKey!==nextKey){
+    selectedKey=nextKey;manual=false;hn.value='';
+    vn.value=''; // Never carry a previous visit number to another person or hospital.
+   }
+   if(!personId||!organizationId){
+    note.textContent='เลือกบุคคลและโรงพยาบาล ระบบจะค้นหา HN ให้';
+    return;
+   }
+   if(manual)return; // A deliberate edit wins over an in-flight or repeated lookup.
+   note.textContent='กำลังค้นหา HN จากทะเบียน…';
    const token=window.liff?.getIDToken?.();
-   if(!token){note.textContent='สามารถกรอก HN เองได้';return;}
+   const endpoint=document.querySelector('meta[name="phms-read-api"]')?.content;
+   if(!token||!endpoint){
+    note.textContent='ยังไม่เชื่อมต่อทะเบียน สามารถกรอก HN สำหรับนัดนี้ได้';
+    return;
+   }
    try{
-    const endpoint=document.querySelector('meta[name="phms-read-api"]')?.content;
-    const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},body:JSON.stringify({action:'provider_catalog',selectedPersonCode:person.value})});
+    const response=await fetch(endpoint,{
+     method:'POST',
+     headers:{'content-type':'application/json',authorization:'Bearer '+token},
+     body:JSON.stringify({action:'provider_catalog',selectedPersonCode:personId})
+    });
     const data=await response.json();
-    if(iteration!==counter||manual||!response.ok||data.ok!==true)return;
-    const match=data.catalog?.personHospitalHns?.find(item=>item.organizationId===org.value);
-    if(match?.value){hn.value=match.value;note.textContent=match.verified?'เติม HN จากทะเบียนแล้ว':'เติม HN แล้ว โปรดตรวจสอบกับบัตรโรงพยาบาล';}
-    else note.textContent='ไม่พบ HN ในทะเบียน สามารถกรอกเองได้';
-   }catch{if(iteration===counter)note.textContent='ค้นหา HN ไม่สำเร็จ สามารถกรอกเองได้';}
+    if(iteration!==generation||selectedKey!==person.value+'|'+org.value||manual)return;
+    if(!response.ok||data?.ok!==true){
+     note.textContent='ไม่สามารถโหลด HN ได้ สามารถกรอกเลขสำหรับนัดนี้เอง';
+     return;
+    }
+    const matches=(data.catalog?.personHospitalHns||[]).filter(item=>item.organizationId===organizationId&&typeof item.value==='string'&&item.value.trim());
+    if(matches.length===1){
+     hn.value=matches[0].value.trim();
+     note.textContent=matches[0].verified
+      ?'เติม HN จากทะเบียนกลางแล้ว (แก้ไขเฉพาะนัดนี้ได้)'
+      :'เติม HN จากทะเบียนกลางแล้ว โปรดตรวจสอบกับบัตรโรงพยาบาล';
+    }else{
+     note.textContent='ยังไม่พบ HN ในทะเบียนกลาง สามารถกรอกสำหรับนัดนี้เองได้';
+    }
+   }catch{
+    if(iteration===generation&&!manual)note.textContent='ค้นหา HN ไม่สำเร็จ สามารถกรอกเองได้';
+   }
   };
-  person.addEventListener('change',update);org.addEventListener('change',update);
+  person.addEventListener('change',update);
+  org.addEventListener('change',update);
   if(person.value&&org.value)update();
  }
 }catch(error){console.warn('hn_optional_unavailable',error);}
