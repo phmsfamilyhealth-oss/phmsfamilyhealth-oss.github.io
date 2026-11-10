@@ -79,3 +79,19 @@ jobs:
             grep -q 'unauthenticated' /tmp/phms-read-response
           done
 
+      - name: Verify private journey API is fail-closed and rejects anonymous access
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-journey-guide'
+          for action in template_get template_save photo_put photo_delete; do
+            status=$(curl --silent --show-error --location --max-time 20 -o /tmp/phms-journey-response -w '%{http_code}' -X POST -H 'content-type: application/json' -d "{\"action\":\"$action\"}" "$url")
+            echo "Unauthorized journey $action status: $status"
+            test "$status" = '401'
+            grep -q 'unauthenticated' /tmp/phms-journey-response
+          done
+          forbidden=$(curl --silent --show-error --max-time 20 -o /tmp/phms-journey-response -w '%{http_code}' -X OPTIONS -H 'origin: https://attacker.invalid' "$url")
+          test "$forbidden" = '403'
+          fake=$(curl --silent --show-error --max-time 20 -o /tmp/phms-journey-response -w '%{http_code}' -X POST -H 'content-type: application/json' -H 'authorization: Bearer fake-id-token' -d '{"action":"template_save"}' "$url")
+          test "$fake" = '404'
+          grep -q 'feature_not_released' /tmp/phms-journey-response
