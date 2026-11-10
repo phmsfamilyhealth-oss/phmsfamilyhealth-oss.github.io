@@ -1829,7 +1829,8 @@ function renderVisitStops(){
 }
 function hasJourneyDetails(){
  return primaryJourney.photos.length>0||visitStops.length>0||
- !!$('location_directions').value.trim()||!!$('location_note').value.trim();
+ !!$('location_directions').value.trim()||!!$('location_note').value.trim()||
+ ($('location_detail').dataset.phmsSource==='manual'&&!!$('location_detail').value.trim());
 }
 function refreshJourneyWarning(){
  const n=$('journeyContextWarning');n.hidden=!journeyNeedsReview;
@@ -1889,7 +1890,11 @@ $('journeyApplyTemplate').addEventListener('click',async()=>{
   instructions:Array.isArray(raw.instructions)?raw.instructions.slice(0,15):[],
   photos:[],coverId:null
  }));
- const gen=journeyImageGeneration,photos=Array.isArray(template.photos)?template.photos:[];
+ const gen=journeyImageGeneration,orgAtApply=$('providerOrg').value,
+  unitAtApply=$('providerUnit').value,
+  photos=Array.isArray(template.photos)?template.photos:[];
+ const current=()=>gen===journeyImageGeneration&&orgAtApply===$('providerOrg').value&&
+  unitAtApply===$('providerUnit').value;
  let loaded=0,errors=0;
  for(const photo of photos){
   try{
@@ -1900,13 +1905,13 @@ $('journeyApplyTemplate').addEventListener('click',async()=>{
    if(!res.ok)throw Error('photo_unavailable');
    const blob=await res.blob();
    if(blob.type!=='image/jpeg'||blob.size>JOURNEY_FILE_BYTES_MAX)throw Error('bad_photo');
-   if(gen!==journeyImageGeneration)return;
+   if(!current())return;
    const image={id:crypto.randomUUID(),name:String(photo.fileName||'รูปสถานที่').slice(0,200),
     caption:String(photo.caption||'').slice(0,140),blob,url:URL.createObjectURL(blob)};
    target.photos.push(image);target.coverId??=image.id;loaded++;
   }catch{errors++;}
  }
- if(gen!==journeyImageGeneration)return;
+ if(!current())return;
  renderMainJourneyPhotos();renderVisitStops();
  journeyNeedsReview=true;refreshJourneyWarning();
  $('primaryLocationDetails').open=true;
@@ -2850,7 +2855,8 @@ try{
    hnManual=true;note.textContent='HN ที่แก้ไขใช้เฉพาะนัดนี้ ไม่เปลี่ยนทะเบียนกลาง';
   });
   location.addEventListener('input',()=>{
-   locationManual=true;locNote.textContent='ใช้จุดติดต่อที่แก้ไขสำหรับนัดนี้ ไม่เปลี่ยนทะเบียนกลาง';
+   locationManual=true;location.dataset.phmsSource='manual';
+   locNote.textContent='ใช้จุดติดต่อที่แก้ไขสำหรับนัดนี้ ไม่เปลี่ยนทะเบียนกลาง';
   });
   const trim=x=>typeof x==='string'?x.trim():'';
   const makeLocation=(record)=>{
