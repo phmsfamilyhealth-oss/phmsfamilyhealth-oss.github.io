@@ -806,6 +806,72 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  }
 }
 
+
+/* PHMS OPTIONAL STATUS STANDARD v1 — every status reads "มีข้อมูล" and stays
+   on the SAME row as its title, never floating below or overlapping the border.
+   Label takes remaining space; full title retained for VoiceOver. */
+#editor #appointmentFlow details>summary.phms-summary-status-line,
+#editor #details>details#simpleExtras>summary.phms-summary-status-line,
+#editor #extrasFlow #details>details>summary.phms-summary-status-line,
+#editor #mainFlow #providerExtras>summary.phms-summary-status-line{
+ box-sizing:border-box!important;display:flex!important;flex-direction:row!important;
+ flex-wrap:nowrap!important;align-items:center!important;gap:8px!important;
+ width:100%!important;min-width:0!important;min-height:58px!important;
+ padding:10px 0!important;margin:0!important;line-height:1.45!important;
+ list-style:none!important;list-style-position:outside!important;
+ font-size:1rem!important;font-weight:700!important;text-align:left!important;
+ color:#29241e!important;cursor:pointer!important
+}
+#editor summary.phms-summary-status-line::-webkit-details-marker{display:none!important}
+#editor summary.phms-summary-status-line::marker{content:""!important}
+#editor #appointmentFlow summary.phms-summary-status-line::before,
+#editor #details>details#simpleExtras>summary.phms-summary-status-line::before,
+#editor #mainFlow #providerExtras>summary.phms-summary-status-line::before{
+ content:"▸"!important;display:block!important;flex:0 0 16px!important;
+ width:16px!important;margin:0!important;color:#29241e!important;
+ font-size:1rem!important;line-height:1!important;text-align:center!important
+}
+#editor #appointmentFlow details[open]>summary.phms-summary-status-line::before,
+#editor #details>details#simpleExtras[open]>summary.phms-summary-status-line::before{
+ content:"▾"!important
+}
+#editor #appointmentFlow summary.phms-summary-status-line>.phms-summary-label,
+#editor #details>details#simpleExtras>summary.phms-summary-status-line>.phms-summary-label,
+#editor #mainFlow #providerExtras>summary.phms-summary-status-line>.phms-summary-label{
+ display:block!important;box-sizing:border-box!important;
+ flex:1 1 auto!important;min-width:0!important;margin:0!important;padding:0!important;
+ overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+ font-size:inherit!important;line-height:1.45!important;font-weight:inherit!important;
+ color:inherit!important
+}
+#editor #appointmentFlow summary.phms-summary-status-line>.filled-indicator,
+#editor #details>details#simpleExtras>summary.phms-summary-status-line>.filled-indicator,
+#editor #mainFlow #providerExtras>summary.phms-summary-status-line>.filled-indicator{
+ box-sizing:border-box!important;display:inline-flex!important;position:static!important;
+ float:none!important;clear:none!important;align-items:center!important;justify-content:center!important;
+ flex:0 0 auto!important;align-self:center!important;
+ height:auto!important;min-height:0!important;max-width:none!important;
+ margin:0 0 0 auto!important;padding:4px 8px!important;
+ border:0!important;border-radius:8px!important;
+ color:#5c452e!important;background:#f4ecdf!important;
+ font-size:.75rem!important;line-height:1.4!important;font-weight:650!important;
+ white-space:nowrap!important
+}
+#editor #appointmentFlow summary.phms-summary-status-line>.filled-indicator[hidden],
+#editor #details>details#simpleExtras>summary.phms-summary-status-line>.filled-indicator[hidden]{display:none!important}
+/* Remove the old collapsed card's 12px bottom padding that looked like a blank second line. */
+#editor #appointmentFlow details.phms-status-panel:not([open]),
+#editor #details>details#simpleExtras.phms-status-panel:not([open]){
+ box-sizing:border-box!important;height:auto!important;min-height:58px!important;
+ padding:0 12px!important;overflow:visible!important
+}
+#editor .prep-choice-card .prep-choice-filled{margin-top:4px!important}
+@media(max-width:380px){
+ #editor #appointmentFlow details>summary.phms-summary-status-line,
+ #editor #details>details#simpleExtras>summary.phms-summary-status-line{gap:6px!important;font-size:.96rem!important}
+ #editor #appointmentFlow summary.phms-summary-status-line>.filled-indicator{font-size:.72rem!important;padding:3px 6px!important}
+}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1730,7 +1796,7 @@ for(const choice of prepChoices){
  const button=document.createElement('button');button.type='button';button.className='prep-choice-card';button.setAttribute('aria-pressed','false');
  const title=document.createElement('strong');title.textContent=choice.icon+' '+choice.title;
  const hint=document.createElement('small');hint.textContent=choice.hint;
- const indicator=document.createElement('span');indicator.className='prep-choice-filled hidden';indicator.textContent='มีข้อมูลแล้ว';
+ const indicator=document.createElement('span');indicator.className='prep-choice-filled hidden';indicator.textContent='มีข้อมูล';
  button.append(title,hint,indicator);prepChoiceGrid.append(button);prepButtons[choice.key]={button,indicator};
  const section=document.createElement('section');section.id='prepSection-'+choice.key;section.className='prep-choice-content hidden';prepSections[choice.key]=section;
  button.setAttribute('aria-controls',section.id);
@@ -1760,7 +1826,7 @@ function updatePrepChoices(){
   const key=choice.key,active=prepOpen.has(key);
   prepSections[key].classList.toggle('hidden',!active);
   prepButtons[key].button.setAttribute('aria-pressed',String(active));
-  prepButtons[key].indicator.textContent=key==='things'?'มี '+checklistItems.length+' รายการ':'มีข้อมูลแล้ว';
+  prepButtons[key].indicator.textContent='มีข้อมูล';
   prepButtons[key].indicator.classList.toggle('hidden',!filled[key]);
  }
 }
@@ -1967,25 +2033,38 @@ function updateRequiredFieldStatus(){
  missingFields.classList.toggle('is-complete',missing.length===0);
 }
 const optionalPanels=[providerExtras,simpleExtras,outcome,outcomeExtras,linkedDisclosure,...Array.from(detailed.querySelectorAll('details'))];
+// Keep one badge and one label row in every optional disclosure, including on iPhone.
+function ensurePhmsStatusSummary(summary){
+ summary.classList.add('phms-summary-status-line');
+ const panel=summary.parentElement;
+ if(panel)panel.classList.add('phms-status-panel');
+ let label=summary.querySelector(':scope > .phms-summary-label');
+ if(!label){
+  label=document.createElement('span');label.className='phms-summary-label';
+  const badge=summary.querySelector(':scope > .filled-indicator');
+  for(const node of [...summary.childNodes]){
+   if(node!==badge)label.append(node);
+  }
+  summary.insertBefore(label,badge||null);
+ }
+ let badge=summary.querySelector(':scope > .filled-indicator');
+ if(!badge){
+  badge=document.createElement('span');badge.className='filled-indicator';summary.append(badge);
+ }
+ return {label,badge};
+}
 function updateFilledIndicators(){
  for(const panel of optionalPanels){
   const summary=panel.querySelector(':scope > summary');if(!summary)continue;
-  let badge=summary.querySelector('.filled-indicator');
-  if(!badge){badge=document.createElement('span');badge.className='filled-indicator';badge.textContent='มีข้อมูลแล้ว';summary.append(badge);}
+  const {label,badge}=ensurePhmsStatusSummary(summary);
   const filled=Array.from(panel.querySelectorAll('input:not([type=hidden]),textarea,select')).some(el=>{
    if(el.disabled||el.type==='file')return false;
    return el.tagName==='SELECT'?!!el.value:!!String(el.value||'').trim();
-  });
-  if(panel===providerExtras){
-   badge.textContent='มีข้อมูล';
-   panel.classList.toggle('has-provider-data',filled);
-  }
-  if(panel===simpleExtras){
-   const prepCount=checklistItems.length+Number(!!$('previsitSymptoms').value.trim())+
-    Number(!!examPrepChoice.value||!!examPrepDetails.value.trim())+Number(!!$('additionalNote').value.trim());
-   badge.textContent=prepCount?'มี '+prepCount+' รายการ':'มีข้อมูลแล้ว';
-  }
+  }) || (panel===simpleExtras&&checklistItems.length>0);
+  panel.classList.toggle('has-provider-data',panel===providerExtras&&filled);
+  badge.textContent='มีข้อมูล';
   badge.hidden=!filled;
+  summary.setAttribute('aria-label',(label.textContent||'').trim()+(filled?' มีข้อมูล':''));
  }
 }
 function updateProgressiveLayout(){
