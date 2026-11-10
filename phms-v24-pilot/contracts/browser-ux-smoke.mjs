@@ -51,10 +51,14 @@ try {
       :{ok:true,items:[]};
    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:JSON.stringify(body)});
   });
-  // New-path fallback bypasses cached in-app HTML while preserving relative ES modules.
-  const versioned=await page.request.get(base.replace('/index.html','/index-photo-equal-20261110.html'));
-  assert.equal(versioned.status(),200,'Versioned UI entrypoint must exist');
-  assert.ok((await versioned.text()).includes('name="phms-photo-ui" content="paired-v2-20261110"'),'Versioned entrypoint must contain the new photo layout');
+  // An older versioned test URL must forward to live HTML, not freeze an outdated UI.
+  const aliasUrl=base.replace('/index.html','/index-photo-equal-20261110.html');
+  const versioned=await page.request.get(aliasUrl);
+  assert.equal(versioned.status(),200,'Compatibility URL must exist');
+  const aliasHtml=await versioned.text();
+  assert.ok(aliasHtml.includes('name="phms-forward-to-canonical" content="index.html"'),'Old test link must forward to the canonical form');
+  assert.ok(aliasHtml.includes("canonical.search=window.location.search"),'Forwarding must preserve LINE person context');
+  assert.ok(aliasHtml.includes("window.location.replace(canonical.href)"),'Old test link must not serve a stale copy');
   const url=base+(scenario==='line-selected'?'?member='+member:'');
   await page.goto(url,{waitUntil:'load'});
   await page.waitForTimeout(1400);
