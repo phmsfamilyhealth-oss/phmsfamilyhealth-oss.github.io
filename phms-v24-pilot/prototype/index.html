@@ -983,7 +983,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <details id="hospitalLocationDetails"><summary>🏥 ข้อมูลโรงพยาบาลเพิ่มเติม</summary>
 <label for="hospital_hn">เลข HN (ถ้ามี)</label><input id="hospital_hn" maxlength="80">
 <label for="hospital_vn">เลข VN (ถ้ามี)</label><input id="hospital_vn" maxlength="80">
-<label for="location_detail">📍 จุดติดต่อหลัก (ถ้ามี)</label><input id="location_detail" maxlength="240" placeholder="เช่น อาคารผู้ป่วยนอก ชั้น 2 จุดยื่นใบนัด">
+<label for="contact_phone">เบอร์ติดต่อโรงพยาบาล (ถ้ามี)</label><input id="contact_phone" inputmode="tel" maxlength="40">
+</details>
+<details id="primaryLocationDetails">
+ <summary>📍 จุดติดต่อหลัก (ถ้ามี)</summary>
+ <label for="location_detail">สถานที่ / จุดยื่นใบนัด</label><input id="location_detail" maxlength="240" placeholder="เช่น อาคารผู้ป่วยนอก ชั้น 2 จุดยื่นใบนัด">
 <label for="location_directions">🚶 วิธีเดินไป (ถ้าทราบ)</label><textarea id="location_directions" maxlength="600" rows="2" placeholder="เช่น เข้าประตู 2 ขึ้นลิฟต์ฝั่งขวาไปชั้น 2"></textarea>
 <label for="location_note">📝 หมายเหตุจุดติดต่อ (ถ้ามี)</label><textarea id="location_note" maxlength="600" rows="2" placeholder="เช่น จุดนี้ใช้สำหรับยื่นใบนัดก่อนพบแพทย์"></textarea>
 <div class="phms-journey-photo-section" id="primaryJourneyPhotos">
@@ -994,7 +998,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  <button id="primaryJourneyAddPhoto" type="button" class="secondary phms-journey-add-photo">＋ เพิ่มรูปสถานที่</button>
  <p id="primaryJourneyPhotoStatus" class="help" role="status">รูปยังอยู่ในร่างทดลอง และยังไม่บันทึกลงระบบกลาง</p>
 </div>
-<label for="contact_phone">เบอร์ติดต่อโรงพยาบาล</label><input id="contact_phone" inputmode="tel" maxlength="40"></details>
+</details>
 <details id="visitStepsDetails" class="visit-steps-detail">
  <summary>🧭 ขั้นตอนในวันนัด (ถ้ามี)</summary>
  <p class="help">เพิ่มเฉพาะขั้นตอนที่ระบุในใบนัด เช่น เจาะเลือด เอกซเรย์ หรือยื่นใบนัด</p>
