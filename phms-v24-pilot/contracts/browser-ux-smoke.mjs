@@ -47,7 +47,15 @@ try {
    const body=data.action==='person_options'
     ?{ok:true,people:[{id:member,name:'ยายปุ'}],activePersonId:scenario==='line-selected'?member:null}
     :data.action==='provider_catalog'
-      ?{ok:true,catalog:{organizations:[],units:[],clinicians:[]}}
+      ?{ok:true,catalog:{
+       organizations:[
+        {id:'22222222-2222-4222-8222-222222222221',name:'โรงพยาบาลทดสอบ ก',display_name:'รพ.ทดสอบ ก'},
+        {id:'22222222-2222-4222-8222-222222222222',name:'โรงพยาบาลทดสอบ ข',display_name:'รพ.ทดสอบ ข'}],
+       units:[],clinicians:[],
+       personHospitalHns:[
+        {organizationId:'22222222-2222-4222-8222-222222222221',value:'HN-TEST-A',verified:true},
+        {organizationId:'22222222-2222-4222-8222-222222222222',value:'HN-TEST-B',verified:false}
+       ]}}
       :{ok:true,items:[]};
    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:JSON.stringify(body)});
   });
@@ -107,6 +115,22 @@ try {
   assert.equal(await page.locator('#prepItems .checklist-row input[type="checkbox"]:checked').count(),0,'Initial items must be pending, not completed');
   if(scenario==='line-selected'){
    await page.locator('#scenarioFlow .scenario-option[data-scenario="booked"]').click();
+   // Hospital picker sets a hidden select programmatically. It must still trigger HN sync.
+   const hospitalButtons=page.locator('#hospitalQuickCards .adaptive-provider-choice:not(.adaptive-provider-more)');
+   assert.equal(await hospitalButtons.count(),2,'Synthetic authorized hospital cards must load');
+   await hospitalButtons.nth(0).click();
+   await page.waitForFunction(()=>document.getElementById('hospital_hn').value==='HN-TEST-A');
+   assert.equal(await page.locator('#hospital_vn').inputValue(),'','VN starts blank for each new visit');
+   await page.locator('#hospital_vn').evaluate(input=>{input.value='VN-FROM-FIRST-VISIT';input.dispatchEvent(new Event('input',{bubbles:true}));});
+   await hospitalButtons.nth(1).click();
+   await page.waitForFunction(()=>document.getElementById('hospital_hn').value==='HN-TEST-B');
+   assert.equal(await page.locator('#hospital_vn').inputValue(),'','Switching hospital clears the previous visit number');
+   await page.locator('#hospital_hn').evaluate(input=>{input.value='HN-CORRECTED-IN-DRAFT';input.dispatchEvent(new Event('input',{bubbles:true}));});
+   await page.waitForTimeout(200);
+   assert.equal(await page.locator('#hospital_hn').inputValue(),'HN-CORRECTED-IN-DRAFT','Manual HN override must not be overwritten');
+   await hospitalButtons.nth(0).click();
+   await page.waitForFunction(()=>document.getElementById('hospital_hn').value==='HN-TEST-A');
+   assert.equal(await page.locator('#hospital_vn').inputValue(),'','Returning to a hospital must not restore a stale VN');
    const getSummaryGeometry=async()=>page.locator('#simpleExtras>summary').evaluate(summary=>{
     const label=summary.querySelector(':scope > .phms-summary-label');
     const badge=summary.querySelector(':scope > .filled-indicator');
