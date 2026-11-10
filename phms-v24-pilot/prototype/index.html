@@ -971,6 +971,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor .phms-journey-template-save>button{width:100%!important;min-height:48px!important;padding:10px 12px!important;border-radius:10px!important;background:#f0dfc9!important;color:#4d3624!important;border:1px solid #c7a37d!important}
 #editor .phms-journey-template-save .help{margin:8px 0 0!important}
 
+
+#editor .phms-simple-journey-view{padding:12px;border:1px solid #d4b797;border-radius:12px;background:#fffaf2;margin:10px 0}
+#editor .phms-simple-journey-view.hidden,#editor .phms-simple-journey-view[hidden]{display:none!important}
+#editor .phms-simple-journey-view>button{width:100%!important;min-height:48px!important;padding:10px 14px!important;background:#f1e2ce!important;color:#4b3521!important;border:1px solid #bd9c78!important}
+#editor .phms-simple-journey-view>p{margin:7px 0 0!important;line-height:1.45!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1852,6 +1857,7 @@ function hasJourneyDetails(){
 function refreshJourneyWarning(){
  const n=$('journeyContextWarning');n.hidden=!journeyNeedsReview;
  n.classList.toggle('hidden',!journeyNeedsReview);
+ if(document.getElementById('simpleJourneyGuide'))updateSimpleJourneyGuide();
 }
 $('journeyKeepAfterReview').addEventListener('click',()=>{journeyNeedsReview=false;refreshJourneyWarning();});
 $('journeyClearOldRoute').addEventListener('click',()=>{
@@ -2088,6 +2094,12 @@ function buildElderJourneyViewer(){
  journeyElderDialog.append(head,close,list,footer);
 }
 $('showJourneyElderPreview').addEventListener('click',()=>{
+ if(journeyNeedsReview){
+  $('journeySaveStatus').textContent='กรุณาตรวจสอบเส้นทางและรูปหลังเปลี่ยนโรงพยาบาลหรือแผนกก่อนเปิดดู';
+  $('primaryLocationDetails').open=true;
+  $('primaryLocationDetails').scrollIntoView({block:'start',behavior:'auto'});
+  return;
+ }
  buildElderJourneyViewer();
  if(typeof journeyElderDialog.showModal==='function')journeyElderDialog.showModal();
 });
@@ -2427,6 +2439,43 @@ timeSection.append($('timebox'),conflictNotice,$('appointmentPhotosSection'));
 const extrasSection=makeFlowSection('extrasFlow','4. เพิ่มเติม (ถ้ามี)');flowRoot.append(extrasSection);
 // Detailed-mode categories; never clone patient inputs or create alternate state.
 const detailed=$('details');extrasSection.append(detailed);
+// A read-only guide is accessible from BOTH modes; editing stays in Detailed mode.
+const simpleJourneyGuide=document.createElement('section');
+simpleJourneyGuide.id='simpleJourneyGuide';simpleJourneyGuide.className='phms-simple-journey-view hidden';
+simpleJourneyGuide.hidden=true;
+const simpleJourneyOpen=document.createElement('button');
+simpleJourneyOpen.type='button';simpleJourneyOpen.id='simpleJourneyOpen';
+simpleJourneyOpen.className='secondary';
+simpleJourneyOpen.textContent='🧭 ดูทางไปจุดนัดหมาย';
+const simpleJourneyHint=document.createElement('p');
+simpleJourneyHint.id='simpleJourneyHint';simpleJourneyHint.className='help';
+simpleJourneyGuide.append(simpleJourneyOpen,simpleJourneyHint);
+extrasSection.append(simpleJourneyGuide);
+simpleJourneyOpen.addEventListener('click',()=>{
+ if(journeyNeedsReview){
+  $('detail').value='full';updateProgressiveLayout();
+  $('primaryLocationDetails').open=true;
+  $('primaryLocationDetails').scrollIntoView({block:'start',behavior:'auto'});
+  return;
+ }
+ buildElderJourneyViewer();
+ if(typeof journeyElderDialog.showModal==='function')journeyElderDialog.showModal();
+});
+function updateSimpleJourneyGuide(){
+ const hasRoute=!!$('location_detail').value.trim()||hasJourneyDetails();
+ const visible=$('detail').value==='simple'&&hasRoute&&
+  !!$('personSelect').value&&scenarioChoiceMade;
+ simpleJourneyGuide.hidden=!visible;simpleJourneyGuide.classList.toggle('hidden',!visible);
+ simpleJourneyOpen.textContent=journeyNeedsReview
+  ?'⚠️ ตรวจสอบเส้นทางก่อนใช้':'🧭 ดูทางไปจุดนัดหมาย';
+ simpleJourneyHint.textContent=journeyNeedsReview
+  ?'มีการเปลี่ยนโรงพยาบาลหรือแผนก กรุณาตรวจสอบสถานที่และรูปก่อนดู'
+  :'เปิดดูสถานที่และรูปประกอบได้ ไม่ต้องกรอกข้อมูลเพิ่ม';
+}
+for(const id of ['location_detail','location_directions','location_note']){
+ $(id).addEventListener('input',updateSimpleJourneyGuide);
+ $(id).addEventListener('change',updateSimpleJourneyGuide);
+}
 // Optional pre-examination instructions. This is pilot-only until the backend contract supports it.
 const examPrepPanel=document.createElement('details');examPrepPanel.id='examPrepPanel';
 const examPrepSummary=document.createElement('summary');examPrepSummary.textContent='🥣 คำสั่งเตรียมตัวจากโรงพยาบาล';
@@ -2769,7 +2818,7 @@ function updateProgressiveLayout(){
  if(mode!=='historical')linkedDisclosure.open=false;
  if(simple&&mode==='walk_in')$('checklistBox').classList.add('simple-walkin-checklist');
  else $('checklistBox').classList.remove('simple-walkin-checklist');
- syncPickerPrompts();updateFilledIndicators();updateRequiredFieldStatus();
+ syncPickerPrompts();updateFilledIndicators();updateRequiredFieldStatus();updateSimpleJourneyGuide();
 }
 $('detail').addEventListener('change',updateProgressiveLayout);
 $('scenario').addEventListener('change',updateProgressiveLayout);
