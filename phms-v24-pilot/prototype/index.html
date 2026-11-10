@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PHMS — เพิ่มนัดหมาย</title><meta name="phms-photo-ui" content="paired-v2-20261110"><meta name="phms-liff-id" content="2011619364-D0xazyre"><meta name="phms-confirm-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-confirm"><meta name="phms-read-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-read">
+<title>PHMS — เพิ่มนัดหมาย</title><meta name="phms-photo-ui" content="paired-v2-20261110"><meta name="phms-liff-id" content="2011619364-D0xazyre"><meta name="phms-confirm-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-confirm"><meta name="phms-read-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-read"><meta name="phms-journey-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-journey-guide">
 <style>
 :root{font-family:system-ui,"Noto Sans Thai",sans-serif;color:#17324d;background:#f3f7fc}*{box-sizing:border-box}main{max-width:620px;margin:auto;padding:20px 14px 40px}h1{font-size:1.55rem}h2{font-size:1.2rem}p{line-height:1.55}.box{background:#fff;border:1px solid #dae4ee;border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 1px 3px #12263a0c}label{display:block;font-weight:650;margin:14px 0 6px}input,select,textarea,button{font:inherit}input,select,textarea{width:100%;min-height:46px;padding:10px;border:1px solid #9eaebf;border-radius:9px}button{min-height:48px;border-radius:10px;padding:10px 18px;border:0;background:#1666a7;color:white;font-weight:700}button:disabled{background:#9ba9b4}button.secondary{background:#e6eef6;color:#17324d}.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.help{color:#526579;font-size:.92rem}.error{color:#a51e2c}.hidden{display:none}.checklist-row{display:flex;align-items:center;gap:8px;margin:8px 0}.checklist-row input[type=checkbox]{width:24px;min-height:24px;flex:none}.checklist-row input:not([type=checkbox]){min-width:0;flex:1}.checklist-row button{flex:none}.checklist-row button.checklist-delete{width:52px;min-width:52px;min-height:48px;padding:8px;background:#913b4b;color:#fff;font-size:1.25rem;display:inline-flex;align-items:center;justify-content:center}.checklist-row button.checklist-delete:hover,.checklist-row button.checklist-delete:focus-visible{background:#7d2f40}.checklist-row button.checklist-delete:focus-visible{outline:3px solid #17324d;outline-offset:2px}.actions #prepEntry{flex:1;min-width:160px}.combo-results{border:1px solid #9eaebf;border-radius:10px;max-height:240px;overflow-y:auto;background:#fff}.combo-results button{display:block;width:100%;border-radius:0;text-align:left;background:white;color:#17324d;border-bottom:1px solid #dae4ee;min-height:48px}.combo-results button:focus{outline:3px solid #1666a7}.combo-results .unavailable{color:#526579;padding:12px}.appointment-cards{display:grid;gap:10px;margin:12px 0}.appointment-card{background:#fff;border:1px solid #b8c7d5;color:#17324d;text-align:left;width:100%;padding:14px;border-radius:12px;font-weight:400}.appointment-card strong{display:block;font-weight:700}.appointment-card span{display:block;color:#526579;font-size:.9rem;margin-top:5px}.appointment-card[aria-pressed="true"]{border:2px solid #1666a7;background:#eaf4ff}.required-star{color:#b42318;font-weight:800;margin-left:4px}.thai-preview{margin:6px 2px 0;font-size:.9rem;line-height:1.5;color:#345678}.notice{background:#fff2d8;border:1px solid #d9ad54;padding:12px;border-radius:10px}dl{display:grid;grid-template-columns:120px 1fr;gap:10px}dd{margin:0;overflow-wrap:anywhere}
 
@@ -959,6 +959,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .phms-journey-elder-footnote{font-size:.94rem;color:#6c4b31;margin:13px 0 2px}
 .phms-journey-elder-empty{color:#6c5140;padding:12px}
 
+
+#editor .phms-journey-template-suggestion{padding:12px;border:1px solid #c8aa85;border-radius:12px;background:#fff7e8;margin:10px 0 14px}
+#editor .phms-journey-template-suggestion[hidden],#editor .phms-journey-template-suggestion.hidden{display:none!important}
+#editor .phms-journey-template-suggestion>p{margin:4px 0 10px;line-height:1.5}
+#editor .phms-journey-template-suggestion>button{min-height:44px!important;padding:9px 14px!important;background:#f3e7d6!important;color:#503823!important}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -987,6 +993,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </details>
 <details id="primaryLocationDetails">
  <summary>📍 จุดติดต่อหลัก (ถ้ามี)</summary>
+ <div id="journeySavedTemplate" class="phms-journey-template-suggestion hidden" hidden>
+  <p id="journeySavedTemplateSummary">มีเส้นทางที่ครอบครัวเคยบันทึกไว้</p>
+  <button id="journeyApplyTemplate" type="button" class="secondary">🔁 ใช้เส้นทางเดิม</button>
+  <p class="help">ตรวจสอบจุดติดต่อและลำดับก่อนใช้กับนัดนี้</p>
+ </div>
  <label for="location_detail">สถานที่ / จุดยื่นใบนัด</label><input id="location_detail" maxlength="240" placeholder="เช่น อาคารผู้ป่วยนอก ชั้น 2 จุดยื่นใบนัด">
 <label for="location_directions">🚶 วิธีเดินไป (ถ้าทราบ)</label><textarea id="location_directions" maxlength="600" rows="2" placeholder="เช่น เข้าประตู 2 ขึ้นลิฟต์ฝั่งขวาไปชั้น 2"></textarea>
 <label for="location_note">📝 หมายเหตุจุดติดต่อ (ถ้ามี)</label><textarea id="location_note" maxlength="600" rows="2" placeholder="เช่น จุดนี้ใช้สำหรับยื่นใบนัดก่อนพบแพทย์"></textarea>
@@ -1831,12 +1842,86 @@ $('journeyClearOldRoute').addEventListener('click',()=>{
 });
 // Warning must be visible without expanding the steps accordion.
 $('details').prepend($('journeyContextWarning'));
+
+let suggestedJourney=null,journeyLookupGeneration=0;
+function setJourneySuggestion(template){
+ suggestedJourney=template;
+ const card=$('journeySavedTemplate');const visible=!!template;
+ card.hidden=!visible;card.classList.toggle('hidden',!visible);
+ if(visible){
+  $('journeySavedTemplateSummary').textContent='พบเส้นทางเดิมของครอบครัว'+
+   (template.updatedAt?' · บันทึกล่าสุด '+new Date(template.updatedAt).toLocaleDateString('th-TH'):'')+
+   ' — ตรวจสอบก่อนใช้';
+ }
+}
+async function fetchSavedJourneySuggestion(){
+ const version=++journeyLookupGeneration,personCode=$('personSelect').value;
+ const organizationId=$('providerOrg').value,unitId=$('providerUnit').value;
+ setJourneySuggestion(null);
+ if(!personCode||!organizationId||!unitId)return;
+ const token=window.liff?.getIDToken?.();
+ const endpoint=document.querySelector('meta[name="phms-journey-api"]')?.content;
+ if(!token||!endpoint)return;
+ try{
+  const result=await fetch(endpoint,{method:'POST',
+   headers:{'content-type':'application/json',authorization:'Bearer '+token},
+   body:JSON.stringify({action:'template_get',selectedPersonCode:personCode,
+    organizationId,unitId})});
+  if(!result.ok)return;
+  const data=await result.json();
+  if(version!==journeyLookupGeneration||personCode!==$('personSelect').value||
+     organizationId!==$('providerOrg').value||unitId!==$('providerUnit').value)return;
+  if(data.ok===true&&data.template&&Array.isArray(data.template.steps))setJourneySuggestion(data.template);
+ }catch{/* Private templates are optional; the form must remain usable without them. */}
+}
+$('journeyApplyTemplate').addEventListener('click',async()=>{
+ const template=suggestedJourney;
+ if(!template||!$('providerOrg').value||!$('providerUnit').value)return;
+ if(hasJourneyDetails()&&!window.confirm('ต้องการแทนที่เส้นทางและรูปที่กรอกไว้ด้วยข้อมูลเดิมของครอบครัวหรือไม่?'))return;
+ clearJourneyDraft();
+ $('location_detail').value=String(template.mainLocation?.place||'').slice(0,240);
+ $('location_detail').dispatchEvent(new Event('input',{bubbles:true}));
+ $('location_directions').value=String(template.mainLocation?.directions||'').slice(0,600);
+ $('location_note').value=String(template.mainLocation?.note||'').slice(0,600);
+ visitStops=template.steps.map(raw=>ensureVisitStop({
+  id:raw.id,title:raw.title||'',place:raw.place||'',time:raw.time||'',
+  directions:raw.directions||'',note:raw.note||'',
+  instructions:Array.isArray(raw.instructions)?raw.instructions.slice(0,15):[],
+  photos:[],coverId:null
+ }));
+ const gen=journeyImageGeneration,photos=Array.isArray(template.photos)?template.photos:[];
+ let loaded=0,errors=0;
+ for(const photo of photos){
+  try{
+   if(loaded>=205)break;
+   const target=photo.stepKey==='primary'?primaryJourney:visitStops.find(x=>x.id===photo.stepKey);
+   if(!target||target.photos.length>=JOURNEY_PHOTO_MAX||typeof photo.url!=='string')continue;
+   const res=await fetch(photo.url,{cache:'no-store'});
+   if(!res.ok)throw Error('photo_unavailable');
+   const blob=await res.blob();
+   if(blob.type!=='image/jpeg'||blob.size>JOURNEY_FILE_BYTES_MAX)throw Error('bad_photo');
+   if(gen!==journeyImageGeneration)return;
+   const image={id:crypto.randomUUID(),name:String(photo.fileName||'รูปสถานที่').slice(0,200),
+    caption:String(photo.caption||'').slice(0,140),blob,url:URL.createObjectURL(blob)};
+   target.photos.push(image);target.coverId??=image.id;loaded++;
+  }catch{errors++;}
+ }
+ if(gen!==journeyImageGeneration)return;
+ renderMainJourneyPhotos();renderVisitStops();
+ journeyNeedsReview=true;refreshJourneyWarning();
+ $('primaryLocationDetails').open=true;
+ $('primaryJourneyPhotoStatus').textContent=errors
+  ?'ดึงข้อความแล้ว แต่รูปบางส่วนเปิดไม่ได้ กรุณาตรวจสอบอีกครั้ง'
+  :'นำรูปจากแม่แบบครอบครัวมาใช้กับร่างนี้แล้ว';
+ updateFilledIndicators();
+});
 const onJourneyContextChange=()=>{
  const next=$('providerOrg').value+'|'+$('providerUnit').value;
  if(journeyPreviousContext&&next!==journeyPreviousContext&&hasJourneyDetails()){
   journeyNeedsReview=true;refreshJourneyWarning();
  }
  journeyPreviousContext=next;
+ fetchSavedJourneySuggestion();
 };
 $('providerOrg').addEventListener('change',onJourneyContextChange);
 $('providerUnit').addEventListener('change',onJourneyContextChange);
@@ -1846,6 +1931,7 @@ $('visitStepAdd').addEventListener('click',()=>{
  updateFilledIndicators();
 });
 $('personSelect').addEventListener('change',()=>{
+ ++journeyLookupGeneration;setJourneySuggestion(null);
  clearJourneyDraft();$('location_directions').value='';$('location_note').value='';
  journeyPreviousContext='';refreshJourneyWarning();
 });
