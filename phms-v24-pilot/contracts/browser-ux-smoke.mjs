@@ -51,11 +51,16 @@ try {
        organizations:[
         {id:'22222222-2222-4222-8222-222222222221',name:'โรงพยาบาลทดสอบ ก',display_name:'รพ.ทดสอบ ก'},
         {id:'22222222-2222-4222-8222-222222222222',name:'โรงพยาบาลทดสอบ ข',display_name:'รพ.ทดสอบ ข'}],
-       units:[],clinicians:[],
+       units:[
+        {id:'33333333-3333-4333-8333-333333333331',organization_id:'22222222-2222-4222-8222-222222222221',name:'อายุรกรรม',location_detail:'อาคาร A ชั้น 2 ช่องยื่นใบนัด',is_verified:true},
+        {id:'33333333-3333-4333-8333-333333333332',organization_id:'22222222-2222-4222-8222-222222222222',name:'กระดูกและข้อ',location_detail:'',is_verified:false}
+       ],clinicians:[],
        personHospitalHns:[
         {organizationId:'22222222-2222-4222-8222-222222222221',value:'HN-TEST-A',verified:true},
         {organizationId:'22222222-2222-4222-8222-222222222222',value:'HN-TEST-B',verified:false}
        ]}}
+      :data.action==='appointment_sources'
+      ?{ok:true,appointments:[{id:'44444444-4444-4444-8444-444444444444',title:'ตรวจตามนัด',organization_id:'22222222-2222-4222-8222-222222222222',service_unit_id:'33333333-3333-4333-8333-333333333332',location_detail:'อาคาร B ชั้น 1 จุดบริการเดิม',created_at:'2026-10-01T00:00:00Z'}]}
       :{ok:true,items:[]};
    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:JSON.stringify(body)});
   });
@@ -120,17 +125,42 @@ try {
    assert.equal(await hospitalButtons.count(),2,'Synthetic authorized hospital cards must load');
    await hospitalButtons.nth(0).click();
    await page.waitForFunction(()=>document.getElementById('hospital_hn').value==='HN-TEST-A');
+   await page.locator('#unitQuickCards .adaptive-provider-choice:not(.adaptive-provider-more)').first().click();
+   await page.waitForFunction(()=>document.getElementById('location_detail').value==='อาคาร A ชั้น 2 ช่องยื่นใบนัด');
+   assert.match(await page.locator('#hospitalLocationSyncNote').textContent(),/ทะเบียนแผนก/,'Verified master location has provenance');
    assert.equal(await page.locator('#hospital_vn').inputValue(),'','VN starts blank for each new visit');
    await page.locator('#hospital_vn').evaluate(input=>{input.value='VN-FROM-FIRST-VISIT';input.dispatchEvent(new Event('input',{bubbles:true}));});
    await hospitalButtons.nth(1).click();
    await page.waitForFunction(()=>document.getElementById('hospital_hn').value==='HN-TEST-B');
+   assert.equal(await page.locator('#location_detail').inputValue(),'','Changing hospital must remove the prior clinic location');
+   await page.locator('#unitQuickCards .adaptive-provider-choice:not(.adaptive-provider-more)').first().click();
+   await page.waitForFunction(()=>document.getElementById('location_detail').value==='อาคาร B ชั้น 1 จุดบริการเดิม');
+   assert.match(await page.locator('#hospitalLocationSyncNote').textContent(),/นัดเดิม/,'Fallback remains labeled as needing verification');
+   await page.locator('#location_detail').evaluate(input=>{input.value='จุดแก้ไขเฉพาะนัด';input.dispatchEvent(new Event('input',{bubbles:true}));});
+   await page.waitForTimeout(150);
+   assert.equal(await page.locator('#location_detail').inputValue(),'จุดแก้ไขเฉพาะนัด','Manual clinic location must remain editable');
    assert.equal(await page.locator('#hospital_vn').inputValue(),'','Switching hospital clears the previous visit number');
    await page.locator('#hospital_hn').evaluate(input=>{input.value='HN-CORRECTED-IN-DRAFT';input.dispatchEvent(new Event('input',{bubbles:true}));});
    await page.waitForTimeout(200);
    assert.equal(await page.locator('#hospital_hn').inputValue(),'HN-CORRECTED-IN-DRAFT','Manual HN override must not be overwritten');
    await hospitalButtons.nth(0).click();
    await page.waitForFunction(()=>document.getElementById('hospital_hn').value==='HN-TEST-A');
+   assert.equal(await page.locator('#location_detail').inputValue(),'','Old hospital location must never bleed into a new hospital');
+   await page.locator('#unitQuickCards .adaptive-provider-choice:not(.adaptive-provider-more)').first().click();
+   await page.waitForFunction(()=>document.getElementById('location_detail').value==='อาคาร A ชั้น 2 ช่องยื่นใบนัด');
    assert.equal(await page.locator('#hospital_vn').inputValue(),'','Returning to a hospital must not restore a stale VN');
+   // No hospital workflow is prefilled. A caregiver may add and order multiple stops.
+   assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),0);
+   await page.locator('#visitStepAdd').click();
+   await page.locator('#visitStepAdd').click();
+   assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),2);
+   const stopNames=page.locator('#visitStepsList input[aria-label^="ทำอะไร"]');
+   await stopNames.nth(0).fill('เจาะเลือด');
+   await stopNames.nth(1).fill('เอกซเรย์');
+   await page.locator('#visitStepsList .visit-stop-card').nth(1).locator('button.visit-move').first().click();
+   assert.deepEqual(await stopNames.evaluateAll(xs=>xs.map(x=>x.value)),['เอกซเรย์','เจาะเลือด']);
+   await page.locator('#visitStepsList .visit-stop-card').first().locator('button.phms-delete-button').click();
+   assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),1,'One stop is removable without deleting the other');
    const getSummaryGeometry=async()=>page.locator('#simpleExtras>summary').evaluate(summary=>{
     const label=summary.querySelector(':scope > .phms-summary-label');
     const badge=summary.querySelector(':scope > .filled-indicator');
