@@ -154,7 +154,7 @@ try {
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),0);
    await page.locator('.mode-choice[data-mode="full"]').click();
    // Journey location photos belong ONLY to detailed mode and have a separate 5-photo cap.
-   const hospitalDetail=page.locator('#details > details').first();
+   const hospitalDetail=page.locator('#hospitalLocationDetails');
    const detailInitiallyOpen=await hospitalDetail.evaluate(el=>el.open);
    if(!detailInitiallyOpen)await hospitalDetail.locator(':scope > summary').click();
    console.log('PHMS_LOCATION_DETAIL_OPEN',JSON.stringify({before:detailInitiallyOpen,after:await hospitalDetail.evaluate(el=>el.open)}));
