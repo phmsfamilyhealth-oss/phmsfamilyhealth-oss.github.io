@@ -193,6 +193,18 @@ try {
    assert.equal(await stops.nth(1).locator('input[aria-label^="วิธีทำข้อ"]').first().inputValue(),'กดบัตรคิว','Substep follows its parent');
    assert.deepEqual(await stopNames.evaluateAll(xs=>xs.map(x=>x.value)),['เอกซเรย์','เจาะเลือด']);
    assert.deepEqual(await stopNames.evaluateAll(xs=>xs.map(x=>x.value)),['เอกซเรย์','เจาะเลือด']);
+   // Patient/carer preview is read-only and keeps progress separate from the editable draft.
+   await page.locator('#showJourneyElderPreview').click();
+   const viewer=page.locator('#journeyElderPreviewDialog');
+   assert.ok(await viewer.isVisible(),'Older patient guide must open in mobile browser');
+   assert.equal(await viewer.locator('.phms-journey-elder-card').count(),3,'Point plus two separate visit stops');
+   assert.equal(await viewer.locator('button.phms-delete-button').count(),0,'Patient guide must not show edit/delete actions');
+   assert.equal(await viewer.locator('.phms-journey-elder-photo').count(),7 ,'Four main plus one X-ray and two blood draw pictures');
+   const progress=viewer.locator('input[type="checkbox"]').first();
+   await progress.check();
+   assert.ok(await progress.isChecked(),'Patient progress can be marked without altering visit template');
+   await viewer.locator('.phms-journey-elder-close').click();
+   assert.ok(!(await viewer.isVisible()),'Patient guide closes cleanly');
    await page.locator('#visitStepsList .visit-stop-card').first().locator('.visit-stop-heading button.phms-delete-button').click();
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),1,'One stop is removable without deleting the other');
    await page.locator('.mode-choice[data-mode="simple"]').click();
