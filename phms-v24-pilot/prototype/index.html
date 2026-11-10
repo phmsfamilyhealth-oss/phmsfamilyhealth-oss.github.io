@@ -1420,6 +1420,8 @@ previewField('เวลา',v.time_known?($('time').value+' น.'):'ไม่ท
 previewField('แผนก',$('department').value.trim());
 previewField('แพทย์',$('doctor').value.trim());
 previewField('รูปใบนัด',photoFiles.length?photoFiles.length+' รูป':'');
+previewField('ขั้นตอนในวันนัด',visitStops.filter(x=>x.title.trim()).map((x,i)=>[
+ (i+1)+'. '+x.title.trim(),x.place.trim(),x.time?x.time+' น.':''].filter(Boolean).join(' · ')).join('\n'));
 previewField('อาการหรือเรื่องที่ไป',$('previsitSymptoms').value.trim());
 previewField('รายละเอียดเพิ่มเติม',$('additionalNote').value.trim());
 if($('detail').value==='full'&&examPrepChoice.value){
@@ -1463,6 +1465,59 @@ async function previewReadApi(action,parameters={}){
   return body;
  }catch{return {ok:false,error:'network_unavailable'};}
 }
+// Optional multiple-stop hospital journey: never infer a mandatory medical workflow.
+let visitStops=[];
+const visitStepKinds=['ยื่นใบนัด / ลงทะเบียน','วัดสัญญาณชีพ','เจาะเลือด','เอกซเรย์ (X-ray)','ตรวจเพิ่มเติม','พบแพทย์','รับยา / นัดครั้งต่อไป'];
+const visitStepsHints=document.createElement('datalist');
+visitStepsHints.id='phmsVisitStepKinds';
+for(const text of visitStepKinds){const option=document.createElement('option');option.value=text;visitStepsHints.append(option);}
+$('visitStepsDetails').append(visitStepsHints);
+function renderVisitStops(){
+ const list=$('visitStepsList');list.replaceChildren();
+ for(const [index,stop] of visitStops.entries()){
+  const card=document.createElement('div');card.className='visit-stop-card';
+  const heading=document.createElement('div');heading.className='visit-stop-heading';
+  const name=document.createElement('strong');name.textContent='ขั้นตอน '+(index+1);
+  const actions=document.createElement('div');actions.className='visit-stop-actions';
+  const move=(label,difference)=>{
+   const button=document.createElement('button');button.type='button';button.className='secondary visit-move';
+   button.textContent=label;button.setAttribute('aria-label',label+'ขั้นตอน '+(index+1));
+   button.disabled=index+difference<0||index+difference>=visitStops.length;
+   button.addEventListener('click',()=>{
+    const other=index+difference;[visitStops[index],visitStops[other]]=[visitStops[other],visitStops[index]];
+    renderVisitStops();
+   });return button;
+  };
+  actions.append(move('↑ ขึ้น',-1),move('↓ ลง',1),
+   makePhmsDeleteButton('ลบขั้นตอน '+(index+1),()=>{
+    visitStops.splice(index,1);renderVisitStops();updateFilledIndicators();
+   }));
+  heading.append(name,actions);card.append(heading);
+  const field=(labelText,kind,placeholder,aria)=>{
+   const label=document.createElement('label');label.textContent=labelText;
+   const el=document.createElement('input');el.type=kind;el.placeholder=placeholder||'';
+   el.value=stop[aria]||'';el.setAttribute('aria-label',labelText+' ขั้นตอน '+(index+1));
+   if(aria==='title'){el.setAttribute('list','phmsVisitStepKinds');el.maxLength=120;}
+   if(aria==='place')el.maxLength=240;
+   el.addEventListener('input',()=>{stop[aria]=el.value;updateFilledIndicators()});
+   label.append(el);card.append(label);
+  };
+  field('ทำอะไร','text','เช่น เจาะเลือด หรือยื่นใบนัด','title');
+  field('ไปที่ไหน (ถ้าทราบ)','text','เช่น อาคาร A ชั้น 1','place');
+  field('เวลา (ถ้ามี)','time','','time');
+  list.append(card);
+ }
+ $('visitStepsHelp').textContent=visitStops.length
+  ?'จัดเรียงได้ตามลำดับจริง และตรวจสอบสถานที่กับใบนัดก่อนเดินทาง'
+  :'ขั้นตอนของแต่ละโรงพยาบาลอาจไม่เหมือนกัน ไม่ต้องเพิ่มหากใบนัดไม่ได้ระบุ';
+}
+$('visitStepAdd').addEventListener('click',()=>{
+ visitStops.push({title:'',place:'',time:''});
+ renderVisitStops();$('visitStepsDetails').open=true;
+ $('visitStepsList').lastElementChild?.querySelector('input')?.focus({preventScroll:true});
+});
+$('personSelect').addEventListener('change',()=>{visitStops=[];renderVisitStops();});
+renderVisitStops();
 let sourceAppointments=new Map();
 function refreshTopicSuggestions(){renderCareTopicSuggestions();}
 let autoPurposeValue='',purposeManuallyEdited=false;
@@ -2045,6 +2100,7 @@ function resetCurrentAppointmentDraft(){
  linkedVisitState.appointmentId='';linkedVisitState.personId=memberId;
  $('linkedCareVisit').value='';$('linkedCareVisitActions').classList.add('hidden');
  clearAppointmentPhotos();
+ visitStops=[];renderVisitStops();
  resetChecklistToDefaults(); // Explicit clear creates a fresh draft with editable defaults.
  procedurePreviewItems=[];renderProcedurePreview();
  $('hasAppointmentPhotos').value='';
