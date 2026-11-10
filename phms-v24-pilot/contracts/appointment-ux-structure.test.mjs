@@ -154,11 +154,24 @@ test('shared PHMS delete action is consistent across every local-draft removal',
  assert.ok(page.includes('width:66px!important;height:32px!important'),'Visible delete pill must stay compact');
  assert.ok(page.includes('height:44px!important;min-height:44px!important'),'Delete target must remain easy to tap');
  assert.ok(script.includes('function makePhmsDeleteButton(label,handler)'),'Do not create a second competing delete style');
- assert.equal((script.match(/const remove=makePhmsDeleteButton\(/g)||[]).length,3,'Checklist, photo and procedure use shared button');
+ assert.equal((script.match(/const remove=makePhmsDeleteButton\(/g)||[]).length,5,'Checklist, photo, procedure, journey photo and substep use the same delete button');
  assert.ok(script.includes("makePhmsDeleteButton('ลบรูปใบนัด '+(index+1)"),'Photo removal uses shared delete action');
  assert.ok(script.includes("makePhmsDeleteButton('ลบรายการตรวจ '+item"),'Procedure removal uses shared delete action');
  assert.ok(script.includes("view.className='secondary phms-photo-view phms-photo-action'"),'Photo preview stays visually distinct from delete');
  assert.ok(!script.includes("remove.textContent='🗑️'"),'Emoji-only deletion is not acceptable');
  assert.ok(!script.includes("remove.className='photo-remove'"),'Old large picture delete button must not reappear');
  assert.ok(!script.includes('checklistUndo')&&!script.includes('askChecklistDelete'),'Local draft deletion stays immediate and without undo');
+});
+
+test('journey guide image controls are detailed-mode only and fail closed on private persistence',()=>{
+ assert.ok(page.includes('id="primaryJourneyPhotos"'),'Location photographs belong to the existing detailed section');
+ assert.ok(page.includes('id="primaryJourneyFileInput"'),'Main location has its own file picker');
+ assert.ok(page.includes('id="visitStepsDetails"'),'Journey steps reuse the existing advanced section');
+ assert.ok(script.includes('const JOURNEY_PHOTO_MAX=5'),'Each location has a strict five-photo cap');
+ assert.ok(script.includes('function prepareJourneyImage(file)'),'Images are processed on-device');
+ assert.ok(script.includes("canvas.toBlob(done,'image/jpeg',.82)"),'EXIF stripped by image recompression');
+ assert.ok(script.includes('makeStopGallery(stop'),'Each stop has its own photo gallery');
+ assert.ok(script.includes('stop.instructions.push('),'Instruction substeps are editable');
+ assert.ok(script.includes('clearJourneyDraft()'),'Draft reset must release private photos');
+ assert.ok(!script.includes("supabase.storage.from('public'"),'Do not upload photos to public storage');
 });
