@@ -153,6 +153,22 @@ try {
    // No hospital workflow is prefilled. A caregiver may add and order multiple stops.
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),0);
    await page.locator('.mode-choice[data-mode="full"]').click();
+   // Journey location photos belong ONLY to detailed mode and have a separate 5-photo cap.
+   await page.locator('#details > details').first().locator('summary').click();
+   const journeyPng=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9VFYDj8AAAAASUVORK5CYII=','base64');
+   const journeyFile=(name)=>({name,mimeType:'image/png',buffer:journeyPng});
+   await page.locator('#primaryJourneyFileInput').setInputFiles(
+    Array.from({length:6},(_,i)=>journeyFile('point-'+i+'.png')));
+   await page.waitForFunction(()=>document.querySelectorAll('#primaryJourneyGallery .phms-journey-photo-tile').length===5);
+   assert.equal(await page.locator('#primaryJourneyPhotoCount').textContent(),'5/5 รูป','Main point has own five-photo limit');
+   assert.ok(await page.locator('#primaryJourneyAddPhoto').evaluate(x=>x.hidden),'Cannot add sixth point photo');
+   const locationCaptions=page.locator('#primaryJourneyGallery input[aria-label^="คำอธิบายรูป"]');
+   await locationCaptions.first().fill('หน้าลิฟต์ทางขวา');
+   await page.locator('#primaryJourneyGallery .phms-journey-photo-tile').nth(1).locator('.phms-journey-cover').click();
+   assert.match(await page.locator('#primaryJourneyGallery .phms-journey-photo-name').first().textContent(),/point-1.png/,'Choosing cover moves the full photo');
+   await page.locator('#primaryJourneyGallery .phms-delete-button').first().click();
+   assert.equal(await page.locator('#primaryJourneyPhotoCount').textContent(),'4/5 รูป','Deletion updates location gallery count');
+   assert.ok(!(await page.locator('#primaryJourneyAddPhoto').evaluate(x=>x.hidden)),'Add is available after delete');
    await page.locator('#visitStepsDetails > summary').click();
    await page.locator('#visitStepAdd').click();
    await page.locator('#visitStepAdd').click();
@@ -160,11 +176,25 @@ try {
    const stopNames=page.locator('#visitStepsList input[aria-label^="ทำอะไร"]');
    await stopNames.nth(0).fill('เจาะเลือด');
    await stopNames.nth(1).fill('เอกซเรย์');
-   await page.locator('#visitStepsList .visit-stop-card').nth(1).locator('button.visit-move').first().click();
+   const stops=page.locator('#visitStepsList .visit-stop-card');
+   await stops.nth(0).locator('input[type=file]').setInputFiles([
+    journeyFile('blood-left.png'),journeyFile('blood-right.png')]);
+   await page.waitForFunction(()=>document.querySelectorAll('#visitStepsList .visit-stop-card:first-child .phms-journey-photo-tile').length===2);
+   await stops.nth(1).locator('input[type=file]').setInputFiles(journeyFile('xray.png'));
+   await page.waitForFunction(()=>document.querySelectorAll('#visitStepsList .visit-stop-card:nth-child(2) .phms-journey-photo-tile').length===1);
+   await stops.nth(0).locator('.visit-stop-instructions button.secondary').click();
+   await stops.nth(0).locator('input[aria-label^="วิธีทำข้อ"]').first().fill('กดบัตรคิว');
+   await stops.nth(1).locator('button.visit-move').first().click();
+   assert.equal(await stops.nth(0).locator('.phms-journey-photo-tile').count(),1,'Step photo follows X-ray during reorder');
+   assert.equal(await stops.nth(1).locator('.phms-journey-photo-tile').count(),2,'Both blood draw angles stay with that stop');
+   assert.equal(await stops.nth(1).locator('input[aria-label^="วิธีทำข้อ"]').first().inputValue(),'กดบัตรคิว','Substep follows its parent');
+   assert.deepEqual(await stopNames.evaluateAll(xs=>xs.map(x=>x.value)),['เอกซเรย์','เจาะเลือด']);
    assert.deepEqual(await stopNames.evaluateAll(xs=>xs.map(x=>x.value)),['เอกซเรย์','เจาะเลือด']);
    await page.locator('#visitStepsList .visit-stop-card').first().locator('button.phms-delete-button').click();
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),1,'One stop is removable without deleting the other');
    await page.locator('.mode-choice[data-mode="simple"]').click();
+   assert.ok(await page.locator('#details').evaluate(x=>x.classList.contains('hidden')),'Journey editing stays hidden in simple mode');
+   assert.equal(await page.locator('#primaryJourneyPhotoCount').textContent(),'4/5 รูป','Switching modes preserves detailed photo draft');
    const getSummaryGeometry=async()=>page.locator('#simpleExtras>summary').evaluate(summary=>{
     const label=summary.querySelector(':scope > .phms-summary-label');
     const badge=summary.querySelector(':scope > .filled-indicator');
