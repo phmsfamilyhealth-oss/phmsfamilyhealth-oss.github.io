@@ -51,6 +51,10 @@ try {
       :{ok:true,items:[]};
    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:JSON.stringify(body)});
   });
+  // New-path fallback bypasses cached in-app HTML while preserving relative ES modules.
+  const versioned=await page.request.get(base.replace('/index.html','/index-photo-equal-20261110.html'));
+  assert.equal(versioned.status(),200,'Versioned UI entrypoint must exist');
+  assert.ok((await versioned.text()).includes('name="phms-photo-ui" content="paired-v2-20261110"'),'Versioned entrypoint must contain the new photo layout');
   const url=base+(scenario==='line-selected'?'?member='+member:'');
   await page.goto(url,{waitUntil:'load'});
   await page.waitForTimeout(1400);
@@ -129,6 +133,17 @@ try {
    assert.ok(Math.abs(photoActionSizes.viewWidth-photoActionSizes.deleteWidth)<1,'Photo View and Delete must have equal width');
    assert.ok(Math.abs(photoActionSizes.viewHeight-photoActionSizes.deleteHeight)<1,'Photo View and Delete must have equal height');
    assert.ok(photoActionSizes.viewHeight>=44,'Photo actions remain accessible on iPhone');
+
+   await page.setViewportSize({width:320,height:700});
+   const narrowPhotoActions=await page.locator('#appointmentPhotoList .appointment-photo-actions').evaluate(actions=>{
+    const a=actions.querySelector('.phms-photo-view').getBoundingClientRect();
+    const b=actions.querySelector('.phms-delete-button').getBoundingClientRect();
+    return {aW:a.width,bW:b.width,aH:a.height,bH:b.height,overflow:actions.scrollWidth-actions.clientWidth};
+   });
+   assert.ok(Math.abs(narrowPhotoActions.aW-narrowPhotoActions.bW)<1,'Buttons must be equally wide at 320px');
+   assert.ok(Math.abs(narrowPhotoActions.aH-narrowPhotoActions.bH)<1,'Buttons must be equally tall at 320px');
+   assert.ok(narrowPhotoActions.overflow<=1,'Photo action row must not overflow on narrow phones');
+   await page.setViewportSize({width:390,height:844});
    await page.locator('#appointmentPhotoList .phms-photo-view').click();
    assert.equal(await page.locator('#appointmentPhotoDialog').evaluate(el=>el.open),true,'Preview is not deletion');
    await page.locator('#closeAppointmentPhoto').click();
