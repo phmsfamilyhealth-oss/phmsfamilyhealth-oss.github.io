@@ -1516,57 +1516,274 @@ async function previewReadApi(action,parameters={}){
  }catch{return {ok:false,error:'network_unavailable'};}
 }
 // Optional multiple-stop hospital journey: never infer a mandatory medical workflow.
+
+/* Journey Guide v1 — Pilot draft only, no private photo persistence. */
+const JOURNEY_PHOTO_MAX=5,JOURNEY_FILE_BYTES_MAX=5*1024*1024;
+let journeyImageSeq=0,journeyImageGeneration=0,journeyNeedsReview=false,journeyPreviousContext='';
+const primaryJourney={photos:[],coverId:null};
 let visitStops=[];
 const visitStepKinds=['ยื่นใบนัด / ลงทะเบียน','วัดสัญญาณชีพ','เจาะเลือด','เอกซเรย์ (X-ray)','ตรวจเพิ่มเติม','พบแพทย์','รับยา / นัดครั้งต่อไป'];
-const visitStepsHints=document.createElement('datalist');
-visitStepsHints.id='phmsVisitStepKinds';
-for(const text of visitStepKinds){const option=document.createElement('option');option.value=text;visitStepsHints.append(option);}
+const visitStepsHints=document.createElement('datalist');visitStepsHints.id='phmsVisitStepKinds';
+for(const value of visitStepKinds){const option=document.createElement('option');option.value=value;visitStepsHints.append(option);}
 $('visitStepsDetails').append(visitStepsHints);
+const newVisitStop=()=>({title:'',place:'',time:'',directions:'',note:'',instructions:[],photos:[],coverId:null});
+function ensureVisitStop(stop){
+ stop.instructions??=[];stop.photos??=[];stop.coverId??=null;
+ stop.directions??='';stop.note??='';return stop;
+}
+function clearJourneyGallery(gallery){
+ for(const photo of gallery.photos||[])URL.revokeObjectURL(photo.url);
+ gallery.photos=[];gallery.coverId=null;
+}
+function renderMainJourneyPhotos(){mainJourneyPhotoUI.render();}
+function clearJourneyDraft(){
+ ++journeyImageGeneration;
+ clearJourneyGallery(primaryJourney);
+ for(const stop of visitStops)clearJourneyGallery(stop);
+ visitStops=[];journeyNeedsReview=false;
+ renderVisitStops();renderMainJourneyPhotos();refreshJourneyWarning();
+}
+async function prepareJourneyImage(file){
+ const allowed=/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)||
+ ['image/jpeg','image/png','image/webp','image/heic','image/heif'].includes((file.type||'').toLowerCase());
+ if(!allowed)throw Error('รองรับ JPG, PNG, WebP และ HEIC/HEIF');
+ if(file.size>JOURNEY_FILE_BYTES_MAX)throw Error('รูปต้องไม่เกิน 5 MB');
+ const raw=URL.createObjectURL(file);
+ try{
+  const img=new Image();img.src=raw;
+  await new Promise((resolve,reject)=>{
+   if(img.complete&&img.naturalWidth){resolve();return;}
+   img.onload=resolve;
+   img.onerror=()=>reject(new Error('เปิดรูปไม่สำเร็จ หากเป็น HEIC ให้แปลงเป็น JPEG'));
+  });
+  if(!img.naturalWidth||!img.naturalHeight)throw Error('เปิดข้อมูลภาพไม่ได้');
+  const scale=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight));
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+  canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+  const ctx=canvas.getContext('2d');
+  if(!ctx)throw Error('อุปกรณ์ไม่รองรับการย่อรูป');
+  ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  const blob=await new Promise(done=>canvas.toBlob(done,'image/jpeg',.82));
+  canvas.width=0;canvas.height=0;
+  if(!blob)throw Error('แปลงรูปไม่สำเร็จ');
+  // Re-encoding via canvas strips nonessential EXIF/location metadata.
+  return {id:'journey-image-'+(++journeyImageSeq),name:file.name,
+    blob,url:URL.createObjectURL(blob),caption:''};
+ }finally{URL.revokeObjectURL(raw);}
+}
+function showJourneyImage(image){
+ if(!image?.url)return;
+ $('appointmentPhotoLarge').src=image.url;
+ $('appointmentPhotoLarge').alt=image.caption||'รูปประกอบสถานที่';
+ if(typeof $('appointmentPhotoDialog').showModal==='function')$('appointmentPhotoDialog').showModal();
+}
+function bindJourneyGallery(gallery,label,{list,input,add,count,status}){
+ const render=()=>{
+  list.replaceChildren();
+  count.textContent=gallery.photos.length+'/5 รูป';
+  add.hidden=gallery.photos.length>=JOURNEY_PHOTO_MAX;
+  if(gallery.photos.length===JOURNEY_PHOTO_MAX)status.textContent='ครบ 5 รูปแล้ว';
+  for(const [index,photo] of gallery.photos.entries()){
+   const tile=document.createElement('div');tile.className='phms-journey-photo-tile';
+   const img=document.createElement('img');img.src=photo.url;img.alt=photo.caption||'รูป '+(index+1)+' '+label;
+   img.tabIndex=0;img.setAttribute('role','button');img.setAttribute('aria-label','ขยายรูป '+(index+1));
+   img.addEventListener('click',()=>showJourneyImage(photo));
+   img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showJourneyImage(photo);}});
+   const name=document.createElement('p');name.className='phms-journey-photo-name';
+   name.textContent='รูป '+(index+1)+' · '+photo.name;
+   const caption=document.createElement('label');caption.textContent='คำอธิบายรูป (ถ้ามี)';
+   const capInput=document.createElement('input');capInput.type='text';capInput.maxLength=140;
+   capInput.value=photo.caption;capInput.placeholder='เช่น ทางขวาหลังลิฟต์';
+   capInput.setAttribute('aria-label','คำอธิบายรูป '+(index+1)+' '+label);
+   capInput.addEventListener('input',()=>{photo.caption=capInput.value;img.alt=capInput.value||'รูป '+(index+1)+' '+label;});
+   caption.append(capInput);
+   const actions=document.createElement('div');actions.className='phms-journey-photo-actions';
+   const view=document.createElement('button');view.type='button';view.className='phms-journey-view';
+   view.textContent='ดูรูป';view.addEventListener('click',()=>showJourneyImage(photo));
+   const remove=makePhmsDeleteButton('ลบรูป '+(index+1)+' '+label,()=>{
+    if($('appointmentPhotoDialog').open)$('appointmentPhotoDialog').close();
+    const position=gallery.photos.indexOf(photo);if(position<0)return;
+    URL.revokeObjectURL(photo.url);gallery.photos.splice(position,1);
+    if(gallery.coverId===photo.id)gallery.coverId=gallery.photos[0]?.id||null;
+    status.textContent='รูปยังอยู่ในร่างทดลอง ไม่บันทึกข้ามเครื่อง';
+    render();updateFilledIndicators();
+   });
+   actions.append(view,remove);
+   const order=document.createElement('div');order.className='phms-journey-photo-reorder';
+   for(const [word,offset] of [['◀ ก่อน',-1],['ถัดไป ▶',1]]){
+    const b=document.createElement('button');b.type='button';b.textContent=word;
+    b.disabled=index+offset<0||index+offset>=gallery.photos.length;
+    b.addEventListener('click',()=>{
+     const target=index+offset;
+     [gallery.photos[index],gallery.photos[target]]=[gallery.photos[target],gallery.photos[index]];
+     render();
+    });order.append(b);
+   }
+   const cover=document.createElement('button');cover.type='button';cover.className='phms-journey-cover';
+   const selected=(gallery.coverId||gallery.photos[0]?.id)===photo.id;
+   cover.textContent=selected?'★ รูปปก':'☆ ตั้งเป็นรูปปก';cover.disabled=selected;
+   cover.addEventListener('click',()=>{
+    gallery.photos.splice(gallery.photos.indexOf(photo),1);
+    gallery.photos.unshift(photo);gallery.coverId=photo.id;render();
+   });
+   tile.append(img,name,caption,actions,order,cover);list.append(tile);
+  }
+ };
+ add.addEventListener('click',()=>{if(gallery.photos.length<JOURNEY_PHOTO_MAX)input.click();});
+ input.addEventListener('change',async()=>{
+  const files=Array.from(input.files||[]);input.value='';
+  if(!files.length)return;
+  const available=JOURNEY_PHOTO_MAX-gallery.photos.length,gen=journeyImageGeneration;
+  if(!available){status.textContent='ครบ 5 รูปแล้ว';return;}
+  status.textContent='กำลังเตรียมรูป…';const errors=[];let added=0;
+  for(const file of files.slice(0,available)){
+   try{
+    const photo=await prepareJourneyImage(file);
+    if(gen!==journeyImageGeneration||!document.contains(input)){
+     URL.revokeObjectURL(photo.url);return;
+    }
+    gallery.photos.push(photo);gallery.coverId??=photo.id;added++;
+   }catch(err){errors.push(err?.message||'รูปนี้เพิ่มไม่ได้');}
+  }
+  if(files.length>available)errors.push('ไม่เกิน 5 รูปต่อจุด');
+  status.textContent=errors.length?[...new Set(errors)].join(' · '):
+   added?'เพิ่มแล้ว (ยังเป็นร่างทดลอง ไม่บันทึกข้ามเครื่อง)':'ยังไม่มีรูป';
+  render();updateFilledIndicators();
+ });
+ render();return {render};
+}
+const mainJourneyPhotoUI=bindJourneyGallery(primaryJourney,'จุดติดต่อหลัก',{
+ list:$('primaryJourneyGallery'),input:$('primaryJourneyFileInput'),
+ add:$('primaryJourneyAddPhoto'),count:$('primaryJourneyPhotoCount'),status:$('primaryJourneyPhotoStatus')
+});
+function makeStopGallery(stop,label){
+ const section=document.createElement('div');section.className='phms-journey-photo-section';
+ const top=document.createElement('div');top.className='phms-journey-photo-heading';
+ const heading=document.createElement('strong');heading.textContent='📷 รูปสถานที่ (ถ้ามี)';
+ const count=document.createElement('span');count.className='phms-journey-count';
+ top.append(heading,count);
+ const hint=document.createElement('p');hint.className='help';hint.textContent='แนบได้ไม่เกิน 5 รูปต่อขั้นตอน';
+ const list=document.createElement('div');list.className='phms-journey-photo-grid';
+ const input=document.createElement('input');input.type='file';input.multiple=true;input.hidden=true;
+ input.accept='image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif';
+ input.setAttribute('aria-label','เลือกรูป '+label);
+ const add=document.createElement('button');add.type='button';add.className='secondary phms-journey-add-photo';
+ add.textContent='＋ เพิ่มรูปสถานที่';
+ const status=document.createElement('p');status.className='help';status.setAttribute('role','status');
+ status.textContent='รูปยังเป็นร่างทดลอง ไม่บันทึกข้ามเครื่อง';
+ section.append(top,hint,list,input,add,status);
+ bindJourneyGallery(stop,label,{list,input,add,count,status});
+ return section;
+}
 function renderVisitStops(){
  const list=$('visitStepsList');list.replaceChildren();
- for(const [index,stop] of visitStops.entries()){
+ for(const [index,raw] of visitStops.entries()){
+  const stop=ensureVisitStop(raw);
   const card=document.createElement('div');card.className='visit-stop-card';
-  const heading=document.createElement('div');heading.className='visit-stop-heading';
-  const name=document.createElement('strong');name.textContent='ขั้นตอน '+(index+1);
+  const top=document.createElement('div');top.className='visit-stop-heading';
+  const heading=document.createElement('strong');heading.textContent='ขั้นตอน '+(index+1);
   const actions=document.createElement('div');actions.className='visit-stop-actions';
-  const move=(label,difference)=>{
-   const button=document.createElement('button');button.type='button';button.className='secondary visit-move';
-   button.textContent=label;button.setAttribute('aria-label',label+'ขั้นตอน '+(index+1));
-   button.disabled=index+difference<0||index+difference>=visitStops.length;
-   button.addEventListener('click',()=>{
-    const other=index+difference;[visitStops[index],visitStops[other]]=[visitStops[other],visitStops[index]];
+  const move=(word,delta)=>{
+   const b=document.createElement('button');b.type='button';b.className='secondary visit-move';
+   b.textContent=word;b.disabled=index+delta<0||index+delta>=visitStops.length;
+   b.setAttribute('aria-label',word+'ขั้นตอน '+(index+1));
+   b.addEventListener('click',()=>{
+    const j=index+delta;[visitStops[index],visitStops[j]]=[visitStops[j],visitStops[index]];
     renderVisitStops();
-   });return button;
+   });return b;
   };
   actions.append(move('↑ ขึ้น',-1),move('↓ ลง',1),
    makePhmsDeleteButton('ลบขั้นตอน '+(index+1),()=>{
+    ++journeyImageGeneration;clearJourneyGallery(stop);
     visitStops.splice(index,1);renderVisitStops();updateFilledIndicators();
    }));
-  heading.append(name,actions);card.append(heading);
-  const field=(labelText,kind,placeholder,aria)=>{
+  top.append(heading,actions);card.append(top);
+  const field=(labelText,type,placeholder,key)=>{
    const label=document.createElement('label');label.textContent=labelText;
-   const el=document.createElement('input');el.type=kind;el.placeholder=placeholder||'';
-   el.value=stop[aria]||'';el.setAttribute('aria-label',labelText+' ขั้นตอน '+(index+1));
-   if(aria==='title'){el.setAttribute('list','phmsVisitStepKinds');el.maxLength=120;}
-   if(aria==='place')el.maxLength=240;
-   el.addEventListener('input',()=>{stop[aria]=el.value;updateFilledIndicators()});
+   const el=document.createElement('input');el.type=type;el.placeholder=placeholder||'';
+   el.value=stop[key]||'';el.setAttribute('aria-label',labelText+' ขั้นตอน '+(index+1));
+   if(key==='title'){el.maxLength=120;el.setAttribute('list','phmsVisitStepKinds');}
+   if(key==='place')el.maxLength=240;
+   el.addEventListener('input',()=>{stop[key]=el.value;updateFilledIndicators();});
    label.append(el);card.append(label);
   };
   field('ทำอะไร','text','เช่น เจาะเลือด หรือยื่นใบนัด','title');
   field('ไปที่ไหน (ถ้าทราบ)','text','เช่น อาคาร A ชั้น 1','place');
   field('เวลา (ถ้ามี)','time','','time');
+  for(const [labelText,key,placeholder] of [
+   ['🚶 วิธีเดินไป (ถ้าทราบ)','directions','เช่น ลงลิฟต์แล้วเลี้ยวขวา'],
+   ['📝 หมายเหตุ (ถ้ามี)','note','เช่น ยื่นใบส่งตรวจก่อน']]){
+   const label=document.createElement('label');label.textContent=labelText;
+   const input=document.createElement('textarea');input.rows=2;input.maxLength=600;
+   input.value=stop[key]||'';input.placeholder=placeholder;
+   input.setAttribute('aria-label',labelText+' ขั้นตอน '+(index+1));
+   input.addEventListener('input',()=>{stop[key]=input.value;updateFilledIndicators();});
+   label.append(input);card.append(label);
+  }
+  const instructions=document.createElement('div');instructions.className='visit-stop-instructions';
+  const subheading=document.createElement('strong');subheading.textContent='📋 วิธีทำ / ขั้นตอนย่อย (ถ้ามี)';
+  const sublist=document.createElement('div');sublist.className='visit-substep-list';
+  const renderSubsteps=()=>{
+   sublist.replaceChildren();
+   for(const [j,value] of stop.instructions.entries()){
+    const row=document.createElement('div');row.className='visit-substep';
+    const input=document.createElement('input');input.type='text';input.value=value;
+    input.maxLength=220;input.placeholder='เช่น กดคิว หรือยื่นใบนัด';
+    input.setAttribute('aria-label','วิธีทำข้อ '+(j+1)+' ขั้นตอน '+(index+1));
+    input.addEventListener('input',()=>{stop.instructions[j]=input.value;updateFilledIndicators();});
+    const remove=makePhmsDeleteButton('ลบวิธีทำข้อ '+(j+1),()=>{
+     stop.instructions.splice(j,1);renderSubsteps();updateFilledIndicators();
+    });
+    row.append(input,remove);sublist.append(row);
+   }
+  };
+  const addSub=document.createElement('button');addSub.type='button';addSub.className='secondary';
+  addSub.textContent='＋ เพิ่มวิธีทำ';
+  addSub.addEventListener('click',()=>{
+   stop.instructions.push('');renderSubsteps();updateFilledIndicators();
+   sublist.lastElementChild?.querySelector('input')?.focus({preventScroll:true});
+  });
+  instructions.append(subheading,sublist,addSub);card.append(instructions);
+  renderSubsteps();
+  card.append(makeStopGallery(stop,'ขั้นตอน '+(index+1)));
   list.append(card);
  }
  $('visitStepsHelp').textContent=visitStops.length
-  ?'จัดเรียงได้ตามลำดับจริง และตรวจสอบสถานที่กับใบนัดก่อนเดินทาง'
-  :'ขั้นตอนของแต่ละโรงพยาบาลอาจไม่เหมือนกัน ไม่ต้องเพิ่มหากใบนัดไม่ได้ระบุ';
+  ?'สลับลำดับแล้ว รูปและวิธีทำของขั้นตอนนั้นจะตามไปด้วย'
+  :'ขั้นตอนแต่ละแผนกอาจต่างกัน เพิ่มเฉพาะที่ใบนัดระบุ';
 }
-$('visitStepAdd').addEventListener('click',()=>{
- visitStops.push({title:'',place:'',time:''});
- renderVisitStops();$('visitStepsDetails').open=true;
- $('visitStepsList').lastElementChild?.querySelector('input')?.focus({preventScroll:true});
+function hasJourneyDetails(){
+ return primaryJourney.photos.length>0||visitStops.length>0||
+ !!$('location_directions').value.trim()||!!$('location_note').value.trim();
+}
+function refreshJourneyWarning(){
+ const n=$('journeyContextWarning');n.hidden=!journeyNeedsReview;
+ n.classList.toggle('hidden',!journeyNeedsReview);
+}
+$('journeyKeepAfterReview').addEventListener('click',()=>{journeyNeedsReview=false;refreshJourneyWarning();});
+$('journeyClearOldRoute').addEventListener('click',()=>{
+ clearJourneyDraft();$('location_directions').value='';$('location_note').value='';
+ updateFilledIndicators();
 });
-$('personSelect').addEventListener('change',()=>{visitStops=[];renderVisitStops();});
+const onJourneyContextChange=()=>{
+ const next=$('providerOrg').value+'|'+$('providerUnit').value;
+ if(journeyPreviousContext&&next!==journeyPreviousContext&&hasJourneyDetails()){
+  journeyNeedsReview=true;refreshJourneyWarning();
+ }
+ journeyPreviousContext=next;
+};
+$('providerOrg').addEventListener('change',onJourneyContextChange);
+$('providerUnit').addEventListener('change',onJourneyContextChange);
+$('visitStepAdd').addEventListener('click',()=>{
+ visitStops.push(newVisitStop());renderVisitStops();$('visitStepsDetails').open=true;
+ $('visitStepsList').lastElementChild?.querySelector('input')?.focus({preventScroll:true});
+ updateFilledIndicators();
+});
+$('personSelect').addEventListener('change',()=>{
+ clearJourneyDraft();$('location_directions').value='';$('location_note').value='';
+ journeyPreviousContext='';refreshJourneyWarning();
+});
 renderVisitStops();
 let sourceAppointments=new Map();
 function refreshTopicSuggestions(){renderCareTopicSuggestions();}
