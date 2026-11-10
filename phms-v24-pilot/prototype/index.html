@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PHMS — เพิ่มนัดหมาย</title><meta name="phms-liff-id" content="2011619364-D0xazyre"><meta name="phms-confirm-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-confirm"><meta name="phms-read-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-read">
+<title>PHMS — เพิ่มนัดหมาย</title><meta name="phms-photo-ui" content="paired-v2-20261110"><meta name="phms-liff-id" content="2011619364-D0xazyre"><meta name="phms-confirm-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-confirm"><meta name="phms-read-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-read">
 <style>
 :root{font-family:system-ui,"Noto Sans Thai",sans-serif;color:#17324d;background:#f3f7fc}*{box-sizing:border-box}main{max-width:620px;margin:auto;padding:20px 14px 40px}h1{font-size:1.55rem}h2{font-size:1.2rem}p{line-height:1.55}.box{background:#fff;border:1px solid #dae4ee;border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 1px 3px #12263a0c}label{display:block;font-weight:650;margin:14px 0 6px}input,select,textarea,button{font:inherit}input,select,textarea{width:100%;min-height:46px;padding:10px;border:1px solid #9eaebf;border-radius:9px}button{min-height:48px;border-radius:10px;padding:10px 18px;border:0;background:#1666a7;color:white;font-weight:700}button:disabled{background:#9ba9b4}button.secondary{background:#e6eef6;color:#17324d}.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.help{color:#526579;font-size:.92rem}.error{color:#a51e2c}.hidden{display:none}.checklist-row{display:flex;align-items:center;gap:8px;margin:8px 0}.checklist-row input[type=checkbox]{width:24px;min-height:24px;flex:none}.checklist-row input:not([type=checkbox]){min-width:0;flex:1}.checklist-row button{flex:none}.checklist-row button.checklist-delete{width:52px;min-width:52px;min-height:48px;padding:8px;background:#913b4b;color:#fff;font-size:1.25rem;display:inline-flex;align-items:center;justify-content:center}.checklist-row button.checklist-delete:hover,.checklist-row button.checklist-delete:focus-visible{background:#7d2f40}.checklist-row button.checklist-delete:focus-visible{outline:3px solid #17324d;outline-offset:2px}.actions #prepEntry{flex:1;min-width:160px}.combo-results{border:1px solid #9eaebf;border-radius:10px;max-height:240px;overflow-y:auto;background:#fff}.combo-results button{display:block;width:100%;border-radius:0;text-align:left;background:white;color:#17324d;border-bottom:1px solid #dae4ee;min-height:48px}.combo-results button:focus{outline:3px solid #1666a7}.combo-results .unavailable{color:#526579;padding:12px}.appointment-cards{display:grid;gap:10px;margin:12px 0}.appointment-card{background:#fff;border:1px solid #b8c7d5;color:#17324d;text-align:left;width:100%;padding:14px;border-radius:12px;font-weight:400}.appointment-card strong{display:block;font-weight:700}.appointment-card span{display:block;color:#526579;font-size:.9rem;margin-top:5px}.appointment-card[aria-pressed="true"]{border:2px solid #1666a7;background:#eaf4ff}.required-star{color:#b42318;font-weight:800;margin-left:4px}.thai-preview{margin:6px 2px 0;font-size:.9rem;line-height:1.5;color:#345678}.notice{background:#fff2d8;border:1px solid #d9ad54;padding:12px;border-radius:10px}dl{display:grid;grid-template-columns:120px 1fr;gap:10px}dd{margin:0;overflow-wrap:anywhere}
 
@@ -770,6 +770,42 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   font-size:.88rem!important
  }
 }
+
+/* PHOTO BUTTON PARITY v2: both controls have the SAME physical 50/50 frame.
+   Overrides all legacy min-width, padding, flex and compact delete-pill rules only inside photo cards. */
+#editor #appointmentPhotoList .phms-photo-action-pair{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ grid-auto-flow:column!important;align-items:stretch!important;
+ gap:6px!important;width:100%!important;min-width:0!important
+}
+#editor #appointmentPhotoList .phms-photo-action-pair>button.phms-photo-action{
+ display:inline-flex!important;box-sizing:border-box!important;
+ flex:none!important;align-self:stretch!important;align-items:center!important;justify-content:center!important;
+ width:100%!important;min-width:0!important;max-width:none!important;
+ height:44px!important;min-height:44px!important;max-height:44px!important;
+ margin:0!important;padding:4px 6px!important;border-radius:10px!important;
+ font-size:.91rem!important;font-weight:700!important;line-height:1.2!important;
+ white-space:nowrap!important
+}
+#editor #appointmentPhotoList .phms-photo-action-pair>button.phms-photo-view{
+ background:#f3e8d9!important;color:#533c25!important;border:1px solid #c9ad8b!important
+}
+#editor #appointmentPhotoList .phms-photo-action-pair>button.phms-delete-button{
+ background:#fff2f3!important;color:#8c3146!important;border:1px solid #b77a85!important
+}
+#editor #appointmentPhotoList .phms-photo-action-pair>button.phms-delete-button>.phms-delete-face{
+ display:inline-flex!important;box-sizing:border-box!important;
+ flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;
+ padding:0!important;margin:0!important;border:0!important;background:none!important;
+ gap:4px!important;color:inherit!important
+}
+@media(max-width:380px){
+ #editor #appointmentPhotoList .phms-photo-action-pair{gap:5px!important}
+ #editor #appointmentPhotoList .phms-photo-action-pair>button.phms-photo-action{
+  font-size:.88rem!important;padding:4px 3px!important
+ }
+}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1139,12 +1175,13 @@ function renderAppointmentPhotos(){
   const card=document.createElement('div');card.className='appointment-photo-item';
   const thumb=document.createElement('img');thumb.src=photoUrls[index];thumb.alt='ดูรูปใบนัด '+(index+1);thumb.addEventListener('click',()=>showAppointmentPhoto(index));
   const name=document.createElement('p');name.textContent='รูป '+(index+1)+' · '+file.name;
-  const actions=document.createElement('div');actions.className='appointment-photo-actions';
-  const view=document.createElement('button');view.type='button';view.className='secondary phms-photo-view';view.textContent='ดูรูป';
+  const actions=document.createElement('div');actions.className='appointment-photo-actions phms-photo-action-pair';
+  const view=document.createElement('button');view.type='button';view.className='secondary phms-photo-view phms-photo-action';view.textContent='ดูรูป';
   view.setAttribute('aria-label','ดูรูปใบนัด '+(index+1));view.addEventListener('click',()=>showAppointmentPhoto(index));
   const remove=makePhmsDeleteButton('ลบรูปใบนัด '+(index+1),()=>{
    URL.revokeObjectURL(photoUrls[index]);photoFiles.splice(index,1);photoUrls.splice(index,1);renderAppointmentPhotos();
   });
+  remove.classList.add('phms-photo-action');
   actions.append(view,remove);card.append(thumb,name,actions);list.append(card);
  });
  $('addAppointmentPhoto').classList.toggle('hidden',photoFiles.length>=2);
