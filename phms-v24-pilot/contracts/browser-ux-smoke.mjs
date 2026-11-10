@@ -212,18 +212,6 @@ try {
    // A different hospital's route must not be displayed until the caregiver reviews it.
    assert.ok(await page.locator('#journeyContextWarning').isVisible(),'Changing hospital requires route review');
    await page.locator('#journeyKeepAfterReview').click();
-   // Patient/carer preview is read-only and keeps progress separate from the editable draft.
-   await page.locator('#showJourneyElderPreview').click();
-   const viewer=page.locator('#journeyElderPreviewDialog');
-   assert.ok(await viewer.isVisible(),'Older patient guide must open in mobile browser');
-   assert.equal(await viewer.locator('.phms-journey-elder-card').count(),3,'Point plus two separate visit stops');
-   assert.equal(await viewer.locator('button.phms-delete-button').count(),0,'Patient guide must not show edit/delete actions');
-   assert.equal(await viewer.locator('.phms-journey-elder-photo').count(),7 ,'Four main plus one X-ray and two blood draw pictures');
-   const progress=viewer.locator('input[type="checkbox"]').first();
-   await progress.check();
-   assert.ok(await progress.isChecked(),'Patient progress can be marked without altering visit template');
-   await viewer.locator('.phms-journey-elder-close').click();
-   assert.ok(!(await viewer.isVisible()),'Patient guide closes cleanly');
    await page.locator('#visitStepsList .visit-stop-card').first().locator('.visit-stop-heading button.phms-delete-button').click();
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),1,'One stop is removable without deleting the other');
    await page.waitForFunction(()=>!document.getElementById('journeySavePanel').hidden);
@@ -238,6 +226,9 @@ try {
    assert.equal(journeyActions.filter(x=>x.action==='photo_put').length,6,'Each of the six point photos uploaded individually');
    assert.equal(journeyActions.filter(x=>x.action==='photo_reorder').length,2,'Image ordering is rechecked before and after upload');
    assert.equal(journeyActions.filter(x=>x.action==='template_save')[0].template.steps[0].time,'','A reusable route never copies appointment-specific time');
+   assert.equal(await page.locator('#showJourneyElderPreview').count(),0,'Redundant detailed-mode viewer button is removed');
+   assert.equal((await page.locator('#primaryLocationDetails > summary').textContent()).trim(),'📍 จุดติดต่อหลัก','Primary point summary is concise');
+   assert.equal((await page.locator('#visitStepsDetails > summary').textContent()).trim(),'🧭 ขั้นตอนในวันนัด','Journey steps summary is concise');
    await page.locator('.mode-choice[data-mode="simple"]').click();
    assert.ok(await page.locator('#details').evaluate(x=>x.classList.contains('hidden')),'Journey editing stays hidden in simple mode');
    assert.equal(await page.locator('#primaryJourneyPhotoCount').textContent(),'4/5 รูป','Switching modes preserves detailed photo draft');
@@ -246,6 +237,9 @@ try {
    assert.ok(await page.locator('#journeyElderPreviewDialog').isVisible(),'Simple mode opens the same read-only guide');
    assert.equal(await page.locator('#journeyElderPreviewDialog .phms-journey-elder-card').count(),2,'The main point and one remaining step are visible');
    assert.equal(await page.locator('#journeyElderPreviewDialog button.phms-delete-button').count(),0,'No editing controls in the Simple guide');
+   const progress=page.locator('#journeyElderPreviewDialog input[type="checkbox"]').first();
+   await progress.check();
+   assert.ok(await progress.isChecked(),'Progress may be marked independently of template');
    await page.locator('#journeyElderPreviewDialog .phms-journey-elder-close').click();
    const getSummaryGeometry=async()=>page.locator('#simpleExtras>summary').evaluate(summary=>{
     const label=summary.querySelector(':scope > .phms-summary-label');
