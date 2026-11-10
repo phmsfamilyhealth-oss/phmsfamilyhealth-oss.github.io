@@ -931,6 +931,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor .phms-journey-warning-actions>button{min-height:44px!important;white-space:normal!important;padding:8px!important;color:#543a29!important;background:#f5eadc!important}
 @media(max-width:380px){#editor .phms-journey-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}#editor .phms-journey-photo-tile{padding:6px}#editor .phms-journey-photo-actions{gap:4px}#editor .phms-journey-photo-actions button{font-size:.8rem!important}#editor .visit-stop-card .visit-substep{grid-template-columns:minmax(0,1fr) 62px;gap:5px}}
 
+
+#editor .phms-journey-review-images{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0!important}
+#editor .phms-journey-review-images img{width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #d7c0a8}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1470,8 +1474,33 @@ previewField('เวลา',v.time_known?($('time').value+' น.'):'ไม่ท
 previewField('แผนก',$('department').value.trim());
 previewField('แพทย์',$('doctor').value.trim());
 previewField('รูปใบนัด',photoFiles.length?photoFiles.length+' รูป':'');
-previewField('ขั้นตอนในวันนัด',visitStops.filter(x=>x.title.trim()).map((x,i)=>[
- (i+1)+'. '+x.title.trim(),x.place.trim(),x.time?x.time+' น.':''].filter(Boolean).join(' · ')).join('\n'));
+previewField('จุดติดต่อหลัก',$('location_detail').value.trim());
+previewField('วิธีเดินไปจุดติดต่อหลัก',$('location_directions').value.trim());
+previewField('หมายเหตุจุดติดต่อ',$('location_note').value.trim());
+previewField('รูปจุดติดต่อหลัก',primaryJourney.photos.length?primaryJourney.photos.length+' รูป (ร่างทดลอง)':'');
+previewField('ขั้นตอนในวันนัด',visitStops.map((x,i)=>[
+ 'ขั้นตอน '+(i+1)+': '+(x.title||'ยังไม่ระบุ').trim(),
+ x.place?.trim(),x.time?x.time+' น.':'',x.directions?.trim(),
+ x.instructions?.filter(Boolean).map((a,j)=>(j+1)+'. '+a).join(' / '),
+ x.note?.trim(),x.photos?.length?x.photos.length+' รูป':''
+ ].filter(Boolean).join(' · ')).join('\n'));
+if(primaryJourney.photos.length||visitStops.some(x=>x.photos?.length)){
+ const warn=document.createElement('p');warn.className='help';
+ warn.textContent='📷 รูปและขั้นตอนในร่างทดลองยังไม่ได้บันทึกเข้า PHMS และจะไม่ซิงค์ข้ามเครื่อง';
+ dl.append(warn);
+ for(const [heading,gallery] of [
+  ['รูปจุดติดต่อหลัก',primaryJourney],...visitStops.map((x,i)=>['รูปขั้นตอน '+(i+1),x])]){
+  if(!gallery.photos?.length)continue;
+  const title=document.createElement('dt');title.textContent=heading;
+  const pictures=document.createElement('dd');pictures.className='phms-journey-review-images';
+  for(const photo of gallery.photos){
+   const image=document.createElement('img');image.src=photo.url;
+   image.alt=photo.caption||photo.name;image.title=photo.caption||photo.name;
+   image.addEventListener('click',()=>showJourneyImage(photo));pictures.append(image);
+  }
+  dl.append(title,pictures);
+ }
+}
 previewField('อาการหรือเรื่องที่ไป',$('previsitSymptoms').value.trim());
 previewField('รายละเอียดเพิ่มเติม',$('additionalNote').value.trim());
 if($('detail').value==='full'&&examPrepChoice.value){
@@ -1766,6 +1795,8 @@ $('journeyClearOldRoute').addEventListener('click',()=>{
  clearJourneyDraft();$('location_directions').value='';$('location_note').value='';
  updateFilledIndicators();
 });
+// Warning must be visible without expanding the steps accordion.
+$('details').prepend($('journeyContextWarning'));
 const onJourneyContextChange=()=>{
  const next=$('providerOrg').value+'|'+$('providerUnit').value;
  if(journeyPreviousContext&&next!==journeyPreviousContext&&hasJourneyDetails()){
@@ -2367,7 +2398,7 @@ function resetCurrentAppointmentDraft(){
  linkedVisitState.appointmentId='';linkedVisitState.personId=memberId;
  $('linkedCareVisit').value='';$('linkedCareVisitActions').classList.add('hidden');
  clearAppointmentPhotos();
- visitStops=[];renderVisitStops();
+ clearJourneyDraft();journeyPreviousContext='';
  resetChecklistToDefaults(); // Explicit clear creates a fresh draft with editable defaults.
  procedurePreviewItems=[];renderProcedurePreview();
  $('hasAppointmentPhotos').value='';
@@ -2429,7 +2460,9 @@ function updateFilledIndicators(){
   const filled=Array.from(panel.querySelectorAll('input:not([type=hidden]),textarea,select')).some(el=>{
    if(el.disabled||el.type==='file')return false;
    return el.tagName==='SELECT'?!!el.value:!!String(el.value||'').trim();
-  }) || (panel===simpleExtras&&checklistItems.length>0);
+  }) || (panel===simpleExtras&&checklistItems.length>0)
+    || (panel.id==='visitStepsDetails'&&visitStops.length>0)
+    || (!!panel.querySelector('#primaryJourneyPhotos')&&primaryJourney.photos.length>0);
   panel.classList.toggle('has-provider-data',panel===providerExtras&&filled);
   badge.textContent='มีข้อมูล';
   badge.hidden=!filled;
