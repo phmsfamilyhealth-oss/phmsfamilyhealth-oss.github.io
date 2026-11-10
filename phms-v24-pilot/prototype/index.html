@@ -625,8 +625,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   height:auto!important;min-height:58px!important;overflow:visible!important
 }
 #editor #checklistBox .checklist-row{
-  display:grid!important;grid-template-columns:30px minmax(0,1fr) 76px!important;
-  align-items:center!important;gap:9px!important;margin:0!important;padding:10px 0!important;
+  display:grid!important;grid-template-columns:30px minmax(0,1fr) 70px!important;
+  align-items:center!important;gap:9px!important;margin:0!important;padding:6px 0!important;
   border-bottom:1px solid #ece1d4!important
 }
 #editor #checklistBox .checklist-row:last-child{border-bottom:0!important}
@@ -636,27 +636,28 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 #editor #checklistBox .checklist-row textarea.checklist-name{
   box-sizing:border-box!important;display:block!important;width:100%!important;min-width:0!important;
-  min-height:54px!important;height:54px!important;max-height:100px!important;
-  padding:7px 5px!important;margin:0!important;border:1px solid transparent!important;
+  min-height:44px!important;height:auto!important;max-height:none!important;
+  padding:5px 3px!important;margin:0!important;border:1px solid transparent!important;
   border-radius:8px!important;outline:0!important;box-shadow:none!important;
   background:transparent!important;color:#30251a!important;
   font:inherit!important;font-size:1rem!important;line-height:1.45!important;
-  resize:none!important;overflow-y:auto!important
+  resize:none!important;overflow-y:hidden!important
 }
 #editor #checklistBox .checklist-row textarea.checklist-name:focus-visible{
   border-color:#9b7951!important;outline:2px solid #ac8760!important;outline-offset:1px!important;
   background:#fffaf3!important
 }
 #editor #checklistBox .checklist-row button.checklist-delete{
-  box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;
-  justify-content:center!important;gap:5px!important;width:76px!important;min-width:0!important;
-  min-height:48px!important;padding:7px 8px!important;
+  box-sizing:border-box!important;display:inline-flex!important;align-self:center!important;
+  align-items:center!important;justify-content:center!important;
+  gap:4px!important;width:70px!important;min-width:0!important;
+  height:44px!important;min-height:44px!important;padding:6px!important;
   border:1px solid #b77a85!important;border-radius:10px!important;
-  color:#8c3146!important;background:#fff2f3!important;font-size:.92rem!important;
+  color:#8c3146!important;background:#fff2f3!important;font-size:.9rem!important;
   font-weight:700!important;line-height:1.25!important
 }
 #editor #checklistBox .checklist-row button.checklist-delete svg{
-  display:block!important;flex:none!important;width:17px!important;height:17px!important
+  display:block!important;flex:none!important;width:16px!important;height:16px!important
 }
 #editor #checklistBox .checklist-row button.checklist-delete:hover{
   background:#fce3e7!important
@@ -666,10 +667,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 @media(max-width:380px){
   #editor #checklistBox .checklist-row{
-    grid-template-columns:28px minmax(0,1fr) 68px!important;gap:6px!important
+    grid-template-columns:28px minmax(0,1fr) 66px!important;gap:6px!important
   }
   #editor #checklistBox .checklist-row button.checklist-delete{
-    width:68px!important;padding:6px 5px!important;font-size:.88rem!important
+    width:66px!important;padding:6px 4px!important;font-size:.88rem!important
   }
 }
 
@@ -1053,6 +1054,23 @@ function resetChecklistToDefaults(){
  syncChecklistUndo();
 }
 function isPastAppointment(){return $('scenario').value==='historical';}
+// Fit an editable title to its actual Thai line wrapping, including when the phone rotates.
+function resizeChecklistName(name){
+ name.style.setProperty('height','auto','important');
+ const desired=Math.max(44,Math.ceil(name.scrollHeight)+2);
+ name.style.setProperty('height',desired+'px','important');
+}
+let checklistObservedWidth=0;
+const checklistWidthObserver=typeof ResizeObserver==='undefined'?null:new ResizeObserver(entries=>{
+ const width=entries[0]?.contentRect?.width||0;
+ if(!width||Math.abs(width-checklistObservedWidth)<1)return;
+ checklistObservedWidth=width;
+ for(const name of $('prepItems').querySelectorAll('textarea.checklist-name'))resizeChecklistName(name);
+});
+if(checklistWidthObserver)checklistWidthObserver.observe($('prepItems'));
+else window.addEventListener('resize',()=>{
+ for(const name of $('prepItems').querySelectorAll('textarea.checklist-name'))resizeChecklistName(name);
+});
 function renderChecklist(){
  const list=$('prepItems');list.replaceChildren();
  for(const [index,item] of checklistItems.entries()){
@@ -1060,9 +1078,10 @@ function renderChecklist(){
   const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=item.status==='completed';
   checkbox.setAttribute('aria-label','เตรียมแล้ว: '+item.title);
   checkbox.addEventListener('change',()=>{item.status=checkbox.checked?'completed':'pending';renderChecklist();});
-  // An editable two-line field keeps the original change/save behavior without hiding long Thai titles.
-  const name=document.createElement('textarea');name.className='checklist-name';name.rows=2;
+  // Editable one-line by default, auto-growing only when the Thai text wraps.
+  const name=document.createElement('textarea');name.className='checklist-name';name.rows=1;
   name.value=item.title;name.maxLength=160;name.setAttribute('aria-label','แก้ไขรายการที่ '+(index+1));
+  name.addEventListener('input',()=>resizeChecklistName(name));
   name.addEventListener('change',()=>{
    const v=name.value.replace(/\s*\n\s*/g,' ').trim();
    if(!v||checklistItems.some((x,i)=>i!==index&&x.title.toLocaleLowerCase('th-TH')===v.toLocaleLowerCase('th-TH'))){name.value=item.title;return;}
@@ -1073,6 +1092,7 @@ function renderChecklist(){
   remove.title='ลบรายการ';remove.setAttribute('aria-label','ลบ '+item.title);
   remove.addEventListener('click',()=>removeChecklistItem(item));
   row.append(checkbox,name,remove);list.append(row);
+  resizeChecklistName(name);
  }
  $('prepProgress').textContent='เตรียมแล้ว '+checklistItems.filter(x=>x.status==='completed').length+'/'+checklistItems.length+' รายการ';
  $('prep').value=checklistItems.map(x=>x.title).join('\n');
