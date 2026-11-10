@@ -673,6 +673,48 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   }
 }
 
+
+/* Provider disclosure: keep the title and saved-state badge on ONE line in iOS LINE WebView.
+   Scope to providerExtras only, leaving every other accordion and its saved-data behavior intact. */
+#editor #mainFlow #providerExtras{padding:0 12px!important}
+#editor #mainFlow #providerExtras>summary{
+  display:flex!important;align-items:center!important;flex-wrap:nowrap!important;
+  box-sizing:border-box!important;gap:7px!important;min-height:56px!important;
+  width:100%!important;margin:0!important;padding:10px 0!important;
+  list-style:none!important;line-height:1.45!important;cursor:pointer!important
+}
+#editor #mainFlow #providerExtras>summary::-webkit-details-marker{display:none!important}
+#editor #mainFlow #providerExtras>summary::marker{content:""!important}
+#editor #mainFlow #providerExtras>summary::before{
+  content:"▸";display:block!important;flex:0 0 17px!important;
+  color:#242424!important;font-size:1.05rem!important;line-height:1!important;
+  text-align:center!important
+}
+#editor #mainFlow #providerExtras[open]>summary::before{content:"▾"}
+#editor #mainFlow #providerExtras>summary .provider-summary-title{
+  display:block!important;min-width:0!important;flex:1 1 auto!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  font-size:.97rem!important;font-weight:700!important;color:#242424!important
+}
+#editor #mainFlow #providerExtras.has-provider-data>summary .provider-summary-optional{
+  display:none!important
+}
+#editor #mainFlow #providerExtras>summary .filled-indicator{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  flex:0 0 auto!important;position:static!important;float:none!important;clear:none!important;
+  width:auto!important;max-width:none!important;margin:0 0 0 auto!important;
+  padding:4px 7px!important;line-height:1.35!important;border-radius:7px!important;
+  background:#f4ecdf!important;color:#5c452e!important;font-size:.75rem!important;
+  font-weight:650!important;white-space:nowrap!important
+}
+#editor #mainFlow #providerExtras>summary .filled-indicator[hidden]{display:none!important}
+#editor #mainFlow #providerExtras[open]>summary{margin-bottom:10px!important}
+@media(max-width:360px){
+  #editor #mainFlow #providerExtras>summary{gap:5px!important}
+  #editor #mainFlow #providerExtras>summary .provider-summary-title{font-size:.92rem!important}
+  #editor #mainFlow #providerExtras>summary .filled-indicator{padding:4px 6px!important;font-size:.7rem!important}
+}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1806,6 +1848,10 @@ function updateFilledIndicators(){
    if(el.disabled||el.type==='file')return false;
    return el.tagName==='SELECT'?!!el.value:!!String(el.value||'').trim();
   });
+  if(panel===providerExtras){
+   badge.textContent='มีข้อมูล';
+   panel.classList.toggle('has-provider-data',filled);
+  }
   if(panel===simpleExtras){
    const prepCount=checklistItems.length+Number(!!$('previsitSymptoms').value.trim())+
     Number(!!examPrepChoice.value||!!examPrepDetails.value.trim())+Number(!!$('additionalNote').value.trim());
@@ -1932,7 +1978,12 @@ for(const [id,icon] of [['purpose','📝'],['hospitalSearch','🏥'],['unitSearc
  if(existing){existing.textContent=icon+' ';continue;}
  const span=document.createElement('span');span.className='field-icon';span.textContent=icon+' ';label.prepend(span);
 }
-providerSummary.textContent='🏷️ แผนกและแพทย์ (ถ้ามี)';
+// One-line accessible disclosure: the optional hint is hidden only when a saved choice exists.
+const providerTitle=document.createElement('span');providerTitle.className='provider-summary-title';
+providerTitle.textContent='🏷️ แผนกและแพทย์';
+const providerOptional=document.createElement('span');providerOptional.className='optional-hint provider-summary-optional';
+providerOptional.textContent=' (ถ้ามี)';
+providerTitle.append(providerOptional);providerSummary.replaceChildren(providerTitle);
 decorateOptionalWording();
 // Titles are also updated dynamically when an existing appointment is selected.
 const optionalObserver=new MutationObserver(records=>{
