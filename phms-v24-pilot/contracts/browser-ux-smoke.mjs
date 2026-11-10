@@ -157,18 +157,6 @@ try {
    const hospitalDetail=page.locator('#hospitalLocationDetails');
    const detailInitiallyOpen=await hospitalDetail.evaluate(el=>el.open);
    if(!detailInitiallyOpen)await hospitalDetail.locator(':scope > summary').click();
-   console.log('PHMS_LOCATION_DETAIL_OPEN',JSON.stringify({before:detailInitiallyOpen,after:await hospitalDetail.evaluate(el=>el.open)}));
-   const galleryDebug=await page.locator('#primaryJourneyGallery').evaluate(node=>{
-    const list=[];let el=node;
-    while(el&&list.length<13){
-     const style=getComputedStyle(el),rect=el.getBoundingClientRect();
-     list.push({tag:el.tagName,id:el.id,classes:el.className,hidden:el.hidden,
-      open:el.open,display:style.display,visibility:style.visibility,width:rect.width,height:rect.height});
-     el=el.parentElement;
-    }
-    return {mode:document.getElementById('detail').value,chain:list};
-   });
-   console.log('PHMS_JOURNEY_GALLERY_DIAGNOSTIC',JSON.stringify(galleryDebug));
    assert.ok(await page.locator('#primaryJourneyPhotos').isVisible(),'The detailed photo editor wrapper must be visible');
    const journeyPng=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9VFYDj8AAAAASUVORK5CYII=','base64');
    const journeyFile=(name)=>({name,mimeType:'image/png',buffer:journeyPng});
@@ -205,7 +193,7 @@ try {
    assert.equal(await stops.nth(1).locator('input[aria-label^="วิธีทำข้อ"]').first().inputValue(),'กดบัตรคิว','Substep follows its parent');
    assert.deepEqual(await stopNames.evaluateAll(xs=>xs.map(x=>x.value)),['เอกซเรย์','เจาะเลือด']);
    assert.deepEqual(await stopNames.evaluateAll(xs=>xs.map(x=>x.value)),['เอกซเรย์','เจาะเลือด']);
-   await page.locator('#visitStepsList .visit-stop-card').first().locator('button.phms-delete-button').click();
+   await page.locator('#visitStepsList .visit-stop-card').first().locator('.visit-stop-heading button.phms-delete-button').click();
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),1,'One stop is removable without deleting the other');
    await page.locator('.mode-choice[data-mode="simple"]').click();
    assert.ok(await page.locator('#details').evaluate(x=>x.classList.contains('hidden')),'Journey editing stays hidden in simple mode');
