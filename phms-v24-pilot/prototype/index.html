@@ -740,10 +740,36 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor .appointment-photo-item{display:grid!important;grid-template-columns:100px minmax(0,1fr)!important;grid-template-rows:auto 1fr!important;gap:7px 10px!important;align-items:center!important;min-width:0!important;padding:10px!important;border:1px solid #d8c4ac!important;border-radius:12px!important;background:#fff!important}
 #editor .appointment-photo-item>img{grid-column:1!important;grid-row:1 / span 2!important;width:100%!important;height:112px!important;object-fit:contain!important;border-radius:9px!important;background:#f8f4ef!important}
 #editor .appointment-photo-item>p{grid-column:2!important;grid-row:1!important;min-width:0!important;margin:0!important;font-size:.92rem!important;line-height:1.5!important;color:#30251a!important;overflow-wrap:anywhere!important}
-#editor .appointment-photo-item .appointment-photo-actions{grid-column:2!important;grid-row:2!important;display:grid!important;grid-template-columns:minmax(0,1fr) 68px!important;gap:6px!important;align-items:center!important;flex-wrap:nowrap!important;min-width:0!important}
+#editor .appointment-photo-item .appointment-photo-actions{grid-column:2!important;grid-row:2!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;align-items:stretch!important;flex-wrap:nowrap!important;min-width:0!important}
 #editor .appointment-photo-actions button.phms-photo-view{box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;height:44px!important;min-height:44px!important;margin:0!important;padding:5px 3px!important;border:1px solid #c9ad8b!important;border-radius:10px!important;background:#f3e8d9!important;color:#533c25!important;font-size:.91rem!important;font-weight:700!important;white-space:nowrap!important}
 #editor .appointment-photo-actions button.phms-photo-view:focus-visible{outline:3px solid #79552c!important;outline-offset:2px!important}
-@media(max-width:380px){#editor button.phms-delete-button{width:62px!important;min-width:62px!important;font-size:.88rem!important}#editor button.phms-delete-button .phms-delete-face{width:60px!important;padding:4px 3px!important}#editor #procedureItems .phms-procedure-row{grid-template-columns:minmax(0,1fr) 62px!important;gap:5px!important}#editor .appointment-photo-item{grid-template-columns:86px minmax(0,1fr)!important;gap:7px 8px!important}#editor .appointment-photo-item>img{height:104px!important}#editor .appointment-photo-item .appointment-photo-actions{grid-template-columns:minmax(0,1fr) 62px!important;gap:5px!important}#editor .appointment-photo-actions button.phms-photo-view{font-size:.88rem!important}}
+@media(max-width:380px){#editor button.phms-delete-button{width:62px!important;min-width:62px!important;font-size:.88rem!important}#editor button.phms-delete-button .phms-delete-face{width:60px!important;padding:4px 3px!important}#editor #procedureItems .phms-procedure-row{grid-template-columns:minmax(0,1fr) 62px!important;gap:5px!important}#editor .appointment-photo-item{grid-template-columns:86px minmax(0,1fr)!important;gap:7px 8px!important}#editor .appointment-photo-item>img{height:104px!important}#editor .appointment-photo-item .appointment-photo-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important}#editor .appointment-photo-actions button.phms-photo-view{font-size:.88rem!important}}
+
+/* Photo card actions: View and Delete are paired peers — precisely equal button boxes.
+   The 32px delete-pill treatment remains for stand-alone Checklist and Procedure actions. */
+#editor .appointment-photo-item .appointment-photo-actions button.phms-delete-button{
+ box-sizing:border-box!important;
+ width:100%!important;min-width:0!important;max-width:none!important;
+ height:44px!important;min-height:44px!important;max-height:44px!important;
+ margin:0!important;padding:5px 3px!important;
+ border:1px solid #b77a85!important;border-radius:10px!important;
+ background:#fff2f3!important;color:#8c3146!important;
+ font-size:.91rem!important;font-weight:700!important;
+ flex:initial!important;align-self:stretch!important
+}
+#editor .appointment-photo-item .appointment-photo-actions button.phms-delete-button .phms-delete-face{
+ width:100%!important;height:100%!important;min-height:0!important;
+ padding:0!important;margin:0!important;border:0!important;
+ border-radius:0!important;background:transparent!important;color:inherit!important
+}
+#editor .appointment-photo-item .appointment-photo-actions button.phms-delete-button:hover{
+ background:#fce3e7!important
+}
+@media(max-width:380px){
+ #editor .appointment-photo-item .appointment-photo-actions button.phms-delete-button{
+  font-size:.88rem!important
+ }
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
