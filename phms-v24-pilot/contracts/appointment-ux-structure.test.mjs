@@ -157,7 +157,7 @@ test('shared PHMS delete action is consistent across every local-draft removal',
  assert.equal((script.match(/const remove=makePhmsDeleteButton\(/g)||[]).length,3,'Checklist, photo and procedure use shared button');
  assert.ok(script.includes("makePhmsDeleteButton('ลบรูปใบนัด '+(index+1)"),'Photo removal uses shared delete action');
  assert.ok(script.includes("makePhmsDeleteButton('ลบรายการตรวจ '+item"),'Procedure removal uses shared delete action');
- assert.ok(script.includes("view.className='secondary phms-photo-view'"),'Photo preview stays visually distinct from delete');
+ assert.ok(script.includes("view.className='secondary phms-photo-view phms-photo-action'"),'Photo preview stays visually distinct from delete');
  assert.ok(!script.includes("remove.textContent='🗑️'"),'Emoji-only deletion is not acceptable');
  assert.ok(!script.includes("remove.className='photo-remove'"),'Old large picture delete button must not reappear');
  assert.ok(!script.includes('checklistUndo')&&!script.includes('askChecklistDelete'),'Local draft deletion stays immediate and without undo');
