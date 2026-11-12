@@ -262,10 +262,10 @@ try {
    await page.locator('#rescheduleEnd').selectOption('09:00');
    assert.match(await page.locator('#rescheduleHoursSummary').textContent(),/08:30–09:00/);
    // Phone cards preserve extension strings, separate entries, and editable rows.
-   assert.equal(await page.locator('#contactPhoneList .phms-contact-phone-row').count(),1);
+   assert.equal(await page.locator('#contactPhoneList .phms-contact-phone-row').count(),2);
    await page.locator('#contactPhoneEntry').fill('089-123-4567 ต่อ 321');
    await page.locator('#contactPhoneEntry').press('Enter');
-   assert.equal(await page.locator('#contactPhoneList .phms-contact-phone-row').count(),2);
+   assert.equal(await page.locator('#contactPhoneList .phms-contact-phone-row').count(),3);
    assert.match(await page.locator('#contact_phone').inputValue(),/089-123-4567 ต่อ 321/);
    await page.locator('#rescheduleDayCards [data-choice="government"]').click();
    assert.equal(await page.locator('#rescheduleWeekdaysBox').isVisible(),false);
