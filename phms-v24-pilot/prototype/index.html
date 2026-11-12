@@ -2802,6 +2802,14 @@ async function applyLoadedFamilyContact(savedPromise,generation,editAtStart,org,
  }else if(!saved.ok){
   $('familyContactSaveStatus').textContent='ยังโหลดข้อมูลครอบครัวไม่ได้ · ยังแก้ไขข้อมูลสำหรับนัดนี้ได้';
  }
+ // Only a same-person, same-hospital/unit appointment may supply an unverified fallback.
+ if(!saved.contact&&!contactPhoneItems.length&&editAtStart===contactEditVersion){
+  const prior=sourceAppointments.get($('relatedSelect').value);
+  if(prior?.organization_id===org&&String(prior?.service_unit_id||'')===String(unit||'')&&prior.contact_phone){
+   setContactPhoneItems(String(prior.contact_phone));
+   $('familyContactSaveStatus').textContent='📋 เติมเบอร์จากนัดเดิม (ยังไม่ได้ตรวจสอบกับโรงพยาบาล) · แก้ไขได้';
+  }
+ }
 }
 async function loadRescheduleContacts(){
  const box=$('contactDetails'),org=$('providerOrg').value,unit=$('providerUnit').value,chosenPerson=memberId,generation=++contactLoadGeneration,editAtStart=contactEditVersion;
