@@ -2590,32 +2590,41 @@ async function loadRescheduleContacts(){
  // Auto-classify only exact, unambiguous text. Retain all other original hours
  // visibly so working days / public holidays are never guessed.
  const hours=String(c.hours||'').trim();
+ const standaloneDays=hours.split(/\s+เวลา(?:ราชการ)?/u)[0].trim();
  if(!$('rescheduleDays').value){
-  if(/^วันราชการ$/u.test(hours))$('rescheduleDays').value='government';
-  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?ศุกร์$/u.test(hours))$('rescheduleDays').value='mon-fri';
-  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?เสาร์$/u.test(hours))$('rescheduleDays').value='mon-sat';
-  else if(/^ทุกวัน$/u.test(hours))$('rescheduleDays').value='everyday';
- }
- if(!$('rescheduleHours').value&&hours==='เวลาราชการ')$('rescheduleHours').value='office';
- // Parse only a fully matched "days + time" phrase; otherwise show source verbatim.
- const specified=hours.match(/^(วันราชการ|วันจันทร์\s*[–-]\s*(?:วัน)?ศุกร์|วันจันทร์\s*[–-]\s*(?:วัน)?เสาร์|ทุกวัน)\s+เวลา\s*(ราชการ|(?:[01]\d|2[0-3]):[0-5]\d\s*[–-]\s*(?:[01]\d|2[0-3]):[0-5]\d)\s*(?:น\.)?$/u);
- if(specified){
-  if(!$('rescheduleDays').value){
-   if(specified[1]==='วันราชการ')$('rescheduleDays').value='government';
-   else if(/ศุกร์$/.test(specified[1]))$('rescheduleDays').value='mon-fri';
-   else if(/เสาร์$/.test(specified[1]))$('rescheduleDays').value='mon-sat';
-   else if(specified[1]==='ทุกวัน')$('rescheduleDays').value='everyday';
-  }
-  if(!$('rescheduleHours').value){
-   const timeText=specified[2].replace(/\s/g,'').replace('–','-');
-   if(timeText==='ราชการ')$('rescheduleHours').value='office';
-   else if(['08:00-16:00','13:00-15:00'].includes(timeText))$('rescheduleHours').value=timeText;
-   else{
-    const range=timeText.split('-');
-    if(range.length===2){$('rescheduleHours').value='custom';$('rescheduleStart').value=range[0];$('rescheduleEnd').value=range[1];}
+  if(/^(?:วันราชการ|วันและเวลาราชการ)$/u.test(standaloneDays))$('rescheduleDays').value='government';
+  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?ศุกร์$/u.test(standaloneDays))$('rescheduleDays').value='mon-fri';
+  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?เสาร์$/u.test(standaloneDays))$('rescheduleDays').value='mon-sat';
+  else if(/^ทุกวัน$/u.test(standaloneDays))$('rescheduleDays').value='everyday';
+  else{
+   const names={'จันทร์':'mon','อังคาร':'tue','พุธ':'wed','พฤหัสบดี':'thu','ศุกร์':'fri','เสาร์':'sat','อาทิตย์':'sun'};
+   const tokens=standaloneDays.split(/\s*(?:,|\/|และ|、)\s*/u).map(x=>x.trim().replace(/^วัน/u,''));
+   if(tokens.length>=2&&tokens.every(token=>Object.prototype.hasOwnProperty.call(names,token))){
+    $('rescheduleDays').value='specific';
+    for(const token of tokens)chosenContactWeekdays.add(names[token]);
    }
   }
  }
+ // Exact verified sources may fill known time presets or a 30-minute slot pair.
+ // Odd-minute registry hours remain visible verbatim, not rounded silently.
+ const specified=hours.match(/^(?:วันราชการ|วันและเวลาราชการ|วันจันทร์\s*[–-]\s*(?:วัน)?ศุกร์|วันจันทร์\s*[–-]\s*(?:วัน)?เสาร์|ทุกวัน)\s+เวลา\s*(ราชการ|(?:[01]\d|2[0-3]):[0-5]\d\s*[–-]\s*(?:[01]\d|2[0-3]):[0-5]\d)\s*(?:น\.)?$/u);
+ if(!$('rescheduleHours').value&&specified){
+  const timeText=specified[1].replace(/\s/g,'').replace('–','-');
+  if(timeText==='ราชการ')$('rescheduleHours').value='office';
+  else if(timeText==='08:30-16:30'&&$('rescheduleDays').value==='government')$('rescheduleHours').value='office';
+  else if(timeText==='08:30-12:00')$('rescheduleHours').value='morning';
+  else if(timeText==='13:00-16:30')$('rescheduleHours').value='afternoon';
+  else{
+   const range=timeText.split('-');
+   if(range.length===2&&range.every(t=>/^(?:[01]\d|2[0-3]):(?:00|30)$/.test(t))&&range[0]<range[1]){
+    $('rescheduleHours').value='custom';$('rescheduleStart').value=range[0];$('rescheduleEnd').value=range[1];
+   }
+  }
+ }
+ if(!$('rescheduleHours').value&&hours==='เวลาราชการ')$('rescheduleHours').value='office';
+ if(!$('rescheduleHours').value&&$('rescheduleDays').value==='government')$('rescheduleHours').value='office';
+ if($('rescheduleDays').value==='government'&&$('rescheduleNoticeUnit').value==='calendar'&&!$('rescheduleNotice').value)
+  $('rescheduleNoticeUnit').value='working';
  syncContactFields();
 }
 function rescheduleContextChanged(){
