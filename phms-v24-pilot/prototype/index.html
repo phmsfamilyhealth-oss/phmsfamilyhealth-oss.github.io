@@ -1705,6 +1705,7 @@ previewField('ติดต่อเลื่อนนัด · วัน',select
 previewField('ติดต่อเลื่อนนัด · เวลา',selectedContactHours());
 previewField('ติดต่อเลื่อนนัด · ล่วงหน้า',selectedContactNotice());
 previewField('เงื่อนไขการติดต่อ', $('rescheduleInstructions').value.trim());
+previewField('เบอร์ติดต่อเลื่อนนัด',contactPhoneItems.map((n,i)=>(i+1)+'. '+n).join('\n'));
 previewField('จุดติดต่อหลัก',$('location_detail').value.trim());
 previewField('วิธีเดินไปจุดติดต่อหลัก',$('location_directions').value.trim());
 previewField('หมายเหตุจุดติดต่อ',$('location_note').value.trim());
@@ -2488,7 +2489,10 @@ function makeContactOption(host,value,label,hint,select){
  button.type='button';button.className='phms-pick';button.dataset.choice=value;button.setAttribute('aria-pressed','false');
  const title=document.createElement('span');title.textContent=label;button.append(title);
  if(hint){const small=document.createElement('small');small.textContent=hint;button.append(small);}
- button.addEventListener('click',()=>{select.value=value;select.dispatchEvent(new Event('change',{bubbles:true}));});
+ button.addEventListener('click',()=>{
+  if(host==='rescheduleHourCards'){toggleContactHours(value);return;}
+  select.value=value;select.dispatchEvent(new Event('change',{bubbles:true}));
+ });
  $(host).append(button);
 }
 for(const [key,label,short] of contactWeekdayValues){
@@ -2501,6 +2505,21 @@ for(const [key,label,short] of contactWeekdayValues){
   syncContactFields();markContactEdited();
  });
  $('rescheduleWeekdays').append(button);
+}
+
+/* One card for office or custom, or any subset of morning and afternoon.
+   Exact four visible card choices; two periods can coexist without a fifth card. */
+function toggleContactHours(value){
+ const select=$('rescheduleHours'),current=select.value;
+ if(value==='morning'||value==='afternoon'){
+  const values=new Set(current==='morning-afternoon'?['morning','afternoon']:
+   ['morning','afternoon'].includes(current)?[current]:[]);
+  if(values.has(value))values.delete(value);else values.add(value);
+  select.value=values.size===2?'morning-afternoon':values.size?[...values][0]:'';
+ }else{
+  select.value=value;
+ }
+ select.dispatchEvent(new Event('change',{bubbles:true}));
 }
 for(const [value,label,hint] of [
  ['government','🏛️ วันราชการ','จันทร์–ศุกร์ 08:30–16:30 น. (แนะนำ)'],
@@ -2538,6 +2557,7 @@ function selectedContactHours(){
  if(type==='office')return '08:30–16:30 น. (เวลาราชการทั่วไป)';
  if(type==='morning')return '08:30–12:00 น. (ช่วงเช้า)';
  if(type==='afternoon')return '13:00–16:30 น. (ช่วงบ่าย)';
+ if(type==='morning-afternoon')return '08:30–12:00 น. (ช่วงเช้า) / 13:00–16:30 น. (ช่วงบ่าย)';
  if(type==='custom'){
   const begin=$('rescheduleStart').value,end=$('rescheduleEnd').value;
   const valid=/^(?:[01]\d|2[0-3]):(?:00|30)$/.test(begin)&&/^(?:[01]\d|2[0-3]):(?:00|30)$/.test(end);
@@ -2551,6 +2571,71 @@ function selectedContactNotice(){
  const type=$('rescheduleNoticeUnit').value==='working'?'วันทำการ':'วันปฏิทิน';
  return days+' '+type+'ก่อนวันนัด';
 }
+
+
+/* The hidden canonical contact_phone is preserved for compatibility.
+   Individual phone strings may include spaces, extensions and descriptions. */
+let contactPhoneItems=[];
+function normalizeContactPhone(item){return String(item||'').normalize('NFKC').trim().replace(/[ \t]+/g,' ');}
+function contactPhoneKey(item){return normalizeContactPhone(item).toLocaleLowerCase('th-TH');}
+function syncContactPhoneSource(){
+ $('contact_phone').value=contactPhoneItems.join('\n');
+ $('contactPhoneStatus').textContent=contactPhoneItems.length
+  ?'☎️ มี '+contactPhoneItems.length+' เบอร์ติดต่อ (แตะที่เบอร์เพื่อแก้ไขได้)'
+  :'ยังไม่ได้เพิ่มเบอร์ติดต่อ';
+}
+function renderContactPhoneItems(){
+ const list=$('contactPhoneList');list.replaceChildren();
+ for(const [index,number] of contactPhoneItems.entries()){
+  const row=document.createElement('div');row.className='phms-contact-phone-row';
+  const label=document.createElement('label');label.textContent='เบอร์ติดต่อ '+(index+1);
+  const input=document.createElement('input');input.type='text';input.value=number;
+  input.maxLength=120;input.setAttribute('aria-label','แก้ไขเบอร์ติดต่อ '+(index+1));
+  input.addEventListener('change',()=>{
+   const revised=normalizeContactPhone(input.value);
+   if(!revised||revised.includes('\n')||contactPhoneItems.some((item,i)=>i!==index&&contactPhoneKey(item)===contactPhoneKey(revised))||
+      contactPhoneItems.reduce((n,item,i)=>n+(i===index?revised:item).length+1,0)>500){input.value=number;return;}
+   contactPhoneItems[index]=revised;renderContactPhoneItems();markContactEdited();
+  });
+  label.append(input);
+  const remove=makePhmsDeleteButton('ลบเบอร์ติดต่อ '+(index+1),()=>{
+   contactPhoneItems.splice(index,1);renderContactPhoneItems();markContactEdited();
+  });
+  row.append(label,remove);list.append(row);
+ }
+ syncContactPhoneSource();
+}
+function setContactPhoneItems(text,markEdited=false){
+ const incoming=String(text||'').split(/\r?\n/).map(normalizeContactPhone).filter(Boolean);
+ const list=[];const seen=new Set();
+ for(const item of incoming){
+  const key=contactPhoneKey(item);
+  if(!seen.has(key)&&item.length<=120&&list.length<12&&[...list,item].join('\n').length<=500){list.push(item);seen.add(key);}
+ }
+ contactPhoneItems=list;renderContactPhoneItems();
+ if(markEdited)markContactEdited();
+}
+function appendContactPhone(text){
+ const incoming=String(text||'').split(/\r?\n/).map(normalizeContactPhone).filter(Boolean);
+ let added=false;const seen=new Set(contactPhoneItems.map(contactPhoneKey));
+ for(const item of incoming){
+  const key=contactPhoneKey(item);
+  if(seen.has(key))continue;
+  if(item.length>120||contactPhoneItems.length>=12||[...contactPhoneItems,item].join('\n').length>500)continue;
+  contactPhoneItems.push(item);seen.add(key);added=true;
+ }
+ if(added){renderContactPhoneItems();markContactEdited();}
+ $('contactPhoneEntry').value='';
+}
+$('contactPhoneAdd').addEventListener('click',()=>appendContactPhone($('contactPhoneEntry').value));
+$('contactPhoneEntry').addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();appendContactPhone(e.currentTarget.value);}
+});
+$('contactPhoneEntry').addEventListener('paste',e=>{
+ const pasted=e.clipboardData?.getData('text')||'';
+ if(/\r|\n/.test(pasted)){e.preventDefault();appendContactPhone(pasted);}
+});
+renderContactPhoneItems();
 
 /* Contact time slots must be a forward range of at least 30 minutes; never round verified source hours. */
 function syncRescheduleTimeLimits(){
@@ -2573,7 +2658,8 @@ function syncContactFields(){
   ['rescheduleDays','rescheduleDayCards'],['rescheduleHours','rescheduleHourCards'],
   ['rescheduleNotice','rescheduleNoticeCards'],['rescheduleNoticeUnit','rescheduleNoticeUnitCards']
  ])for(const button of $(hostId).children)
-  button.setAttribute('aria-pressed',String($(selectId).value===button.dataset.choice));
+  button.setAttribute('aria-pressed',String($(selectId).value===button.dataset.choice||
+   hostId==='rescheduleHourCards'&&$('rescheduleHours').value==='morning-afternoon'&&['morning','afternoon'].includes(button.dataset.choice)));
  for(const button of $('rescheduleWeekdays').children)
   button.setAttribute('aria-pressed',String(chosenContactWeekdays.has(button.dataset.weekday)));
  $('rescheduleDaysSummary').textContent=mode==='government'
@@ -2603,7 +2689,7 @@ $('rescheduleDays').addEventListener('change',()=>{
  }
  syncContactFields();markContactEdited();
 });
-for(const id of ['rescheduleHours','rescheduleStart','rescheduleEnd','contact_phone',
+for(const id of ['rescheduleHours','rescheduleStart','rescheduleEnd',
   'rescheduleNotice','rescheduleNoticeUnit','rescheduleInstructions']){
  $(id).addEventListener('change',()=>{syncContactFields();markContactEdited();});
 }
@@ -2614,6 +2700,7 @@ function resetContactDraft(){
   'contact_phone','rescheduleNotice','rescheduleInstructions'
  ])$(id).value='';
  $('rescheduleNoticeUnit').value='calendar';
+ setContactPhoneItems('');$('contactPhoneEntry').value='';
  chosenContactWeekdays.clear();syncContactFields();
  $('contactDetails').textContent='เปิดส่วนนี้เพื่อดูข้อมูลติดต่อที่โรงพยาบาล/แผนกบันทึกไว้';
  $('rescheduleDraftNote').textContent='แก้ไขข้อมูลได้สำหรับนัดนี้ · รุ่นทดลองยังไม่บันทึกการแก้ไขกลับทะเบียนกลาง';
@@ -2633,7 +2720,7 @@ async function loadRescheduleContacts(){
  if(Number.isInteger(c.minNoticeMinutes))messages.push('ระยะติดต่อล่วงหน้าตามข้อมูลกลาง: '+c.minNoticeMinutes+' นาที (ยังไม่ระบุวิธีนับวันทำการ)');
  if(c.email)messages.push('อีเมล: '+String(c.email));
  box.textContent=messages.join('\n');
- if(c.phone&&!$('contact_phone').value.trim())$('contact_phone').value=String(c.phone).slice(0,500);
+ if(c.phone&&!contactPhoneItems.length)setContactPhoneItems(String(c.phone).slice(0,500));
  if(c.instructions&&!$('rescheduleInstructions').value.trim())$('rescheduleInstructions').value=String(c.instructions).slice(0,600);
  // Auto-classify only exact, unambiguous text. Retain all other original hours
  // visibly so working days / public holidays are never guessed.
