@@ -982,6 +982,21 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .arrival-lead-choice:focus-visible{outline:3px solid #93683f;outline-offset:2px}
 .arrival-lead-preview:not([hidden]){display:block;margin:12px 0 4px;padding:12px;border-radius:10px;background:#f8f1e8;color:#4c3420;font-weight:650}
 @media(max-width:360px){.arrival-lead-choices{gap:6px}.arrival-lead-choice{padding:10px 4px}}
+
+/* Structured reschedule and appointment selection cards (PHMS pilot) */
+.phms-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.phms-choice-grid .phms-pick{min-height:48px;border:1px solid #c4ad92;border-radius:11px;padding:9px 7px;background:#fffaf4;color:#493526;text-align:center;font-size:.95rem;font-weight:650;white-space:normal;line-height:1.4}
+.phms-choice-grid .phms-pick[aria-pressed="true"]{border:2px solid #966b3b;background:#efe2ce;color:#3a2618}
+.phms-choice-grid .phms-pick:focus-visible{outline:3px solid #7a5a34;outline-offset:2px}
+.phms-choice-grid .phms-pick small{display:block;color:#605144;font-size:.79rem;font-weight:500}
+.phms-contact-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.phms-contact-two label{min-width:0}
+#rescheduleContactEditor textarea{min-height:75px}
+#contactDetails{white-space:pre-wrap;line-height:1.55}
+#rescheduleContactEditor .help{line-height:1.5}
+@media(max-width:350px){.phms-choice-grid{gap:6px}.phms-choice-grid .phms-pick{font-size:.9rem}}
+
+.phms-mini-heading{font-size:.93rem;font-weight:700;margin:12px 0 5px;color:#453427}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1006,7 +1021,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <details id="hospitalLocationDetails"><summary>🏥 ข้อมูลโรงพยาบาลเพิ่มเติม</summary>
 <label for="hospital_hn">เลข HN (ถ้ามี)</label><input id="hospital_hn" maxlength="80">
 <label for="hospital_vn">เลข VN (ถ้ามี)</label><input id="hospital_vn" maxlength="80">
-<label for="contact_phone">เบอร์ติดต่อโรงพยาบาล (ถ้ามี)</label><input id="contact_phone" inputmode="tel" maxlength="40">
+
 </details>
 <details id="primaryLocationDetails">
  <summary>📍 จุดติดต่อหลัก</summary>
@@ -1071,7 +1086,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help">ยังไม่มีนัดที่บันทึกไว้? ต้องบันทึกนัดก่อนจึงจะเพิ่มค่าใช้จ่ายหรือยาได้</p>
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
-<details id="procedurePreviewBox"><summary>🔬 รายการตรวจและหัตถการ</summary><p class="help">พิมพ์รายการที่ทราบได้หลายข้อ ข้อมูลนี้ยังไม่ใช่ทะเบียนตรวจที่แพทย์ยืนยันและยังไม่บันทึกลงระบบ</p><label for="procedureEntry">ชื่อการตรวจหรือหัตถการ</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
+<details id="procedurePreviewBox"><summary>🔬 รายการตรวจและหัตถการ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจที่พบบ่อย</p><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดครั้งก่อน (ถ้ามี)</summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
@@ -1081,7 +1096,29 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </details>
 <details id="contactRescheduleBox"><summary>📞 ติดต่อโรงพยาบาลและเลื่อนนัด</summary>
 <p class="help">ติดต่อเพื่อขอเลื่อนนัดได้ แต่ระบบจะไม่เปลี่ยนวันนัดเดิมจนกว่าโรงพยาบาลจะยืนยัน</p>
-<button type="button" id="contactLoad" class="secondary">ดูข้อมูลติดต่อของแผนกนี้</button><div id="contactDetails" role="status" class="help">ยังไม่ได้โหลดข้อมูลติดต่อ</div>
+<div id="contactDetails" role="status" class="help">เปิดส่วนนี้เพื่อดูข้อมูลติดต่อที่โรงพยาบาล/แผนกบันทึกไว้</div>
+<div id="rescheduleContactEditor">
+ <label for="rescheduleDays">📅 วันติดต่อเลื่อนนัด</label>
+ <select id="rescheduleDays"><option value="">ยังไม่ระบุ</option><option value="government">วันราชการ</option><option value="mon-fri">วันจันทร์–ศุกร์</option><option value="mon-sat">วันจันทร์–เสาร์</option><option value="everyday">ทุกวัน</option><option value="specific">เลือกวันเอง</option></select>
+ <div id="rescheduleWeekdays" class="phms-choice-grid hidden" role="group" aria-label="เลือกวันที่ติดต่อได้"></div>
+ <label for="rescheduleHours">🕒 เวลาที่ติดต่อได้</label>
+ <select id="rescheduleHours"><option value="">ยังไม่ระบุ</option><option value="office">เวลาราชการ</option><option value="08:00-16:00">08:00–16:00 น.</option><option value="13:00-15:00">13:00–15:00 น.</option><option value="custom">ระบุเวลาเอง</option></select>
+ <div id="rescheduleCustomHours" class="phms-contact-two hidden">
+  <label for="rescheduleStart">ตั้งแต่เวลา<input id="rescheduleStart" type="time"></label>
+  <label for="rescheduleEnd">ถึงเวลา<input id="rescheduleEnd" type="time"></label>
+ </div>
+ <label for="contact_phone">☎️ เบอร์ติดต่อ (ใส่หลายเบอร์และเลขต่อได้)</label>
+ <textarea id="contact_phone" rows="2" maxlength="500" placeholder="02-123-4567 ต่อ 1234&#10;081-234-5678 (หนึ่งเบอร์ต่อหนึ่งบรรทัด)"></textarea>
+ <label for="rescheduleNotice">📆 ต้องติดต่อล่วงหน้า</label>
+ <select id="rescheduleNotice"><option value="">ยังไม่ระบุ</option><option value="1-calendar">1 วันก่อนนัด</option><option value="3-working">3 วันทำการ</option><option value="7-calendar">1 สัปดาห์ก่อนนัด</option><option value="custom">ระบุเอง</option></select>
+ <div id="rescheduleCustomNotice" class="phms-contact-two hidden">
+  <label for="rescheduleNoticeNumber">จำนวนวัน<input id="rescheduleNoticeNumber" type="number" min="1" max="365" step="1" placeholder="เช่น 5"></label>
+  <label for="rescheduleNoticeUnit">นับแบบ<select id="rescheduleNoticeUnit"><option value="calendar">วันปฏิทิน</option><option value="working">วันทำการ</option></select></label>
+ </div>
+ <label for="rescheduleInstructions">📝 วิธีติดต่อหรือข้อกำหนดอื่น</label>
+ <textarea id="rescheduleInstructions" rows="2" maxlength="600" placeholder="เช่น ติดต่อเฉพาะช่วงเช้า หรือแจ้ง HN ก่อนเลื่อนนัด"></textarea>
+ <p id="rescheduleDraftNote" class="help">แก้ไขข้อมูลได้สำหรับนัดนี้ · รุ่นทดลองยังไม่บันทึกการแก้ไขกลับทะเบียนกลาง</p>
+</div>
 <label for="reschedulePhase">สถานะการเลื่อนนัด (ทดลอง)</label><select id="reschedulePhase"><option value="">ยังไม่ดำเนินการ</option><option value="requested">ต้องการเลื่อนนัด</option><option value="contact_pending">ติดต่อแล้ว รอยืนยัน</option><option value="confirmed">โรงพยาบาลยืนยันแล้ว</option></select>
 <p class="help">การเลือกสถานะนี้ยังไม่เปลี่ยนวันนัดหรือบันทึกข้อมูลในระบบ</p></details>
 <p class="help">เอกสาร งานมอบหมาย และแจ้งเตือนยังรอ API ตรวจสิทธิ์ จึงยังไม่เปิดการบันทึก</p>
@@ -1536,6 +1573,10 @@ previewField('ควรไปถึงโรงพยาบาล',arrivalTimeFo
 previewField('แผนก',$('department').value.trim());
 previewField('แพทย์',$('doctor').value.trim());
 previewField('รูปใบนัด',photoFiles.length?photoFiles.length+' รูป':'');
+previewField('ติดต่อเลื่อนนัด · วัน',selectedContactDays());
+previewField('ติดต่อเลื่อนนัด · เวลา',selectedContactHours());
+previewField('ติดต่อเลื่อนนัด · ล่วงหน้า',selectedContactNotice());
+previewField('เงื่อนไขการติดต่อ', $('rescheduleInstructions').value.trim());
 previewField('จุดติดต่อหลัก',$('location_detail').value.trim());
 previewField('วิธีเดินไปจุดติดต่อหลัก',$('location_directions').value.trim());
 previewField('หมายเหตุจุดติดต่อ',$('location_note').value.trim());
@@ -1574,6 +1615,35 @@ if(!isPastAppointment()&&checklistItems.length){const dt=document.createElement(
 $('save').addEventListener('click',async()=>{if(!confirmClient||!reviewedDraft)return;const button=$('save');button.disabled=true;button.textContent='กำลังตรวจสอบและบันทึก…';const result=await confirmClient({selectedPersonCode:memberId,draft:reviewedDraft});if(result.ok){button.textContent='บันทึกสำเร็จ';$('saveStatus').textContent='บันทึกนัดแล้ว เลขอ้างอิง: '+result.appointmentId;$('back').disabled=true;}else{button.textContent='ลองบันทึกอีกครั้ง';button.disabled=false;$('saveStatus').textContent='ยังไม่บันทึกนัด: '+result.error;}});
 $('back').addEventListener('click',()=>{if($('back').disabled)return;$('confirmation').classList.add('hidden');$('editor').classList.remove('hidden')});
 let procedurePreviewItems=[];
+
+const PROCEDURE_PRESETS=[
+ {name:'🩸 เจาะเลือด',en:'Blood test',host:'procedureCommonCards'},
+ {name:'🧪 เก็บปัสสาวะ',en:'Urine sample',host:'procedureCommonCards'},
+ {name:'🩻 เอกซเรย์',en:'X-ray',host:'procedureCommonCards'},
+ {name:'💓 ตรวจคลื่นไฟฟ้าหัวใจ',en:'ECG / EKG',host:'procedureCommonCards'},
+ {name:'🧫 เก็บอุจจาระ',en:'Stool sample',host:'procedureOtherCards'},
+ {name:'🫁 เก็บเสมหะ',en:'Sputum sample',host:'procedureOtherCards'},
+ {name:'💻 พบแพทย์ออนไลน์',en:'Telemedicine',host:'procedureOtherCards'}
+];
+const procedurePresetButtons=new Map();
+for(const preset of PROCEDURE_PRESETS){
+ const button=document.createElement('button');button.type='button';button.className='phms-pick';
+ const title=document.createElement('span');title.textContent=preset.name;
+ const en=document.createElement('small');en.textContent=preset.en;button.append(title,en);
+ button.setAttribute('aria-pressed','false');button.dataset.procedure=preset.name;
+ button.addEventListener('click',()=>{
+  const index=procedurePreviewItems.indexOf(preset.name);
+  if(index>=0)procedurePreviewItems.splice(index,1);
+  else if(procedurePreviewItems.length<30)procedurePreviewItems.push(preset.name);
+  renderProcedurePreview();
+ });
+ $(preset.host).append(button);procedurePresetButtons.set(preset.name,button);
+}
+function syncProcedureChoices(){
+ for(const [name,button] of procedurePresetButtons)
+  button.setAttribute('aria-pressed',String(procedurePreviewItems.includes(name)));
+}
+
 function renderProcedurePreview(){
  const list=$('procedureItems');list.replaceChildren();
  for(const [index,item] of procedurePreviewItems.entries()){
@@ -1585,7 +1655,8 @@ function renderProcedurePreview(){
   });
   row.append(input,remove);list.append(row);
  }
- $('procedureStatus').textContent='รายการตรวจ '+procedurePreviewItems.length+' ข้อ — ยังไม่บันทึก';
+ $('procedureStatus').textContent='เลือกแล้ว '+procedurePreviewItems.length+' รายการ — ยังไม่บันทึก';
+ syncProcedureChoices();
 }
 function addProcedurePreview(){
  const name=$('procedureEntry').value.trim(),key=name.normalize('NFKC').toLocaleLowerCase('th-TH');
@@ -2198,8 +2269,9 @@ function clearSourceFilled({personChanged=false}={}){
    if($(id))$(id).value='';
   }
   $('relatedSelect').value='';$('relatedQuery').value='';
-  $('contactDetails').textContent='ยังไม่ได้โหลดข้อมูลติดต่อ';
+  resetContactDraft();
   setArrivalLeadMinutes(30);
+  resetPrepOrderCards();
  }
  if($('purpose').value===autoPurposeValue&&autoPurposeValue){$('purpose').value='';purposeManuallyEdited=false;}
  sourceFilled.clear();autoPurposeValue='';
@@ -2268,22 +2340,121 @@ async function loadRelatedAppointments(){
  if(sourceAppointments.has(prior))picker.value=prior;
  $('relatedAppointmentBox').hidden=relatedAllItems.length===0;if(!relatedAllItems.length){renderLinkedCareVisits();status.textContent='';return;}relatedAllItems.sort((a,b)=>String(b.planned_visit_date||b.appointment_at||'').localeCompare(String(a.planned_visit_date||a.appointment_at||'')));renderLinkedCareVisits();refreshTopicSuggestions();renderCareTopicSuggestions();relatedExpanded=false;renderRelatedCards();
 }
-async function loadRescheduleContacts(){
- const box=$('contactDetails'),org=$('providerOrg').value,unit=$('providerUnit').value,chosenPerson=memberId;
- if(!chosenPerson||!org){box.textContent='กรุณาเลือกบุคคลและโรงพยาบาลก่อน';return;}
- box.textContent='กำลังตรวจข้อมูลติดต่อที่ได้รับสิทธิ์…';
- const result=await previewReadApi('reschedule_contact',{organizationId:org,unitId:unit||undefined});
- if(chosenPerson!==memberId||org!==$('providerOrg').value)return;
- if(!result.ok){box.textContent='ยังโหลดข้อมูลติดต่อไม่ได้ ('+result.error+')';return;}
- const c=result.contact||{},parts=[['โทรศัพท์',c.phone],['อีเมล',c.email],['เวลาติดต่อ',c.hours],['วิธีขอเลื่อนนัด',c.instructions]];
- box.replaceChildren();
- for(const [name,value] of parts){if(!value)continue;const p=document.createElement('p');p.textContent=name+': '+String(value);box.append(p);}
- if(!box.children.length)box.textContent='ยังไม่มีข้อมูลติดต่อที่ตรวจสอบแล้ว';
+
+/* Reschedule: one phone editor, verified hospital/department fallback, and editable
+   appointment-specific draft. No automatic changes to hospital master data. */
+let contactLoadGeneration=0;
+const contactWeekdayValues=[['mon','จ.'],['tue','อ.'],['wed','พ.'],['thu','พฤ.'],['fri','ศ.'],['sat','ส.'],['sun','อา.']];
+const chosenContactWeekdays=new Set();
+for(const [key,label] of contactWeekdayValues){
+ const button=document.createElement('button');button.type='button';button.className='phms-pick';
+ button.textContent=label;button.dataset.weekday=key;button.setAttribute('aria-pressed','false');
+ button.addEventListener('click',()=>{
+  if(chosenContactWeekdays.has(key))chosenContactWeekdays.delete(key);else chosenContactWeekdays.add(key);
+  syncContactFields();markContactEdited();
+ });
+ $('rescheduleWeekdays').append(button);
 }
+function syncContactFields(){
+ const days=$('rescheduleDays').value;
+ $('rescheduleWeekdays').classList.toggle('hidden',days!=='specific');
+ for(const button of $('rescheduleWeekdays').children)button.setAttribute('aria-pressed',String(chosenContactWeekdays.has(button.dataset.weekday)));
+ $('rescheduleCustomHours').classList.toggle('hidden',$('rescheduleHours').value!=='custom');
+ $('rescheduleCustomNotice').classList.toggle('hidden',$('rescheduleNotice').value!=='custom');
+}
+function markContactEdited(){ $('rescheduleDraftNote').textContent='แก้ไขสำหรับนัดนี้แล้ว · ยังไม่บันทึกกลับทะเบียนกลาง'; }
+for(const id of ['rescheduleDays','rescheduleHours','rescheduleStart','rescheduleEnd','contact_phone','rescheduleNotice','rescheduleNoticeNumber','rescheduleNoticeUnit','rescheduleInstructions']){
+ $(id).addEventListener('change',()=>{syncContactFields();markContactEdited();});
+}
+function resetContactDraft(){
+ ++contactLoadGeneration;
+ for(const id of ['rescheduleDays','rescheduleHours','rescheduleStart','rescheduleEnd','contact_phone','rescheduleNotice','rescheduleNoticeNumber','rescheduleInstructions'])$(id).value='';
+ $('rescheduleNoticeUnit').value='calendar';chosenContactWeekdays.clear();syncContactFields();
+ $('contactDetails').textContent='เปิดส่วนนี้เพื่อดูข้อมูลติดต่อที่โรงพยาบาล/แผนกบันทึกไว้';
+ $('rescheduleDraftNote').textContent='แก้ไขข้อมูลได้สำหรับนัดนี้ · รุ่นทดลองยังไม่บันทึกการแก้ไขกลับทะเบียนกลาง';
+}
+function selectedContactDays(){
+ const select=$('rescheduleDays'),days=select.value;
+ return days==='specific'
+  ?contactWeekdayValues.filter(([key])=>chosenContactWeekdays.has(key)).map(([,name])=>name).join(' / ')
+  :days?select.selectedOptions[0]?.textContent||'':'';
+}
+function selectedContactHours(){
+ const sel=$('rescheduleHours');
+ return sel.value==='custom'
+  ?($('rescheduleStart').value&&$('rescheduleEnd').value?$('rescheduleStart').value+'–'+$('rescheduleEnd').value+' น.':'')
+  :sel.value?sel.selectedOptions[0]?.textContent||'':'';
+}
+function selectedContactNotice(){
+ const sel=$('rescheduleNotice');
+ if(sel.value==='custom'){
+  const days=Number($('rescheduleNoticeNumber').value);
+  return Number.isInteger(days)&&days>=1&&days<=365
+   ?days+' '+($('rescheduleNoticeUnit').value==='working'?'วันทำการ':'วันปฏิทิน')+'ก่อนนัด':'';
+ }
+ return sel.value?sel.selectedOptions[0]?.textContent||'':'';
+}
+async function loadRescheduleContacts(){
+ const box=$('contactDetails'),org=$('providerOrg').value,unit=$('providerUnit').value,chosenPerson=memberId,generation=++contactLoadGeneration;
+ if(!chosenPerson||!org){box.textContent='เลือกบุคคลและโรงพยาบาลก่อน จึงจะดึงข้อมูลติดต่อได้';return;}
+ box.textContent='กำลังตรวจข้อมูลติดต่อของโรงพยาบาลและแผนก…';
+ const result=await previewReadApi('reschedule_contact',{organizationId:org,unitId:unit||undefined});
+ if(generation!==contactLoadGeneration||chosenPerson!==memberId||org!==$('providerOrg').value||unit!==$('providerUnit').value)return;
+ if(!result.ok){box.textContent='ยังดึงข้อมูลกลางไม่ได้ · สามารถกรอกตามใบนัดได้ ('+result.error+')';return;}
+ const c=result.contact||{};
+ if(!c.verified){box.textContent='ข้อมูลกลางยังไม่ผ่านการยืนยัน · กรุณากรอกตามใบนัด';return;}
+ const source=c.source==='service_unit_reschedule'||c.source==='service_unit'?'แผนก':'โรงพยาบาล';
+ const messages=['✓ ข้อมูลติดต่อจากทะเบียน'+source+' (ตรวจสอบแล้ว)'];
+ if(c.hours)messages.push('วันและเวลาตามข้อมูลกลาง: '+String(c.hours));
+ if(Number.isInteger(c.minNoticeMinutes))messages.push('ระยะติดต่อล่วงหน้าตามข้อมูลกลาง: '+c.minNoticeMinutes+' นาที (ยังไม่ระบุวิธีนับวันทำการ)');
+ if(c.email)messages.push('อีเมล: '+String(c.email));
+ box.textContent=messages.join('\n');
+ if(c.phone&&!$('contact_phone').value.trim())$('contact_phone').value=String(c.phone).slice(0,500);
+ if(c.instructions&&!$('rescheduleInstructions').value.trim())$('rescheduleInstructions').value=String(c.instructions).slice(0,600);
+ // Auto-classify only exact, unambiguous text. Retain all other original hours
+ // visibly so working days / public holidays are never guessed.
+ const hours=String(c.hours||'').trim();
+ if(!$('rescheduleDays').value){
+  if(/^วันราชการ$/u.test(hours))$('rescheduleDays').value='government';
+  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?ศุกร์$/u.test(hours))$('rescheduleDays').value='mon-fri';
+  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?เสาร์$/u.test(hours))$('rescheduleDays').value='mon-sat';
+  else if(/^ทุกวัน$/u.test(hours))$('rescheduleDays').value='everyday';
+ }
+ if(!$('rescheduleHours').value&&hours==='เวลาราชการ')$('rescheduleHours').value='office';
+ // Parse only a fully matched "days + time" phrase; otherwise show source verbatim.
+ const specified=hours.match(/^(วันราชการ|วันจันทร์\s*[–-]\s*(?:วัน)?ศุกร์|วันจันทร์\s*[–-]\s*(?:วัน)?เสาร์|ทุกวัน)\s+เวลา\s*(ราชการ|(?:[01]\d|2[0-3]):[0-5]\d\s*[–-]\s*(?:[01]\d|2[0-3]):[0-5]\d)\s*(?:น\.)?$/u);
+ if(specified){
+  if(!$('rescheduleDays').value){
+   if(specified[1]==='วันราชการ')$('rescheduleDays').value='government';
+   else if(/ศุกร์$/.test(specified[1]))$('rescheduleDays').value='mon-fri';
+   else if(/เสาร์$/.test(specified[1]))$('rescheduleDays').value='mon-sat';
+   else if(specified[1]==='ทุกวัน')$('rescheduleDays').value='everyday';
+  }
+  if(!$('rescheduleHours').value){
+   const timeText=specified[2].replace(/\s/g,'').replace('–','-');
+   if(timeText==='ราชการ')$('rescheduleHours').value='office';
+   else if(['08:00-16:00','13:00-15:00'].includes(timeText))$('rescheduleHours').value=timeText;
+   else{
+    const range=timeText.split('-');
+    if(range.length===2){$('rescheduleHours').value='custom';$('rescheduleStart').value=range[0];$('rescheduleEnd').value=range[1];}
+   }
+  }
+ }
+ syncContactFields();
+}
+function rescheduleContextChanged(){
+ resetContactDraft();
+ if($('contactRescheduleBox').open)void loadRescheduleContacts();
+}
+$('contactRescheduleBox').addEventListener('toggle',()=>{
+ if($('contactRescheduleBox').open)void loadRescheduleContacts();
+});
+for(const id of ['personSelect','providerOrg','providerUnit'])$(id).addEventListener('change',rescheduleContextChanged);
+syncContactFields();
 $('relatedMore').addEventListener('click',()=>{relatedExpanded=!relatedExpanded;renderRelatedCards();});
 $('relatedClear').addEventListener('click',()=>{clearSourceFilled();$('relatedSelect').value='';$('relatedClear').classList.add('hidden');renderRelatedCards();});
 $('relatedAppointmentBox').addEventListener('toggle',()=>{if($('relatedAppointmentBox').open&&memberId&&!relatedAllItems.length)loadRelatedAppointments();});
-$('contactLoad').addEventListener('click',loadRescheduleContacts);
+
 $('relatedQuery').addEventListener('input',()=>{relatedExpanded=false;renderRelatedCards();});
 // Order fields by the patient's task, not the database schema.
 const editor=$('editor'),scenario=$('scenario');
@@ -2539,6 +2710,119 @@ function syncExamPrep(){
 }
 examPrepChoice.addEventListener('change',syncExamPrep);syncExamPrep();
 // Keep the existing single checklist and procedure registry; provide clear navigation rather than duplicate entries.
+
+// Structured order transcription only: never infer that a patient should fast,
+// stop medication or drink water based on a procedure name.
+const prepOrderGrid=document.createElement('div');prepOrderGrid.id='prepOrderGrid';prepOrderGrid.className='phms-choice-grid';
+prepOrderGrid.setAttribute('role','group');prepOrderGrid.setAttribute('aria-label','เลือกคำสั่งงดอาหารและน้ำจากใบนัด');
+const prepOrderPresets=[
+ ['none','ไม่ระบุคำสั่ง',''],['stop-food-water','🚫 งดอาหารและน้ำ','รวมถึงน้ำเปล่า'],
+ ['water-ok','💧 งดอาหาร แต่น้ำเปล่าดื่มได้','งดเครื่องดื่มอื่น'],
+ ['no-fast','✅ ไม่ต้องงดอาหารและน้ำ','ตามที่โรงพยาบาลแจ้ง'],
+ ['special','📝 คำสั่งอื่น','ระบุเพิ่มเติม']
+];
+let selectedPrepOrder='none';
+const prepOrderButtons=new Map();
+for(const [key,title,subtitle] of prepOrderPresets){
+ const button=document.createElement('button');button.type='button';button.className='phms-pick';
+ const label=document.createElement('span');label.textContent=title;button.append(label);
+ if(subtitle){const small=document.createElement('small');small.textContent=subtitle;button.append(small);}
+ button.addEventListener('click',()=>{selectedPrepOrder=key;syncPrepOrder();});
+ prepOrderGrid.append(button);prepOrderButtons.set(key,button);
+}
+const prepTimeArea=document.createElement('div');prepTimeArea.id='prepTimeArea';
+const prepTimeLabel=document.createElement('label');prepTimeLabel.htmlFor='prepTimeSelect';prepTimeLabel.textContent='🕘 เริ่มงดหลังเวลาใด';
+const prepTimeSelect=document.createElement('select');prepTimeSelect.id='prepTimeSelect';
+for(const [value,label] of [
+ ['','ใบนัดยังไม่ระบุเวลา'],['20:00','20:00 น. (2 ทุ่ม วันก่อนนัด)'],
+ ['22:00','22:00 น. (4 ทุ่ม วันก่อนนัด)'],['00:00','00:00 น. (เที่ยงคืนก่อนวันนัด)'],
+ ['02:00','02:00 น. (ตี 2 วันนัด)'],['other','เวลาอื่นตามใบนัด']
+])prepTimeSelect.add(new Option(label,value));
+const prepCustomTime=document.createElement('input');prepCustomTime.id='prepCustomTime';prepCustomTime.type='time';prepCustomTime.className='hidden';
+prepCustomTime.setAttribute('aria-label','เวลาเริ่มงดอื่นตามใบนัด');
+const prepTimeWarning=document.createElement('p');prepTimeWarning.id='prepTimeWarning';prepTimeWarning.className='help';
+prepTimeArea.append(prepTimeLabel,prepTimeSelect,prepCustomTime,prepTimeWarning);
+const prepExtraTitle=document.createElement('p');prepExtraTitle.className='phms-mini-heading';prepExtraTitle.textContent='คำสั่งเพิ่มเติมในใบนัด (เลือกได้หลายอย่าง)';
+const prepExtraGrid=document.createElement('div');prepExtraGrid.id='prepExtraGrid';prepExtraGrid.className='phms-choice-grid';
+prepExtraGrid.setAttribute('role','group');prepExtraGrid.setAttribute('aria-label','คำสั่งเพิ่มเติมจากโรงพยาบาล');
+const prepExtraOptions=[
+ ['bring-water','🥤 เตรียมน้ำมาด้วย'],
+ ['hold-urine','🚻 กลั้นปัสสาวะก่อนตรวจ'],
+ ['medicine','💊 มีคำสั่งเรื่องยา'],
+ ['more','📝 มีคำสั่งอื่น']
+];
+const prepExtraSelected=new Set();
+for(const [key,label] of prepExtraOptions){
+ const button=document.createElement('button');button.type='button';button.className='phms-pick';
+ button.textContent=label;button.dataset.prepExtra=key;
+ button.addEventListener('click',()=>{
+  if(prepExtraSelected.has(key))prepExtraSelected.delete(key);else prepExtraSelected.add(key);
+  syncPrepOrder();
+ });
+ prepExtraGrid.append(button);
+}
+const prepMedicineLabel=document.createElement('label');prepMedicineLabel.htmlFor='prepMedicineText';prepMedicineLabel.textContent='💊 คำสั่งเรื่องยาตามใบนัด';
+const prepMedicineText=document.createElement('textarea');prepMedicineText.id='prepMedicineText';
+prepMedicineText.maxLength=400;prepMedicineText.rows=2;prepMedicineText.placeholder='ระบุชื่อยาและคำสั่งจริง ไม่ควรหยุดยาเอง';
+const prepMedicineArea=document.createElement('div');prepMedicineArea.id='prepMedicineArea';
+prepMedicineArea.append(prepMedicineLabel,prepMedicineText);
+const prepOtherLabel=document.createElement('label');prepOtherLabel.htmlFor='prepOtherText';prepOtherLabel.textContent='📝 คำสั่งอื่นตามใบนัด';
+const prepOtherText=document.createElement('textarea');prepOtherText.id='prepOtherText';
+prepOtherText.maxLength=450;prepOtherText.rows=2;prepOtherText.placeholder='เช่น ปริมาณน้ำที่โรงพยาบาลระบุ หรือเวลาที่ต้องกลั้นปัสสาวะ';
+const prepOtherArea=document.createElement('div');prepOtherArea.id='prepOtherArea';
+prepOtherArea.append(prepOtherLabel,prepOtherText);
+function selectedPrepTimeText(){
+ const selected=prepTimeSelect.value;
+ if(!selected)return '';
+ if(selected==='other'){
+  const value=prepCustomTime.value;
+  return value?'หลัง '+value+' น. (โปรดตรวจสอบวันที่เริ่มงดตามใบนัด)':'';
+ }
+ const part=prepTimeSelect.selectedOptions[0]?.textContent||'';
+ return 'หลัง '+part;
+}
+function syncPrepOrder(){
+ for(const [key,button] of prepOrderButtons)button.setAttribute('aria-pressed',String(selectedPrepOrder===key));
+ for(const button of prepExtraGrid.children)button.setAttribute('aria-pressed',String(prepExtraSelected.has(button.dataset.prepExtra)));
+ const fasting=selectedPrepOrder==='stop-food-water'||selectedPrepOrder==='water-ok';
+ prepTimeArea.classList.toggle('hidden',!fasting);
+ prepCustomTime.classList.toggle('hidden',prepTimeSelect.value!=='other');
+ prepTimeWarning.textContent=fasting&&!selectedPrepTimeText()
+  ?'⚠️ ยังไม่ระบุเวลาเริ่มงด โปรดดูใบนัดหรือติดต่อโรงพยาบาล':
+  selectedPrepOrder==='stop-food-water'&&prepExtraSelected.has('bring-water')
+  ?'⚠️ คำสั่งงดน้ำและเตรียมน้ำอาจขัดกัน กรุณายืนยันกับโรงพยาบาล':'';
+ prepMedicineArea.classList.toggle('hidden',!prepExtraSelected.has('medicine'));
+ prepOtherArea.classList.toggle('hidden',selectedPrepOrder!=='special'&&!prepExtraSelected.has('more'));
+ const texts=[];
+ if(selectedPrepOrder==='stop-food-water')texts.push('งดอาหารและน้ำ รวมถึงน้ำเปล่า');
+ else if(selectedPrepOrder==='water-ok')texts.push('งดอาหารและเครื่องดื่มอื่น แต่น้ำเปล่าดื่มได้');
+ else if(selectedPrepOrder==='no-fast')texts.push('ไม่ต้องงดอาหารและน้ำ');
+ if(fasting&&selectedPrepTimeText())texts.push('เริ่มงด'+selectedPrepTimeText());
+ if(prepExtraSelected.has('bring-water'))texts.push('เตรียมน้ำมาด้วย (ตามปริมาณที่โรงพยาบาลระบุ)');
+ if(prepExtraSelected.has('hold-urine'))texts.push('กลั้นปัสสาวะก่อนตรวจ (ตามคำสั่งโรงพยาบาล)');
+ if(prepExtraSelected.has('medicine'))texts.push('คำสั่งเรื่องยา: '+(prepMedicineText.value.trim()||'ยังไม่ได้ระบุรายละเอียด'));
+ if((selectedPrepOrder==='special'||prepExtraSelected.has('more'))&&prepOtherText.value.trim())texts.push('คำสั่งอื่น: '+prepOtherText.value.trim());
+ examPrepChoice.value=fasting?'fasting':selectedPrepOrder==='no-fast'?'normal':texts.length||selectedPrepOrder==='special'?'other':'';
+ examPrepDetails.value=texts.join('\n');
+ if(typeof updatePrepChoices==='function')updatePrepChoices();
+}
+function resetPrepOrderCards(){
+ selectedPrepOrder='none';prepExtraSelected.clear();prepTimeSelect.value='';
+ prepCustomTime.value='';prepMedicineText.value='';prepOtherText.value='';
+ syncPrepOrder();
+}
+for(const input of [prepTimeSelect,prepCustomTime,prepMedicineText,prepOtherText]){
+ input.addEventListener('change',syncPrepOrder);
+ input.addEventListener('input',syncPrepOrder);
+}
+// The old select/textarea remain as compatibility controls for the existing
+// review route; users see and edit only the structured cards.
+examPrepChoice.classList.add('visually-hidden-form');examPrepChoice.setAttribute('tabindex','-1');
+examPrepChoice.setAttribute('aria-hidden','true');
+examPrepDetailArea.classList.add('visually-hidden-form');
+examPrepLabel.textContent='เลือกเฉพาะคำสั่งที่ระบุในใบนัด';
+examPrepHelp.textContent='โปรดใช้คำสั่งจากโรงพยาบาลจริงเท่านั้น โดยเฉพาะน้ำและยา · ข้อมูลนี้ยังอยู่ในร่างทดลอง';
+
 const prepItemsLabel=document.querySelector('label[for="prepEntry"]');
 if(prepItemsLabel)prepItemsLabel.textContent='🎒 สิ่งที่ต้องนำไป / เตรียมก่อนออกจากบ้าน';
 const prepPrompt=document.createElement('p');prepPrompt.className='help phms-prep-guide';
@@ -2582,7 +2866,7 @@ moveNodes('symptoms',[$('previsitLabel'),symptomHelp,$('previsitSymptoms'),$('pr
 moveNodes('notes',[$('additionalNoteLabel'),otherNoteHelp,$('additionalNote')]);
 moveNodes('things',[$('checklistBox')]);
 examPrepPanel.open=true; // The main card controls visibility; no nested disclosure to open again.
-moveNodes('instructions',[examPrepLabel,examPrepChoice,examPrepDetailArea,examPrepHelp]);
+moveNodes('instructions',[examPrepLabel,prepOrderGrid,prepTimeArea,prepExtraTitle,prepExtraGrid,prepMedicineArea,prepOtherArea,examPrepChoice,examPrepDetailArea,examPrepHelp]);
 examPrepPanel.remove();
 procedureGuide.remove();
 const prepIntro=document.createElement('p');prepIntro.className='help prep-choice-intro';prepIntro.textContent='เลือกเฉพาะเรื่องที่ต้องการเพิ่ม';
@@ -2759,6 +3043,7 @@ function resetCurrentAppointmentDraft(){
   el.value='';
  }
  setArrivalLeadMinutes(30);
+ resetPrepOrderCards();
  for(const kind of ['hospital','unit','clinician']){
   comboState[kind]={searchText:'',selectedItem:null,isOpen:false};
   closeCombo(kind);
@@ -2775,7 +3060,7 @@ function resetCurrentAppointmentDraft(){
  resetChecklistToDefaults(); // Explicit clear creates a fresh draft with editable defaults.
  procedurePreviewItems=[];renderProcedurePreview();
  $('hasAppointmentPhotos').value='';
- $('contactDetails').textContent='ยังไม่ได้โหลดข้อมูลติดต่อ';
+ resetContactDraft();
  $('reschedulePhase').value='';
  $('detail').value='simple';$('scenario').value='booked';$('known').value='yes';scenarioChoiceMade=false;syncScenarioCards();
  for(const panel of editor.querySelectorAll('details'))panel.open=false;
