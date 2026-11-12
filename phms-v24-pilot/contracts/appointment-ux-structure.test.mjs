@@ -154,7 +154,7 @@ test('shared PHMS delete action is consistent across every local-draft removal',
  assert.ok(page.includes('width:66px!important;height:32px!important'),'Visible delete pill must stay compact');
  assert.ok(page.includes('height:44px!important;min-height:44px!important'),'Delete target must remain easy to tap');
  assert.ok(script.includes('function makePhmsDeleteButton(label,handler)'),'Do not create a second competing delete style');
- assert.equal((script.match(/const remove=makePhmsDeleteButton\(/g)||[]).length,5,'Checklist, photo, procedure, journey photo and substep use the same delete button');
+ assert.equal((script.match(/const remove=makePhmsDeleteButton\(/g)||[]).length,6,'Checklist, phone, photo, procedure, journey photo and substep use the same delete button');
  assert.ok(script.includes("makePhmsDeleteButton('ลบรูปใบนัด '+(index+1)"),'Photo removal uses shared delete action');
  assert.ok(script.includes("makePhmsDeleteButton('ลบรายการตรวจ '+item"),'Procedure removal uses shared delete action');
  assert.ok(script.includes("view.className='secondary phms-photo-view phms-photo-action'"),'Photo preview stays visually distinct from delete');
