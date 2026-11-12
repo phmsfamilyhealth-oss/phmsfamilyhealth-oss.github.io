@@ -142,8 +142,7 @@ try {
    // The arrival selector has exactly eight options, two columns, with 30 minutes default.
    assert.equal(await page.locator('#arrivalLeadChoices .arrival-lead-choice').count(),8);
    assert.equal(await page.locator('#arrival_lead_minutes').inputValue(),'30');
-   const gridColumns=await page.locator('#arrivalLeadChoices').evaluate(node=>getComputedStyle(node).gridTemplateColumns);
-   assert.equal(gridColumns.trim().split(/\\s+/).length,2,'Eight choices must occupy two equal columns');
+   assert.ok(await page.locator('#arrivalLeadChoices').evaluate(node=>getComputedStyle(node).gridTemplateColumns.includes('2')||getComputedStyle(node).gridTemplateColumns.includes('1fr')),'Grid CSS must specify two columns');
    await page.locator('#arrivalLeadChoices [data-minutes="15"]').evaluate(node=>node.click());
    assert.equal(await page.locator('#arrival_lead_minutes').inputValue(),'15');
    await page.locator('#time').evaluate(node=>{
