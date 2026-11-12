@@ -1223,16 +1223,16 @@ function showLineLoading(phase,message){
  lineStartup.warningTimer=setTimeout(()=>{
   if(generation!==lineStartup.generation)return;
   const advice=document.createElement('span');advice.className='phms-loading-advice';
-  advice.textContent='ใช้เวลานานกว่าปกติ กำลังตรวจสอบอยู่…';
+  advice.textContent='ใช้เวลานานกว่าปกติ กำลังตรวจสอบอย่างปลอดภัย…';
   status.append(advice);
- },3500);
+ },2500);
  lineStartup.retryTimer=setTimeout(()=>{
   if(generation!==lineStartup.generation)return;
   const retry=document.createElement('button');retry.type='button';
   retry.className='secondary phms-loading-retry';retry.textContent='🔄 ลองเปิดใหม่';
   retry.addEventListener('click',()=>location.reload());
   status.append(retry);
- },9000);
+ },8000);
 }
 
 async function loadAuthorizedPeople(liff,endpoint){const controller=new AbortController();const deadline=setTimeout(()=>controller.abort(),12000);try{const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+liff.getIDToken()},body:JSON.stringify({action:'person_options'}),signal:controller.signal});const data=await response.json();if(!response.ok||data?.ok!==true||!Array.isArray(data.people))return {ok:false,error:data?.error||'members_unavailable'};const allowed=data.people.filter(x=>/^[0-9a-f-]{36}$/i.test(x?.id)&&typeof x.name==='string');return {ok:true,people:allowed,activePersonId:allowed.some(x=>x.id===data.activePersonId)?data.activePersonId:''};}catch(error){return {ok:false,error:error?.name==='AbortError'?'members_timeout':'members_unavailable'};}finally{clearTimeout(deadline);}}
