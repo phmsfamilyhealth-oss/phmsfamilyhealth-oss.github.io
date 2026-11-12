@@ -48,7 +48,10 @@ jobs:
               grep -q 'function thaiSourceDate' /tmp/phms-check
               grep -Fq 'TH_DAYS[date.getUTCDay()]' /tmp/phms-check
               if grep -q 'id="relatedAll"' /tmp/phms-check; then echo 'ERROR: legacy appointment dropdown controls still published'; exit 1; fi
-              grep -q 'id="contactLoad"' /tmp/phms-check
+              grep -q 'id="rescheduleContactEditor"' /tmp/phms-check
+              grep -q 'id="rescheduleDays"' /tmp/phms-check
+              grep -q 'id="procedureCommonCards"' /tmp/phms-check
+              if grep -q 'id="contactLoad"' /tmp/phms-check; then echo 'ERROR: redundant contact load button'; exit 1; fi
               grep -q 'id="procedureAdd"' /tmp/phms-check
               grep -q 'id="appointmentPhotoPicker"' /tmp/phms-check
               grep -q 'id="historicalLinkedVisitSection"' /tmp/phms-check
