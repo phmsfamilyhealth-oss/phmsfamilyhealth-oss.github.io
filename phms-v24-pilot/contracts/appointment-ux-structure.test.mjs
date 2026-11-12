@@ -216,3 +216,51 @@ test('arrival lead calculations handle every option, unknown time and crossing m
  state.known.value='yes';state.scenario.value='historical';
  assert.equal(calculate.clock(),'');
 });
+
+
+test('reschedule contact opens on disclosure with one editor and verified-source guard',()=>{
+ assert.equal((page.match(/id="contact_phone"/g)||[]).length,1,'No duplicate hospital telephone editors');
+ assert.equal((page.match(/id="rescheduleContactEditor"/g)||[]).length,1);
+ assert.ok(!page.includes('id="contactLoad"'),'Do not demand a second fetch button');
+ for(const id of ['rescheduleDays','rescheduleWeekdays','rescheduleHours','rescheduleStart','rescheduleEnd','contact_phone','rescheduleNotice','rescheduleNoticeNumber','rescheduleNoticeUnit','rescheduleInstructions']){
+  assert.ok(page.includes('id="'+id+'"'),id+' missing from one editable contact panel');
+ }
+ assert.match(script,/contactRescheduleBox'\)\.addEventListener\('toggle'/);
+ assert.match(script,/loadRescheduleContacts\(\)/);
+ assert.match(script,/if\(!c\.verified\)/);
+ assert.match(script,/if\(generation!==contactLoadGeneration/,'Late results must not refill a different hospital/person');
+ assert.match(script,/function resetContactDraft\(\)/);
+ assert.match(script,/selectedContactDays\(\)/);
+ assert.match(script,/selectedContactHours\(\)/);
+ assert.match(script,/selectedContactNotice\(\)/);
+ assert.ok(page.includes('ยังไม่บันทึกการแก้ไขกลับทะเบียนกลาง'),'Never claim per-appointment edits update the master');
+});
+
+test('procedure cards allow 7 bilingual options and manual additions without preselecting',()=>{
+ const names=['🩸 เจาะเลือด','🧪 เก็บปัสสาวะ','🧫 เก็บอุจจาระ','🫁 เก็บเสมหะ','🩻 เอกซเรย์','💓 ตรวจคลื่นไฟฟ้าหัวใจ','💻 พบแพทย์ออนไลน์'];
+ for(const name of names)assert.ok(script.includes(name),'Missing procedure option: '+name);
+ for(const term of ['Blood test','Urine sample','Stool sample','Sputum sample','X-ray','ECG / EKG','Telemedicine'])assert.ok(script.includes(term));
+ assert.ok(page.includes('id="procedureCommonCards"'));
+ assert.ok(page.includes('id="procedureOtherCards"'));
+ assert.match(script,/procedurePreviewItems\.indexOf\(preset\.name\)/);
+ assert.match(script,/function syncProcedureChoices\(\)/);
+ assert.match(script,/function addProcedurePreview\(\)/);
+ assert.ok(page.includes('id="procedureEntry"'),'Other procedure manual entry remains possible');
+});
+
+test('hospital preparation cards explicitly distinguish fasting, water, medications, and source time',()=>{
+ assert.match(script,/const prepOrderPresets=/);
+ for(const key of ["stop-food-water","water-ok","no-fast","special"]){
+  assert.ok(script.includes("'"+key+"'"));
+ }
+ for(const time of ["20:00","22:00","00:00","02:00"])assert.ok(script.includes("'"+time+"'"));
+ assert.ok(script.includes("prepMedicineText.placeholder='ระบุชื่อยาและคำสั่งจริง"));
+ assert.ok(script.includes("'bring-water'"));
+ assert.ok(script.includes("'hold-urine'"));
+ assert.ok(script.includes("'medicine'"));
+ assert.match(script,/function resetPrepOrderCards\(\)/);
+ assert.match(script,/selectedPrepOrder='none'/,'No unverified hospital instruction is auto-selected');
+ assert.match(script,/examPrepChoice\.value=fasting/,'Existing review flow receives selected structured category');
+ assert.match(script,/examPrepDetails\.value=texts\.join/,'Review retains full explicit instructions');
+ assert.ok(script.includes("รุ่นทดลองยังไม่บันทึกการแก้ไขกลับทะเบียนกลาง"));
+});
