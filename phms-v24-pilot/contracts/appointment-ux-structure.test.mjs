@@ -321,3 +321,25 @@ test('custom contact time uses only selectable half-hour slots and 1 3 5 7 day c
  assert.match(script,/function selectedContactHours\(\)/);
  assert.match(script,/08:30–16:30 น./);
 });
+
+
+test('required-field legend emphasizes only the star and short red phrase',()=>{
+ assert.match(script,/\$\('requiredLegend'\)\.innerHTML='<strong class="phms-required-mark">\*<\/strong> <strong>จำเป็นต้องกรอก<\/strong>'/);
+ assert.match(page,/#editor #requiredLegend strong\{color:#b42318!important/);
+ assert.match(page,/#editor #requiredLegend\{color:#605547!important/);
+ assert.ok(!script.includes("$('requiredLegend').textContent='* จำเป็นต้องกรอก'"),'Do not overwrite colored markup with plain text');
+});
+
+test('LINE startup exposes safe phases, deferred history, and bounded person lookup',()=>{
+ for(const phase of ["sdk","login","people","catalog"])assert.ok(script.includes("showLineLoading('"+phase+"'"),phase);
+ assert.ok(script.includes("new AbortController()"),'Person fetch must have a timeout');
+ assert.ok(script.includes("12000"),'Person fetch must not wait indefinitely');
+ assert.ok(script.includes("members_timeout"),'Explicit timeout must be visible');
+ assert.ok(script.includes("showLineLoading('people','กำลังตรวจสิทธิ์"),'No false ready state before protected authorization');
+ assert.match(script,/lineStartup\.warningTimer=setTimeout/);
+ assert.match(script,/\},2500\)/);
+ assert.match(script,/\},8000\)/);
+ assert.match(script,/void loadRelatedAppointments\(\)/);
+ assert.ok(!script.includes("loadRelatedAppointments();showLineLoading('catalog'"),'Unrelated history should not compete with critical catalog loading');
+ assert.ok(script.includes("const people=await loadAuthorizedPeople(window.liff,readEndpoint);stopLineLoading();"),'Clear loading after authorized person response');
+});
