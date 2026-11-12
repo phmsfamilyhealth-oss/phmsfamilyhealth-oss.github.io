@@ -1007,6 +1007,27 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #connectionStatus .phms-loading-advice{display:block;margin-top:5px;font-size:.86em;font-weight:500}
 #connectionStatus .phms-loading-retry{display:block;margin-top:10px;width:100%;min-height:44px}
 
+
+/* Consistent hospital-style full-label cards for elderly reschedule editing. */
+#rescheduleContactEditor .phms-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#rescheduleContactEditor .phms-pick{
+  min-width:0;min-height:55px;width:100%;border:1px solid #b99a76;border-radius:12px;
+  padding:10px 6px;background:#fffaf4;color:#442e20;font-weight:700;
+  font-size:clamp(.88rem,3.7vw,1.02rem);line-height:1.4;white-space:normal;overflow-wrap:break-word;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px
+}
+#rescheduleContactEditor .phms-pick[aria-pressed="true"]{
+  border:2px solid #82552b;background:#f3e0c4;color:#382415
+}
+#rescheduleContactEditor .phms-pick small{font-size:.82rem;line-height:1.3;font-weight:500;color:#695540}
+#rescheduleContactEditor .phms-contact-result{margin:7px 0 10px;line-height:1.5;color:#614b33}
+#rescheduleContactEditor .phms-contact-guide{margin:4px 0 8px}
+#rescheduleContactEditor #rescheduleWeekdays{margin-top:4px}
+#rescheduleContactEditor #rescheduleHoursSection{margin-top:14px}
+#rescheduleContactEditor #rescheduleCustomHours label{display:block;min-width:0;font-size:.94rem}
+#rescheduleContactEditor #rescheduleCustomHours select{min-height:46px}
+@media (max-width:359px){#rescheduleContactEditor .phms-pick{font-size:.86rem;padding:9px 4px}}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1108,24 +1129,49 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help">ติดต่อเพื่อขอเลื่อนนัดได้ แต่ระบบจะไม่เปลี่ยนวันนัดเดิมจนกว่าโรงพยาบาลจะยืนยัน</p>
 <div id="contactDetails" role="status" class="help">เปิดส่วนนี้เพื่อดูข้อมูลติดต่อที่โรงพยาบาล/แผนกบันทึกไว้</div>
 <div id="rescheduleContactEditor">
- <label for="rescheduleDays">📅 วันติดต่อเลื่อนนัด</label>
- <select id="rescheduleDays"><option value="">ยังไม่ระบุ</option><option value="government">วันราชการ</option><option value="mon-fri">วันจันทร์–ศุกร์</option><option value="mon-sat">วันจันทร์–เสาร์</option><option value="everyday">ทุกวัน</option><option value="specific">เลือกวันเอง</option></select>
- <div id="rescheduleWeekdays" class="phms-choice-grid hidden" role="group" aria-label="เลือกวันที่ติดต่อได้"></div>
+ <label for="rescheduleDays">📅 เลือกวันที่ติดต่อเลื่อนนัดได้</label>
+<select id="rescheduleDays" class="visually-hidden-form" tabindex="-1" aria-hidden="true">
+ <option value="">ยังไม่ระบุ</option><option value="government">วันและเวลาราชการ</option>
+ <option value="mon-fri">วันจันทร์–ศุกร์</option><option value="mon-sat">วันจันทร์–เสาร์</option>
+ <option value="everyday">ทุกวัน</option><option value="specific">เลือกวันเอง</option>
+</select>
+<div id="rescheduleDayCards" class="phms-choice-grid" role="group" aria-label="เลือกรูปแบบวันที่ติดต่อ"></div>
+<div id="rescheduleWeekdaysBox" class="hidden">
+ <p class="help phms-contact-guide">เลือกได้หลายวัน</p>
+ <div id="rescheduleWeekdays" class="phms-choice-grid" role="group" aria-label="เลือกวันที่ติดต่อได้"></div>
+</div>
+<p id="rescheduleDaysSummary" class="help phms-contact-result" role="status"></p>
+<section id="rescheduleHoursSection" class="hidden">
  <label for="rescheduleHours">🕒 เวลาที่ติดต่อได้</label>
- <select id="rescheduleHours"><option value="">ยังไม่ระบุ</option><option value="office">เวลาราชการ</option><option value="08:00-16:00">08:00–16:00 น.</option><option value="13:00-15:00">13:00–15:00 น.</option><option value="custom">ระบุเวลาเอง</option></select>
+ <select id="rescheduleHours" class="visually-hidden-form" tabindex="-1" aria-hidden="true">
+  <option value="">ยังไม่ระบุ</option><option value="office">เวลาราชการ</option>
+  <option value="morning">ช่วงเช้า</option><option value="afternoon">ช่วงบ่าย</option>
+  <option value="custom">เลือกเวลาเอง</option>
+ </select>
+ <div id="rescheduleHourCards" class="phms-choice-grid" role="group" aria-label="เลือกช่วงเวลาติดต่อ"></div>
  <div id="rescheduleCustomHours" class="phms-contact-two hidden">
-  <label for="rescheduleStart">ตั้งแต่เวลา<input id="rescheduleStart" type="time"></label>
-  <label for="rescheduleEnd">ถึงเวลา<input id="rescheduleEnd" type="time"></label>
+  <label for="rescheduleStart">ตั้งแต่เวลา<select id="rescheduleStart" aria-label="เวลาเริ่มติดต่อ (ช่วงละ 30 นาที)"><option value="">เลือกเวลา</option></select></label>
+  <label for="rescheduleEnd">ถึงเวลา<select id="rescheduleEnd" aria-label="เวลาสิ้นสุดการติดต่อ (ช่วงละ 30 นาที)"><option value="">เลือกเวลา</option></select></label>
  </div>
- <label for="contact_phone">☎️ เบอร์ติดต่อ (ใส่หลายเบอร์และเลขต่อได้)</label>
- <textarea id="contact_phone" rows="2" maxlength="500" placeholder="02-123-4567 ต่อ 1234&#10;081-234-5678 (หนึ่งเบอร์ต่อหนึ่งบรรทัด)"></textarea>
- <label for="rescheduleNotice">📆 ต้องติดต่อล่วงหน้า</label>
- <select id="rescheduleNotice"><option value="">ยังไม่ระบุ</option><option value="1-calendar">1 วันก่อนนัด</option><option value="3-working">3 วันทำการ</option><option value="7-calendar">1 สัปดาห์ก่อนนัด</option><option value="custom">ระบุเอง</option></select>
- <div id="rescheduleCustomNotice" class="phms-contact-two hidden">
-  <label for="rescheduleNoticeNumber">จำนวนวัน<input id="rescheduleNoticeNumber" type="number" min="1" max="365" step="1" placeholder="เช่น 5"></label>
-  <label for="rescheduleNoticeUnit">นับแบบ<select id="rescheduleNoticeUnit"><option value="calendar">วันปฏิทิน</option><option value="working">วันทำการ</option></select></label>
- </div>
- <label for="rescheduleInstructions">📝 วิธีติดต่อหรือข้อกำหนดอื่น</label>
+ <p id="rescheduleHoursSummary" class="help phms-contact-result" role="status"></p>
+</section>
+<label for="contact_phone">☎️ เบอร์ติดต่อ (ใส่หลายเบอร์และเลขต่อได้)</label>
+<textarea id="contact_phone" rows="2" maxlength="500" placeholder="02-123-4567 ต่อ 1234&#10;081-234-5678 (หนึ่งเบอร์ต่อหนึ่งบรรทัด)"></textarea>
+<label for="rescheduleNotice">📆 ต้องติดต่อล่วงหน้ากี่วัน</label>
+<select id="rescheduleNotice" class="visually-hidden-form" tabindex="-1" aria-hidden="true">
+ <option value="">ยังไม่ระบุ</option><option value="1">1 วัน</option>
+ <option value="3">3 วัน</option><option value="5">5 วัน</option><option value="7">7 วัน (1 สัปดาห์)</option>
+</select>
+<div id="rescheduleNoticeCards" class="phms-choice-grid" role="group" aria-label="จำนวนวันที่ต้องแจ้งล่วงหน้า"></div>
+<div id="rescheduleNoticeUnitSection" class="hidden">
+ <label for="rescheduleNoticeUnit">🗓️ นับวันแบบไหน</label>
+ <select id="rescheduleNoticeUnit" class="visually-hidden-form" tabindex="-1" aria-hidden="true">
+  <option value="calendar">วันปฏิทิน</option><option value="working">วันทำการ</option>
+ </select>
+ <div id="rescheduleNoticeUnitCards" class="phms-choice-grid" role="group" aria-label="เลือกวิธีนับวันล่วงหน้า"></div>
+</div>
+<p id="rescheduleNoticeHint" class="help phms-contact-result" role="status"></p>
+<label for="rescheduleInstructions">📝 วิธีติดต่อหรือข้อกำหนดอื่น</label>
  <textarea id="rescheduleInstructions" rows="2" maxlength="600" placeholder="เช่น ติดต่อเฉพาะช่วงเช้า หรือแจ้ง HN ก่อนเลื่อนนัด"></textarea>
  <p id="rescheduleDraftNote" class="help">แก้ไขข้อมูลได้สำหรับนัดนี้ · รุ่นทดลองยังไม่บันทึกการแก้ไขกลับทะเบียนกลาง</p>
 </div>
