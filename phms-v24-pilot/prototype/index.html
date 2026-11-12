@@ -1201,6 +1201,11 @@ if(!people.ok&&people.error==='unauthenticated'){
  }
 }
 if(!people.ok){document.getElementById('connectionStatus').textContent=people.error==='feature_not_released'?'บัญชี LINE นี้ยังไม่อยู่ในกลุ่มทดลอง':people.error==='members_timeout'?'โหลดรายชื่อบุคคลนานเกินไป กรุณาลองเปิดใหม่':'เชื่อมต่อ LINE แล้ว แต่ยังโหลดรายชื่อสมาชิกไม่ได้ ('+people.error+')';document.getElementById('error').textContent=people.error==='unauthenticated'?'LINE ยืนยันการเข้าสู่ระบบไม่สำเร็จ กรุณากดเชื่อมต่อ LINE ใหม่ (ข้อมูลสุขภาพยังปลอดภัย)':'ตรวจสมาชิกไม่สำเร็จ: '+people.error;
+if(people.error==='members_timeout'){
+ const status=document.getElementById('connectionStatus');
+ const retry=document.createElement('button');retry.type='button';retry.className='secondary phms-loading-retry';retry.textContent='🔄 ลองเปิดใหม่';
+ retry.addEventListener('click',()=>location.reload());status.append(retry);
+}
 if(people.error==='unauthenticated'){
  const status=document.getElementById('connectionStatus');
  status.textContent='การเข้าสู่ระบบ LINE หมดอายุหรือยืนยันไม่ผ่าน';
@@ -3321,7 +3326,7 @@ syncAppointmentHeader();
 const connectionBanner=$('connectionStatus');
 function updateConnectionBanner(){
  const t=connectionBanner.textContent||'';
- connectionBanner.dataset.state=/กำลัง|โหลด|ตรวจสอบการเชื่อมต่อ/.test(t)?'loading':/ไม่สำเร็จ|ไม่พร้อม|ไม่ได้|ข้อผิดพลาด|ล้มเหลว/.test(t)?'error':'ready';
+ connectionBanner.dataset.state=/ไม่สำเร็จ|ไม่พร้อม|ไม่ได้|ข้อผิดพลาด|ล้มเหลว|นานเกินไป|หมดอายุ|ยืนยันไม่ผ่าน/.test(t)?'error':/กำลัง|โหลด|ตรวจสอบการเชื่อมต่อ/.test(t)?'loading':'ready';
 }
 new MutationObserver(updateConnectionBanner).observe(connectionBanner,{childList:true,characterData:true,subtree:true});
 updateConnectionBanner();
