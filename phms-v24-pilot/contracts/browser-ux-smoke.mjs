@@ -217,7 +217,7 @@ try {
    assert.equal(await page.locator('#rescheduleWeekdaysBox').isVisible(),true);
    assert.equal(await page.locator('#rescheduleWeekdays .phms-pick').count(),7);
    assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('span').textContent()).trim(),'💛 วันจันทร์');
-   assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('small').textContent()).trim(),'MON');
+   assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('small').textContent()).trim(),'(MON)');
    assert.equal(await page.locator('#rescheduleDayCards .phms-pick').count(),2);
    await page.locator('#rescheduleWeekdays [data-weekday="tue"]').click();
    await page.locator('#rescheduleWeekdays [data-weekday="fri"]').click();
