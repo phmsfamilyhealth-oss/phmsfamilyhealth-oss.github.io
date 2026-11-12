@@ -229,8 +229,13 @@ try {
    assert.equal(times.length,48);
    assert.ok(times.includes('08:30')&&times.includes('09:00')&&!times.includes('08:45'));
    await page.locator('#rescheduleStart').selectOption('08:30');
-   assert.ok(await page.locator('#rescheduleEnd option[value="08:30"]').isDisabled(),'End must be later than start');
-   assert.ok(await page.locator('#rescheduleEnd option[value="08:00"]').isDisabled(),'End cannot precede start');
+   const timeLimit=await page.locator('#rescheduleEnd option[value="08:30"]').evaluate(option=>({
+    disabled:option.disabled,start:document.getElementById('rescheduleStart').value,
+    end:document.getElementById('rescheduleEnd').value,
+    hours:document.getElementById('rescheduleHours').value
+   }));
+   assert.ok(timeLimit.disabled,'End must be later than start: '+JSON.stringify(timeLimit));
+   assert.ok(await page.locator('#rescheduleEnd option[value="08:00"]').evaluate(option=>option.disabled),'End cannot precede start');
    await page.locator('#rescheduleEnd').selectOption('09:00');
    await page.locator('#rescheduleStart').selectOption('09:30');
    assert.equal(await page.locator('#rescheduleEnd').inputValue(),'','Changing start invalidates an earlier end');
