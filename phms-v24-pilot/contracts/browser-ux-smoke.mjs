@@ -66,6 +66,17 @@ try {
       :{ok:true,items:[]};
    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:JSON.stringify(body)});
   });
+  let familyContactRecord=null;
+  const familyContactWrites=[];
+  await page.route('**/functions/v1/phms-v24-family-reschedule-contact',async route=>{
+   let data={};try{data=JSON.parse(route.request().postData()||'{}')}catch{}
+   if(data.action==='put'){
+    familyContactRecord=data.contact;familyContactWrites.push(data);
+   }
+   await route.fulfill({status:200,contentType:'application/json',
+    headers:{'Access-Control-Allow-Origin':'*'},
+    body:JSON.stringify({ok:true,contact:familyContactRecord,canWrite:true,scope:'family_only'})});
+  });
   const journeyActions=[];
   let photoSerial=40;
   await page.route('**/functions/v1/phms-v24-journey-guide',async route=>{
@@ -219,6 +230,14 @@ try {
    assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('span').textContent()).trim(),'💛 วันจันทร์');
    assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('small').textContent()).trim(),'(MON)');
    assert.equal(await page.locator('#rescheduleDayCards .phms-pick').count(),2);
+   assert.equal(await page.locator('#rescheduleHourCards .phms-pick').count(),4);
+   await page.locator('#rescheduleHourCards [data-choice="morning"]').click();
+   assert.equal(await page.locator('#rescheduleHours').inputValue(),'morning');
+   await page.locator('#rescheduleHourCards [data-choice="afternoon"]').click();
+   assert.equal(await page.locator('#rescheduleHours').inputValue(),'morning-afternoon');
+   assert.equal(await page.locator('#rescheduleHourCards [data-choice="morning"]').getAttribute('aria-pressed'),'true');
+   assert.equal(await page.locator('#rescheduleHourCards [data-choice="afternoon"]').getAttribute('aria-pressed'),'true');
+   assert.equal(await page.locator('#rescheduleCustomHours').isVisible(),false);
    await page.locator('#rescheduleWeekdays [data-weekday="tue"]').click();
    await page.locator('#rescheduleWeekdays [data-weekday="fri"]').click();
    assert.match(await page.locator('#rescheduleDaysSummary').textContent(),/วันอังคาร/);
@@ -242,11 +261,25 @@ try {
    await page.locator('#rescheduleStart').selectOption('08:30');
    await page.locator('#rescheduleEnd').selectOption('09:00');
    assert.match(await page.locator('#rescheduleHoursSummary').textContent(),/08:30–09:00/);
+   // Phone cards preserve extension strings, separate entries, and editable rows.
+   assert.equal(await page.locator('#contactPhoneList .phms-contact-phone-row').count(),2);
+   await page.locator('#contactPhoneEntry').fill('089-123-4567 ต่อ 321');
+   await page.locator('#contactPhoneEntry').press('Enter');
+   assert.equal(await page.locator('#contactPhoneList .phms-contact-phone-row').count(),3);
+   assert.match(await page.locator('#contact_phone').inputValue(),/089-123-4567 ต่อ 321/);
    await page.locator('#rescheduleDayCards [data-choice="government"]').click();
    assert.equal(await page.locator('#rescheduleWeekdaysBox').isVisible(),false);
    assert.equal(await page.locator('#rescheduleHours').inputValue(),'office');
    assert.equal(await page.locator('#rescheduleNoticeUnit').inputValue(),'working');
    assert.match(await page.locator('#rescheduleDaysSummary').textContent(),/วันหยุดราชการ/);
+   assert.equal(await page.locator('#rescheduleCustomHours').isVisible(),false);
+   await page.waitForFunction(()=>!document.getElementById('familyContactSaveBox').classList.contains('hidden'));
+   await page.locator('#familyContactSave').click();
+   await page.waitForFunction(()=>document.getElementById('familyContactSaveStatus').textContent.includes('บันทึกข้อมูลติดต่อให้ครอบครัวใช้ซ้ำแล้ว'));
+   assert.equal(familyContactWrites.length,1);
+   assert.equal(familyContactWrites[0].contact.daysMode,'government');
+   assert.ok(familyContactWrites[0].contact.phones.some(n=>n.includes('ต่อ 321')));
+   assert.equal(familyContactWrites[0].contact.noticeDays,3);
    // Hospital information must not show a second telephone editor.
    assert.equal(await page.locator('#contact_phone').count(),1);
    // Seven bilingual procedure cards can be selected, unselected and edited.

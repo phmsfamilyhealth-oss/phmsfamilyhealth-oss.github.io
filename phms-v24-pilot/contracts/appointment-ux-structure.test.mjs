@@ -341,3 +341,33 @@ test('reschedule has two day options, bilingual weekday cards and safe time orde
  assert.ok(script.includes('function syncRescheduleTimeLimits()'));
  assert.ok(script.includes('option.disabled=!!start&&option.value<=start'));
 });
+
+test('family phone entries and contact-hour cards expose elder-friendly editing',()=>{
+ assert.ok(page.includes('id="contactPhoneEntry"'));
+ assert.ok(page.includes('id="contactPhoneList"'));
+ assert.ok(page.includes('id="contactPhoneAdd"'));
+ assert.ok(page.includes('id="familyContactSave"'));
+ assert.ok(page.includes('phms-v24-family-reschedule-contact'));
+ for(const id of ['rescheduleHours','rescheduleHourCards','rescheduleCustomHours','rescheduleStart','rescheduleEnd'])assert.ok(page.includes('id="'+id+'"'));
+ for(const label of ['1 วันก่อนนัด','3 วันก่อนนัด','5 วันก่อนนัด','7 วันก่อนนัด'])assert.ok(page.includes(label));
+ assert.ok(script.includes('function toggleContactHours(value)'));
+ assert.ok(script.includes("'morning-afternoon'"));
+ assert.ok(script.includes('contactPhoneItems.join'));
+ assert.ok(script.includes('function appendContactPhone(text)'));
+ assert.ok(script.includes("e.key==='Enter'"));
+ assert.ok(script.includes('function setContactPhoneItems(text'));
+ assert.ok(script.includes('applyLoadedFamilyContact('));
+ assert.ok(script.includes("familyContactApi('put'"));
+});
+test('family contact server validation checks extensions, 30-minute time order and notice units',async()=>{
+ const {validateFamilyRescheduleContact:validate}=await import('./family-reschedule-contact-schema.mjs');
+ const base={daysMode:'specific',weekdays:['mon','tue'],hoursMode:'morning-afternoon',phones:['02-123-4567 ต่อ 1234','089-123-4567'],noticeDays:3,noticeUnit:'working',instructions:'แจ้ง HN'};
+ assert.equal(validate(base).ok,true);
+ assert.equal(validate({...base,hoursMode:'custom',startTime:'08:30',endTime:'09:00'}).ok,true);
+ assert.equal(validate({...base,hoursMode:'custom',startTime:'08:30',endTime:'08:30'}).error,'invalid_time_range');
+ assert.equal(validate({...base,hoursMode:'custom',startTime:'08:45',endTime:'09:15'}).error,'invalid_time_range');
+ assert.equal(validate({...base,phones:[base.phones[0],base.phones[0]]}).error,'invalid_phones');
+ assert.equal(validate({...base,noticeDays:4}).error,'invalid_notice');
+ assert.equal(validate({...base,weekdays:['mon','mon']}).error,'invalid_weekdays');
+ assert.equal(validate({...base,daysMode:'government',weekdays:['mon','tue']}).ok,true);
+});
