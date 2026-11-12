@@ -996,6 +996,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #rescheduleContactEditor .help{line-height:1.5}
 @media(max-width:350px){.phms-choice-grid{gap:6px}.phms-choice-grid .phms-pick{font-size:.9rem}}
 
+.phms-mini-heading{font-size:.93rem;font-weight:700;margin:12px 0 5px;color:#453427}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1085,7 +1086,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help">ยังไม่มีนัดที่บันทึกไว้? ต้องบันทึกนัดก่อนจึงจะเพิ่มค่าใช้จ่ายหรือยาได้</p>
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
-<details id="procedurePreviewBox"><summary>🔬 รายการตรวจและหัตถการ</summary><p class="help">พิมพ์รายการที่ทราบได้หลายข้อ ข้อมูลนี้ยังไม่ใช่ทะเบียนตรวจที่แพทย์ยืนยันและยังไม่บันทึกลงระบบ</p><label for="procedureEntry">ชื่อการตรวจหรือหัตถการ</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
+<details id="procedurePreviewBox"><summary>🔬 รายการตรวจและหัตถการ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจที่พบบ่อย</p><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดครั้งก่อน (ถ้ามี)</summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
@@ -1614,6 +1615,35 @@ if(!isPastAppointment()&&checklistItems.length){const dt=document.createElement(
 $('save').addEventListener('click',async()=>{if(!confirmClient||!reviewedDraft)return;const button=$('save');button.disabled=true;button.textContent='กำลังตรวจสอบและบันทึก…';const result=await confirmClient({selectedPersonCode:memberId,draft:reviewedDraft});if(result.ok){button.textContent='บันทึกสำเร็จ';$('saveStatus').textContent='บันทึกนัดแล้ว เลขอ้างอิง: '+result.appointmentId;$('back').disabled=true;}else{button.textContent='ลองบันทึกอีกครั้ง';button.disabled=false;$('saveStatus').textContent='ยังไม่บันทึกนัด: '+result.error;}});
 $('back').addEventListener('click',()=>{if($('back').disabled)return;$('confirmation').classList.add('hidden');$('editor').classList.remove('hidden')});
 let procedurePreviewItems=[];
+
+const PROCEDURE_PRESETS=[
+ {name:'🩸 เจาะเลือด',en:'Blood test',host:'procedureCommonCards'},
+ {name:'🧪 เก็บปัสสาวะ',en:'Urine sample',host:'procedureCommonCards'},
+ {name:'🩻 เอกซเรย์',en:'X-ray',host:'procedureCommonCards'},
+ {name:'💓 ตรวจคลื่นไฟฟ้าหัวใจ',en:'ECG / EKG',host:'procedureCommonCards'},
+ {name:'🧫 เก็บอุจจาระ',en:'Stool sample',host:'procedureOtherCards'},
+ {name:'🫁 เก็บเสมหะ',en:'Sputum sample',host:'procedureOtherCards'},
+ {name:'💻 พบแพทย์ออนไลน์',en:'Telemedicine',host:'procedureOtherCards'}
+];
+const procedurePresetButtons=new Map();
+for(const preset of PROCEDURE_PRESETS){
+ const button=document.createElement('button');button.type='button';button.className='phms-pick';
+ const title=document.createElement('span');title.textContent=preset.name;
+ const en=document.createElement('small');en.textContent=preset.en;button.append(title,en);
+ button.setAttribute('aria-pressed','false');button.dataset.procedure=preset.name;
+ button.addEventListener('click',()=>{
+  const index=procedurePreviewItems.indexOf(preset.name);
+  if(index>=0)procedurePreviewItems.splice(index,1);
+  else if(procedurePreviewItems.length<30)procedurePreviewItems.push(preset.name);
+  renderProcedurePreview();
+ });
+ $(preset.host).append(button);procedurePresetButtons.set(preset.name,button);
+}
+function syncProcedureChoices(){
+ for(const [name,button] of procedurePresetButtons)
+  button.setAttribute('aria-pressed',String(procedurePreviewItems.includes(name)));
+}
+
 function renderProcedurePreview(){
  const list=$('procedureItems');list.replaceChildren();
  for(const [index,item] of procedurePreviewItems.entries()){
@@ -1625,7 +1655,8 @@ function renderProcedurePreview(){
   });
   row.append(input,remove);list.append(row);
  }
- $('procedureStatus').textContent='รายการตรวจ '+procedurePreviewItems.length+' ข้อ — ยังไม่บันทึก';
+ $('procedureStatus').textContent='เลือกแล้ว '+procedurePreviewItems.length+' รายการ — ยังไม่บันทึก';
+ syncProcedureChoices();
 }
 function addProcedurePreview(){
  const name=$('procedureEntry').value.trim(),key=name.normalize('NFKC').toLocaleLowerCase('th-TH');
