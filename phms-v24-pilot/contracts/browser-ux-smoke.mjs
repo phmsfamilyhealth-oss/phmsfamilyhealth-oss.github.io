@@ -59,6 +59,8 @@ try {
         {organizationId:'22222222-2222-4222-8222-222222222221',value:'HN-TEST-A',verified:true},
         {organizationId:'22222222-2222-4222-8222-222222222222',value:'HN-TEST-B',verified:false}
        ]}}
+      :data.action==='reschedule_contact'
+      ?{ok:true,contact:{verified:true,source:'service_unit_reschedule',phone:'02-123-4567 ต่อ 1234\\n081-234-5678',hours:'วันราชการ',instructions:'แจ้ง HN ก่อนเลื่อนนัด',minNoticeMinutes:4320}}
       :data.action==='appointment_sources'
       ?{ok:true,appointments:[{id:'44444444-4444-4444-8444-444444444444',title:'ตรวจตามนัด',organization_id:'22222222-2222-4222-8222-222222222222',service_unit_id:'33333333-3333-4333-8333-333333333332',location_detail:'อาคาร B ชั้น 1 จุดบริการเดิม',created_at:'2026-10-01T00:00:00Z'}]}
       :{ok:true,items:[]};
@@ -169,6 +171,35 @@ try {
    // No hospital workflow is prefilled. A caregiver may add and order multiple stops.
    assert.equal(await page.locator('#visitStepsList .visit-stop-card').count(),0);
    await page.locator('.mode-choice[data-mode="full"]').click();
+
+   // Contact is loaded when the section opens: no redundant second button.
+   assert.equal(await page.locator('#contactLoad').count(),0);
+   await page.locator('#contactRescheduleBox > summary').click();
+   await page.waitForFunction(()=>document.getElementById('contact_phone').value.includes('1234'));
+   assert.equal(await page.locator('#rescheduleDays').inputValue(),'government');
+   assert.match(await page.locator('#contactDetails').textContent(),/ทะเบียนแผนก/);
+   await page.locator('#rescheduleNotice').selectOption('3-working');
+   assert.equal(await page.locator('#rescheduleNotice').inputValue(),'3-working');
+   // Hospital information must not show a second telephone editor.
+   assert.equal(await page.locator('#contact_phone').count(),1);
+   // Seven bilingual procedure cards can be selected, unselected and edited.
+   await page.locator('#procedurePreviewBox > summary').click();
+   const bloodCard=page.locator('#procedureCommonCards .phms-pick').first();
+   await bloodCard.click();
+   assert.equal(await bloodCard.getAttribute('aria-pressed'),'true');
+   assert.equal(await page.locator('#procedureItems .phms-procedure-row').count(),1);
+   await bloodCard.click();
+   assert.equal(await bloodCard.getAttribute('aria-pressed'),'false');
+   // Preparation is sourced exclusively from an explicit user tap.
+   const preparationGroup=page.locator('#simpleExtras');
+   if(!(await preparationGroup.evaluate(x=>x.open)))await preparationGroup.locator(':scope > summary').click();
+   await page.locator('#prepChoiceGrid .prep-choice-card').nth(2).click();
+   await page.locator('#prepOrderGrid .phms-pick').nth(2).click();
+   await page.locator('#prepTimeSelect').selectOption('22:00');
+   assert.equal(await page.locator('#examPrepChoice').inputValue(),'fasting');
+   assert.match(await page.locator('#examPrepDetails').inputValue(),/น้ำเปล่าดื่มได้/);
+   assert.match(await page.locator('#examPrepDetails').inputValue(),/22:00/);
+
    // Journey location photos belong ONLY to detailed mode and have a separate 5-photo cap.
    const hospitalDetail=page.locator('#primaryLocationDetails');
    const detailInitiallyOpen=await hospitalDetail.evaluate(el=>el.open);
