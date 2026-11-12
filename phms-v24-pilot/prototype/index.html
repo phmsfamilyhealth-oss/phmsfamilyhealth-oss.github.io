@@ -2271,6 +2271,7 @@ function clearSourceFilled({personChanged=false}={}){
   $('relatedSelect').value='';$('relatedQuery').value='';
   resetContactDraft();
   setArrivalLeadMinutes(30);
+  resetPrepOrderCards();
  }
  if($('purpose').value===autoPurposeValue&&autoPurposeValue){$('purpose').value='';purposeManuallyEdited=false;}
  sourceFilled.clear();autoPurposeValue='';
@@ -2690,6 +2691,117 @@ function syncExamPrep(){
 }
 examPrepChoice.addEventListener('change',syncExamPrep);syncExamPrep();
 // Keep the existing single checklist and procedure registry; provide clear navigation rather than duplicate entries.
+
+// Structured order transcription only: never infer that a patient should fast,
+// stop medication or drink water based on a procedure name.
+const prepOrderGrid=document.createElement('div');prepOrderGrid.id='prepOrderGrid';prepOrderGrid.className='phms-choice-grid';
+prepOrderGrid.setAttribute('role','group');prepOrderGrid.setAttribute('aria-label','เลือกคำสั่งงดอาหารและน้ำจากใบนัด');
+const prepOrderPresets=[
+ ['none','ไม่ระบุคำสั่ง',''],['stop-food-water','🚫 งดอาหารและน้ำ','รวมถึงน้ำเปล่า'],
+ ['water-ok','💧 งดอาหาร แต่น้ำเปล่าดื่มได้','งดเครื่องดื่มอื่น'],
+ ['no-fast','✅ ไม่ต้องงดอาหารและน้ำ','ตามที่โรงพยาบาลแจ้ง'],
+ ['special','📝 คำสั่งอื่น','ระบุเพิ่มเติม']
+];
+let selectedPrepOrder='none';
+const prepOrderButtons=new Map();
+for(const [key,title,subtitle] of prepOrderPresets){
+ const button=document.createElement('button');button.type='button';button.className='phms-pick';
+ const label=document.createElement('span');label.textContent=title;button.append(label);
+ if(subtitle){const small=document.createElement('small');small.textContent=subtitle;button.append(small);}
+ button.addEventListener('click',()=>{selectedPrepOrder=key;syncPrepOrder();});
+ prepOrderGrid.append(button);prepOrderButtons.set(key,button);
+}
+const prepTimeArea=document.createElement('div');prepTimeArea.id='prepTimeArea';
+const prepTimeLabel=document.createElement('label');prepTimeLabel.htmlFor='prepTimeSelect';prepTimeLabel.textContent='🕘 เริ่มงดหลังเวลาใด';
+const prepTimeSelect=document.createElement('select');prepTimeSelect.id='prepTimeSelect';
+for(const [value,label] of [
+ ['','ใบนัดยังไม่ระบุเวลา'],['20:00','20:00 น. (2 ทุ่ม วันก่อนนัด)'],
+ ['22:00','22:00 น. (4 ทุ่ม วันก่อนนัด)'],['00:00','00:00 น. (เที่ยงคืนก่อนวันนัด)'],
+ ['02:00','02:00 น. (ตี 2 วันนัด)'],['other','เวลาอื่นตามใบนัด']
+])prepTimeSelect.add(new Option(label,value));
+const prepCustomTime=document.createElement('input');prepCustomTime.id='prepCustomTime';prepCustomTime.type='time';prepCustomTime.className='hidden';
+prepCustomTime.setAttribute('aria-label','เวลาเริ่มงดอื่นตามใบนัด');
+const prepTimeWarning=document.createElement('p');prepTimeWarning.id='prepTimeWarning';prepTimeWarning.className='help';
+prepTimeArea.append(prepTimeLabel,prepTimeSelect,prepCustomTime,prepTimeWarning);
+const prepExtraTitle=document.createElement('p');prepExtraTitle.className='phms-mini-heading';prepExtraTitle.textContent='คำสั่งเพิ่มเติมในใบนัด (เลือกได้หลายอย่าง)';
+const prepExtraGrid=document.createElement('div');prepExtraGrid.id='prepExtraGrid';prepExtraGrid.className='phms-choice-grid';
+prepExtraGrid.setAttribute('role','group');prepExtraGrid.setAttribute('aria-label','คำสั่งเพิ่มเติมจากโรงพยาบาล');
+const prepExtraOptions=[
+ ['bring-water','🥤 เตรียมน้ำมาด้วย'],
+ ['hold-urine','🚻 กลั้นปัสสาวะก่อนตรวจ'],
+ ['medicine','💊 มีคำสั่งเรื่องยา'],
+ ['more','📝 มีคำสั่งอื่น']
+];
+const prepExtraSelected=new Set();
+for(const [key,label] of prepExtraOptions){
+ const button=document.createElement('button');button.type='button';button.className='phms-pick';
+ button.textContent=label;button.dataset.prepExtra=key;
+ button.addEventListener('click',()=>{
+  if(prepExtraSelected.has(key))prepExtraSelected.delete(key);else prepExtraSelected.add(key);
+  syncPrepOrder();
+ });
+ prepExtraGrid.append(button);
+}
+const prepMedicineLabel=document.createElement('label');prepMedicineLabel.htmlFor='prepMedicineText';prepMedicineLabel.textContent='💊 คำสั่งเรื่องยาตามใบนัด';
+const prepMedicineText=document.createElement('textarea');prepMedicineText.id='prepMedicineText';
+prepMedicineText.maxLength=400;prepMedicineText.rows=2;prepMedicineText.placeholder='ระบุชื่อยาและคำสั่งจริง ไม่ควรหยุดยาเอง';
+const prepMedicineArea=document.createElement('div');prepMedicineArea.id='prepMedicineArea';
+prepMedicineArea.append(prepMedicineLabel,prepMedicineText);
+const prepOtherLabel=document.createElement('label');prepOtherLabel.htmlFor='prepOtherText';prepOtherLabel.textContent='📝 คำสั่งอื่นตามใบนัด';
+const prepOtherText=document.createElement('textarea');prepOtherText.id='prepOtherText';
+prepOtherText.maxLength=450;prepOtherText.rows=2;prepOtherText.placeholder='เช่น ปริมาณน้ำที่โรงพยาบาลระบุ หรือเวลาที่ต้องกลั้นปัสสาวะ';
+const prepOtherArea=document.createElement('div');prepOtherArea.id='prepOtherArea';
+prepOtherArea.append(prepOtherLabel,prepOtherText);
+function selectedPrepTimeText(){
+ const selected=prepTimeSelect.value;
+ if(!selected)return '';
+ if(selected==='other'){
+  const value=prepCustomTime.value;
+  return value?'หลัง '+value+' น. (โปรดตรวจสอบวันที่เริ่มงดตามใบนัด)':'';
+ }
+ const part=prepTimeSelect.selectedOptions[0]?.textContent||'';
+ return 'หลัง '+part;
+}
+function syncPrepOrder(){
+ for(const [key,button] of prepOrderButtons)button.setAttribute('aria-pressed',String(selectedPrepOrder===key));
+ for(const button of prepExtraGrid.children)button.setAttribute('aria-pressed',String(prepExtraSelected.has(button.dataset.prepExtra)));
+ const fasting=selectedPrepOrder==='stop-food-water'||selectedPrepOrder==='water-ok';
+ prepTimeArea.classList.toggle('hidden',!fasting);
+ prepCustomTime.classList.toggle('hidden',prepTimeSelect.value!=='other');
+ prepTimeWarning.textContent=fasting&&!selectedPrepTimeText()
+  ?'⚠️ ยังไม่ระบุเวลาเริ่มงด โปรดดูใบนัดหรือติดต่อโรงพยาบาล':'';
+ prepMedicineArea.classList.toggle('hidden',!prepExtraSelected.has('medicine'));
+ prepOtherArea.classList.toggle('hidden',selectedPrepOrder!=='special'&&!prepExtraSelected.has('more'));
+ const texts=[];
+ if(selectedPrepOrder==='stop-food-water')texts.push('งดอาหารและน้ำ รวมถึงน้ำเปล่า');
+ else if(selectedPrepOrder==='water-ok')texts.push('งดอาหารและเครื่องดื่มอื่น แต่น้ำเปล่าดื่มได้');
+ else if(selectedPrepOrder==='no-fast')texts.push('ไม่ต้องงดอาหารและน้ำ');
+ if(fasting&&selectedPrepTimeText())texts.push('เริ่มงด'+selectedPrepTimeText());
+ if(prepExtraSelected.has('bring-water'))texts.push('เตรียมน้ำมาด้วย (ตามปริมาณที่โรงพยาบาลระบุ)');
+ if(prepExtraSelected.has('hold-urine'))texts.push('กลั้นปัสสาวะก่อนตรวจ (ตามคำสั่งโรงพยาบาล)');
+ if(prepExtraSelected.has('medicine'))texts.push('คำสั่งเรื่องยา: '+(prepMedicineText.value.trim()||'ยังไม่ได้ระบุรายละเอียด'));
+ if((selectedPrepOrder==='special'||prepExtraSelected.has('more'))&&prepOtherText.value.trim())texts.push('คำสั่งอื่น: '+prepOtherText.value.trim());
+ examPrepChoice.value=fasting?'fasting':selectedPrepOrder==='no-fast'?'normal':texts.length||selectedPrepOrder==='special'?'other':'';
+ examPrepDetails.value=texts.join('\n');
+ if(typeof updatePrepChoices==='function')updatePrepChoices();
+}
+function resetPrepOrderCards(){
+ selectedPrepOrder='none';prepExtraSelected.clear();prepTimeSelect.value='';
+ prepCustomTime.value='';prepMedicineText.value='';prepOtherText.value='';
+ syncPrepOrder();
+}
+for(const input of [prepTimeSelect,prepCustomTime,prepMedicineText,prepOtherText]){
+ input.addEventListener('change',syncPrepOrder);
+ input.addEventListener('input',syncPrepOrder);
+}
+// The old select/textarea remain as compatibility controls for the existing
+// review route; users see and edit only the structured cards.
+examPrepChoice.classList.add('visually-hidden-form');examPrepChoice.setAttribute('tabindex','-1');
+examPrepChoice.setAttribute('aria-hidden','true');
+examPrepDetailArea.classList.add('visually-hidden-form');
+examPrepLabel.textContent='เลือกเฉพาะคำสั่งที่ระบุในใบนัด';
+examPrepHelp.textContent='โปรดใช้คำสั่งจากโรงพยาบาลจริงเท่านั้น โดยเฉพาะน้ำและยา · ข้อมูลนี้ยังอยู่ในร่างทดลอง';
+
 const prepItemsLabel=document.querySelector('label[for="prepEntry"]');
 if(prepItemsLabel)prepItemsLabel.textContent='🎒 สิ่งที่ต้องนำไป / เตรียมก่อนออกจากบ้าน';
 const prepPrompt=document.createElement('p');prepPrompt.className='help phms-prep-guide';
@@ -2733,7 +2845,7 @@ moveNodes('symptoms',[$('previsitLabel'),symptomHelp,$('previsitSymptoms'),$('pr
 moveNodes('notes',[$('additionalNoteLabel'),otherNoteHelp,$('additionalNote')]);
 moveNodes('things',[$('checklistBox')]);
 examPrepPanel.open=true; // The main card controls visibility; no nested disclosure to open again.
-moveNodes('instructions',[examPrepLabel,examPrepChoice,examPrepDetailArea,examPrepHelp]);
+moveNodes('instructions',[examPrepLabel,prepOrderGrid,prepTimeArea,prepExtraTitle,prepExtraGrid,prepMedicineArea,prepOtherArea,examPrepChoice,examPrepDetailArea,examPrepHelp]);
 examPrepPanel.remove();
 procedureGuide.remove();
 const prepIntro=document.createElement('p');prepIntro.className='help prep-choice-intro';prepIntro.textContent='เลือกเฉพาะเรื่องที่ต้องการเพิ่ม';
@@ -2910,6 +3022,7 @@ function resetCurrentAppointmentDraft(){
   el.value='';
  }
  setArrivalLeadMinutes(30);
+ resetPrepOrderCards();
  for(const kind of ['hospital','unit','clinician']){
   comboState[kind]={searchText:'',selectedItem:null,isOpen:false};
   closeCombo(kind);
