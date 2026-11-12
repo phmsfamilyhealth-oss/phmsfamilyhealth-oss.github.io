@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PHMS — เพิ่มนัดหมาย</title><link rel="preconnect" href="https://static.line-scdn.net" crossorigin><link rel="preconnect" href="https://buxvdlfrikpwdscdlcfd.supabase.co" crossorigin><link rel="preload" href="https://static.line-scdn.net/liff/edge/2/sdk.js" as="script"><meta name="phms-photo-ui" content="paired-v2-20261110"><meta name="phms-liff-id" content="2011619364-D0xazyre"><meta name="phms-confirm-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-confirm"><meta name="phms-read-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-read"><meta name="phms-journey-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-journey-guide">
+<title>PHMS — เพิ่มนัดหมาย</title><link rel="preconnect" href="https://static.line-scdn.net" crossorigin><link rel="preconnect" href="https://buxvdlfrikpwdscdlcfd.supabase.co" crossorigin><link rel="preload" href="https://static.line-scdn.net/liff/edge/2/sdk.js" as="script"><meta name="phms-photo-ui" content="paired-v2-20261110"><meta name="phms-liff-id" content="2011619364-D0xazyre"><meta name="phms-confirm-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-confirm"><meta name="phms-read-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-read"><meta name="phms-family-contact-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-family-reschedule-contact"><meta name="phms-journey-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-journey-guide">
 <style>
 :root{font-family:system-ui,"Noto Sans Thai",sans-serif;color:#17324d;background:#f3f7fc}*{box-sizing:border-box}main{max-width:620px;margin:auto;padding:20px 14px 40px}h1{font-size:1.55rem}h2{font-size:1.2rem}p{line-height:1.55}.box{background:#fff;border:1px solid #dae4ee;border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 1px 3px #12263a0c}label{display:block;font-weight:650;margin:14px 0 6px}input,select,textarea,button{font:inherit}input,select,textarea{width:100%;min-height:46px;padding:10px;border:1px solid #9eaebf;border-radius:9px}button{min-height:48px;border-radius:10px;padding:10px 18px;border:0;background:#1666a7;color:white;font-weight:700}button:disabled{background:#9ba9b4}button.secondary{background:#e6eef6;color:#17324d}.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.help{color:#526579;font-size:.92rem}.error{color:#a51e2c}.hidden{display:none}.checklist-row{display:flex;align-items:center;gap:8px;margin:8px 0}.checklist-row input[type=checkbox]{width:24px;min-height:24px;flex:none}.checklist-row input:not([type=checkbox]){min-width:0;flex:1}.checklist-row button{flex:none}.checklist-row button.checklist-delete{width:52px;min-width:52px;min-height:48px;padding:8px;background:#913b4b;color:#fff;font-size:1.25rem;display:inline-flex;align-items:center;justify-content:center}.checklist-row button.checklist-delete:hover,.checklist-row button.checklist-delete:focus-visible{background:#7d2f40}.checklist-row button.checklist-delete:focus-visible{outline:3px solid #17324d;outline-offset:2px}.actions #prepEntry{flex:1;min-width:160px}.combo-results{border:1px solid #9eaebf;border-radius:10px;max-height:240px;overflow-y:auto;background:#fff}.combo-results button{display:block;width:100%;border-radius:0;text-align:left;background:white;color:#17324d;border-bottom:1px solid #dae4ee;min-height:48px}.combo-results button:focus{outline:3px solid #1666a7}.combo-results .unavailable{color:#526579;padding:12px}.appointment-cards{display:grid;gap:10px;margin:12px 0}.appointment-card{background:#fff;border:1px solid #b8c7d5;color:#17324d;text-align:left;width:100%;padding:14px;border-radius:12px;font-weight:400}.appointment-card strong{display:block;font-weight:700}.appointment-card span{display:block;color:#526579;font-size:.9rem;margin-top:5px}.appointment-card[aria-pressed="true"]{border:2px solid #1666a7;background:#eaf4ff}.required-star{color:#b42318;font-weight:800;margin-left:4px}.thai-preview{margin:6px 2px 0;font-size:.9rem;line-height:1.5;color:#345678}.notice{background:#fff2d8;border:1px solid #d9ad54;padding:12px;border-radius:10px}dl{display:grid;grid-template-columns:120px 1fr;gap:10px}dd{margin:0;overflow-wrap:anywhere}
 
@@ -1050,6 +1050,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .phms-contact-phone-add input{min-width:160px;flex:1}
 .phms-contact-phone-add button{min-width:126px;flex:none}
 #rescheduleHourCards .phms-pick[aria-pressed="true"]{border-color:#8a633d}
+#familyContactSaveBox{margin:12px 0 5px}
+#familyContactSave{width:100%;min-height:48px;text-align:center}
+#familyContactSaveStatus{margin:8px 0;line-height:1.5}
 
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
@@ -1202,7 +1205,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p id="rescheduleNoticeHint" class="help phms-contact-result" role="status"></p>
 <label for="rescheduleInstructions">📝 วิธีติดต่อหรือข้อกำหนดอื่น</label>
  <textarea id="rescheduleInstructions" rows="2" maxlength="600" placeholder="เช่น ติดต่อเฉพาะช่วงเช้า หรือแจ้ง HN ก่อนเลื่อนนัด"></textarea>
- <p id="rescheduleDraftNote" class="help">แก้ไขข้อมูลได้สำหรับนัดนี้ · รุ่นทดลองยังไม่บันทึกการแก้ไขกลับทะเบียนกลาง</p>
+ <p id="rescheduleDraftNote" class="help">แก้ไขข้อมูลได้สำหรับนัดนี้ · การเปลี่ยนแปลงยังไม่อัปเดตทะเบียนโรงพยาบาลที่ยืนยันแล้ว</p>
+ <div id="familyContactSaveBox" class="hidden">
+  <button type="button" id="familyContactSave" class="secondary">💾 บันทึกข้อมูลติดต่อให้ครอบครัวใช้ซ้ำ</button>
+  <p class="help">เจ้าของครอบครัวหรือผู้ดูแลระบบเท่านั้น · บันทึกให้สมาชิกในครอบครัวใช้ร่วมกัน ไม่ใช่ข้อมูลที่โรงพยาบาลยืนยัน</p>
+ </div>
+ <p id="familyContactSaveStatus" role="status" class="help"></p>
 </div>
 <label for="reschedulePhase">ความคืบหน้าการติดต่อเพื่อเลื่อนนัด (ทดลอง)</label><select id="reschedulePhase"><option value="">ยังไม่ดำเนินการ</option><option value="requested">ต้องการเลื่อนนัด</option><option value="contact_pending">ติดต่อแล้ว รอยืนยัน</option><option value="confirmed">โรงพยาบาลยืนยันแล้ว</option></select>
 <p class="help">การเลือกสถานะนี้ยังไม่เปลี่ยนวันนัดหรือบันทึกข้อมูลในระบบ</p></details>
@@ -2471,6 +2479,74 @@ async function loadRelatedAppointments(){
  $('relatedAppointmentBox').hidden=relatedAllItems.length===0;if(!relatedAllItems.length){renderLinkedCareVisits();status.textContent='';return;}relatedAllItems.sort((a,b)=>String(b.planned_visit_date||b.appointment_at||'').localeCompare(String(a.planned_visit_date||a.appointment_at||'')));renderLinkedCareVisits();refreshTopicSuggestions();renderCareTopicSuggestions();relatedExpanded=false;renderRelatedCards();
 }
 
+
+/* Family-shared contact directory is distinct from the verified hospital master. */
+let familyContactCanWrite=false,contactEditVersion=0;
+async function familyContactApi(action,data){
+ const endpoint=document.querySelector('meta[name="phms-family-contact-api"]')?.content;
+ const token=window.liff?.getIDToken?.();
+ if(!token||!memberId||!endpoint)return {ok:false,error:'unauthenticated'};
+ try{
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),12000);
+  try{
+   const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},
+    body:JSON.stringify({action,selectedPersonCode:memberId,...data}),signal:controller.signal});
+   const result=await response.json();
+   return response.ok&&result?.ok?result:{ok:false,error:result?.error||'contact_unavailable'};
+  }finally{clearTimeout(timeout);}
+ }catch{return {ok:false,error:'contact_unavailable'};}
+}
+function applyFamilyContact(contact){
+ if(!contact||typeof contact!=='object')return;
+ $('rescheduleDays').value=contact.daysMode||'';
+ chosenContactWeekdays.clear();
+ if(Array.isArray(contact.weekdays))for(const day of contact.weekdays)if(contactWeekdayValues.some(([code])=>code===day))chosenContactWeekdays.add(day);
+ $('rescheduleHours').value=contact.hoursMode||'';
+ $('rescheduleStart').value=contact.startTime||'';
+ $('rescheduleEnd').value=contact.endTime||'';
+ setContactPhoneItems(Array.isArray(contact.phones)?contact.phones.join('\n'):'');
+ $('rescheduleNotice').value=contact.noticeDays?String(contact.noticeDays):'';
+ $('rescheduleNoticeUnit').value=contact.noticeUnit==='working'?'working':'calendar';
+ $('rescheduleInstructions').value=String(contact.instructions||'').slice(0,600);
+ syncContactFields();
+}
+function snapshotFamilyContact(){
+ const hours=$('rescheduleHours').value;
+ return {
+  daysMode:$('rescheduleDays').value,
+  weekdays:$('rescheduleDays').value==='specific'?contactWeekdayValues.filter(([key])=>chosenContactWeekdays.has(key)).map(([key])=>key):[],
+  hoursMode:hours,
+  startTime:hours==='custom'?$('rescheduleStart').value:null,
+  endTime:hours==='custom'?$('rescheduleEnd').value:null,
+  phones:[...contactPhoneItems],
+  noticeDays:$('rescheduleNotice').value?Number($('rescheduleNotice').value):null,
+  noticeUnit:$('rescheduleNoticeUnit').value,
+  instructions:$('rescheduleInstructions').value.trim()
+ };
+}
+$('familyContactSave').addEventListener('click',async()=>{
+ if(!familyContactCanWrite)return;
+ const org=$('providerOrg').value,unit=$('providerUnit').value,who=memberId;
+ if(!org||!who)return;
+ const payload=snapshotFamilyContact(),status=$('familyContactSaveStatus');
+ if(!payload.daysMode||payload.daysMode==='specific'&&!payload.weekdays.length){
+  status.textContent='กรุณาเลือกวันติดต่ออย่างน้อย 1 วันก่อนบันทึก';return;
+ }
+ if(payload.hoursMode==='custom'&&!selectedContactHours()){
+  status.textContent='กรุณาเลือกเวลาเริ่มและสิ้นสุดให้ถูกต้องก่อนบันทึก';return;
+ }
+ const button=$('familyContactSave');button.disabled=true;
+ status.textContent='กำลังบันทึกข้อมูลติดต่อสำหรับครอบครัว…';
+ const result=await familyContactApi('put',{organizationId:org,unitId:unit||null,contact:payload});
+ button.disabled=false;
+ if(who!==memberId||org!==$('providerOrg').value||unit!==$('providerUnit').value)return;
+ if(result.ok){
+  status.textContent='✓ บันทึกข้อมูลติดต่อให้ครอบครัวใช้ซ้ำแล้ว (ไม่ใช่ทะเบียนกลางที่โรงพยาบาลยืนยัน)';
+  $('rescheduleDraftNote').textContent='บันทึกสำหรับครอบครัวแล้ว · ระบบไม่แก้ทะเบียนโรงพยาบาลที่ยืนยัน';
+ }else status.textContent='ยังบันทึกไม่ได้ กรุณาตรวจวัน เวลา เบอร์ หรือสิทธิ์ผู้บันทึก ('+result.error+')';
+});
+
 /* Reschedule: one phone editor, verified hospital/department fallback, and editable
    appointment-specific draft. No automatic changes to hospital master data. */
 let contactLoadGeneration=0;
@@ -2676,6 +2752,8 @@ function syncContactFields(){
   :'';
 }
 function markContactEdited(){
+ contactEditVersion++;
+ $('familyContactSaveStatus').textContent='';
  $('rescheduleDraftNote').textContent='แก้ไขสำหรับนัดนี้แล้ว · ยังไม่บันทึกกลับทะเบียนกลาง';
 }
 $('rescheduleDays').addEventListener('change',()=>{
@@ -2694,7 +2772,9 @@ for(const id of ['rescheduleHours','rescheduleStart','rescheduleEnd',
  $(id).addEventListener('change',()=>{syncContactFields();markContactEdited();});
 }
 function resetContactDraft(){
- ++contactLoadGeneration;
+ ++contactLoadGeneration;contactEditVersion++;
+ familyContactCanWrite=false;$('familyContactSaveBox').classList.add('hidden');
+ $('familyContactSaveStatus').textContent='';
  for(const id of [
   'rescheduleDays','rescheduleHours','rescheduleStart','rescheduleEnd',
   'contact_phone','rescheduleNotice','rescheduleInstructions'
@@ -2705,15 +2785,35 @@ function resetContactDraft(){
  $('contactDetails').textContent='เปิดส่วนนี้เพื่อดูข้อมูลติดต่อที่โรงพยาบาล/แผนกบันทึกไว้';
  $('rescheduleDraftNote').textContent='แก้ไขข้อมูลได้สำหรับนัดนี้ · รุ่นทดลองยังไม่บันทึกการแก้ไขกลับทะเบียนกลาง';
 }
+
+async function applyLoadedFamilyContact(savedPromise,generation,editAtStart,org,unit,person){
+ const saved=await savedPromise;
+ if(generation!==contactLoadGeneration||person!==memberId||org!==$('providerOrg').value||unit!==$('providerUnit').value)return;
+ familyContactCanWrite=saved.ok&&saved.canWrite===true;
+ $('familyContactSaveBox').classList.toggle('hidden',!familyContactCanWrite);
+ if(saved.ok&&saved.contact){
+  if(editAtStart===contactEditVersion){
+   applyFamilyContact(saved.contact);
+   $('familyContactSaveStatus').textContent='✓ เติมข้อมูลติดต่อที่ครอบครัวบันทึกไว้ครั้งก่อนแล้ว · ตรวจสอบและแก้ไขได้';
+  }else $('familyContactSaveStatus').textContent='มีข้อมูลติดต่อของครอบครัว แต่ไม่ได้ทับข้อมูลที่กำลังกรอก';
+ }else if(saved.ok&&familyContactCanWrite){
+  $('familyContactSaveStatus').textContent='ยังไม่มีข้อมูลของครอบครัว · เพิ่มแล้วกดบันทึกเพื่อใช้ซ้ำ';
+ }else if(!saved.ok){
+  $('familyContactSaveStatus').textContent='ยังโหลดข้อมูลครอบครัวไม่ได้ · ยังแก้ไขข้อมูลสำหรับนัดนี้ได้';
+ }
+}
 async function loadRescheduleContacts(){
- const box=$('contactDetails'),org=$('providerOrg').value,unit=$('providerUnit').value,chosenPerson=memberId,generation=++contactLoadGeneration;
+ const box=$('contactDetails'),org=$('providerOrg').value,unit=$('providerUnit').value,chosenPerson=memberId,generation=++contactLoadGeneration,editAtStart=contactEditVersion;
+ const savedPromise=org&&chosenPerson?familyContactApi('get',{organizationId:org,unitId:unit||null}):Promise.resolve({ok:false});
  if(!chosenPerson||!org){box.textContent='เลือกบุคคลและโรงพยาบาลก่อน จึงจะดึงข้อมูลติดต่อได้';return;}
  box.textContent='กำลังตรวจข้อมูลติดต่อของโรงพยาบาลและแผนก…';
  const result=await previewReadApi('reschedule_contact',{organizationId:org,unitId:unit||undefined});
  if(generation!==contactLoadGeneration||chosenPerson!==memberId||org!==$('providerOrg').value||unit!==$('providerUnit').value)return;
- if(!result.ok){box.textContent='ยังดึงข้อมูลกลางไม่ได้ · สามารถกรอกตามใบนัดได้ ('+result.error+')';return;}
+ if(!result.ok){box.textContent='ยังดึงข้อมูลกลางไม่ได้ · สามารถกรอกตามใบนัดได้ ('+result.error+')';
+  await applyLoadedFamilyContact(savedPromise,generation,editAtStart,org,unit,chosenPerson);return;}
  const c=result.contact||{};
- if(!c.verified){box.textContent='ข้อมูลกลางยังไม่ผ่านการยืนยัน · กรุณากรอกตามใบนัด';return;}
+ if(!c.verified){box.textContent='ข้อมูลกลางยังไม่ผ่านการยืนยัน · กรุณากรอกตามใบนัด';
+  await applyLoadedFamilyContact(savedPromise,generation,editAtStart,org,unit,chosenPerson);return;}
  const source=c.source==='service_unit_reschedule'||c.source==='service_unit'?'แผนก':'โรงพยาบาล';
  const messages=['✓ ข้อมูลติดต่อจากทะเบียน'+source+' (ตรวจสอบแล้ว)'];
  if(c.hours)messages.push('วันและเวลาตามข้อมูลกลาง: '+String(c.hours));
@@ -2765,6 +2865,7 @@ async function loadRescheduleContacts(){
  if($('rescheduleDays').value==='government'&&$('rescheduleNoticeUnit').value==='calendar'&&!$('rescheduleNotice').value)
   $('rescheduleNoticeUnit').value='working';
  syncContactFields();
+ await applyLoadedFamilyContact(savedPromise,generation,editAtStart,org,unit,chosenPerson);
 }
 function rescheduleContextChanged(){
  resetContactDraft();
