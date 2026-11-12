@@ -1028,6 +1028,18 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #rescheduleContactEditor #rescheduleCustomHours select{min-height:46px}
 @media (max-width:359px){#rescheduleContactEditor .phms-pick{font-size:.86rem;padding:9px 4px}}
 
+
+/* Compact, elder-readable status choices placed in the main appointment form. */
+#appointmentStateBox{border:1px solid #dfcfba;border-radius:13px;background:#fffcf7;padding:12px;margin:6px 0 12px}
+#appointmentStateBox .phms-state-label{font-size:1rem;font-weight:750;margin:7px 0 9px;line-height:1.4}
+#appointmentStateBox .phms-state-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#appointmentStateBox .phms-state-card{min-height:54px;min-width:0;border:1px solid #bca389;border-radius:11px;padding:10px 7px;background:#fff;color:#493422;font-size:.94rem;text-align:center;line-height:1.45}
+#appointmentStateBox .phms-state-card[aria-pressed="true"]{background:#f4e5ce;border:2px solid #875d32;color:#362513;font-weight:750}
+#appointmentStateBox .phms-state-card:focus-visible{outline:3px solid #865e3a;outline-offset:2px}
+#appointmentStateBox .phms-state-note{margin:8px 2px 10px;font-size:.85rem;line-height:1.5;color:#655545}
+#appointmentStateBox .phms-state-note.attention{color:#9b3a18;font-weight:650}
+#rescheduleWeekdays .phms-pick small{display:block;font-size:.83em;letter-spacing:.03em;color:#685e4e;font-weight:550;margin-top:3px}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1131,9 +1143,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="rescheduleContactEditor">
  <label for="rescheduleDays">📅 เลือกวันที่ติดต่อเลื่อนนัดได้</label>
 <select id="rescheduleDays" class="visually-hidden-form" tabindex="-1" aria-hidden="true">
- <option value="">ยังไม่ระบุ</option><option value="government">วันและเวลาราชการ</option>
- <option value="mon-fri">วันจันทร์–ศุกร์</option><option value="mon-sat">วันจันทร์–เสาร์</option>
- <option value="everyday">ทุกวัน</option><option value="specific">เลือกวันเอง</option>
+ <option value="">ยังไม่ระบุ</option><option value="government">วันและเวลาราชการ</option><option value="specific">เลือกวันเอง</option>
 </select>
 <div id="rescheduleDayCards" class="phms-choice-grid" role="group" aria-label="เลือกรูปแบบวันที่ติดต่อ"></div>
 <div id="rescheduleWeekdaysBox" class="hidden">
@@ -2442,9 +2452,9 @@ let contactLoadGeneration=0;
    Verified registry text remains visible independently from this editable draft.
    Government hours are a suggestion, NOT a claim about a specific hospital. */
 const contactWeekdayValues=[
- ['mon','💛 วันจันทร์'],['tue','🩷 วันอังคาร'],['wed','💚 วันพุธ'],
- ['thu','🧡 วันพฤหัสบดี'],['fri','💙 วันศุกร์'],
- ['sat','💜 วันเสาร์'],['sun','❤️ วันอาทิตย์']
+ ['mon','💛 วันจันทร์','MON'],['tue','🩷 วันอังคาร','TUE'],['wed','💚 วันพุธ','WED'],
+ ['thu','🧡 วันพฤหัสบดี','THU'],['fri','💙 วันศุกร์','FRI'],
+ ['sat','💜 วันเสาร์','SAT'],['sun','❤️ วันอาทิตย์','SUN']
 ];
 const chosenContactWeekdays=new Set();
 function makeContactOption(host,value,label,hint,select){
@@ -2455,9 +2465,11 @@ function makeContactOption(host,value,label,hint,select){
  button.addEventListener('click',()=>{select.value=value;select.dispatchEvent(new Event('change',{bubbles:true}));});
  $(host).append(button);
 }
-for(const [key,label] of contactWeekdayValues){
+for(const [key,label,short] of contactWeekdayValues){
  const button=document.createElement('button');button.type='button';button.className='phms-pick';
- button.textContent=label;button.dataset.weekday=key;button.setAttribute('aria-pressed','false');
+ const th=document.createElement('span');th.textContent=label;
+ const en=document.createElement('small');en.textContent=short;en.lang='en';
+ button.append(th,en);button.dataset.weekday=key;button.setAttribute('aria-pressed','false');
  button.addEventListener('click',()=>{
   if(chosenContactWeekdays.has(key))chosenContactWeekdays.delete(key);else chosenContactWeekdays.add(key);
   syncContactFields();markContactEdited();
@@ -2465,10 +2477,7 @@ for(const [key,label] of contactWeekdayValues){
  $('rescheduleWeekdays').append(button);
 }
 for(const [value,label,hint] of [
- ['government','🏛️ วันและเวลาราชการ','จันทร์–ศุกร์ ไม่รวมวันหยุด'],
- ['mon-fri','📅 วันจันทร์–ศุกร์',''],
- ['mon-sat','📆 วันจันทร์–เสาร์',''],
- ['everyday','🗓️ ทุกวัน',''],
+ ['government','🏛️ วันและเวลาราชการ','จันทร์–ศุกร์ 08:30–16:30 น.'],
  ['specific','✏️ เลือกวันเอง','เลือกได้หลายวัน']
 ])makeContactOption('rescheduleDayCards',value,label,hint,$('rescheduleDays'));
 for(const [value,label,hint] of [
@@ -2505,7 +2514,8 @@ function selectedContactHours(){
  if(type==='afternoon')return '13:00–16:30 น. (ช่วงบ่าย)';
  if(type==='custom'){
   const begin=$('rescheduleStart').value,end=$('rescheduleEnd').value;
-  return begin&&end&&begin<end?begin+'–'+end+' น.':'';
+  const valid=/^(?:[01]\d|2[0-3]):(?:00|30)$/.test(begin)&&/^(?:[01]\d|2[0-3]):(?:00|30)$/.test(end);
+  return valid&&begin<end?begin+'–'+end+' น.':'';
  }
  return '';
 }
@@ -2515,7 +2525,19 @@ function selectedContactNotice(){
  const type=$('rescheduleNoticeUnit').value==='working'?'วันทำการ':'วันปฏิทิน';
  return days+' '+type+'ก่อนวันนัด';
 }
+
+/* Contact time slots must be a forward range of at least 30 minutes; never round verified source hours. */
+function syncRescheduleTimeLimits(){
+ const start=$('rescheduleStart').value,end=$('rescheduleEnd').value;
+ for(const option of $('rescheduleEnd').options){
+  if(!option.value)continue;
+  option.disabled=!!start&&option.value<=start;
+ }
+ if(start&&end&&end<=start)$('rescheduleEnd').value='';
+}
+$('rescheduleStart').addEventListener('change',()=>{syncRescheduleTimeLimits();syncContactFields();});
 function syncContactFields(){
+ syncRescheduleTimeLimits();
  const mode=$('rescheduleDays').value,specific=mode==='specific',hasDay=!!mode;
  $('rescheduleWeekdaysBox').classList.toggle('hidden',!specific);
  $('rescheduleHoursSection').classList.toggle('hidden',!hasDay);
@@ -2593,9 +2615,13 @@ async function loadRescheduleContacts(){
  const standaloneDays=hours.split(/\s+เวลา(?:ราชการ)?/u)[0].trim();
  if(!$('rescheduleDays').value){
   if(/^(?:วันราชการ|วันและเวลาราชการ)$/u.test(standaloneDays))$('rescheduleDays').value='government';
-  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?ศุกร์$/u.test(standaloneDays))$('rescheduleDays').value='mon-fri';
-  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?เสาร์$/u.test(standaloneDays))$('rescheduleDays').value='mon-sat';
-  else if(/^ทุกวัน$/u.test(standaloneDays))$('rescheduleDays').value='everyday';
+  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?ศุกร์$/u.test(standaloneDays)){
+   $('rescheduleDays').value='specific';for(const k of ['mon','tue','wed','thu','fri'])chosenContactWeekdays.add(k);
+  }else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?เสาร์$/u.test(standaloneDays)){
+   $('rescheduleDays').value='specific';for(const k of ['mon','tue','wed','thu','fri','sat'])chosenContactWeekdays.add(k);
+  }else if(/^ทุกวัน$/u.test(standaloneDays)){
+   $('rescheduleDays').value='specific';for(const [key] of contactWeekdayValues)chosenContactWeekdays.add(key);
+  }
   else{
    const names={'จันทร์':'mon','อังคาร':'tue','พุธ':'wed','พฤหัสบดี':'thu','ศุกร์':'fri','เสาร์':'sat','อาทิตย์':'sun'};
    const tokens=standaloneDays.split(/\s*(?:,|\/|และ|、)\s*/u).map(x=>x.trim().replace(/^วัน/u,''));
