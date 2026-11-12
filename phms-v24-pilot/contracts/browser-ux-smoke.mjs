@@ -138,6 +138,18 @@ try {
   assert.equal(await page.locator('#prepItems .checklist-row input[type="checkbox"]:checked').count(),0,'Initial items must be pending, not completed');
   if(scenario==='line-selected'){
    await page.locator('#scenarioFlow .scenario-option[data-scenario="booked"]').click();
+
+   // The arrival selector has exactly eight options, two columns, with 30 minutes default.
+   assert.equal(await page.locator('#arrivalLeadChoices .arrival-lead-choice').count(),8);
+   assert.equal(await page.locator('#arrival_lead_minutes').inputValue(),'30');
+   assert.ok(await page.locator('#arrivalLeadChoices').evaluate(node=>getComputedStyle(node).gridTemplateColumns.includes('2')||getComputedStyle(node).gridTemplateColumns.includes('1fr')),'Grid CSS must specify two columns');
+   await page.locator('#arrivalLeadChoices [data-minutes="15"]').evaluate(node=>node.click());
+   assert.equal(await page.locator('#arrival_lead_minutes').inputValue(),'15');
+   await page.locator('#time').evaluate(node=>{
+     node.value='09:00';node.dispatchEvent(new Event('input',{bubbles:true}));
+   });
+   assert.match(await page.locator('#arrivalLeadPreview').textContent(),/08:45 น./);
+
    // Hospital picker sets a hidden select programmatically. It must still trigger HN sync.
    const hospitalButtons=page.locator('#hospitalQuickCards .adaptive-provider-choice:not(.adaptive-provider-more)');
    assert.equal(await hospitalButtons.count(),2,'Synthetic authorized hospital cards must load');
