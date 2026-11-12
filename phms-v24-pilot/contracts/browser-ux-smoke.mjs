@@ -190,8 +190,38 @@ try {
    await page.waitForFunction(()=>document.getElementById('contact_phone').value.includes('1234'));
    assert.equal(await page.locator('#rescheduleDays').inputValue(),'government');
    assert.match(await page.locator('#contactDetails').textContent(),/ทะเบียนแผนก/);
-   await page.locator('#rescheduleNotice').selectOption('3-working');
-   assert.equal(await page.locator('#rescheduleNotice').inputValue(),'3-working');
+   // Verified government schedule preselects Monday–Friday and suggested office hours.
+   assert.equal(await page.locator('#rescheduleHours').inputValue(),'office');
+   assert.match(await page.locator('#rescheduleHoursSummary').textContent(),/08:30–16:30/);
+   assert.equal(await page.locator('#rescheduleWeekdaysBox').isVisible(),false);
+   await page.locator('#rescheduleNoticeCards [data-choice="3"]').click();
+   assert.equal(await page.locator('#rescheduleNotice').inputValue(),'3');
+   assert.equal(await page.locator('#rescheduleNoticeUnit').inputValue(),'working');
+   assert.match(await page.locator('#rescheduleNoticeHint').textContent(),/3 วันทำการ/);
+   await page.locator('#rescheduleNoticeUnitCards [data-choice="calendar"]').click();
+   assert.match(await page.locator('#rescheduleNoticeHint').textContent(),/3 วันปฏิทิน/);
+   // Full weekday labels only appear when the user explicitly selects custom days.
+   await page.locator('#rescheduleDayCards [data-choice="specific"]').click();
+   assert.equal(await page.locator('#rescheduleWeekdaysBox').isVisible(),true);
+   assert.equal(await page.locator('#rescheduleWeekdays .phms-pick').count(),7);
+   assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).textContent()).trim(),'💛 วันจันทร์');
+   await page.locator('#rescheduleWeekdays [data-weekday="tue"]').click();
+   await page.locator('#rescheduleWeekdays [data-weekday="fri"]').click();
+   assert.match(await page.locator('#rescheduleDaysSummary').textContent(),/วันอังคาร/);
+   assert.match(await page.locator('#rescheduleDaysSummary').textContent(),/วันศุกร์/);
+   // Custom phone hours are select-backed, in exact 30-minute increments.
+   await page.locator('#rescheduleHourCards [data-choice="custom"]').click();
+   const times=await page.locator('#rescheduleStart option').evaluateAll(items=>items.filter(el=>el.value).map(el=>el.value));
+   assert.equal(times.length,48);
+   assert.ok(times.includes('08:30')&&times.includes('09:00')&&!times.includes('08:45'));
+   await page.locator('#rescheduleStart').selectOption('08:30');
+   await page.locator('#rescheduleEnd').selectOption('09:00');
+   assert.match(await page.locator('#rescheduleHoursSummary').textContent(),/08:30–09:00/);
+   await page.locator('#rescheduleDayCards [data-choice="government"]').click();
+   assert.equal(await page.locator('#rescheduleWeekdaysBox').isVisible(),false);
+   assert.equal(await page.locator('#rescheduleHours').inputValue(),'office');
+   assert.equal(await page.locator('#rescheduleNoticeUnit').inputValue(),'working');
+   assert.match(await page.locator('#rescheduleDaysSummary').textContent(),/วันหยุดราชการ/);
    // Hospital information must not show a second telephone editor.
    assert.equal(await page.locator('#contact_phone').count(),1);
    // Seven bilingual procedure cards can be selected, unselected and edited.
