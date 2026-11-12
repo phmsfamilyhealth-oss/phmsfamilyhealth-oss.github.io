@@ -2437,8 +2437,24 @@ async function loadRelatedAppointments(){
 /* Reschedule: one phone editor, verified hospital/department fallback, and editable
    appointment-specific draft. No automatic changes to hospital master data. */
 let contactLoadGeneration=0;
-const contactWeekdayValues=[['mon','จ.'],['tue','อ.'],['wed','พ.'],['thu','พฤ.'],['fri','ศ.'],['sat','ส.'],['sun','อา.']];
+
+/* Elder-first reschedule editing: choices shown only after selecting the context.
+   Verified registry text remains visible independently from this editable draft.
+   Government hours are a suggestion, NOT a claim about a specific hospital. */
+const contactWeekdayValues=[
+ ['mon','💛 วันจันทร์'],['tue','🩷 วันอังคาร'],['wed','💚 วันพุธ'],
+ ['thu','🧡 วันพฤหัสบดี'],['fri','💙 วันศุกร์'],
+ ['sat','💜 วันเสาร์'],['sun','❤️ วันอาทิตย์']
+];
 const chosenContactWeekdays=new Set();
+function makeContactOption(host,value,label,hint,select){
+ const button=document.createElement('button');
+ button.type='button';button.className='phms-pick';button.dataset.choice=value;button.setAttribute('aria-pressed','false');
+ const title=document.createElement('span');title.textContent=label;button.append(title);
+ if(hint){const small=document.createElement('small');small.textContent=hint;button.append(small);}
+ button.addEventListener('click',()=>{select.value=value;select.dispatchEvent(new Event('change',{bubbles:true}));});
+ $(host).append(button);
+}
 for(const [key,label] of contactWeekdayValues){
  const button=document.createElement('button');button.type='button';button.className='phms-pick';
  button.textContent=label;button.dataset.weekday=key;button.setAttribute('aria-pressed','false');
@@ -2448,44 +2464,111 @@ for(const [key,label] of contactWeekdayValues){
  });
  $('rescheduleWeekdays').append(button);
 }
-function syncContactFields(){
- const days=$('rescheduleDays').value;
- $('rescheduleWeekdays').classList.toggle('hidden',days!=='specific');
- for(const button of $('rescheduleWeekdays').children)button.setAttribute('aria-pressed',String(chosenContactWeekdays.has(button.dataset.weekday)));
- $('rescheduleCustomHours').classList.toggle('hidden',$('rescheduleHours').value!=='custom');
- $('rescheduleCustomNotice').classList.toggle('hidden',$('rescheduleNotice').value!=='custom');
+for(const [value,label,hint] of [
+ ['government','🏛️ วันและเวลาราชการ','จันทร์–ศุกร์ ไม่รวมวันหยุด'],
+ ['mon-fri','📅 วันจันทร์–ศุกร์',''],
+ ['mon-sat','📆 วันจันทร์–เสาร์',''],
+ ['everyday','🗓️ ทุกวัน',''],
+ ['specific','✏️ เลือกวันเอง','เลือกได้หลายวัน']
+])makeContactOption('rescheduleDayCards',value,label,hint,$('rescheduleDays'));
+for(const [value,label,hint] of [
+ ['office','🏛️ เวลาราชการ','08:30–16:30 น.'],
+ ['morning','🌤️ ช่วงเช้า','08:30–12:00 น.'],
+ ['afternoon','🌇 ช่วงบ่าย','13:00–16:30 น.'],
+ ['custom','🕘 เลือกเวลาเอง','ช่วงละ 30 นาที']
+])makeContactOption('rescheduleHourCards',value,label,hint,$('rescheduleHours'));
+for(const value of ['1','3','5','7']){
+ const label=value==='7'?'7 วัน (1 สัปดาห์)':value+' วัน';
+ makeContactOption('rescheduleNoticeCards',value,label,'',$('rescheduleNotice'));
 }
-function markContactEdited(){ $('rescheduleDraftNote').textContent='แก้ไขสำหรับนัดนี้แล้ว · ยังไม่บันทึกกลับทะเบียนกลาง'; }
-for(const id of ['rescheduleDays','rescheduleHours','rescheduleStart','rescheduleEnd','contact_phone','rescheduleNotice','rescheduleNoticeNumber','rescheduleNoticeUnit','rescheduleInstructions']){
+for(const [value,label,hint] of [
+ ['calendar','📅 วันปฏิทิน','นับทุกวัน'],
+ ['working','🏛️ วันทำการ','ไม่รวมวันหยุดราชการ']
+])makeContactOption('rescheduleNoticeUnitCards',value,label,hint,$('rescheduleNoticeUnit'));
+for(let minute=0;minute<24*60;minute+=30){
+ const hh=String(Math.floor(minute/60)).padStart(2,'0');
+ const mm=String(minute%60).padStart(2,'0'),time=hh+':'+mm;
+ $('rescheduleStart').add(new Option(time+' น.',time));
+ $('rescheduleEnd').add(new Option(time+' น.',time));
+}
+function selectedContactDays(){
+ const select=$('rescheduleDays'),days=select.value;
+ if(days==='government')return 'วันจันทร์–ศุกร์ (ยกเว้นวันหยุดราชการ)';
+ if(days==='specific')return contactWeekdayValues
+  .filter(([key])=>chosenContactWeekdays.has(key)).map(([,name])=>name).join(' / ');
+ return days?select.selectedOptions[0]?.textContent||'':'';
+}
+function selectedContactHours(){
+ const sel=$('rescheduleHours'),type=sel.value;
+ if(type==='office')return '08:30–16:30 น. (เวลาราชการทั่วไป)';
+ if(type==='morning')return '08:30–12:00 น. (ช่วงเช้า)';
+ if(type==='afternoon')return '13:00–16:30 น. (ช่วงบ่าย)';
+ if(type==='custom'){
+  const begin=$('rescheduleStart').value,end=$('rescheduleEnd').value;
+  return begin&&end&&begin<end?begin+'–'+end+' น.':'';
+ }
+ return '';
+}
+function selectedContactNotice(){
+ const days=$('rescheduleNotice').value;
+ if(!['1','3','5','7'].includes(days))return '';
+ const type=$('rescheduleNoticeUnit').value==='working'?'วันทำการ':'วันปฏิทิน';
+ return days+' '+type+'ก่อนวันนัด';
+}
+function syncContactFields(){
+ const mode=$('rescheduleDays').value,specific=mode==='specific',hasDay=!!mode;
+ $('rescheduleWeekdaysBox').classList.toggle('hidden',!specific);
+ $('rescheduleHoursSection').classList.toggle('hidden',!hasDay);
+ $('rescheduleCustomHours').classList.toggle('hidden',$('rescheduleHours').value!=='custom'||!hasDay);
+ $('rescheduleNoticeUnitSection').classList.toggle('hidden',!$('rescheduleNotice').value);
+ for(const [selectId,hostId] of [
+  ['rescheduleDays','rescheduleDayCards'],['rescheduleHours','rescheduleHourCards'],
+  ['rescheduleNotice','rescheduleNoticeCards'],['rescheduleNoticeUnit','rescheduleNoticeUnitCards']
+ ])for(const button of $(hostId).children)
+  button.setAttribute('aria-pressed',String($(selectId).value===button.dataset.choice));
+ for(const button of $('rescheduleWeekdays').children)
+  button.setAttribute('aria-pressed',String(chosenContactWeekdays.has(button.dataset.weekday)));
+ $('rescheduleDaysSummary').textContent=mode==='government'
+  ?'📌 จันทร์–ศุกร์ ไม่รวมวันเสาร์ อาทิตย์ และวันหยุดราชการ · ยังไม่มีการตรวจวันหยุดพิเศษอัตโนมัติ'
+  :specific&&!chosenContactWeekdays.size?'เลือกวันอย่างน้อย 1 วัน':selectedContactDays()?'📌 '+selectedContactDays():'';
+ const hours=$('rescheduleHours').value,validHours=selectedContactHours();
+ $('rescheduleHoursSummary').textContent=hours==='custom'&&!validHours
+  ?'เลือกเวลาเริ่มและสิ้นสุดให้ครบ (ช่วงละ 30 นาที และเวลาสิ้นสุดต้องช้ากว่าเวลาเริ่ม)'
+  :hours?('📌 '+validHours+(hours==='office'?' · ตรวจสอบเวลารับโทรศัพท์ของแผนกอีกครั้ง':' · ตัวอย่างช่วงเวลา ปรับให้ตรงกับโรงพยาบาล')):'';
+ const notice=selectedContactNotice();
+ $('rescheduleNoticeHint').textContent=notice
+  ?'📌 '+notice+($('rescheduleNoticeUnit').value==='working'
+    ?' · ไม่รวมเสาร์–อาทิตย์และวันหยุดราชการ (ยังไม่คำนวณวันหยุดอัตโนมัติ)':'')
+  :'';
+}
+function markContactEdited(){
+ $('rescheduleDraftNote').textContent='แก้ไขสำหรับนัดนี้แล้ว · ยังไม่บันทึกกลับทะเบียนกลาง';
+}
+$('rescheduleDays').addEventListener('change',()=>{
+ if($('rescheduleDays').value==='government'){
+  $('rescheduleHours').value='office';
+  $('rescheduleNoticeUnit').value='working';
+ }else{
+  $('rescheduleHours').value='';
+  $('rescheduleStart').value='';$('rescheduleEnd').value='';
+  $('rescheduleNoticeUnit').value='calendar';
+ }
+ syncContactFields();markContactEdited();
+});
+for(const id of ['rescheduleHours','rescheduleStart','rescheduleEnd','contact_phone',
+  'rescheduleNotice','rescheduleNoticeUnit','rescheduleInstructions']){
  $(id).addEventListener('change',()=>{syncContactFields();markContactEdited();});
 }
 function resetContactDraft(){
  ++contactLoadGeneration;
- for(const id of ['rescheduleDays','rescheduleHours','rescheduleStart','rescheduleEnd','contact_phone','rescheduleNotice','rescheduleNoticeNumber','rescheduleInstructions'])$(id).value='';
- $('rescheduleNoticeUnit').value='calendar';chosenContactWeekdays.clear();syncContactFields();
+ for(const id of [
+  'rescheduleDays','rescheduleHours','rescheduleStart','rescheduleEnd',
+  'contact_phone','rescheduleNotice','rescheduleInstructions'
+ ])$(id).value='';
+ $('rescheduleNoticeUnit').value='calendar';
+ chosenContactWeekdays.clear();syncContactFields();
  $('contactDetails').textContent='เปิดส่วนนี้เพื่อดูข้อมูลติดต่อที่โรงพยาบาล/แผนกบันทึกไว้';
  $('rescheduleDraftNote').textContent='แก้ไขข้อมูลได้สำหรับนัดนี้ · รุ่นทดลองยังไม่บันทึกการแก้ไขกลับทะเบียนกลาง';
-}
-function selectedContactDays(){
- const select=$('rescheduleDays'),days=select.value;
- return days==='specific'
-  ?contactWeekdayValues.filter(([key])=>chosenContactWeekdays.has(key)).map(([,name])=>name).join(' / ')
-  :days?select.selectedOptions[0]?.textContent||'':'';
-}
-function selectedContactHours(){
- const sel=$('rescheduleHours');
- return sel.value==='custom'
-  ?($('rescheduleStart').value&&$('rescheduleEnd').value?$('rescheduleStart').value+'–'+$('rescheduleEnd').value+' น.':'')
-  :sel.value?sel.selectedOptions[0]?.textContent||'':'';
-}
-function selectedContactNotice(){
- const sel=$('rescheduleNotice');
- if(sel.value==='custom'){
-  const days=Number($('rescheduleNoticeNumber').value);
-  return Number.isInteger(days)&&days>=1&&days<=365
-   ?days+' '+($('rescheduleNoticeUnit').value==='working'?'วันทำการ':'วันปฏิทิน')+'ก่อนนัด':'';
- }
- return sel.value?sel.selectedOptions[0]?.textContent||'':'';
 }
 async function loadRescheduleContacts(){
  const box=$('contactDetails'),org=$('providerOrg').value,unit=$('providerUnit').value,chosenPerson=memberId,generation=++contactLoadGeneration;
