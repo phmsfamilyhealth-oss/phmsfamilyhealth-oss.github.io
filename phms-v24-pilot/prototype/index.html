@@ -1028,6 +1028,18 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #rescheduleContactEditor #rescheduleCustomHours select{min-height:46px}
 @media (max-width:359px){#rescheduleContactEditor .phms-pick{font-size:.86rem;padding:9px 4px}}
 
+
+/* Compact, elder-readable status choices placed in the main appointment form. */
+#appointmentStateBox{border:1px solid #dfcfba;border-radius:13px;background:#fffcf7;padding:12px;margin:6px 0 12px}
+#appointmentStateBox .phms-state-label{font-size:1rem;font-weight:750;margin:7px 0 9px;line-height:1.4}
+#appointmentStateBox .phms-state-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#appointmentStateBox .phms-state-card{min-height:54px;min-width:0;border:1px solid #bca389;border-radius:11px;padding:10px 7px;background:#fff;color:#493422;font-size:.94rem;text-align:center;line-height:1.45}
+#appointmentStateBox .phms-state-card[aria-pressed="true"]{background:#f4e5ce;border:2px solid #875d32;color:#362513;font-weight:750}
+#appointmentStateBox .phms-state-card:focus-visible{outline:3px solid #865e3a;outline-offset:2px}
+#appointmentStateBox .phms-state-note{margin:8px 2px 10px;font-size:.85rem;line-height:1.5;color:#655545}
+#appointmentStateBox .phms-state-note.attention{color:#9b3a18;font-weight:650}
+#rescheduleWeekdays .phms-pick small{display:block;font-size:.83em;letter-spacing:.03em;color:#685e4e;font-weight:550;margin-top:3px}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1131,9 +1143,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="rescheduleContactEditor">
  <label for="rescheduleDays">📅 เลือกวันที่ติดต่อเลื่อนนัดได้</label>
 <select id="rescheduleDays" class="visually-hidden-form" tabindex="-1" aria-hidden="true">
- <option value="">ยังไม่ระบุ</option><option value="government">วันและเวลาราชการ</option>
- <option value="mon-fri">วันจันทร์–ศุกร์</option><option value="mon-sat">วันจันทร์–เสาร์</option>
- <option value="everyday">ทุกวัน</option><option value="specific">เลือกวันเอง</option>
+ <option value="">ยังไม่ระบุ</option><option value="government">วันและเวลาราชการ</option><option value="specific">เลือกวันเอง</option>
 </select>
 <div id="rescheduleDayCards" class="phms-choice-grid" role="group" aria-label="เลือกรูปแบบวันที่ติดต่อ"></div>
 <div id="rescheduleWeekdaysBox" class="hidden">
@@ -1175,7 +1185,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  <textarea id="rescheduleInstructions" rows="2" maxlength="600" placeholder="เช่น ติดต่อเฉพาะช่วงเช้า หรือแจ้ง HN ก่อนเลื่อนนัด"></textarea>
  <p id="rescheduleDraftNote" class="help">แก้ไขข้อมูลได้สำหรับนัดนี้ · รุ่นทดลองยังไม่บันทึกการแก้ไขกลับทะเบียนกลาง</p>
 </div>
-<label for="reschedulePhase">สถานะการเลื่อนนัด (ทดลอง)</label><select id="reschedulePhase"><option value="">ยังไม่ดำเนินการ</option><option value="requested">ต้องการเลื่อนนัด</option><option value="contact_pending">ติดต่อแล้ว รอยืนยัน</option><option value="confirmed">โรงพยาบาลยืนยันแล้ว</option></select>
+<label for="reschedulePhase">ความคืบหน้าการติดต่อเพื่อเลื่อนนัด (ทดลอง)</label><select id="reschedulePhase"><option value="">ยังไม่ดำเนินการ</option><option value="requested">ต้องการเลื่อนนัด</option><option value="contact_pending">ติดต่อแล้ว รอยืนยัน</option><option value="confirmed">โรงพยาบาลยืนยันแล้ว</option></select>
 <p class="help">การเลือกสถานะนี้ยังไม่เปลี่ยนวันนัดหรือบันทึกข้อมูลในระบบ</p></details>
 <p class="help">เอกสาร งานมอบหมาย และแจ้งเตือนยังรอ API ตรวจสิทธิ์ จึงยังไม่เปิดการบันทึก</p>
 <input type="hidden" id="doctor"></div><label for="purpose">ชื่อนัดหมาย</label><input id="purpose" type="text" maxlength="80" placeholder="เช่น ปวดเข่า, ฟังผลเลือด, รับยาเดิม" autocomplete="off"><p class="help">ตั้งชื่อสั้น ๆ เพื่อให้รู้ว่าไปโรงพยาบาลเรื่องอะไร</p><p id="historicalGuide" class="help hidden" role="status">บันทึกการไปพบแพทย์ย้อนหลัง: ระบุเหตุผลที่ไปและผลหลังพบแพทย์ตามข้อมูลที่ทราบ ไม่ต้องกรอกเรื่องที่อยากบอกแพทย์ในอนาคต</p><label id="previsitLabel" for="previsitSymptoms">อาการหรือเรื่องที่อยากบอกหมอ (ถ้ามี)</label><textarea id="previsitSymptoms" maxlength="1000" rows="2" placeholder="เช่น ปวดเข่ามา 3 วัน หรือมีคำถามเรื่องยา"></textarea><p id="previsitHelp" class="help">ข้อมูลที่ผู้ใช้แจ้งเอง ยังไม่ใช่การวินิจฉัยจากแพทย์ และยังไม่บันทึกในโหมดทดลอง</p><label id="additionalNoteLabel" for="additionalNote">รายละเอียดเพิ่มเติม (ถ้ามี)</label><textarea id="additionalNote" maxlength="1000" rows="3" placeholder="อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม"></textarea>
@@ -1658,6 +1668,12 @@ function previewField(label,value){if(value===undefined||value===null||String(va
 const personName=$('personSelect').selectedOptions?.[0]?.textContent||'';
 previewField('บุคคล',personName==='เลือกบุคคล'?'':personName);
 previewField('ประเภทนัด',{booked:'นัดตามใบนัด',walk_in:'ไปโรงพยาบาลเอง',historical:'บันทึกย้อนหลัง'}[$('scenario').value]);
+if($('scenario').value==='booked'){
+ previewField('ที่มาของนัด',$('appointmentOrigin').selectedOptions[0]?.textContent.trim()||'');
+ previewField('สถานะปัจจุบัน',$('appointmentLifecycle').selectedOptions[0]?.textContent.trim()||'');
+ if($('appointmentOrigin').value==='rescheduled'||$('appointmentLifecycle').value!=='planned')
+  previewField('หมายเหตุสถานะ','ร่างทดลองเท่านั้น ยังไม่อัปเดตนัดเดิมหรือแจ้งโรงพยาบาล');
+}
 previewField('ชื่อนัดหมาย',$('purpose').value.trim());
 previewField('โรงพยาบาล',$('hospital').value.trim());
 previewField('วันที่',thaiSourceDate($('date').value));
@@ -2358,6 +2374,7 @@ function clearSourceFilled({personChanged=false}={}){
  }
  if(personChanged||(values.has('arrival_lead_minutes')&&$('arrival_lead_minutes').value===values.get('arrival_lead_minutes')))setArrivalLeadMinutes(30);
  if(personChanged){
+  if($('appointmentOrigin')){$('appointmentOrigin').value='new';$('appointmentLifecycle').value='planned';updateAppointmentStateUI();}
   for(const id of ['examPrepChoice','examPrepDetails','hospital_hn','hospital_vn','location_detail','contact_phone','coverage_type','arrival_lead_minutes','previsitSymptoms','additionalNote','visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps','walk_in_reason','reschedulePhase']){
    if($(id))$(id).value='';
   }
@@ -2442,9 +2459,9 @@ let contactLoadGeneration=0;
    Verified registry text remains visible independently from this editable draft.
    Government hours are a suggestion, NOT a claim about a specific hospital. */
 const contactWeekdayValues=[
- ['mon','💛 วันจันทร์'],['tue','🩷 วันอังคาร'],['wed','💚 วันพุธ'],
- ['thu','🧡 วันพฤหัสบดี'],['fri','💙 วันศุกร์'],
- ['sat','💜 วันเสาร์'],['sun','❤️ วันอาทิตย์']
+ ['mon','💛 วันจันทร์','MON'],['tue','🩷 วันอังคาร','TUE'],['wed','💚 วันพุธ','WED'],
+ ['thu','🧡 วันพฤหัสบดี','THU'],['fri','💙 วันศุกร์','FRI'],
+ ['sat','💜 วันเสาร์','SAT'],['sun','❤️ วันอาทิตย์','SUN']
 ];
 const chosenContactWeekdays=new Set();
 function makeContactOption(host,value,label,hint,select){
@@ -2455,9 +2472,11 @@ function makeContactOption(host,value,label,hint,select){
  button.addEventListener('click',()=>{select.value=value;select.dispatchEvent(new Event('change',{bubbles:true}));});
  $(host).append(button);
 }
-for(const [key,label] of contactWeekdayValues){
+for(const [key,label,short] of contactWeekdayValues){
  const button=document.createElement('button');button.type='button';button.className='phms-pick';
- button.textContent=label;button.dataset.weekday=key;button.setAttribute('aria-pressed','false');
+ const th=document.createElement('span');th.textContent=label;
+ const en=document.createElement('small');en.textContent=short;en.lang='en';
+ button.append(th,en);button.dataset.weekday=key;button.setAttribute('aria-pressed','false');
  button.addEventListener('click',()=>{
   if(chosenContactWeekdays.has(key))chosenContactWeekdays.delete(key);else chosenContactWeekdays.add(key);
   syncContactFields();markContactEdited();
@@ -2465,10 +2484,7 @@ for(const [key,label] of contactWeekdayValues){
  $('rescheduleWeekdays').append(button);
 }
 for(const [value,label,hint] of [
- ['government','🏛️ วันและเวลาราชการ','จันทร์–ศุกร์ ไม่รวมวันหยุด'],
- ['mon-fri','📅 วันจันทร์–ศุกร์',''],
- ['mon-sat','📆 วันจันทร์–เสาร์',''],
- ['everyday','🗓️ ทุกวัน',''],
+ ['government','🏛️ วันและเวลาราชการ','จันทร์–ศุกร์ 08:30–16:30 น.'],
  ['specific','✏️ เลือกวันเอง','เลือกได้หลายวัน']
 ])makeContactOption('rescheduleDayCards',value,label,hint,$('rescheduleDays'));
 for(const [value,label,hint] of [
@@ -2505,7 +2521,8 @@ function selectedContactHours(){
  if(type==='afternoon')return '13:00–16:30 น. (ช่วงบ่าย)';
  if(type==='custom'){
   const begin=$('rescheduleStart').value,end=$('rescheduleEnd').value;
-  return begin&&end&&begin<end?begin+'–'+end+' น.':'';
+  const valid=/^(?:[01]\d|2[0-3]):(?:00|30)$/.test(begin)&&/^(?:[01]\d|2[0-3]):(?:00|30)$/.test(end);
+  return valid&&begin<end?begin+'–'+end+' น.':'';
  }
  return '';
 }
@@ -2515,7 +2532,19 @@ function selectedContactNotice(){
  const type=$('rescheduleNoticeUnit').value==='working'?'วันทำการ':'วันปฏิทิน';
  return days+' '+type+'ก่อนวันนัด';
 }
+
+/* Contact time slots must be a forward range of at least 30 minutes; never round verified source hours. */
+function syncRescheduleTimeLimits(){
+ const start=$('rescheduleStart').value,end=$('rescheduleEnd').value;
+ for(const option of $('rescheduleEnd').options){
+  if(!option.value)continue;
+  option.disabled=!!start&&option.value<=start;
+ }
+ if(start&&end&&end<=start)$('rescheduleEnd').value='';
+}
+$('rescheduleStart').addEventListener('change',()=>{syncRescheduleTimeLimits();syncContactFields();});
 function syncContactFields(){
+ syncRescheduleTimeLimits();
  const mode=$('rescheduleDays').value,specific=mode==='specific',hasDay=!!mode;
  $('rescheduleWeekdaysBox').classList.toggle('hidden',!specific);
  $('rescheduleHoursSection').classList.toggle('hidden',!hasDay);
@@ -2593,9 +2622,13 @@ async function loadRescheduleContacts(){
  const standaloneDays=hours.split(/\s+เวลา(?:ราชการ)?/u)[0].trim();
  if(!$('rescheduleDays').value){
   if(/^(?:วันราชการ|วันและเวลาราชการ)$/u.test(standaloneDays))$('rescheduleDays').value='government';
-  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?ศุกร์$/u.test(standaloneDays))$('rescheduleDays').value='mon-fri';
-  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?เสาร์$/u.test(standaloneDays))$('rescheduleDays').value='mon-sat';
-  else if(/^ทุกวัน$/u.test(standaloneDays))$('rescheduleDays').value='everyday';
+  else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?ศุกร์$/u.test(standaloneDays)){
+   $('rescheduleDays').value='specific';for(const k of ['mon','tue','wed','thu','fri'])chosenContactWeekdays.add(k);
+  }else if(/^วันจันทร์\s*[–-]\s*(?:วัน)?เสาร์$/u.test(standaloneDays)){
+   $('rescheduleDays').value='specific';for(const k of ['mon','tue','wed','thu','fri','sat'])chosenContactWeekdays.add(k);
+  }else if(/^ทุกวัน$/u.test(standaloneDays)){
+   $('rescheduleDays').value='specific';for(const [key] of contactWeekdayValues)chosenContactWeekdays.add(key);
+  }
   else{
    const names={'จันทร์':'mon','อังคาร':'tue','พุธ':'wed','พฤหัสบดี':'thu','ศุกร์':'fri','เสาร์':'sat','อาทิตย์':'sun'};
    const tokens=standaloneDays.split(/\s*(?:,|\/|และ|、)\s*/u).map(x=>x.trim().replace(/^วัน/u,''));
@@ -2744,6 +2777,67 @@ personFirstHint.textContent='👤 เลือกบุคคลด้านบ�
 scenarioGrid.setAttribute('aria-describedby','personFirstHint');
 scenarioSection.append(originalScenarioLabel,$('scenario'),personFirstHint,scenarioGrid,sourceBox);
 const mainSection=makeFlowSection('mainFlow','2. นัดเรื่องอะไร ที่ไหน');flowRoot.append(mainSection);
+
+/* Appointment provenance and current state are independent from the appointment type.
+   This is an editable PREVIEW only; changing it never updates an existing appointment. */
+const appointmentStateBox=document.createElement('section');
+appointmentStateBox.id='appointmentStateBox';appointmentStateBox.setAttribute('aria-label','ที่มาและสถานะของนัด');
+function newStateField(id,title,choices){
+ const field=document.createElement('div');field.className='phms-state-field';
+ const label=document.createElement('p');label.className='phms-state-label';label.textContent=title;label.id=id+'Label';
+ const select=document.createElement('select');select.id=id;select.className='visually-hidden-form';
+ select.setAttribute('tabindex','-1');select.setAttribute('aria-hidden','true');
+ const cards=document.createElement('div');cards.id=id+'Cards';cards.className='phms-state-grid';
+ cards.setAttribute('role','group');cards.setAttribute('aria-labelledby',label.id);
+ for(const [value,caption] of choices){
+  const opt=new Option(caption,value);select.add(opt);
+  const btn=document.createElement('button');btn.type='button';btn.className='phms-state-card';
+  btn.textContent=caption;btn.dataset.choice=value;btn.setAttribute('aria-pressed','false');
+  btn.addEventListener('click',()=>{
+   select.value=value;select.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  cards.append(btn);
+ }
+ select.addEventListener('change',updateAppointmentStateUI);
+ field.append(label,select,cards);return field;
+}
+appointmentStateBox.append(
+ newStateField('appointmentOrigin','📋 ที่มาของนัด',[
+  ['new','📅 นัดใหม่'],['rescheduled','🔄 นัดที่เลื่อนมา']
+ ]),
+ newStateField('appointmentLifecycle','📍 สถานะปัจจุบันของนัด',[
+  ['planned','📅 มีนัดตามกำหนด'],['awaiting_new_date','⏳ รอวันนัดใหม่'],
+  ['cancelled','🚫 ยกเลิกแล้ว'],['completed','✅ ไปพบแพทย์แล้ว']
+ ])
+);
+const appointmentStateNote=document.createElement('p');appointmentStateNote.id='appointmentStateNote';
+appointmentStateNote.className='phms-state-note';appointmentStateNote.setAttribute('role','status');
+appointmentStateBox.append(appointmentStateNote);
+mainSection.append(appointmentStateBox);
+function updateAppointmentStateUI(){
+ const booked=$('scenario').value==='booked';
+ appointmentStateBox.classList.toggle('hidden',!booked);
+ appointmentStateBox.hidden=!booked;
+ if(!booked){$('appointmentOrigin').value='new';$('appointmentLifecycle').value='planned';}
+ for(const id of ['appointmentOrigin','appointmentLifecycle'])
+  for(const button of $(id+'Cards').children)
+   button.setAttribute('aria-pressed',String($(id).value===button.dataset.choice));
+ const source=$('appointmentOrigin').value,state=$('appointmentLifecycle').value;
+ const hasLinked=!!$('relatedSelect').value;
+ appointmentStateNote.classList.toggle('attention',source==='rescheduled'||state!=='planned');
+ if(state==='cancelled')appointmentStateNote.textContent=
+  '🚫 บันทึกสถานะยกเลิกเป็นร่างเท่านั้น ไม่ได้ยกเลิกนัดในระบบหรือที่โรงพยาบาล ต้องจัดการนัดเดิมเมื่อเปิดระบบจริง';
+ else if(state==='awaiting_new_date')appointmentStateNote.textContent=
+  '⏳ นัดเดิมยังรอวันใหม่ กรุณาอย่าถือว่าวันที่กรอกเป็นวันที่โรงพยาบาลยืนยัน';
+ else if(state==='completed')appointmentStateNote.textContent=
+  '✅ ใช้เมื่อไปพบแพทย์แล้วเท่านั้น ข้อมูลยังเป็นร่าง ไม่ได้ปิดนัดเดิม';
+ else if(source==='rescheduled')appointmentStateNote.textContent=
+  hasLinked?'🔄 เลือกนัดเดิมแล้ว โปรดตรวจสอบว่าเป็นนัดที่เลื่อนจริง':'🔄 แนะนำให้เลือกนัดเดิมจากหัวข้อ “ใช้ข้อมูลจากนัดเดิม” ด้านบน เพื่อเชื่อมประวัติการเลื่อน';
+ else appointmentStateNote.textContent='เลือกตามใบนัดจริง · สถานะนี้เป็นร่างทดลอง ยังไม่เปลี่ยนข้อมูลนัดเดิม';
+}
+$('relatedSelect').addEventListener('change',updateAppointmentStateUI);
+updateAppointmentStateUI();
+
 const purposeHelp=$('purpose').nextElementSibling;
 moveLabelAndInput('purpose',mainSection);
 if(purposeHelp?.classList.contains('help'))mainSection.append(purposeHelp);
@@ -3247,6 +3341,7 @@ function resetCurrentAppointmentDraft(){
  $('hasAppointmentPhotos').value='';
  resetContactDraft();
  $('reschedulePhase').value='';
+ $('appointmentOrigin').value='new';$('appointmentLifecycle').value='planned';updateAppointmentStateUI();
  $('detail').value='simple';$('scenario').value='booked';$('known').value='yes';scenarioChoiceMade=false;syncScenarioCards();
  for(const panel of editor.querySelectorAll('details'))panel.open=false;
  reviewedDraft=null;$('confirmation').classList.add('hidden');editor.classList.remove('hidden');
@@ -3314,6 +3409,7 @@ function updateFilledIndicators(){
 }
 function updateProgressiveLayout(){
  const simple=$('detail').value==='simple',mode=$('scenario').value;
+ updateAppointmentStateUI();
  editor.classList.toggle('simple-ui',simple);document.body.classList.toggle('simple-entry',simple);
  if(simple){if(simpleExtras.parentElement!==extrasSection)extrasSection.insertBefore(simpleExtras,$('outcomeDetails'));}
  else if(simpleExtras.parentElement!==detailed)detailed.append(simpleExtras);

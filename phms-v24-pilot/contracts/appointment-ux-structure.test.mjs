@@ -322,3 +322,22 @@ test('custom contact time uses only selectable half-hour slots and 1 3 5 7 day c
  assert.match(script,/function selectedContactHours\(\)/);
  assert.match(script,/08:30–16:30 น./);
 });
+
+test('booked appointment origin and lifecycle cards stay separate',()=>{
+ for(const value of ['appointmentOrigin','appointmentLifecycle','updateAppointmentStateUI'])assert.ok(script.includes(value));
+ for(const value of ['📅 นัดใหม่','🔄 นัดที่เลื่อนมา','📅 มีนัดตามกำหนด','⏳ รอวันนัดใหม่','🚫 ยกเลิกแล้ว','✅ ไปพบแพทย์แล้ว'])assert.ok(script.includes(value));
+ assert.ok(script.includes('mainSection.append(appointmentStateBox)'));
+ assert.ok(script.includes("appointmentStateBox.classList.toggle('hidden',!booked)"));
+ assert.ok(script.includes("previewField('ที่มาของนัด'"));
+ assert.ok(script.includes("previewField('สถานะปัจจุบัน'"));
+ assert.ok(script.includes('ยังไม่อัปเดตนัดเดิม'));
+});
+test('reschedule has two day options, bilingual weekday cards and safe time order',()=>{
+ const days=page.match(/<select id="rescheduleDays"[^>]*>([\s\S]*?)<\/select>/)?.[1]||'';
+ assert.ok(days.includes('value="government"')&&days.includes('value="specific"'));
+ for(const old of ['mon-fri','mon-sat','everyday'])assert.ok(!days.includes('value="'+old+'"'));
+ for(const day of ['MON','TUE','WED','THU','FRI','SAT','SUN'])assert.ok(script.includes("'"+day+"'"));
+ assert.ok(script.includes("en.lang='en'"));
+ assert.ok(script.includes('function syncRescheduleTimeLimits()'));
+ assert.ok(script.includes('option.disabled=!!start&&option.value<=start'));
+});

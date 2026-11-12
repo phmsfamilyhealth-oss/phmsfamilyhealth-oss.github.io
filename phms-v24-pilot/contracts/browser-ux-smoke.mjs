@@ -138,6 +138,18 @@ try {
   assert.equal(await page.locator('#prepItems .checklist-row input[type="checkbox"]:checked').count(),0,'Initial items must be pending, not completed');
   if(scenario==='line-selected'){
    await page.locator('#scenarioFlow .scenario-option[data-scenario="booked"]').click();
+   // Independent source/status fields are in the visible appointment form.
+   assert.equal(await page.locator('#appointmentOriginCards .phms-state-card').count(),2);
+   assert.equal(await page.locator('#appointmentLifecycleCards .phms-state-card').count(),4);
+   assert.ok(await page.locator('#appointmentStateBox').isVisible());
+   assert.equal(await page.locator('#appointmentOrigin').inputValue(),'new');
+   assert.equal(await page.locator('#appointmentLifecycle').inputValue(),'planned');
+   await page.locator('#appointmentOriginCards [data-choice="rescheduled"]').click();
+   assert.equal(await page.locator('#appointmentOrigin').inputValue(),'rescheduled');
+   await page.locator('#appointmentLifecycleCards [data-choice="cancelled"]').click();
+   assert.match(await page.locator('#appointmentStateNote').textContent(),/ไม่ได้ยกเลิกนัดในระบบ/);
+   await page.locator('#appointmentOriginCards [data-choice="new"]').click();
+   await page.locator('#appointmentLifecycleCards [data-choice="planned"]').click();
 
    // The arrival selector has exactly eight options, two columns, with 30 minutes default.
    assert.equal(await page.locator('#arrivalLeadChoices .arrival-lead-choice').count(),8);
@@ -204,7 +216,9 @@ try {
    await page.locator('#rescheduleDayCards [data-choice="specific"]').click();
    assert.equal(await page.locator('#rescheduleWeekdaysBox').isVisible(),true);
    assert.equal(await page.locator('#rescheduleWeekdays .phms-pick').count(),7);
-   assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).textContent()).trim(),'💛 วันจันทร์');
+   assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('span').textContent()).trim(),'💛 วันจันทร์');
+   assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('small').textContent()).trim(),'MON');
+   assert.equal(await page.locator('#rescheduleDayCards .phms-pick').count(),2);
    await page.locator('#rescheduleWeekdays [data-weekday="tue"]').click();
    await page.locator('#rescheduleWeekdays [data-weekday="fri"]').click();
    assert.match(await page.locator('#rescheduleDaysSummary').textContent(),/วันอังคาร/);
@@ -214,6 +228,12 @@ try {
    const times=await page.locator('#rescheduleStart option').evaluateAll(items=>items.filter(el=>el.value).map(el=>el.value));
    assert.equal(times.length,48);
    assert.ok(times.includes('08:30')&&times.includes('09:00')&&!times.includes('08:45'));
+   await page.locator('#rescheduleStart').selectOption('08:30');
+   assert.ok(await page.locator('#rescheduleEnd option[value="08:30"]').isDisabled(),'End must be later than start');
+   assert.ok(await page.locator('#rescheduleEnd option[value="08:00"]').isDisabled(),'End cannot precede start');
+   await page.locator('#rescheduleEnd').selectOption('09:00');
+   await page.locator('#rescheduleStart').selectOption('09:30');
+   assert.equal(await page.locator('#rescheduleEnd').inputValue(),'','Changing start invalidates an earlier end');
    await page.locator('#rescheduleStart').selectOption('08:30');
    await page.locator('#rescheduleEnd').selectOption('09:00');
    assert.match(await page.locator('#rescheduleHoursSummary').textContent(),/08:30–09:00/);
