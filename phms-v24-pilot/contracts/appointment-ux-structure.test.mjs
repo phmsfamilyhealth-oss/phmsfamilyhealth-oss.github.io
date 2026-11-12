@@ -189,7 +189,7 @@ test('fixed arrival lead uses seven accessible choices and preserves the safe 30
  assert.match(script,/button\.setAttribute\('aria-pressed'/);
  assert.match(script,/setArrivalLeadMinutes\(30\)/);
  assert.match(script,/sourceFilled\.set\('arrival_lead_minutes'/);
- assert.match(script,/sourceFilled\.has\('arrival_lead_minutes'\)/);
+ assert.match(script,/values\.has\('arrival_lead_minutes'\)/);
 });
 
 test('arrival lead calculations handle every option, unknown time and crossing midnight',()=>{
