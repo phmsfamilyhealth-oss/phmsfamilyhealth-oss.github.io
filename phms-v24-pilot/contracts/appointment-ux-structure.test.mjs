@@ -274,3 +274,24 @@ test('draft packager allows 15 minutes without changing 30-minute default',async
  assert.equal(fallback.draft.arrival_lead_minutes,30);
  for(const minutes of [0,14,16,29,181,720])assert.deepEqual(prepareDraftForReview({arrival_lead_minutes:minutes}).errors,['invalid_arrival_lead_minutes']);
 });
+
+
+test('required label is explicitly readable red without changing field validation',()=>{
+ assert.match(page, /#editor #requiredLegend\{color:#b42318!important;font-weight:750!important/);
+ assert.match(script, /requiredLegend'\)\.innerHTML='<strong class="phms-required-mark">\*<\/strong> <strong>จำเป็นต้องกรอก<\/strong>'/);
+ assert.match(page, /<p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">/);
+});
+test('LINE boot shows genuine phases and bounded authorization-loading recovery',()=>{
+ assert.match(page, /rel="preload" href="https:\/\/static\.line-scdn\.net\/liff\/edge\/2\/sdk\.js"/);
+ for(const key of ["'sdk','กำลังเปิด LINE","'login','กำลังยืนยันตัวตน","'people','กำลังตรวจสิทธิ์","'catalog','กำลังโหลดข้อมูลโรงพยาบาล"]){
+  assert.ok(script.includes(key),'Missing progress phase '+key);
+ }
+ assert.match(script,/function showLineLoading\(phase,message\)/);
+ assert.match(script,/function stopLineLoading\(\)/);
+ assert.match(script,/const controller=new AbortController\(\)/);
+ assert.match(script,/controller\.abort\(\),12000/);
+ assert.match(script,/setTimeout\(\(\)=>\{\s*if\(generation!==lineStartup\.generation\)return;[\s\S]*?3500\)/);
+ assert.match(script,/retry\.addEventListener\('click',\(\)=>location\.reload\(\)\)/);
+ assert.match(script,/people\.error==='members_timeout'/);
+ assert.match(script,/connectionBanner\.dataset\.state=\/ไม่สำเร็จ\|ไม่พร้อม/,'Errors must take priority over "loading" matches');
+});
