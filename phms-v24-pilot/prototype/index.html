@@ -974,6 +974,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor .phms-simple-journey-view.hidden,#editor .phms-simple-journey-view[hidden]{display:none!important}
 #editor .phms-simple-journey-view>button{width:100%!important;min-height:48px!important;padding:10px 14px!important;background:#f1e2ce!important;color:#4b3521!important;border:1px solid #bd9c78!important}
 #editor .phms-simple-journey-view>p{margin:7px 0 0!important;line-height:1.45!important}
+
+/* PHMS v2.4 — locked, elder-friendly hospital arrival time */
+.arrival-lead-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0}
+.arrival-lead-choice{width:100%;min-height:48px;padding:10px 8px;border:1px solid #c5ad91;border-radius:10px;background:#fffaf4;color:#4b3726;font-weight:650;text-align:center;line-height:1.35;white-space:normal}
+.arrival-lead-choice[aria-pressed="true"]{border:2px solid #92673a;background:#f1e5d6;color:#3d2a18}
+.arrival-lead-choice:focus-visible{outline:3px solid #93683f;outline-offset:2px}
+.arrival-lead-preview:not([hidden]){display:block;margin:12px 0 4px;padding:12px;border-radius:10px;background:#f8f1e8;color:#4c3420;font-weight:650}
+@media(max-width:360px){.arrival-lead-choices{gap:6px}.arrival-lead-choice{padding:10px 4px}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status">กำลังตรวจสอบการเชื่อมต่อ LINE และสิทธิ์การเพิ่มนัด…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1040,7 +1048,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help">รายละเอียดที่กรอกเองยังไม่ถือว่าแพทย์ยืนยัน</p></details>
 <details><summary>🪪 สิทธิรักษาและการเดินทาง</summary>
 <label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
-<label for="arrival_lead_minutes">ควรไปถึงก่อนนัดกี่นาที</label><input id="arrival_lead_minutes" type="number" min="0" max="720" step="5" value="30"></details>
+<label for="arrival_lead_minutes" id="arrivalLeadLabel">ควรไปถึงโรงพยาบาลก่อนเวลานัด</label><select id="arrival_lead_minutes"><option value="30" selected>30 นาที</option><option value="45">45 นาที</option><option value="60">1 ชั่วโมง</option><option value="90">1 ชั่วโมงครึ่ง</option><option value="120">2 ชั่วโมง</option><option value="150">2 ชั่วโมงครึ่ง</option><option value="180">3 ชั่วโมง</option></select><div id="arrivalLeadChoices" class="arrival-lead-choices" role="group" aria-labelledby="arrivalLeadLabel"></div><p id="arrivalLeadPreview" class="arrival-lead-preview" role="status" aria-live="polite" hidden></p></details>
 <details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล (ถ้ามี)</option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
 <details id="outcomeDetails" class="hidden"><summary>📋 ผลการไปพบแพทย์</summary>
 <label for="visit_outcome_notes">หมอบอกว่าอย่างไร หรือรักษาอะไร</label><textarea id="visit_outcome_notes" maxlength="1000" rows="2"></textarea>
@@ -1524,6 +1532,7 @@ previewField('ชื่อนัดหมาย',$('purpose').value.trim());
 previewField('โรงพยาบาล',$('hospital').value.trim());
 previewField('วันที่',thaiSourceDate($('date').value));
 previewField('เวลา',v.time_known?($('time').value+' น.'):'ไม่ทราบเวลา');
+previewField('ควรไปถึงโรงพยาบาล',arrivalTimeForAppointment());
 previewField('แผนก',$('department').value.trim());
 previewField('แพทย์',$('doctor').value.trim());
 previewField('รูปใบนัด',photoFiles.length?photoFiles.length+' รูป':'');
@@ -2089,6 +2098,54 @@ function buildElderJourneyViewer(){
 }
 journeyElderDialog.addEventListener('click',event=>{if(event.target===journeyElderDialog)journeyElderDialog.close();});
 
+
+/* Fixed appointment arrival lead time: the select stays the single source of truth.
+   No free-text minutes, no member-specific data in browser storage. */
+const ARRIVAL_LEAD_OPTIONS=[[30,'30 นาที'],[45,'45 นาที'],[60,'1 ชั่วโมง'],[90,'1 ชั่วโมงครึ่ง'],[120,'2 ชั่วโมง'],[150,'2 ชั่วโมงครึ่ง'],[180,'3 ชั่วโมง']];
+const arrivalLeadSelect=$('arrival_lead_minutes');
+const arrivalLeadButtons=[];
+for(const [value,label] of ARRIVAL_LEAD_OPTIONS){
+ const button=document.createElement('button');button.type='button';
+ button.className='arrival-lead-choice';button.textContent=label;
+ button.dataset.minutes=String(value);
+ button.addEventListener('click',()=>{
+  arrivalLeadSelect.value=String(value);
+  arrivalLeadSelect.dispatchEvent(new Event('change',{bubbles:true}));
+ });
+ $('arrivalLeadChoices').append(button);arrivalLeadButtons.push(button);
+}
+arrivalLeadSelect.classList.add('visually-hidden-form');
+arrivalLeadSelect.setAttribute('tabindex','-1');
+arrivalLeadSelect.setAttribute('aria-hidden','true');
+function normalizeArrivalLeadMinutes(raw){
+ const number=Number(raw);
+ return ARRIVAL_LEAD_OPTIONS.some(([value])=>value===number)?number:30;
+}
+function arrivalTimeForAppointment(){
+ if($('scenario').value==='historical'||$('known').value!=='yes')return '';
+ const time=/^([01]\d|2[0-3]):([0-5]\d)$/.exec($('time').value);
+ if(!time)return '';
+ const minutes=Number(time[1])*60+Number(time[2])-normalizeArrivalLeadMinutes(arrivalLeadSelect.value);
+ const clock=((minutes%1440)+1440)%1440;
+ return String(Math.floor(clock/60)).padStart(2,'0')+':'+String(clock%60).padStart(2,'0')+' น.'+(minutes<0?' (วันก่อนนัด)':'');
+}
+function updateArrivalLeadUI(){
+ const value=normalizeArrivalLeadMinutes(arrivalLeadSelect.value);
+ if(arrivalLeadSelect.value!==String(value))arrivalLeadSelect.value=String(value);
+ for(const button of arrivalLeadButtons)button.setAttribute('aria-pressed',String(Number(button.dataset.minutes)===value));
+ const preview=$('arrivalLeadPreview'),time=arrivalTimeForAppointment();
+ preview.hidden=!time;preview.textContent=time?'🕒 ควรถึงโรงพยาบาลเวลา '+time:'';
+}
+function setArrivalLeadMinutes(value){
+ arrivalLeadSelect.value=String(normalizeArrivalLeadMinutes(value));updateArrivalLeadUI();
+}
+arrivalLeadSelect.addEventListener('change',updateArrivalLeadUI);
+for(const id of ['time','known','scenario','date']){
+ $(id).addEventListener('input',updateArrivalLeadUI);
+ $(id).addEventListener('change',updateArrivalLeadUI);
+}
+updateArrivalLeadUI();
+
 let sourceAppointments=new Map();
 function refreshTopicSuggestions(){renderCareTopicSuggestions();}
 let autoPurposeValue='',purposeManuallyEdited=false;
@@ -2135,12 +2192,14 @@ function clearSourceFilled({personChanged=false}={}){
    comboState[kind]={searchText:'',selectedItem:null,isOpen:false};closeCombo(kind);
   }
  }
+ if(personChanged||(values.has('arrival_lead_minutes')&&$('arrival_lead_minutes').value===values.get('arrival_lead_minutes')))setArrivalLeadMinutes(30);
  if(personChanged){
   for(const id of ['examPrepChoice','examPrepDetails','hospital_hn','hospital_vn','location_detail','contact_phone','coverage_type','arrival_lead_minutes','previsitSymptoms','additionalNote','visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps','walk_in_reason','reschedulePhase']){
    if($(id))$(id).value='';
   }
   $('relatedSelect').value='';$('relatedQuery').value='';
   $('contactDetails').textContent='ยังไม่ได้โหลดข้อมูลติดต่อ';
+  setArrivalLeadMinutes(30);
  }
  if($('purpose').value===autoPurposeValue&&autoPurposeValue){$('purpose').value='';purposeManuallyEdited=false;}
  sourceFilled.clear();autoPurposeValue='';
@@ -2155,7 +2214,11 @@ function applySourceAppointment(){
  for(const id of ['hospitalSearch','unitSearch','clinicianSearch','providerOrg','providerUnit','providerClinician','hospital','department','doctor']){
   if($(id)?.value)sourceFilled.set(id,$(id).value);
  }
-} $('relatedStatus').textContent='เติมข้อมูลจากนัดครั้งก่อนแล้ว — ตรวจสอบและแก้ไขข้อมูลสำหรับครั้งใหม่ได้ โดยวันที่และเวลาจะไม่ถูกคัดลอก';}
+} const priorMinutes=Number(src.arrival_lead_minutes??src.extended_details?.arrival_lead_minutes);
+ if(ARRIVAL_LEAD_OPTIONS.some(([n])=>n===priorMinutes)){
+  setArrivalLeadMinutes(priorMinutes);sourceFilled.set('arrival_lead_minutes',String(priorMinutes));
+ }
+ $('relatedStatus').textContent='เติมข้อมูลจากนัดครั้งก่อนแล้ว — ตรวจสอบและแก้ไขข้อมูลสำหรับครั้งใหม่ได้ โดยวันที่และเวลาจะไม่ถูกคัดลอก';}
 let relatedAllItems=[],relatedExpanded=false,relatedLoadGeneration=0;
 function thaiSourceDate(value){
  const raw=String(value||'').slice(0,10);const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
@@ -2695,7 +2758,7 @@ function resetCurrentAppointmentDraft(){
   if(el.type==='checkbox'||el.type==='radio'){el.checked=false;continue;}
   el.value='';
  }
- $('arrival_lead_minutes').value='30';
+ setArrivalLeadMinutes(30);
  for(const kind of ['hospital','unit','clinician']){
   comboState[kind]={searchText:'',selectedItem:null,isOpen:false};
   closeCombo(kind);
