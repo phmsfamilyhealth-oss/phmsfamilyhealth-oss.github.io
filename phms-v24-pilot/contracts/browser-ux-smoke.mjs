@@ -199,6 +199,8 @@ try {
    assert.equal(await page.locator('#examPrepChoice').inputValue(),'fasting');
    assert.match(await page.locator('#examPrepDetails').inputValue(),/น้ำเปล่าดื่มได้/);
    assert.match(await page.locator('#examPrepDetails').inputValue(),/22:00/);
+   // Restore initial disclosure state for the existing Simple Mode regression flow.
+   if(await preparationGroup.evaluate(x=>x.open))await preparationGroup.locator(':scope > summary').click();
 
    // Journey location photos belong ONLY to detailed mode and have a separate 5-photo cap.
    const hospitalDetail=page.locator('#primaryLocationDetails');
