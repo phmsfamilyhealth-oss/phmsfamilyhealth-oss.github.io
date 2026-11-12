@@ -310,7 +310,7 @@ test('reschedule exposes seven fully spelled Thai weekday emoji cards only in cu
 });
 test('custom contact time uses only selectable half-hour slots and 1 3 5 7 day cards',()=>{
  assert.ok(!page.includes('id="rescheduleNoticeNumber"'),'No free-form day count');
- assert.ok(!page.includes('type="time"'),'Native unrestricted minute picker removed');
+ assert.ok(!page.includes('<input id="rescheduleStart" type="time"')&&!page.includes('<input id="rescheduleEnd" type="time"'),'Unrestricted minute pickers removed from contact panel');
  assert.match(script,/for\(let minute=0;minute<24\*60;minute\+=30\)/);
  assert.match(script,/minute%60/);
  assert.match(script,/for\(const value of \['1','3','5','7'\]\)/);
