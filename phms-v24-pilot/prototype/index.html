@@ -2475,7 +2475,7 @@ function makeContactOption(host,value,label,hint,select){
 for(const [key,label,short] of contactWeekdayValues){
  const button=document.createElement('button');button.type='button';button.className='phms-pick';
  const th=document.createElement('span');th.textContent=label;
- const en=document.createElement('small');en.textContent=short;en.lang='en';
+ const en=document.createElement('small');en.textContent='('+short+')';en.lang='en';
  button.append(th,en);button.dataset.weekday=key;button.setAttribute('aria-pressed','false');
  button.addEventListener('click',()=>{
   if(chosenContactWeekdays.has(key))chosenContactWeekdays.delete(key);else chosenContactWeekdays.add(key);
