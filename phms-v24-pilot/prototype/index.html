@@ -2421,6 +2421,25 @@ async function loadRescheduleContacts(){
   else if(/^ทุกวัน$/u.test(hours))$('rescheduleDays').value='everyday';
  }
  if(!$('rescheduleHours').value&&hours==='เวลาราชการ')$('rescheduleHours').value='office';
+ // Parse only a fully matched "days + time" phrase; otherwise show source verbatim.
+ const specified=hours.match(/^(วันราชการ|วันจันทร์\s*[–-]\s*(?:วัน)?ศุกร์|วันจันทร์\s*[–-]\s*(?:วัน)?เสาร์|ทุกวัน)\s+เวลา\s*(ราชการ|(?:[01]\d|2[0-3]):[0-5]\d\s*[–-]\s*(?:[01]\d|2[0-3]):[0-5]\d)\s*(?:น\.)?$/u);
+ if(specified){
+  if(!$('rescheduleDays').value){
+   if(specified[1]==='วันราชการ')$('rescheduleDays').value='government';
+   else if(/ศุกร์$/.test(specified[1]))$('rescheduleDays').value='mon-fri';
+   else if(/เสาร์$/.test(specified[1]))$('rescheduleDays').value='mon-sat';
+   else if(specified[1]==='ทุกวัน')$('rescheduleDays').value='everyday';
+  }
+  if(!$('rescheduleHours').value){
+   const timeText=specified[2].replace(/\s/g,'').replace('–','-');
+   if(timeText==='ราชการ')$('rescheduleHours').value='office';
+   else if(['08:00-16:00','13:00-15:00'].includes(timeText))$('rescheduleHours').value=timeText;
+   else{
+    const range=timeText.split('-');
+    if(range.length===2){$('rescheduleHours').value='custom';$('rescheduleStart').value=range[0];$('rescheduleEnd').value=range[1];}
+   }
+  }
+ }
  syncContactFields();
 }
 function rescheduleContextChanged(){
@@ -2769,7 +2788,9 @@ function syncPrepOrder(){
  prepTimeArea.classList.toggle('hidden',!fasting);
  prepCustomTime.classList.toggle('hidden',prepTimeSelect.value!=='other');
  prepTimeWarning.textContent=fasting&&!selectedPrepTimeText()
-  ?'⚠️ ยังไม่ระบุเวลาเริ่มงด โปรดดูใบนัดหรือติดต่อโรงพยาบาล':'';
+  ?'⚠️ ยังไม่ระบุเวลาเริ่มงด โปรดดูใบนัดหรือติดต่อโรงพยาบาล':
+  selectedPrepOrder==='stop-food-water'&&prepExtraSelected.has('bring-water')
+  ?'⚠️ คำสั่งงดน้ำและเตรียมน้ำอาจขัดกัน กรุณายืนยันกับโรงพยาบาล':'';
  prepMedicineArea.classList.toggle('hidden',!prepExtraSelected.has('medicine'));
  prepOtherArea.classList.toggle('hidden',selectedPrepOrder!=='special'&&!prepExtraSelected.has('more'));
  const texts=[];
