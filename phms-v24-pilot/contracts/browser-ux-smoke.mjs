@@ -112,6 +112,17 @@ try {
    };
   });
   console.log('BROWSER_UI_SMOKE',scenario,JSON.stringify({...state,errors}));
+  const requiredColors=await page.locator('#requiredLegend').evaluate(el=>({
+   mark:getComputedStyle(el.querySelector('.phms-required-mark')).color,
+   phrase:getComputedStyle(el.querySelector('strong:last-child')).color,
+   context:getComputedStyle(el).color,
+   text:el.textContent.trim()
+  }));
+  assert.equal(requiredColors.mark,'rgb(180, 35, 24)','Required star should be prominent red');
+  assert.equal(requiredColors.phrase,'rgb(180, 35, 24)','Only required phrase should be prominent red');
+  assert.equal(requiredColors.context,'rgb(96, 85, 71)','Background legend should retain neutral color');
+  assert.equal(requiredColors.text,'* จำเป็นต้องกรอก');
+  assert.equal(await page.locator('#connectionStatus').getAttribute('data-state'),'ready','Successful LINE read should not leave a loading banner');
   assert.equal(errors.length,0,'Browser JS errors indicate the OLD bare HTML will show');
   assert.equal(state.flowVisible,true,'Approved dynamic appointment flow missing');
   assert.equal(state.cards,3,'Approved three appointment type cards missing');
