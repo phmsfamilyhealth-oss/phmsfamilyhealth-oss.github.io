@@ -2682,7 +2682,7 @@ function renderContactPhoneItems(){
  syncContactPhoneSource();
 }
 function setContactPhoneItems(text,markEdited=false){
- const incoming=String(text||'').split(/\r?\n/).map(normalizeContactPhone).filter(Boolean);
+ const incoming=String(text||'').replace(/\\n/g,'\n').split(/\r?\n/).map(normalizeContactPhone).filter(Boolean);
  const list=[];const seen=new Set();
  for(const item of incoming){
   const key=contactPhoneKey(item);
@@ -2692,7 +2692,7 @@ function setContactPhoneItems(text,markEdited=false){
  if(markEdited)markContactEdited();
 }
 function appendContactPhone(text){
- const incoming=String(text||'').split(/\r?\n/).map(normalizeContactPhone).filter(Boolean);
+ const incoming=String(text||'').replace(/\\n/g,'\n').split(/\r?\n/).map(normalizeContactPhone).filter(Boolean);
  let added=false;const seen=new Set(contactPhoneItems.map(contactPhoneKey));
  for(const item of incoming){
   const key=contactPhoneKey(item);
