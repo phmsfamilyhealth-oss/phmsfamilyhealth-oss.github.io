@@ -2123,7 +2123,7 @@ function normalizeArrivalLeadMinutes(raw){
 }
 function arrivalTimeForAppointment(){
  if($('scenario').value==='historical'||$('known').value!=='yes')return '';
- const time=/^([01]\\d|2[0-3]):([0-5]\\d)$/.exec($('time').value);
+ const time=/^([01]\d|2[0-3]):([0-5]\d)$/.exec($('time').value);
  if(!time)return '';
  const minutes=Number(time[1])*60+Number(time[2])-normalizeArrivalLeadMinutes(arrivalLeadSelect.value);
  const clock=((minutes%1440)+1440)%1440;
