@@ -48,6 +48,13 @@ jobs:
               grep -q 'function thaiSourceDate' /tmp/phms-check
               grep -Fq 'TH_DAYS[date.getUTCDay()]' /tmp/phms-check
               if grep -q 'id="relatedAll"' /tmp/phms-check; then echo 'ERROR: legacy appointment dropdown controls still published'; exit 1; fi
+              # The Pages smoke and Pages deployment run concurrently; retry the
+              # release marker until the updated HTML becomes visible on HTTPS.
+              for attempt in $(seq 1 36); do
+                if grep -q 'id="rescheduleContactEditor"' /tmp/phms-check && grep -q 'id="procedureCommonCards"' /tmp/phms-check; then break; fi
+                sleep 5
+                curl --fail --location --silent --show-error --max-time 15 -o /tmp/phms-check "$base/$path?release=${GITHUB_SHA}"
+              done
               grep -q 'id="rescheduleContactEditor"' /tmp/phms-check
               grep -q 'id="rescheduleDays"' /tmp/phms-check
               grep -q 'id="procedureCommonCards"' /tmp/phms-check
