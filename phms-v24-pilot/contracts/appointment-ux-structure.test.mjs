@@ -277,7 +277,8 @@ test('draft packager allows 15 minutes without changing 30-minute default',async
 
 
 test('required label is explicitly readable red without changing field validation',()=>{
- assert.match(page, /#editor #requiredLegend\{color:#b42318!important;font-weight:750!important/);
+ assert.match(page, /#editor #requiredLegend \.phms-required-mark\{color:#b42318!important/);
+ assert.match(page, /#editor #requiredLegend strong\{color:#b42318!important;font-weight:750/);
  assert.match(script, /requiredLegend'\)\.innerHTML='<strong class="phms-required-mark">\*<\/strong> <strong>จำเป็นต้องกรอก<\/strong>'/);
  assert.match(page, /<p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">/);
 });
