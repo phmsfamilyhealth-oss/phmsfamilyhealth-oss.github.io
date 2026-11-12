@@ -1040,6 +1040,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #appointmentStateBox .phms-state-note.attention{color:#9b3a18;font-weight:650}
 #rescheduleWeekdays .phms-pick small{display:block;font-size:.83em;letter-spacing:.03em;color:#685e4e;font-weight:550;margin-top:3px}
 
+
+#contactPhoneList{display:flex;flex-direction:column;gap:9px;margin:10px 0}
+#contactPhoneList .phms-contact-phone-row{display:grid;grid-template-columns:1fr 48px;gap:8px;align-items:end;border:1px solid #e2d3be;background:#fffbf5;border-radius:11px;padding:10px}
+#contactPhoneList .phms-contact-phone-row label{margin:0;font-size:.86rem;color:#55422e}
+#contactPhoneList .phms-contact-phone-row input{margin-top:5px;min-width:0;font-size:1rem;background:#fff}
+#contactPhoneList .phms-delete-button{height:48px;min-height:48px;min-width:48px}
+.phms-contact-phone-add{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+.phms-contact-phone-add input{min-width:160px;flex:1}
+.phms-contact-phone-add button{min-width:126px;flex:none}
+#rescheduleHourCards .phms-pick[aria-pressed="true"]{border-color:#8a633d}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1143,7 +1154,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="rescheduleContactEditor">
  <label for="rescheduleDays">📅 เลือกวันที่ติดต่อเลื่อนนัดได้</label>
 <select id="rescheduleDays" class="visually-hidden-form" tabindex="-1" aria-hidden="true">
- <option value="">ยังไม่ระบุ</option><option value="government">วันและเวลาราชการ</option><option value="specific">เลือกวันเอง</option>
+ <option value="">ยังไม่ระบุ</option><option value="government">วันราชการ</option><option value="specific">เลือกวันเอง</option>
 </select>
 <div id="rescheduleDayCards" class="phms-choice-grid" role="group" aria-label="เลือกรูปแบบวันที่ติดต่อ"></div>
 <div id="rescheduleWeekdaysBox" class="hidden">
@@ -1156,6 +1167,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  <select id="rescheduleHours" class="visually-hidden-form" tabindex="-1" aria-hidden="true">
   <option value="">ยังไม่ระบุ</option><option value="office">เวลาราชการ</option>
   <option value="morning">ช่วงเช้า</option><option value="afternoon">ช่วงบ่าย</option>
+  <option value="morning-afternoon">ช่วงเช้าและช่วงบ่าย</option>
   <option value="custom">เลือกเวลาเอง</option>
  </select>
  <div id="rescheduleHourCards" class="phms-choice-grid" role="group" aria-label="เลือกช่วงเวลาติดต่อ"></div>
@@ -1165,12 +1177,19 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  </div>
  <p id="rescheduleHoursSummary" class="help phms-contact-result" role="status"></p>
 </section>
-<label for="contact_phone">☎️ เบอร์ติดต่อ (ใส่หลายเบอร์และเลขต่อได้)</label>
-<textarea id="contact_phone" rows="2" maxlength="500" placeholder="02-123-4567 ต่อ 1234&#10;081-234-5678 (หนึ่งเบอร์ต่อหนึ่งบรรทัด)"></textarea>
+<label for="contactPhoneEntry">☎️ เบอร์ติดต่อของโรงพยาบาล / แผนก</label>
+<p class="help">พิมพ์เบอร์และเลขต่อได้ เช่น 02-123-4567 ต่อ 1234 · กด Enter หรือ ＋ เพิ่มเบอร์ เพื่อแยกแต่ละรายการ</p>
+<div id="contactPhoneList" class="phms-contact-phone-list" role="group" aria-label="รายการเบอร์ติดต่อ"></div>
+<div class="phms-contact-phone-add">
+ <input id="contactPhoneEntry" type="text" inputmode="text" maxlength="120" enterkeyhint="done" autocomplete="off" placeholder="เช่น 02-123-4567 ต่อ 1234">
+ <button id="contactPhoneAdd" type="button" class="secondary">＋ เพิ่มเบอร์</button>
+</div>
+<p id="contactPhoneStatus" class="help" role="status">ยังไม่ได้เพิ่มเบอร์ติดต่อ</p>
+<textarea id="contact_phone" class="visually-hidden-form" tabindex="-1" aria-hidden="true" rows="1" maxlength="500"></textarea>
 <label for="rescheduleNotice">📆 ต้องติดต่อล่วงหน้ากี่วัน</label>
 <select id="rescheduleNotice" class="visually-hidden-form" tabindex="-1" aria-hidden="true">
- <option value="">ยังไม่ระบุ</option><option value="1">1 วัน</option>
- <option value="3">3 วัน</option><option value="5">5 วัน</option><option value="7">7 วัน (1 สัปดาห์)</option>
+ <option value="">ยังไม่ระบุ</option><option value="1">1 วันก่อนนัด</option>
+ <option value="3">3 วันก่อนนัด</option><option value="5">5 วันก่อนนัด</option><option value="7">7 วันก่อนนัด (1 สัปดาห์)</option>
 </select>
 <div id="rescheduleNoticeCards" class="phms-choice-grid" role="group" aria-label="จำนวนวันที่ต้องแจ้งล่วงหน้า"></div>
 <div id="rescheduleNoticeUnitSection" class="hidden">
@@ -2484,7 +2503,7 @@ for(const [key,label,short] of contactWeekdayValues){
  $('rescheduleWeekdays').append(button);
 }
 for(const [value,label,hint] of [
- ['government','🏛️ วันและเวลาราชการ','จันทร์–ศุกร์ 08:30–16:30 น.'],
+ ['government','🏛️ วันราชการ','จันทร์–ศุกร์ 08:30–16:30 น. (แนะนำ)'],
  ['specific','✏️ เลือกวันเอง','เลือกได้หลายวัน']
 ])makeContactOption('rescheduleDayCards',value,label,hint,$('rescheduleDays'));
 for(const [value,label,hint] of [
@@ -2494,7 +2513,7 @@ for(const [value,label,hint] of [
  ['custom','🕘 เลือกเวลาเอง','ช่วงละ 30 นาที']
 ])makeContactOption('rescheduleHourCards',value,label,hint,$('rescheduleHours'));
 for(const value of ['1','3','5','7']){
- const label=value==='7'?'7 วัน (1 สัปดาห์)':value+' วัน';
+ const label=value==='7'?'7 วันก่อนนัด (1 สัปดาห์)':value+' วันก่อนนัด';
  makeContactOption('rescheduleNoticeCards',value,label,'',$('rescheduleNotice'));
 }
 for(const [value,label,hint] of [
