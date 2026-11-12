@@ -177,11 +177,11 @@ test('journey guide image controls are detailed-mode only and fail closed on pri
 });
 
 
-test('fixed arrival lead uses seven accessible choices and preserves the safe 30-minute default',()=>{
+test('fixed arrival lead uses eight accessible choices and preserves the safe 30-minute default',()=>{
  const match=page.match(/<select id="arrival_lead_minutes">([\s\S]*?)<\/select>/);
  assert.ok(match,'Arrival must remain a select-backed field in the form');
  const entries=[...match[1].matchAll(/<option value="(\d+)"/g)].map(x=>Number(x[1]));
- assert.deepEqual(entries,[30,45,60,90,120,150,180]);
+ assert.deepEqual(entries,[15,30,45,60,90,120,150,180]);
  assert.ok(match[1].includes('<option value="30" selected>30 นาที</option>'));
  assert.ok(!page.includes('<input id="arrival_lead_minutes" type="number"'));
  assert.match(page,/id="arrivalLeadChoices"/);
@@ -197,16 +197,16 @@ test('arrival lead calculations handle every option, unknown time and crossing m
  const to=script.indexOf('function updateArrivalLeadUI',from);
  assert.ok(from>0&&to>from,'The pure arrival math must be present');
  const state={scenario:{value:'booked'},known:{value:'yes'},time:{value:'09:00'},arrival_lead_minutes:{value:'30'}};
- const options=[[30,'30 นาที'],[45,'45 นาที'],[60,'1 ชั่วโมง'],[90,'1 ชั่วโมงครึ่ง'],[120,'2 ชั่วโมง'],[150,'2 ชั่วโมงครึ่ง'],[180,'3 ชั่วโมง']];
+ const options=[[15,'15 นาที'],[30,'30 นาที'],[45,'45 นาที'],[60,'1 ชั่วโมง'],[90,'1 ชั่วโมงครึ่ง'],[120,'2 ชั่วโมง'],[150,'2 ชั่วโมงครึ่ง'],[180,'3 ชั่วโมง']];
  const ctx={state,options};
  const calculate=vm.runInNewContext(
    'const ARRIVAL_LEAD_OPTIONS=options;const $=id=>state[id];const arrivalLeadSelect=state.arrival_lead_minutes;'+script.slice(from,to)+';({normalize:normalizeArrivalLeadMinutes,clock:arrivalTimeForAppointment})',
    ctx);
- for(const [offset,expected] of [[30,'08:30 น.'],[45,'08:15 น.'],[60,'08:00 น.'],[90,'07:30 น.'],[120,'07:00 น.'],[150,'06:30 น.'],[180,'06:00 น.']]){
+ for(const [offset,expected] of [[15,'08:45 น.'],[30,'08:30 น.'],[45,'08:15 น.'],[60,'08:00 น.'],[90,'07:30 น.'],[120,'07:00 น.'],[150,'06:30 น.'],[180,'06:00 น.']]){
   state.arrival_lead_minutes.value=String(offset);
   assert.equal(calculate.clock(),expected);
  }
- for(const invalid of ['','0','29','31','720']){
+ for(const invalid of ['','0','14','29','31','720']){
   assert.equal(calculate.normalize(invalid),30);
  }
  state.arrival_lead_minutes.value='180';state.time.value='00:20';
@@ -263,4 +263,14 @@ test('hospital preparation cards explicitly distinguish fasting, water, medicati
  assert.match(script,/examPrepChoice\.value=fasting/,'Existing review flow receives selected structured category');
  assert.match(script,/examPrepDetails\.value=texts\.join/,'Review retains full explicit instructions');
  assert.ok(script.includes("รุ่นทดลองยังไม่บันทึกการแก้ไขกลับทะเบียนกลาง"));
+});
+
+test('draft packager allows 15 minutes without changing 30-minute default',async()=>{
+ const {prepareDraftForReview}=await import('./draft-packager.mjs');
+ const fifteen=prepareDraftForReview({arrival_lead_minutes:15});
+ assert.equal(fifteen.ok,true);
+ assert.equal(fifteen.draft.arrival_lead_minutes,15);
+ const fallback=prepareDraftForReview({});
+ assert.equal(fallback.draft.arrival_lead_minutes,30);
+ for(const minutes of [0,14,16,29,181,720])assert.deepEqual(prepareDraftForReview({arrival_lead_minutes:minutes}).errors,['invalid_arrival_lead_minutes']);
 });
