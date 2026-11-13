@@ -1661,8 +1661,34 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #coverageSearchChoices.combo-results button strong{display:block!important;font-weight:700!important}
 #editor #coverageSearchChoices.combo-results button small{display:block!important;color:#756758!important;font-size:.86rem!important;margin-top:2px!important}
 #editor #coverageSearchChoices.combo-results button:focus-visible{outline:3px solid #93683f!important;outline-offset:-3px!important}
+/* PHMS v2.4.55 — Existing appointment cards use Choice A, not add/search style B. */
+#editor #relatedCards .appointment-card.related-compact-card{
+ box-sizing:border-box!important;
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ gap:5px!important;width:100%!important;min-height:88px!important;
+ padding:14px 16px!important;text-align:left!important;
+ border:1.5px solid #c5a17c!important;border-radius:14px!important;
+ background:#fffaf4!important;color:#493526!important;
+ box-shadow:none!important;font-weight:400!important;
+}
+#editor #relatedCards .appointment-card.related-compact-card strong{
+ display:block!important;font-size:1rem!important;font-weight:750!important;
+ line-height:1.4!important;color:#3f2d1e!important;
+}
+#editor #relatedCards .appointment-card.related-compact-card span{
+ display:block!important;margin-top:2px!important;font-size:.9rem!important;
+ line-height:1.45!important;color:#705e4d!important;
+}
+#editor #relatedCards .appointment-card.related-compact-card[aria-pressed="true"]{
+ border:2px solid #89592f!important;background:#f3dfc2!important;
+ color:#3a2618!important;
+}
+#editor #relatedCards .appointment-card.related-compact-card:focus-visible{
+ outline:3px solid #93683f!important;outline-offset:2px!important;
+}
+#editor #relatedCards{gap:10px!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.54</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.55</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
