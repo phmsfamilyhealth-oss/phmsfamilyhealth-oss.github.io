@@ -1150,6 +1150,19 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #appointmentRescheduleCountText{font-size:1.2rem!important;font-weight:750!important;text-align:center!important;color:#3e2c1b!important}
 #editor #appointmentStateNote.hidden{display:none!important}
 
+
+/* PHMS elder-first appointment refinements, 2026-11-13 */
+#editor #appointmentStateBox{margin:12px 0!important;background:#fff!important;border:1.5px solid #c9ad8b!important}
+#editor #appointmentStateBox .phms-state-card{min-height:60px!important}
+#editor #procedurePreviewBox{border:1.5px solid #c9ad8b!important;border-radius:12px!important;background:#fff!important}
+#editor #procedureSelectedHeading{margin-top:20px!important;border-top:1px solid #e6d9c8!important;padding-top:12px!important}
+#editor .arrival-lead-choices .arrival-lead-choice,#editor .phms-choice-grid .phms-pick{min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#editor #procedurePreviewBox .phms-pick[aria-pressed="true"]{background:#f1e5d6!important;border:2px solid #92673a!important;color:#39291c!important}
+@media (hover:hover) and (pointer:fine){
+ #editor .native-picker-shell>input[type="date"],#editor .native-picker-shell>input[type="time"]{position:relative!important;inset:auto!important;opacity:1!important;height:56px!important;min-height:56px!important;padding:10px 14px!important;-webkit-text-fill-color:currentColor!important;color:#352b22!important;background:#fff!important;z-index:2!important}
+ #editor .native-picker-shell>.native-picker-prompt{display:none!important}
+ #editor .native-picker-shell>input::-webkit-calendar-picker-indicator{opacity:1!important;cursor:pointer!important}
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1212,7 +1225,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  <p id="journeySaveStatus" class="help" role="status">บันทึกเป็นเส้นทางประจำของครอบครัว ไม่เปลี่ยนทะเบียนโรงพยาบาล</p>
 </div>
 <details><summary>🩺 เรื่องที่รักษา</summary>
-<label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><p class="help">เลือกเรื่องที่เคยรักษา หรือพิมพ์เรื่องใหม่สำหรับนัดนี้ได้ (ยังไม่เพิ่มลงทะเบียนโรคกลาง)</p>
+<label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><p class="help">เลือกเรื่องเดิม หรือพิมพ์เรื่องใหม่ได้ · ข้อมูลที่พิมพ์เองเป็นบันทึกสำหรับนัดนี้</p>
 <p class="help">รายละเอียดที่กรอกเองยังไม่ถือว่าแพทย์ยืนยัน</p></details>
 <details><summary>🪪 สิทธิและเดินทาง</summary>
 <label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
@@ -1239,7 +1252,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help">ยังไม่มีนัดที่บันทึกไว้? ต้องบันทึกนัดก่อนจึงจะเพิ่มค่าใช้จ่ายหรือยาได้</p>
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
-<details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจที่พบบ่อย</p><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
+<details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจแนะนำ (เลือกได้หลายอย่าง)</p><p id="procedureHistoryHint" class="help">เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดครั้งก่อน (ถ้ามี)</summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
@@ -1304,7 +1317,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  <p id="rescheduleDraftNote" class="help">แก้ไขข้อมูลได้สำหรับนัดนี้ · การเปลี่ยนแปลงยังไม่อัปเดตทะเบียนโรงพยาบาลที่ยืนยันแล้ว</p>
  <div id="familyContactSaveBox">
   <button type="button" id="familyContactSave" class="secondary" disabled aria-describedby="familyContactSaveHint">💾 เก็บข้อมูลติดต่อไว้ใช้ครั้งหน้า</button>
-  <p id="familyContactSaveHint" class="phms-family-contact-hint" role="status">เลือกคนและโรงพยาบาลก่อน · เฉพาะเจ้าของหรือผู้ดูแลครอบครัว</p>
+  <p id="familyContactSaveHint" class="phms-family-contact-hint" role="status">เลือกคนและโรงพยาบาลก่อน จึงจะบันทึกให้ครอบครัวใช้ซ้ำได้</p>
  </div>
  <p id="familyContactSaveStatus" role="status" class="help"></p>
 </div>
@@ -1791,8 +1804,8 @@ const personName=$('personSelect').selectedOptions?.[0]?.textContent||'';
 previewField('บุคคล',personName==='เลือกบุคคล'?'':personName);
 previewField('ประเภทนัด',{booked:'นัดตามใบนัด',walk_in:'ไปโรงพยาบาลเอง',historical:'บันทึกย้อนหลัง'}[$('scenario').value]);
 if($('scenario').value==='booked'){
- previewField('การเลื่อนนัด',$('appointmentOrigin').value==='rescheduled'
-  ?'เลื่อนมาแล้ว '+$('appointmentRescheduleCount').value+' ครั้ง':'ยังไม่เคยเลื่อน');
+ previewField('ประวัติการเลื่อนนัด',$('appointmentOrigin').value==='rescheduled'
+  ?'เลื่อนนัดนี้มาแล้ว '+$('appointmentRescheduleCount').value+' ครั้ง':'นัดนี้ยังไม่เคยเลื่อน');
  if($('appointmentOrigin').value==='rescheduled')
   previewField('หมายเหตุ','ข้อมูลตามที่ทราบ · ยังไม่ได้เปลี่ยนวันนัดเดิม');
 }
@@ -1858,6 +1871,7 @@ const PROCEDURE_PRESETS=[
  {name:'💻 พบแพทย์ออนไลน์',en:'Telemedicine',host:'procedureOtherCards'}
 ];
 const procedurePresetButtons=new Map();
+
 for(const preset of PROCEDURE_PRESETS){
  const button=document.createElement('button');button.type='button';button.className='phms-pick';
  const title=document.createElement('span');title.textContent=preset.name;
@@ -1887,7 +1901,7 @@ function renderProcedurePreview(){
   });
   row.append(input,remove);list.append(row);
  }
- $('procedureStatus').textContent='เลือกแล้ว '+procedurePreviewItems.length+' รายการ — ยังไม่บันทึก';
+ $('procedureStatus').textContent=procedurePreviewItems.length?'ตรวจสอบรายการด้านบนก่อนบันทึกนัด':'ยังไม่ได้เลือกรายการตรวจ';$('procedureSelectedHeading').textContent='รายการตรวจที่เลือก ('+procedurePreviewItems.length+' รายการ)';
  syncProcedureChoices();
 }
 function addProcedurePreview(){
@@ -2582,12 +2596,12 @@ function syncFamilyContactSaveUI(phase=''){
  const button=$('familyContactSave'),hint=$('familyContactSaveHint');
  button.disabled=familyContactSaving||!ready||!familyContactCanWrite;
  button.setAttribute('aria-disabled',String(button.disabled));
- if(!ready)hint.textContent='เลือกคนและโรงพยาบาลก่อน · เฉพาะเจ้าของหรือผู้ดูแลครอบครัว';
+ if(!ready)hint.textContent='เลือกคนและโรงพยาบาลก่อน จึงจะบันทึกให้ครอบครัวใช้ซ้ำได้';
  else if(phase==='checking')hint.textContent='กำลังตรวจสิทธิ์บันทึกข้อมูลของครอบครัว…';
  else if(phase==='unavailable')hint.textContent='ยังตรวจสอบสิทธิ์ไม่ได้ · กรุณาลองเปิดหัวข้อนี้อีกครั้ง';
- else if(!familyContactCanWrite)hint.textContent='บัญชีนี้บันทึกไม่ได้ · ให้เจ้าของหรือผู้ดูแลครอบครัวบันทึก';
+ else if(!familyContactCanWrite)hint.textContent='บัญชีนี้ยังไม่มีสิทธิ์บันทึก กรุณาให้ผู้ดูแลหลักของครอบครัวบันทึก';
  else if(familyContactSaving)hint.textContent='กำลังบันทึกข้อมูลให้ครอบครัว…';
- else hint.textContent='บันทึกไว้ให้คนในครอบครัวใช้ครั้งหน้า · ไม่แก้ข้อมูลโรงพยาบาลกลาง';
+ else hint.textContent='คนในครอบครัวนำไปใช้ครั้งหน้าได้ · ไม่เปลี่ยนข้อมูลของโรงพยาบาล';
 }
 syncFamilyContactSaveUI();
 async function familyContactApi(action,data){
@@ -2650,7 +2664,7 @@ $('familyContactSave').addEventListener('click',async()=>{
  familyContactSaving=false;syncFamilyContactSaveUI();
  if(who!==memberId||org!==$('providerOrg').value||unit!==$('providerUnit').value)return;
  if(result.ok){
-  status.textContent='✓ บันทึกข้อมูลติดต่อให้ครอบครัวใช้ซ้ำแล้ว (ไม่ใช่ทะเบียนกลางที่โรงพยาบาลยืนยัน)';
+  status.textContent='✓ บันทึกไว้ให้ครอบครัวใช้ครั้งหน้าแล้ว · ไม่ได้แก้ข้อมูลของโรงพยาบาล';
   $('rescheduleDraftNote').textContent='บันทึกสำหรับครอบครัวแล้ว · ระบบไม่แก้ทะเบียนโรงพยาบาลที่ยืนยัน';
  }else status.textContent='ยังบันทึกไม่ได้ กรุณาตรวจวัน เวลา เบอร์ หรือสิทธิ์ผู้บันทึก ('+result.error+')';
 });
@@ -3112,7 +3126,7 @@ appointmentStateBox.setAttribute('aria-label','ประวัติการเ
 const appointmentOriginLabel=document.createElement('p');
 appointmentOriginLabel.id='appointmentOriginLabel';
 appointmentOriginLabel.className='phms-state-label';
-appointmentOriginLabel.textContent='🔄 นัดนี้เคยเลื่อนหรือยัง?';
+appointmentOriginLabel.textContent='🔄 ประวัติการเลื่อนนัดนี้';
 const appointmentOrigin=document.createElement('select');
 appointmentOrigin.id='appointmentOrigin';appointmentOrigin.className='visually-hidden-form';
 appointmentOrigin.setAttribute('tabindex','-1');appointmentOrigin.setAttribute('aria-hidden','true');
@@ -3120,7 +3134,7 @@ const appointmentOriginCards=document.createElement('div');
 appointmentOriginCards.id='appointmentOriginCards';appointmentOriginCards.className='phms-state-grid';
 appointmentOriginCards.setAttribute('role','group');
 appointmentOriginCards.setAttribute('aria-labelledby',appointmentOriginLabel.id);
-for(const [value,label] of [['new','📅 ยังไม่เคยเลื่อน'],['rescheduled','🔄 เคยเลื่อนแล้ว']]){
+for(const [value,label] of [['new','📅 ยังไม่เคยเลื่อนนัดนี้'],['rescheduled','🔄 เคยเลื่อนนัดนี้']]){
  appointmentOrigin.add(new Option(label,value));
  const card=document.createElement('button');
  card.type='button';card.className='phms-state-card';card.dataset.choice=value;card.textContent=label;
@@ -3133,7 +3147,7 @@ appointmentRescheduleCountArea.id='appointmentRescheduleCountArea';
 appointmentRescheduleCountArea.className='phms-reschedule-count hidden';
 appointmentRescheduleCountArea.hidden=true;
 const countLabel=document.createElement('p');countLabel.className='phms-state-label';
-countLabel.id='appointmentRescheduleCountLabel';countLabel.textContent='เลื่อนมาแล้วกี่ครั้ง?';
+countLabel.id='appointmentRescheduleCountLabel';countLabel.textContent='นัดนี้เลื่อนมาแล้วกี่ครั้ง?';
 const countControls=document.createElement('div');countControls.className='phms-reschedule-count-controls';
 const countMinus=document.createElement('button');countMinus.type='button';
 countMinus.id='appointmentRescheduleMinus';countMinus.textContent='−';
@@ -3158,10 +3172,10 @@ countControls.append(countMinus,countOutput,countPlus);
 appointmentRescheduleCountArea.append(countLabel,countControls,countInput);
 const appointmentStateNote=document.createElement('p');
 appointmentStateNote.id='appointmentStateNote';appointmentStateNote.className='phms-state-note hidden';
-appointmentStateNote.textContent='ข้อมูลตามที่ทราบ · ยังไม่ได้เปลี่ยนนัดเดิม';
+appointmentStateNote.textContent='บันทึกประวัติของนัดนี้เท่านั้น ไม่ได้สั่งเลื่อนนัด';
 appointmentStateBox.append(appointmentOriginLabel,appointmentOrigin,appointmentOriginCards,
  appointmentRescheduleCountArea,appointmentStateNote);
-mainSection.append(appointmentStateBox);
+scenarioSection.append(appointmentStateBox);
 function updateAppointmentStateUI(){
  const booked=$('scenario').value==='booked';
  appointmentStateBox.classList.toggle('hidden',!booked);
