@@ -1163,6 +1163,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  #editor .native-picker-shell>.native-picker-prompt{display:none!important}
  #editor .native-picker-shell>input::-webkit-calendar-picker-indicator{opacity:1!important;cursor:pointer!important}
 }
+
+#editor #departmentDraftMeta{border:1px solid #c9ad8b;border-radius:12px;padding:12px;background:#fffaf3;margin:9px 0}
+#editor #departmentDraftMeta.hidden{display:none!important}
+#editor #departmentDraftMeta p{margin:8px 0}
+#editor .phms-emoji-choices{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0}
+#editor .phms-emoji-choices button{min-height:48px;border:1px solid #c9ad8b;background:white;border-radius:10px;font-size:1.35rem}
+#editor .phms-emoji-choices button[aria-pressed="true"]{border:2px solid #92673a;background:#f1e5d6}
+#editor #careTopicAddNew{min-height:48px;margin:8px 0}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1225,7 +1233,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  <p id="journeySaveStatus" class="help" role="status">บันทึกเป็นเส้นทางประจำของครอบครัว ไม่เปลี่ยนทะเบียนโรงพยาบาล</p>
 </div>
 <details><summary>🩺 เรื่องที่รักษา</summary>
-<label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><p class="help">เลือกเรื่องเดิม หรือพิมพ์เรื่องใหม่ได้ · ข้อมูลที่พิมพ์เองเป็นบันทึกสำหรับนัดนี้</p>
+<label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><button type="button" id="careTopicAddNew" class="secondary">＋ ใช้เรื่องที่พิมพ์ในนัดนี้</button><p id="careTopicDraftStatus" class="help" role="status"></p><p class="help">เลือกเรื่องเดิม หรือพิมพ์เรื่องใหม่ได้ · ข้อมูลที่พิมพ์เองเป็นบันทึกสำหรับนัดนี้</p>
 <p class="help">รายละเอียดที่กรอกเองยังไม่ถือว่าแพทย์ยืนยัน</p></details>
 <details><summary>🪪 สิทธิและเดินทาง</summary>
 <label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
@@ -1462,6 +1470,43 @@ for(const kind of ['hospital','unit']){
  search.before(cards);
  adaptivePickers[kind]={cards,search,expanded:false};
 }
+
+// Assist with draft department metadata without generating unverified hospital codes.
+const DEPARTMENT_NAME_HINTS=[
+ {pattern:/เบาหวาน|diabetes|endocrin/i,th:'คลินิกเบาหวาน',en:'Diabetes Clinic',emoji:'🩺'},
+ {pattern:/จักษุ|ตา|ophth/i,th:'จักษุ',en:'Ophthalmology',emoji:'👁️'},
+ {pattern:/ปัสสาวะ|ยูโร|urolog/i,th:'ศัลยกรรมระบบทางเดินปัสสาวะ',en:'Urology',emoji:'🩺'},
+ {pattern:/กระดูก|ข้อ|orthop/i,th:'ศัลยกรรมกระดูกและข้อ',en:'Orthopedics',emoji:'🦴'},
+ {pattern:/หัวใจ|cardio/i,th:'โรคหัวใจ',en:'Cardiology',emoji:'❤️'},
+ {pattern:/ทันต|ฟัน|dental/i,th:'ทันตกรรม',en:'Dentistry',emoji:'🦷'},
+ {pattern:/เด็ก|กุมาร|pediatr/i,th:'กุมารเวชกรรม',en:'Pediatrics',emoji:'👶'},
+ {pattern:/ประสาท|neuro/i,th:'ประสาทวิทยา',en:'Neurology',emoji:'🧠'}
+];
+const departmentDraftMeta=document.createElement('div');
+departmentDraftMeta.id='departmentDraftMeta';departmentDraftMeta.className='phms-department-draft hidden';departmentDraftMeta.hidden=true;
+departmentDraftMeta.innerHTML='<strong>🏷️ ตัวอย่างชื่อแผนกใหม่</strong><p id="departmentDraftThai"></p><label for="departmentDraftEnglish">ชื่อภาษาอังกฤษ (แก้ไขได้)</label><input id="departmentDraftEnglish" maxlength="120" placeholder="ไม่ทราบก็เว้นว่างได้"><p class="help">🏷️ เลือกสัญลักษณ์สำหรับร่างนี้</p><div id="departmentEmojiChoices" class="phms-emoji-choices" role="group" aria-label="เลือกสัญลักษณ์แผนก"></div><p class="help">รหัสแผนกใช้ได้เฉพาะรหัสจริงจากทะเบียนโรงพยาบาล · ชื่อที่เพิ่มเองยังบันทึกจริงไม่ได้</p>';
+document.getElementById('unitSearchResults').after(departmentDraftMeta);
+let draftDepartmentEmoji='🏷️';
+function showDepartmentDraftMeta(){
+ const input=document.getElementById('unitSearch'),term=input.value.trim();
+ const known=authorizedCatalog?.units?.some(x=>masterMatches({label:x.name||x.display_name||'',name:x.name},term)&&normalizedMasterName(x.name||x.display_name)===normalizedMasterName(term));
+ const visible=!!term&&!known&&adaptivePickers.unit.expanded;
+ departmentDraftMeta.hidden=!visible;departmentDraftMeta.classList.toggle('hidden',!visible);
+ if(!visible)return;
+ const hint=DEPARTMENT_NAME_HINTS.find(x=>x.pattern.test(term));
+ document.getElementById('departmentDraftThai').textContent=(hint?.emoji||'🏷️')+' '+term+(hint?' · หมวดใกล้เคียง: '+hint.th:'');
+ const english=document.getElementById('departmentDraftEnglish');
+ if(english.dataset.sourceTerm!==term){english.value=hint?.en||'';english.dataset.sourceTerm=term;draftDepartmentEmoji=hint?.emoji||'🏷️';}
+ const emojis=document.getElementById('departmentEmojiChoices');emojis.replaceChildren();
+ for(const symbol of ['🏷️','🩺','👁️','🦴','❤️','🦷','👶','🧠']){
+  const button=document.createElement('button');button.type='button';button.textContent=symbol;button.setAttribute('aria-label','เลือก '+symbol);
+  button.setAttribute('aria-pressed',String(symbol===draftDepartmentEmoji));
+  button.addEventListener('click',()=>{draftDepartmentEmoji=symbol;showDepartmentDraftMeta();});
+  emojis.append(button);
+ }
+}
+document.getElementById('unitSearch').addEventListener('input',showDepartmentDraftMeta);
+
 function drawAdaptiveProviderCards(kind,choices){
  const ui=adaptivePickers[kind];if(!ui)return;
  const entries=Array.isArray(choices)?choices:[];
@@ -1503,7 +1548,7 @@ function drawAdaptiveProviderCards(kind,choices){
   other.addEventListener('click',()=>{
    ui.expanded=!ui.expanded;
    drawAdaptiveProviderCards(kind,entries);
-   if(ui.expanded){ui.search.focus();ui.search.scrollIntoView({block:'nearest'});}
+   if(ui.expanded){ui.search.focus();ui.search.scrollIntoView({block:'nearest'});}if(kind==='unit')showDepartmentDraftMeta();
   });
   ui.cards.append(other);
  }
@@ -1758,6 +1803,11 @@ async function openExistingAppointmentWorkflow(kind){
 }
 $('openCanonicalFinance').addEventListener('click',()=>openExistingAppointmentWorkflow('finance'));
 $('openCanonicalMedication').addEventListener('click',()=>openExistingAppointmentWorkflow('medication'));
+$('careTopicAddNew').addEventListener('click',()=>{
+ const value=$('care_topic').value.trim();if(!value){$('careTopicDraftStatus').textContent='กรุณาพิมพ์เรื่องที่รักษาก่อน';$('care_topic').focus();return;}
+ $('care_topic').value=value;$('careTopicDraftStatus').textContent='✓ ใช้เรื่อง “'+value+'” ในร่างนัดนี้แล้ว · ยังไม่ใช่การวินิจฉัยที่แพทย์ยืนยัน';
+});
+$('care_topic').addEventListener('input',()=>{$('careTopicDraftStatus').textContent='';});
 function renderCareTopicSuggestions(){
  const host=$('careTopicSuggestions');host.replaceChildren();
  const options=Array.from(new Set((relatedAllItems||[]).map(a=>a.care_topic).filter(Boolean))).slice(0,8);
