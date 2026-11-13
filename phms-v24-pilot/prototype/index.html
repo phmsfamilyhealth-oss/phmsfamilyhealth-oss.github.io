@@ -2992,6 +2992,7 @@ function renderPurposeRecentChoices(){
  const filtered=titles.filter(t=>t!==chosen);
  for(const title of filtered){
   const b=document.createElement('button');b.type='button';b.className='phms-purpose-choice';b.textContent='📋 '+title;
+  b.addEventListener('pointerdown',e=>e.preventDefault());
   b.addEventListener('click',()=>{purposeInput.value=title;purposeManuallyEdited=true;autoPurposeValue='';titleSuggestions.classList.add('hidden');purposeInput.dispatchEvent(new Event('change',{bubbles:true}));});
   titleSuggestions.append(b);
  }
@@ -3000,7 +3001,7 @@ function renderPurposeRecentChoices(){
 purposeInput.addEventListener('focus',renderPurposeRecentChoices);
 purposeInput.addEventListener('input',renderPurposeRecentChoices);
 purposeInput.addEventListener('keydown',e=>{
- if(e.key==='Enter'&&!e.isComposing){e.preventDefault();purposeInput.value=purposeInput.value.trim().replace(/\\s+/g,' ');purposeManuallyEdited=true;titleSuggestions.classList.add('hidden');purposeInput.blur();}
+ if(e.key==='Enter'&&!e.isComposing){e.preventDefault();purposeInput.value=purposeInput.value.trim().replace(/\s+/g,' ');purposeManuallyEdited=true;titleSuggestions.classList.add('hidden');purposeInput.blur();}
 });
 purposeInput.addEventListener('blur',()=>{titleSuggestions.classList.add('hidden');});
 
