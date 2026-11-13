@@ -1478,8 +1478,23 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  color:#33281b!important;
 }
 
+
+/* PHMS v2.4.43: one-of-many coverage cards with a searchable expandable catalog. */
+#editor .phms-coverage-cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;margin:9px 0 12px!important}
+#editor .phms-coverage-card{
+ box-sizing:border-box!important;width:100%!important;min-height:65px!important;
+ border:1.8px solid #bb8960!important;border-radius:12px!important;
+ padding:10px!important;background:#fff!important;color:#30261b!important;
+ font-size:1rem!important;font-weight:700!important;line-height:1.4!important;
+ text-align:center!important;white-space:normal!important;overflow-wrap:anywhere!important;
+}
+#editor .phms-coverage-card[aria-pressed="true"]{border:2px solid #86592d!important;background:#fff0d9!important}
+#editor .phms-coverage-card:last-child[aria-expanded],#editor .phms-coverage-more{border-style:dashed!important;background:#fcf7f0!important}
+#editor #coverageSearchArea[hidden],#editor #coverageSearchArea.hidden{display:none!important}
+#editor #coverageSearch{box-sizing:border-box!important;width:100%!important;min-height:52px!important}
+@media(max-width:390px){#editor .phms-coverage-cards{gap:7px!important}#editor .phms-coverage-card{min-height:60px!important;padding:8px!important}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.42</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.43</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -1546,7 +1561,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p id="careTopicDraftStatus" class="help" role="status"></p>
 <p class="help">เรื่องใหม่เป็นบันทึกสำหรับนัดนี้ ไม่ใช่การวินิจฉัยที่แพทย์ยืนยัน</p></details>
 <details><summary>🪪 สิทธิและเดินทาง</summary>
-<label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
+<label for="coverage_type">สิทธิรักษา</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
 <label for="arrival_lead_minutes" id="arrivalLeadLabel">ควรไปถึงโรงพยาบาลก่อนเวลานัดกี่นาที</label><select id="arrival_lead_minutes"><option value="15">15 นาที</option><option value="30" selected>30 นาที</option><option value="45">45 นาที</option><option value="60">1 ชั่วโมง</option><option value="90">1 ชั่วโมงครึ่ง</option><option value="120">2 ชั่วโมง</option><option value="150">2 ชั่วโมงครึ่ง</option><option value="180">3 ชั่วโมง</option></select><div id="arrivalLeadChoices" class="arrival-lead-choices" role="group" aria-labelledby="arrivalLeadLabel"></div><p id="arrivalLeadPreview" class="arrival-lead-preview" role="status" aria-live="polite" hidden></p><p class="help">15 นาทีเหมาะเฉพาะนัดที่โรงพยาบาลอนุญาตให้มาถึงใกล้เวลานัด โปรดตรวจสอบใบนัด</p></details>
 <details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล </option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
 <details id="outcomeDetails" class="hidden"><summary>📋 ผลการไปพบแพทย์</summary>
@@ -2977,7 +2992,7 @@ for(const id of ['time','known','scenario','date']){
 updateArrivalLeadUI();
 
 let sourceAppointments=new Map();
-function refreshTopicSuggestions(){renderCareTopicSuggestions();renderHistoricalProcedureSuggestions();if(typeof renderPurposeRecentChoices==='function')renderPurposeRecentChoices();}
+function refreshTopicSuggestions(){renderCareTopicSuggestions();renderHistoricalProcedureSuggestions();if(typeof renderPurposeRecentChoices==='function')renderPurposeRecentChoices();if(typeof renderCoverageChoices==='function')renderCoverageChoices();}
 let autoPurposeValue='',purposeManuallyEdited=false;
 function proposedFollowupTitle(title){
  const original=String(title||'นัดติดตาม').trim();
@@ -4332,7 +4347,7 @@ $('detail').addEventListener('change',updateProgressiveLayout);
 $('scenario').addEventListener('change',updateProgressiveLayout);
 editor.addEventListener('input',()=>{updateFilledIndicators();updateRequiredFieldStatus();});editor.addEventListener('change',()=>{updateFilledIndicators();updateRequiredFieldStatus();});
 // Adaptive selection for existing bounded choices (no duplicate fields or new enum values).
-const adaptiveSelectIds=['known','hasAppointmentPhotos','coverage_type','walk_in_reason'];
+const adaptiveSelectIds=['known','hasAppointmentPhotos','walk_in_reason'];
 function installAdaptiveSelect(id){
  const select=$(id);if(!select)return;
  const host=document.createElement('div');host.className='adaptive-option-host';host.setAttribute('role','group');
@@ -4372,6 +4387,86 @@ function installAdaptiveSelect(id){
  sync();
 }
 for(const id of adaptiveSelectIds)installAdaptiveSelect(id);
+/* v2.4.43 — A single coverage choice, shown as familiar cards. The original
+   select remains authoritative; unfamiliar free text is a draft-only value. */
+const coverageSelect=$('coverage_type');
+const coverageCards=document.createElement('div');
+coverageCards.id='coverageRecentCards';
+coverageCards.className='phms-coverage-cards';
+coverageCards.setAttribute('role','group');
+coverageCards.setAttribute('aria-label','เลือกสิทธิรักษา');
+const coverageSearchArea=document.createElement('div');
+coverageSearchArea.id='coverageSearchArea';
+coverageSearchArea.className='hidden';
+coverageSearchArea.hidden=true;
+const coverageSearch=document.createElement('input');
+coverageSearch.type='search';coverageSearch.id='coverageSearch';
+coverageSearch.placeholder='🔎 ค้นหาหรือพิมพ์ชื่อสิทธิ';
+coverageSearch.setAttribute('aria-label','ค้นหาหรือพิมพ์สิทธิรักษา');
+const coverageSearchChoices=document.createElement('div');
+coverageSearchChoices.className='phms-coverage-cards';
+coverageSearchArea.append(coverageSearch,coverageSearchChoices);
+coverageSelect.before(coverageCards,coverageSearchArea);
+coverageSelect.classList.add('adaptive-select-hidden');
+let coverageExpanded=false;
+const coverageIcon=value=>({'บัตรทอง':'🪪','ประกันสังคม':'🏥','ข้าราชการ':'🏛️','รัฐวิสาหกิจ':'🏢','ประกันสุขภาพเอกชน':'🛡️','ชำระเอง':'💳'}[value]||'🪪');
+function coverageOptionLabel(value){
+ const option=[...coverageSelect.options].find(x=>x.value===value);
+ return option?.textContent||value;
+}
+function makeCoverageCard(value,label,selected,action){
+ const button=document.createElement('button');button.type='button';
+ button.className='phms-coverage-card';
+ button.textContent=value?coverageIcon(value)+' '+label:'＋ สิทธิอื่น / ค้นหา';
+ button.setAttribute('aria-pressed',String(selected));
+ button.addEventListener('click',action);
+ return button;
+}
+function setCoverageChoice(value){
+ if(value&&!Array.from(coverageSelect.options).some(x=>x.value===value)){
+  const opt=new Option(value+' (ร่าง)',value);
+  opt.dataset.unverified='true';coverageSelect.add(opt);
+ }
+ coverageSelect.value=value;
+ coverageExpanded=false;
+ coverageSearch.value='';
+ coverageSelect.dispatchEvent(new Event('change',{bubbles:true}));
+}
+function renderCoverageChoices(){
+ const values=[...coverageSelect.options].filter(x=>x.value&&x.value!=='อื่น ๆ').map(x=>x.value);
+ const used=new Set((relatedAllItems||[]).map(a=>String(a.coverage_type||a.coverage||'').trim()).filter(Boolean));
+ const selected=coverageSelect.value;
+ let visible=values.filter(v=>used.has(v)||v===selected).slice(0,5);
+ if(!visible.length)visible=['บัตรทอง','ประกันสังคม','ข้าราชการ'].filter(v=>values.includes(v));
+ coverageCards.replaceChildren();
+ for(const value of visible)coverageCards.append(makeCoverageCard(value,coverageOptionLabel(value),selected===value,()=>setCoverageChoice(value)));
+ const more=makeCoverageCard('', '',false,()=>{
+  coverageExpanded=!coverageExpanded;renderCoverageChoices();if(coverageExpanded)coverageSearch.focus();
+ });
+ more.setAttribute('aria-expanded',String(coverageExpanded));coverageCards.append(more);
+ coverageSearchArea.hidden=!coverageExpanded;
+ coverageSearchArea.classList.toggle('hidden',!coverageExpanded);
+ const query=coverageSearch.value.normalize('NFKC').toLocaleLowerCase('th-TH').trim();
+ coverageSearchChoices.replaceChildren();
+ for(const value of values.filter(v=>!query||coverageOptionLabel(v).normalize('NFKC').toLocaleLowerCase('th-TH').includes(query)).slice(0,12)){
+  coverageSearchChoices.append(makeCoverageCard(value,coverageOptionLabel(value),selected===value,()=>setCoverageChoice(value)));
+ }
+ if(query&&!values.some(v=>coverageOptionLabel(v).normalize('NFKC').toLocaleLowerCase('th-TH')===query)){
+  const b=makeCoverageCard(query,'ใช้ชื่อ "'+coverageSearch.value.trim()+'" ในร่างนัด',false,()=>setCoverageChoice(coverageSearch.value.trim().slice(0,120)));
+  b.classList.add('phms-coverage-more');coverageSearchChoices.append(b);
+ }
+}
+coverageSearch.addEventListener('input',renderCoverageChoices);
+coverageSearch.addEventListener('keydown',e=>{
+ if(e.key!=='Enter'||e.isComposing)return;
+ e.preventDefault();
+ const name=coverageSearch.value.trim().replace(/\s+/g,' ').slice(0,120);
+ if(!name)return;
+ const matched=[...coverageSelect.options].find(o=>o.value&&o.textContent.trim().toLocaleLowerCase('th-TH')===name.toLocaleLowerCase('th-TH'));
+ setCoverageChoice(matched?.value||name);
+});
+coverageSelect.addEventListener('change',renderCoverageChoices);
+renderCoverageChoices();
 function syncChoiceCards(){
  for(const id of ['known','hasAppointmentPhotos']){
   const select=$(id),host=select.previousElementSibling;
