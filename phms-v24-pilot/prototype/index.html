@@ -2802,7 +2802,7 @@ function renderHistoricalProcedureSuggestions(){
  }
  const rows=[...records.values()].sort((a,b)=>b.count-a.count||a.order-b.order||a.name.localeCompare(b.name,'th'));
  host.replaceChildren();
- const procedureQuery=$('procedureEntry').value.trim().toLocaleLowerCase('th-TH');\n const visibleRows=procedurePickerExpanded?rows.filter(row=>!procedureQuery||row.name.toLocaleLowerCase('th-TH').includes(procedureQuery)||String(row.en||'').toLocaleLowerCase('en').includes(procedureQuery)):rows.slice(0,4);
+ const procedureQuery=$('procedureEntry').value.trim().toLocaleLowerCase('th-TH');\n const visibleRows=procedurePickerExpanded?rows.filter(row=>!procedureQuery||row.name.toLocaleLowerCase('th-TH').includes(procedureQuery)||String(row.en||'').toLocaleLowerCase('en').includes(procedureQuery)):rows.slice(0,4);\n host.classList.toggle('is-expanded',procedurePickerExpanded);
  for(const row of visibleRows){
   const button=document.createElement('button');
   button.type='button';button.className='phms-pick';
@@ -4935,7 +4935,7 @@ function renderCoverageChoices(){
  coverageSearchChoices.className='combo-results';
  const query=coverageSearch.value.normalize('NFKC').toLocaleLowerCase('th-TH').trim();
  coverageSearchChoices.replaceChildren();
- const matches=values.filter(v=>!query||coverageOptionLabel(v).normalize('NFKC').toLocaleLowerCase('th-TH').includes(query)||coverageEnglishLabel(v).toLocaleLowerCase('en').includes(query)).slice(0,12);
+ const matches=values.filter(v=>!query||coverageOptionLabel(v).normalize('NFKC').toLocaleLowerCase('th-TH').includes(query)||coverageEnglishLabel(v).toLocaleLowerCase('en').includes(query));
  for(const value of matches){
   const button=document.createElement('button');button.type='button';button.setAttribute('role','option');
   const title=document.createElement('strong');title.textContent=coverageIcon(value)+' '+coverageOptionLabel(value);
