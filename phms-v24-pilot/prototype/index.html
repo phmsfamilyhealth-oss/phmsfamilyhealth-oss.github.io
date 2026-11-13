@@ -1195,6 +1195,49 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .phms-postvisit-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
 .phms-postvisit-actions button{min-height:54px;white-space:normal;padding:9px;line-height:1.4}
 @media(max-width:390px){.phms-postvisit-actions{grid-template-columns:1fr}}
+
+/* PHMS v2.4: consistent elder-first form controls (desktop and LINE LIFF). */
+#editor #hospitalSearch.adaptive-search-collapsed,
+#editor #unitSearch.adaptive-search-collapsed,
+#editor #hospitalSearchResults.adaptive-search-collapsed,
+#editor #unitSearchResults.adaptive-search-collapsed{display:none!important}
+#editor #hospitalQuickCards,#editor #unitQuickCards,#editor #doctorQuickCards,#editor #coverageQuickCards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#editor .phms-provider-inline{background:#fff!important;border:0!important;padding:4px 0!important;margin:12px 0!important}
+#editor .phms-provider-inline>h3{font-size:1rem;margin:8px 0 10px!important;font-weight:750;color:#493526}
+#editor .phms-provider-inline>label{font-size:.98rem}
+#editor .phms-provider-inline #unitQuickCards,#editor .phms-provider-inline #doctorQuickCards{margin-bottom:8px!important}
+#editor .phms-coverage-collapsed{display:none!important}
+#editor #coverageQuickCards .adaptive-provider-choice{min-height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#editor #coverageQuickCards .adaptive-provider-choice small{font-size:.78rem;font-weight:400;opacity:.85}
+#editor #prepChoiceGrid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important}
+#editor #prepChoiceGrid>.prep-choice-card{display:flex!important;flex-direction:row!important;align-items:center!important;min-height:54px!important;text-align:left!important;gap:8px!important;padding:10px 13px!important}
+#editor #prepChoiceGrid>.prep-choice-card small{display:none!important}
+#editor #prepChoiceGrid>.prep-choice-card .prep-choice-filled{margin-left:auto!important}
+#editor .phms-inline-add{display:grid!important;grid-template-columns:minmax(0,1fr) 92px!important;gap:8px!important;align-items:stretch!important;flex-wrap:nowrap!important}
+#editor .phms-inline-add>input{min-width:0!important;width:100%!important;margin:0!important}
+#editor .phms-inline-add>button{min-width:0!important;width:92px!important;min-height:52px!important;white-space:nowrap!important;margin:0!important;padding:8px!important}
+@media(max-width:390px){#editor .phms-inline-add{grid-template-columns:minmax(0,1fr) 76px!important}#editor .phms-inline-add>button{width:76px!important}}
+@media(hover:hover) and (pointer:fine){
+ #editor .native-picker-shell{height:auto!important;min-height:56px!important;overflow:visible!important}
+ #editor .native-picker-shell>input[type="date"],
+ #editor .native-picker-shell>input[type="time"]{
+  position:relative!important;inset:auto!important;opacity:1!important;display:block!important;
+  width:100%!important;height:56px!important;min-height:56px!important;line-height:normal!important;
+  padding:12px 14px!important;margin:0!important;border:0!important;border-radius:11px!important;
+  background:#fff!important;color:#302519!important;-webkit-text-fill-color:#302519!important;
+  font-size:16px!important;appearance:auto!important;-webkit-appearance:auto!important;
+  cursor:text!important;pointer-events:auto!important;z-index:3!important;
+ }
+ #editor .native-picker-shell>.native-picker-prompt,
+ #editor .native-picker-shell:focus-within>.native-picker-prompt,
+ #editor .native-picker-shell.has-display-value:focus-within>.native-picker-prompt{display:none!important}
+ #editor .native-picker-shell>input::-webkit-calendar-picker-indicator{display:block!important;opacity:1!important;cursor:pointer!important;pointer-events:auto!important}
+}
+
+/* Keep exactly one provider selection presentation visible at any moment. */
+#editor #hospitalSearch.adaptive-search-collapsed,#editor #unitSearch.adaptive-search-collapsed{display:none!important}
+#editor #doctorQuickCards:not(.hidden){margin-top:8px!important}
+#editor #providerExtras.phms-provider-inline{display:block!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1257,7 +1300,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  <p id="journeySaveStatus" class="help" role="status">บันทึกเป็นเส้นทางประจำของครอบครัว ไม่เปลี่ยนทะเบียนโรงพยาบาล</p>
 </div>
 <details><summary>🩺 เรื่องที่รักษา</summary>
-<label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><button type="button" id="careTopicAddNew" class="secondary">＋ ใช้เรื่องที่พิมพ์ในนัดนี้</button><p id="careTopicDraftStatus" class="help" role="status"></p><p class="help">เลือกเรื่องเดิม หรือพิมพ์เรื่องใหม่ได้ · ข้อมูลที่พิมพ์เองเป็นบันทึกสำหรับนัดนี้</p>
+<label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><p id="careTopicDraftStatus" class="help" role="status"></p><p class="help">เลือกเรื่องเดิม หรือพิมพ์เรื่องใหม่ได้ · ข้อมูลที่พิมพ์เองเป็นบันทึกสำหรับนัดนี้</p>
 <p class="help">รายละเอียดที่กรอกเองยังไม่ถือว่าแพทย์ยืนยัน</p></details>
 <details><summary>🪪 สิทธิและเดินทาง</summary>
 <label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
@@ -1284,7 +1327,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help">🩺 ผลตรวจแบบมีค่าตัวเลข ให้บันทึกในหมวดสุขภาพของบุคคลนี้ · 📄 เอกสารให้เพิ่มในหมวดเอกสารตามสิทธิ์ที่มี</p>
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
-<details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจแนะนำ (เลือกได้หลายอย่าง)</p><p id="procedureHistoryHint" class="help">เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureHistoryCards" class="phms-choice-grid" role="group" aria-label="รายการตรวจจากประวัติ" hidden></div><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
+<details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจแนะนำ (เลือกได้หลายอย่าง)</p><p id="procedureHistoryHint" class="help">เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureHistoryCards" class="phms-choice-grid" role="group" aria-label="รายการตรวจจากประวัติ" hidden></div><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions phms-inline-add"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">＋ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดครั้งก่อน (ถ้ามี)</summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
@@ -1453,7 +1496,7 @@ function normalizedMasterName(value){return String(value||'').normalize('NFKC').
 function masterMatches(item,term){const q=normalizedMasterName(term);return !q||[item.label,item.name,item.display_name,item.code,item.external_code,...(Array.isArray(item.aliases)?item.aliases:[])].filter(Boolean).some(v=>normalizedMasterName(v).includes(q));}
 const comboState=Object.fromEntries(['hospital','unit','clinician'].map(kind=>[kind,{searchText:'',selectedItem:null,isOpen:false}]));
 function closeCombo(kind){comboState[kind].isOpen=false;const input=document.getElementById(kind+'Search');document.getElementById(kind+'SearchResults').classList.add('hidden');input.setAttribute('aria-expanded','false');}
-function renderCombo(kind,choices){const input=document.getElementById(kind+'Search'),list=document.getElementById(kind+'SearchResults'),state=comboState[kind];list.replaceChildren();if(!state.isOpen){closeCombo(kind);return;}const term=state.searchText.trim();const matched=choices.filter(x=>masterMatches(x,term)).slice(0,40);for(const item of matched){const button=document.createElement('button');button.type='button';button.setAttribute('role','option');button.textContent=item.label;button.addEventListener('click',()=>{const select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');select.value=item.value;state.selectedItem=item;state.searchText=item.label;input.value=item.label;closeCombo(kind);if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});list.append(button);}
+function renderCombo(kind,choices){const input=document.getElementById(kind+'Search'),list=document.getElementById(kind+'SearchResults'),state=comboState[kind];list.replaceChildren();if(!state.isOpen){closeCombo(kind);return;}const term=state.searchText.trim();const matched=choices.filter(x=>masterMatches(x,term)).slice(0,40);for(const item of matched){const button=document.createElement('button');button.type='button';button.setAttribute('role','option');button.textContent=item.label;button.addEventListener('click',()=>{const select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');select.value=item.value;state.selectedItem=item;state.searchText=item.label;input.value=item.label;if(adaptivePickers[kind])adaptivePickers[kind].expanded=false;closeCombo(kind);if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});list.append(button);}
 if(term&&!matched.length){const msg=document.createElement('div');msg.className='unavailable';msg.textContent='ไม่พบรายการที่ตรงกัน';list.append(msg);}
 if(term&&!matched.length){
  const add=document.createElement('button');add.type='button';add.className='local-name-option';
@@ -1870,11 +1913,10 @@ async function openExistingAppointmentWorkflow(kind){
 }
 $('openCanonicalFinance').addEventListener('click',()=>openExistingAppointmentWorkflow('finance'));
 $('openCanonicalMedication').addEventListener('click',()=>openExistingAppointmentWorkflow('medication'));
-$('careTopicAddNew').addEventListener('click',()=>{
- const value=$('care_topic').value.trim();if(!value){$('careTopicDraftStatus').textContent='กรุณาพิมพ์เรื่องที่รักษาก่อน';$('care_topic').focus();return;}
- $('care_topic').value=value;$('careTopicDraftStatus').textContent='✓ ใช้เรื่อง “'+value+'” ในร่างนัดนี้แล้ว · ยังไม่ใช่การวินิจฉัยที่แพทย์ยืนยัน';
-});
 $('care_topic').addEventListener('input',()=>{$('careTopicDraftStatus').textContent='';});
+$('care_topic').addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&!e.isComposing){e.preventDefault();$('care_topic').blur();}
+});
 function renderCareTopicSuggestions(){
  const host=$('careTopicSuggestions');host.replaceChildren();
  const options=Array.from(new Set((relatedAllItems||[]).map(a=>a.care_topic).filter(Boolean))).slice(0,8);
@@ -3245,8 +3287,8 @@ function makeFlowSection(id,title){
  section.append(heading);return section;
 }
 // Optional provider fields remain in the original picker and are only relocated once.
-const providerExtras=document.createElement('details');providerExtras.id='providerExtras';providerExtras.className='progressive-extras';
-const providerSummary=document.createElement('summary');providerSummary.textContent='แผนกและแพทย์ (ถ้ามี)';providerExtras.append(providerSummary);
+const providerExtras=document.createElement('section');providerExtras.id='providerExtras';providerExtras.className='progressive-extras phms-provider-inline';
+const providerSummary=document.createElement('h3');providerSummary.textContent='🏷️ แผนกและแพทย์ (ถ้ามี)';providerExtras.append(providerSummary);
 const unitFieldLabel=document.querySelector('label[for="unitSearch"]');unitFieldLabel.before(providerExtras);
 moveRangeTo(unitFieldLabel,$('doctorHint'),providerExtras);
 
@@ -3963,7 +4005,7 @@ $('detail').addEventListener('change',updateProgressiveLayout);
 $('scenario').addEventListener('change',updateProgressiveLayout);
 editor.addEventListener('input',()=>{updateFilledIndicators();updateRequiredFieldStatus();});editor.addEventListener('change',()=>{updateFilledIndicators();updateRequiredFieldStatus();});
 // Adaptive selection for existing bounded choices (no duplicate fields or new enum values).
-const adaptiveSelectIds=['known','hasAppointmentPhotos','coverage_type','walk_in_reason'];
+const adaptiveSelectIds=['known','hasAppointmentPhotos','walk_in_reason'];
 function installAdaptiveSelect(id){
  const select=$(id);if(!select)return;
  const host=document.createElement('div');host.className='adaptive-option-host';host.setAttribute('role','group');
@@ -4003,6 +4045,36 @@ function installAdaptiveSelect(id){
  sync();
 }
 for(const id of adaptiveSelectIds)installAdaptiveSelect(id);
+// One coverage chooser: popular cards first, a single native dropdown only on request.
+const coverage=$('coverage_type');
+const coverageHost=document.createElement('div');coverageHost.id='coverageQuickCards';coverageHost.className='adaptive-provider-cards';
+coverageHost.setAttribute('role','group');coverageHost.setAttribute('aria-label','สิทธิรักษา');
+coverage.before(coverageHost);
+const coverageValues=[
+ ['บัตรทอง','🪪 บัตรทอง / 30 บาท','Universal Coverage'],
+ ['ประกันสังคม','🏥 ประกันสังคม','Social Security'],
+ ['ข้าราชการ','🏛️ ข้าราชการ','CSMBS'],
+ ['ชำระเอง','💳 ชำระเอง','Self-pay']
+];
+let coverageExpanded=false;
+function renderCoverageCards(){
+ coverageHost.replaceChildren();
+ for(const [value,thai,en] of coverageValues){
+  const b=document.createElement('button');b.type='button';b.className='adaptive-provider-choice';
+  b.setAttribute('aria-pressed',String(coverage.value===value));
+  const main=document.createElement('span');main.textContent=thai;
+  const sub=document.createElement('small');sub.textContent=en;b.append(main,sub);
+  b.addEventListener('click',()=>{coverage.value=value;coverageExpanded=false;coverage.dispatchEvent(new Event('change',{bubbles:true}));renderCoverageCards();});
+  coverageHost.append(b);
+ }
+ const other=document.createElement('button');other.type='button';other.className='adaptive-provider-choice adaptive-provider-more';
+ other.textContent='＋ สิทธิอื่น / ค้นหา';other.setAttribute('aria-expanded',String(coverageExpanded));
+ other.addEventListener('click',()=>{coverageExpanded=!coverageExpanded;renderCoverageCards();if(coverageExpanded)coverage.focus();});
+ coverageHost.append(other);
+ coverage.classList.toggle('phms-coverage-collapsed',!coverageExpanded);
+}
+coverage.addEventListener('change',renderCoverageCards);
+renderCoverageCards();
 function syncChoiceCards(){
  for(const id of ['known','hasAppointmentPhotos']){
   const select=$(id),host=select.previousElementSibling;
