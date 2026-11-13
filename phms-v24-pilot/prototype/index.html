@@ -2556,7 +2556,20 @@ async function loadRelatedAppointments(){
 
 
 /* Family-shared contact directory is distinct from the verified hospital master. */
-let familyContactCanWrite=false,contactEditVersion=0;
+let familyContactCanWrite=false,contactEditVersion=0,familyContactSaving=false;
+function syncFamilyContactSaveUI(phase=''){
+ const ready=!!memberId&&!!$('providerOrg').value;
+ const button=$('familyContactSave'),hint=$('familyContactSaveHint');
+ button.disabled=familyContactSaving||!ready||!familyContactCanWrite;
+ button.setAttribute('aria-disabled',String(button.disabled));
+ if(!ready)hint.textContent='เลือกบุคคลและโรงพยาบาลก่อน · บันทึกใช้ซ้ำได้เฉพาะ Owner/Admin';
+ else if(phase==='checking')hint.textContent='กำลังตรวจสิทธิ์บันทึกข้อมูลของครอบครัว…';
+ else if(phase==='unavailable')hint.textContent='ยังตรวจสอบสิทธิ์ไม่ได้ · กรุณาลองเปิดหัวข้อนี้อีกครั้ง';
+ else if(!familyContactCanWrite)hint.textContent='บัญชีนี้ไม่มีสิทธิ์บันทึกข้อมูลใช้ซ้ำ · เฉพาะ Owner/Admin';
+ else if(familyContactSaving)hint.textContent='กำลังบันทึกข้อมูลให้ครอบครัว…';
+ else hint.textContent='Owner/Admin · บันทึกให้ครอบครัวใช้ร่วมกัน ไม่เปลี่ยนทะเบียนโรงพยาบาลกลาง';
+}
+syncFamilyContactSaveUI();
 async function familyContactApi(action,data){
  const endpoint=document.querySelector('meta[name="phms-family-contact-api"]')?.content;
  const token=window.liff?.getIDToken?.();
@@ -2611,10 +2624,10 @@ $('familyContactSave').addEventListener('click',async()=>{
  if(payload.hoursMode==='custom'&&!selectedContactHours()){
   status.textContent='กรุณาเลือกเวลาเริ่มและสิ้นสุดให้ถูกต้องก่อนบันทึก';return;
  }
- const button=$('familyContactSave');button.disabled=true;
+ familyContactSaving=true;syncFamilyContactSaveUI();
  status.textContent='กำลังบันทึกข้อมูลติดต่อสำหรับครอบครัว…';
  const result=await familyContactApi('put',{organizationId:org,unitId:unit||null,contact:payload});
- button.disabled=false;
+ familyContactSaving=false;syncFamilyContactSaveUI();
  if(who!==memberId||org!==$('providerOrg').value||unit!==$('providerUnit').value)return;
  if(result.ok){
   status.textContent='✓ บันทึกข้อมูลติดต่อให้ครอบครัวใช้ซ้ำแล้ว (ไม่ใช่ทะเบียนกลางที่โรงพยาบาลยืนยัน)';
@@ -2848,7 +2861,8 @@ for(const id of ['rescheduleHours','rescheduleStart','rescheduleEnd',
 }
 function resetContactDraft(){
  ++contactLoadGeneration;contactEditVersion++;
- familyContactCanWrite=false;$('familyContactSaveBox').classList.add('hidden');
+ familyContactCanWrite=false;familyContactSaving=false;
+ syncFamilyContactSaveUI();
  $('familyContactSaveStatus').textContent='';
  for(const id of [
   'rescheduleDays','rescheduleHours','rescheduleStart','rescheduleEnd',
@@ -2865,7 +2879,7 @@ async function applyLoadedFamilyContact(savedPromise,generation,editAtStart,org,
  const saved=await savedPromise;
  if(generation!==contactLoadGeneration||person!==memberId||org!==$('providerOrg').value||unit!==$('providerUnit').value)return;
  familyContactCanWrite=saved.ok&&saved.canWrite===true;
- $('familyContactSaveBox').classList.toggle('hidden',!familyContactCanWrite);
+ syncFamilyContactSaveUI(saved.ok?'':'unavailable');
  if(saved.ok&&saved.contact){
   if(editAtStart===contactEditVersion){
    applyFamilyContact(saved.contact);
@@ -2888,6 +2902,8 @@ async function applyLoadedFamilyContact(savedPromise,generation,editAtStart,org,
 async function loadRescheduleContacts(){
  const box=$('contactDetails'),org=$('providerOrg').value,unit=$('providerUnit').value,chosenPerson=memberId,generation=++contactLoadGeneration,editAtStart=contactEditVersion;
  const savedPromise=org&&chosenPerson?familyContactApi('get',{organizationId:org,unitId:unit||null}):Promise.resolve({ok:false});
+ familyContactCanWrite=false;
+ syncFamilyContactSaveUI(org&&chosenPerson?'checking':'');
  if(!chosenPerson||!org){box.textContent='เลือกบุคคลและโรงพยาบาลก่อน จึงจะดึงข้อมูลติดต่อได้';return;}
  box.textContent='กำลังตรวจข้อมูลติดต่อของโรงพยาบาลและแผนก…';
  const result=await previewReadApi('reschedule_contact',{organizationId:org,unitId:unit||undefined});
