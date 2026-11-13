@@ -1803,8 +1803,47 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #procedureCommonCards.is-expanded .phms-pick:not(.phms-procedure-more){width:100%!important;min-height:50px!important;border:0!important;border-bottom:1px solid #eadfd2!important;border-radius:0!important;background:#fff!important;text-align:left!important}
 #editor #procedureCommonCards.is-expanded .phms-pick[aria-pressed="true"]:not(.phms-procedure-more){background:#f3dfc2!important;border-left:3px solid #89592f!important}
 @media(max-width:390px){#editor #scenarioFlow .scenario-option,#editor .phms-treatment-cards .phms-treatment-card,#editor .phms-coverage-cards .phms-coverage-card,#editor #procedureCommonCards .phms-pick{min-height:62px!important;padding:8px!important}}
+
+/* PHMS v2.4.62 — header mode control and selected-choice compaction. */
+.phms-appointment-header .phms-header-mode-switch{
+ display:flex!important;justify-content:flex-end!important;align-items:center!important;
+ width:100%!important;margin:4px 0 0!important;padding:0!important;
+}
+.phms-appointment-header .phms-header-mode-switch .mode-choices,
+.phms-appointment-header .phms-header-mode-switch .mode-choices.phms-mode-segmented{
+ display:inline-flex!important;flex:0 0 auto!important;flex-direction:row!important;
+ align-items:center!important;justify-content:flex-end!important;gap:2px!important;
+ width:max-content!important;max-width:100%!important;padding:2px!important;
+ margin:0 0 0 auto!important;border:1px solid #f4e9d9!important;
+ border-radius:9px!important;background:#f4e9d9!important;box-shadow:none!important;
+}
+.phms-appointment-header .phms-header-mode-switch .phms-mode-segment,
+.phms-appointment-header .phms-header-mode-switch .mode-choice{
+ display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:center!important;
+ width:auto!important;min-width:0!important;min-height:31px!important;height:31px!important;
+ padding:5px 9px!important;margin:0!important;border:1px solid #f4e9d9!important;
+ border-radius:7px!important;background:#f4e9d9!important;color:#704f31!important;
+ font-family:inherit!important;font-size:13px!important;font-weight:650!important;
+ line-height:1.15!important;white-space:nowrap!important;box-shadow:none!important;
+}
+.phms-appointment-header .phms-header-mode-switch .phms-mode-segment.is-active,
+.phms-appointment-header .phms-header-mode-switch .phms-mode-segment[aria-pressed="true"],
+.phms-appointment-header .phms-header-mode-switch .mode-choice[aria-pressed="true"]{
+ border-color:#76532f!important;background:#76532f!important;color:#fff!important;
+}
+#editor .phms-treatment-cards .phms-treatment-card,
+#editor .phms-coverage-cards .phms-coverage-card,
+#editor #procedureCommonCards .phms-pick{font-family:inherit!important}
+#editor #procedureCommonCards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+#editor #procedureCommonCards.is-expanded{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;max-height:none!important;overflow:visible!important;border:0!important}
+#editor #procedureCommonCards.is-expanded .phms-pick:not(.phms-procedure-more){width:100%!important;min-height:68px!important;padding:10px!important;border:1.8px solid #c58a55!important;border-radius:12px!important;background:#fffaf4!important;text-align:center!important}
+#editor #procedureCommonCards.is-expanded .phms-pick[aria-pressed="true"]:not(.phms-procedure-more){border:2px solid #89592f!important;background:#f3dfc2!important}
+@media(max-width:420px){
+ .phms-appointment-header .phms-header-mode-switch .phms-mode-segment,
+ .phms-appointment-header .phms-header-mode-switch .mode-choice{min-height:29px!important;height:29px!important;padding:4px 7px!important;font-size:12px!important}
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.61</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.62</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -2578,8 +2617,7 @@ function renderCareTopicSuggestions(){
  const field=$('care_topic'),host=$('careTopicSuggestions'),current=field.value.trim();
  const same=(a,b)=>String(a||'').trim().toLocaleLowerCase('th-TH')===String(b||'').trim().toLocaleLowerCase('th-TH');
  const ranked=topHistoryNames(['care_topic','treatment_topic','diagnosis_name'],4);
- const entries=ranked.map(name=>(relatedAllItems||[]).find(a=>String(a.care_topic||a.treatment_topic||a.diagnosis_name||'').trim()===name)?.care_topic||name);
- if(current&&!entries.some(x=>same(x,current))){if(entries.length>=4)entries.pop();entries.unshift(current);}
+ const entries=current?[current]:ranked.map(name=>(relatedAllItems||[]).find(a=>String(a.care_topic||a.treatment_topic||a.diagnosis_name||'').trim()===name)?.care_topic||name);
  host.replaceChildren();
  for(const value of entries.slice(0,4)){
   const button=document.createElement('button');button.type='button';button.className='phms-treatment-card';
@@ -2802,7 +2840,8 @@ function renderHistoricalProcedureSuggestions(){
  }
  const rows=[...records.values()].sort((a,b)=>b.count-a.count||a.order-b.order||a.name.localeCompare(b.name,'th'));
  host.replaceChildren();
- const procedureQuery=$('procedureEntry').value.trim().toLocaleLowerCase('th-TH');\n const visibleRows=procedurePickerExpanded?rows.filter(row=>!procedureQuery||row.name.toLocaleLowerCase('th-TH').includes(procedureQuery)||String(row.en||'').toLocaleLowerCase('en').includes(procedureQuery)):rows.slice(0,4);\n host.classList.toggle('is-expanded',procedurePickerExpanded);
+ const visibleRows=rows;
+ host.classList.remove('is-expanded');
  for(const row of visibleRows){
   const button=document.createElement('button');
   button.type='button';button.className='phms-pick';
@@ -4904,11 +4943,11 @@ function renderCoverageChoices(){
   .map(([key,row])=>({key,value:values.find(v=>coverageKey(v)===key)||row.value,count:row.count}))
   .sort((a,b)=>b.count-a.count||(counts.get(a.key)?.lastIndex??999)-(counts.get(b.key)?.lastIndex??999));
  let visible=[];
- if(historical.length){
+ if(selected){visible=[selected];}
+ else if(historical.length){
   visible=historical.slice(0,4).map(x=>x.value);
   for(const value of defaults){if(visible.length>=4)break;if(!visible.some(v=>coverageKey(v)===coverageKey(value)))visible.push(value);}
  }else visible=defaults.slice(0,4);
- if(selected&&!visible.some(v=>coverageKey(v)===coverageKey(selected))){if(visible.length>=4)visible.pop();visible.unshift(selected);}
  coverageCards.replaceChildren();
  for(const value of visible.slice(0,4)){
   coverageCards.append(makeCoverageCard(value,coverageOptionLabel(value),selected===value,()=>setCoverageChoice(value)));
