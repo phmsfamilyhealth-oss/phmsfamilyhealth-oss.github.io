@@ -1453,8 +1453,32 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  padding:9px;font-weight:650;text-align:left;min-height:46px;
 }
 @media(max-width:390px){#editor .phms-treatment-card{min-height:72px!important}}
+
+/* PHMS v2.4.39: center text and marker at existing 45px height. */
+#editor #scenarioFlow #relatedAppointmentBox:not([open]),
+#editor #scenarioFlow #appointmentHistoryDisclosure:not([open]){
+ height:45px!important;min-height:45px!important;
+ padding:0 12px!important;box-sizing:border-box!important;
+ background:#fff!important;border:1px solid #e6d7c4!important;border-radius:12px!important;
+}
+#editor #scenarioFlow #relatedAppointmentBox:not([open])>summary,
+#editor #scenarioFlow #appointmentHistoryDisclosure:not([open])>summary{
+ box-sizing:border-box!important;height:100%!important;
+ display:flex!important;align-items:center!important;
+ padding:0!important;margin:0!important;
+ line-height:1.3!important;
+ list-style:none!important;cursor:pointer!important;
+}
+#editor #scenarioFlow #relatedAppointmentBox:not([open])>summary::-webkit-details-marker,
+#editor #scenarioFlow #appointmentHistoryDisclosure:not([open])>summary::-webkit-details-marker{display:none!important}
+#editor #scenarioFlow #relatedAppointmentBox:not([open])>summary::before,
+#editor #scenarioFlow #appointmentHistoryDisclosure:not([open])>summary::before{
+ content:'▸'!important;display:inline-block!important;
+ font-size:14px!important;width:18px!important;flex:0 0 18px!important;
+ color:#33281b!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.38</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.39</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -1831,6 +1855,12 @@ const doctorQuickCards=document.createElement('div');
 doctorQuickCards.id='doctorQuickCards';doctorQuickCards.className='adaptive-provider-cards';doctorQuickCards.setAttribute('role','group');
 doctorQuickCards.setAttribute('aria-label','แพทย์ที่เคยพบ');
 document.getElementById('clinicianSearch').before(doctorQuickCards);
+function clinicianEmoji(name){
+ const value=String(name||'').trim();
+ if(/^(?:พญ\.|แพทย์หญิง|ดร\.\s*พญ\.)\s*/u.test(value))return '👩‍⚕️';
+ if(/^(?:นพ\.|นายแพทย์|ดร\.\s*นพ\.)\s*/u.test(value))return '👨‍⚕️';
+ return '🩺';
+}
 let doctorSearchExpanded=false;
 const doctorSearchInput=document.getElementById('clinicianSearch');
 doctorSearchInput.placeholder='🔎 ค้นหาหรือพิมพ์ชื่อแพทย์';
@@ -1842,14 +1872,14 @@ function drawRecentDoctorCards(choices){
  const draft=comboState.clinician.selectedItem?.draftOnly?comboState.clinician.selectedItem:null;
  if(draft){
   const provisional=document.createElement('button');provisional.type='button';provisional.className='adaptive-provider-choice';
-  provisional.textContent='👨‍⚕️ '+draft.label+' · ร่าง';
+  provisional.textContent=clinicianEmoji(draft.label)+' '+draft.label+' · ร่าง';
   provisional.setAttribute('aria-pressed','true');
   provisional.addEventListener('click',()=>{doctorSearchExpanded=true;drawRecentDoctorCards(choices);doctorSearchInput.focus();});
   doctorQuickCards.append(provisional);
  }
  for(const item of matched){
   const button=document.createElement('button');button.type='button';button.className='adaptive-provider-choice';
-  button.textContent='👨‍⚕️ '+item.label;button.setAttribute('aria-pressed',String(item.value===selected));
+  button.textContent=clinicianEmoji(item.label)+' '+item.label;button.setAttribute('aria-pressed',String(item.value===selected));
   button.addEventListener('click',()=>{
    document.getElementById('providerClinician').value=item.value;
    comboState.clinician.selectedItem=item;comboState.clinician.searchText=item.label;
@@ -3076,7 +3106,7 @@ function renderRelatedCards(){
  }
  $('relatedMore').classList.toggle('hidden',filtered.length<=2);
  $('relatedMore').textContent=relatedExpanded?'แสดงน้อยลง':'ดูนัดเพิ่มเติม ('+(filtered.length-2)+')';
- $('relatedStatus').textContent=filtered.length?'พบนัด '+filtered.length+' รายการ · เลือกนัดเดิมเพื่อเติมข้อมูล':'ไม่พบนัดเดิมที่ตรงกับคำค้น';
+ $('relatedStatus').textContent=filtered.length?'พบนัด '+filtered.length+' รายการ':'ไม่พบนัดเดิมที่ตรงกับคำค้น';
  const chosen=relatedAllItems.find(a=>a.id===selected);
  const summary=$('relatedAppointmentBox').querySelector('summary');
  summary.textContent=chosen?'🔗 ใช้นัดเดิม: '+(chosen.title||'นัดหมาย'):'🔗 ใช้นัดเดิม ';
@@ -3531,7 +3561,7 @@ editor.insertBefore(sourceBox,$('date').previousElementSibling);
 sourceBox.open=false;sourceBox.hidden=!memberId;
 // Selecting an existing appointment updates the disclosure heading itself.
 // Reopen that heading to change or unlink; no detached button in additional information.
-sourceBox.querySelector('p.help').textContent='เลือกนัดเดิมเพื่อเติมข้อมูล หรือข้ามได้';
+if(sourceBox.querySelector('p.help:not(#relatedStatus)'))sourceBox.querySelector('p.help:not(#relatedStatus)').remove();
 
 // Three clearly visible appointment types; keep the original select as the single source of state.
 const scenarioChoices=[
@@ -4136,7 +4166,7 @@ const photoHelp=$('appointmentPhotoPicker').querySelector('p.help');
 if(photoHelp)photoHelp.textContent='ใส่ได้สูงสุด 2 รูป';
 $('filehelp').textContent='0/2 รูป';
 const sourceSummary=sourceBox.querySelector('summary');if(sourceSummary)sourceSummary.textContent='ใช้ข้อมูลจากนัดครั้งก่อน';
-const sourceInstruction=sourceBox.querySelector('p.help');if(sourceInstruction)sourceInstruction.textContent='เลือกนัดครั้งก่อนเพื่อช่วยเติมข้อมูล';
+const sourceInstruction=sourceBox.querySelector('p.help:not(#relatedStatus)');if(sourceInstruction)sourceInstruction.remove();
 const simpleSummaryText={booked:'อาการและสิ่งที่ต้องเตรียม',walk_in:'เหตุผลที่ไปและอาการ',historical:'อาการก่อนพบแพทย์'};
 const datePrompt=document.createElement('span');datePrompt.id='dateInputPrompt';datePrompt.className='native-picker-prompt';datePrompt.textContent='📅 แตะเพื่อเลือกวันที่';
 const dateShell=document.createElement('div');dateShell.className='native-picker-shell';$('date').before(dateShell);dateShell.append($('date'),datePrompt);
