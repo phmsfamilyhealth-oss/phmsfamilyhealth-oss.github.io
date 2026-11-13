@@ -226,10 +226,14 @@ try {
    // Full weekday labels only appear when the user explicitly selects custom days.
    await page.locator('#rescheduleDayCards [data-choice="specific"]').click();
    assert.equal(await page.locator('#rescheduleWeekdaysBox').isVisible(),true);
+   assert.equal((await page.locator('#rescheduleWeekdaysBox .phms-contact-days-title').textContent()).trim(),'🗓️ เลือกวันที่ติดต่อได้');
+   const weekdayBoxBorder=await page.locator('#rescheduleWeekdaysBox').evaluate(el=>parseFloat(getComputedStyle(el).borderTopWidth));
+   assert.ok(weekdayBoxBorder>=2,'Custom weekdays need a clear visual separator');
    assert.equal(await page.locator('#rescheduleWeekdays .phms-pick').count(),7);
    assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('span').textContent()).trim(),'💛 วันจันทร์');
-   assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('small').textContent()).trim(),'(MON)');
+   assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('small').textContent()).trim(),'MON');
    assert.equal(await page.locator('#rescheduleDayCards .phms-pick').count(),2);
+   assert.equal(await page.locator('#rescheduleNoticeCards [data-choice="7"]').textContent().then(t=>t.trim()),'7 วันก่อนนัด');
    // Day card hint is intentionally short even when the selected mode supplies office hours.
    const officeDay=page.locator('#rescheduleDayCards [data-choice="government"]');
    assert.equal((await officeDay.locator('span').textContent()).trim(),'🏛️ วันราชการ');
@@ -254,6 +258,8 @@ try {
    assert.equal(enlargedTitle.clipped,false,'Large-font headings must not be horizontally clipped');
    await page.setViewportSize({width:390,height:844});
    assert.equal(await page.locator('#rescheduleHourCards .phms-pick').count(),4);
+   const actualHoursOrder=await page.locator('#rescheduleHourCards .phms-pick').evaluateAll(items=>items.map(el=>el.dataset.choice));
+   assert.deepEqual(actualHoursOrder,['office','morning','custom','afternoon'],'Office/custom must share left column, morning/afternoon the right');
    await page.locator('#rescheduleHourCards [data-choice="morning"]').click();
    assert.equal(await page.locator('#rescheduleHours').inputValue(),'morning');
    await page.locator('#rescheduleHourCards [data-choice="afternoon"]').click();
@@ -290,13 +296,27 @@ try {
    await page.locator('#contactPhoneEntry').press('Enter');
    assert.equal(await page.locator('#contactPhoneList .phms-contact-phone-row').count(),3);
    assert.match(await page.locator('#contact_phone').inputValue(),/089-123-4567 ต่อ 321/);
+   const checkPhoneRow=async()=>page.locator('#contactPhoneList .phms-contact-phone-row').first().evaluate(row=>{
+    const card=row.getBoundingClientRect(),input=row.querySelector('input').getBoundingClientRect(),
+      remove=row.querySelector('button.phms-delete-button').getBoundingClientRect();
+    return {inside:remove.right<=card.right-2&&remove.left>=card.left+2&&remove.bottom<=card.bottom+1,
+      gap:remove.left-input.right,cardWidth:card.width,buttonWidth:remove.width};
+   });
+   const phone390=await checkPhoneRow();
+   assert.ok(phone390.inside&&phone390.gap>=4,'Phone delete must stay INSIDE its card with spacing: '+JSON.stringify(phone390));
+   await page.setViewportSize({width:320,height:700});
+   const phone320=await checkPhoneRow();
+   assert.ok(phone320.inside&&phone320.gap>=3,'Phone delete must fit 320px mobile: '+JSON.stringify(phone320));
+   await page.setViewportSize({width:390,height:844});
    await page.locator('#rescheduleDayCards [data-choice="government"]').click();
    assert.equal(await page.locator('#rescheduleWeekdaysBox').isVisible(),false);
    assert.equal(await page.locator('#rescheduleHours').inputValue(),'office');
    assert.equal(await page.locator('#rescheduleNoticeUnit').inputValue(),'working');
    assert.match(await page.locator('#rescheduleDaysSummary').textContent(),/วันหยุดราชการ/);
    assert.equal(await page.locator('#rescheduleCustomHours').isVisible(),false);
-   await page.waitForFunction(()=>!document.getElementById('familyContactSaveBox').classList.contains('hidden'));
+   assert.equal(await page.locator('#familyContactSaveBox').evaluate(el=>el.classList.contains('hidden')),false,'Save option remains discoverable, not conditionally hidden');
+   await page.waitForFunction(()=>!document.getElementById('familyContactSave').disabled);
+   assert.ok(await page.locator('#familyContactSaveHint').textContent().then(t=>t.includes('Owner/Admin')),'Authorized user needs an explanation of family-only saving');
    await page.locator('#familyContactSave').click();
    await page.waitForFunction(()=>document.getElementById('familyContactSaveStatus').textContent.includes('บันทึกข้อมูลติดต่อให้ครอบครัวใช้ซ้ำแล้ว'));
    assert.equal(familyContactWrites.length,1);
