@@ -2027,8 +2027,32 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .phms-appointment-header .phms-header-person-mode-row .phms-mode-segment[aria-pressed="true"]{
  background:#76532f!important;color:#fff!important;
 }
+
+/* PHMS v2.4.69 — override the higher-specificity #editor .mode-choices rule causing the visible outer border. */
+#editor .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented{
+ border:0!important;
+ outline:0!important;
+ box-shadow:none!important;
+ background:#f4e9d9!important;
+ padding:2px!important;
+ border-radius:14px!important;
+}
+#editor .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment,
+#editor .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment.is-active,
+#editor .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment[aria-pressed="true"]{
+ border:0!important;
+ outline:0!important;
+ box-shadow:none!important;
+}
+#editor .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment:not(.is-active):not([aria-pressed="true"]){
+ background:#f4e9d9!important;color:#704f31!important;
+}
+#editor .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment.is-active,
+#editor .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment[aria-pressed="true"]{
+ background:#76532f!important;color:#fff!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.68</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.69</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
