@@ -1477,8 +1477,36 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  font-size:14px!important;width:18px!important;flex:0 0 18px!important;
  color:#33281b!important;
 }
+
+/* PHMS v2.4.40 — one visual pattern for all selectable appointment cards.
+   Keep arrival time as a SINGLE selection (existing select remains authoritative). */
+#editor .arrival-lead-choices{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:9px!important;margin:9px 0 12px!important;
+}
+#editor .arrival-lead-choices .arrival-lead-choice{
+ box-sizing:border-box!important;width:100%!important;
+ min-height:80px!important;padding:12px!important;
+ border:1.8px solid #bb8960!important;border-radius:12px!important;
+ background:#fff!important;color:#30261b!important;
+ font-size:1rem!important;font-weight:700!important;line-height:1.4!important;
+ text-align:center!important;white-space:normal!important;
+}
+#editor .arrival-lead-choices .arrival-lead-choice[aria-pressed="true"]{
+ border:2px solid #86592d!important;background:#fff0d9!important;
+ color:#30261b!important;
+}
+#editor .arrival-lead-choices .arrival-lead-choice:focus-visible{
+ outline:3px solid #8c673e!important;outline-offset:2px!important;
+}
+@media(max-width:390px){
+ #editor .arrival-lead-choices{gap:7px!important}
+ #editor .arrival-lead-choices .arrival-lead-choice{
+  min-height:72px!important;padding:9px!important;
+ }
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.39</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.40</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
