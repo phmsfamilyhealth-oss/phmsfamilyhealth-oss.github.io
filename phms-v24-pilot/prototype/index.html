@@ -1184,6 +1184,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #appointmentStateNote{margin:8px 2px 0!important;font-size:.84rem!important;color:#65533e!important;line-height:1.35!important}
 #editor #doctorQuickCards .adaptive-provider-choice{min-height:52px}
 @media(max-width:375px){#editor #appointmentStateBox .phms-state-card{font-size:.85rem!important}}
+
+/* Elder-friendly historical visit: one visit record with safe follow-up links. */
+#editor #outcomeDetails>summary{font-weight:750}
+#historicalLinkedVisitSection{border:1.5px solid #c9ad8b;border-radius:12px;background:#fff;padding:14px;margin:12px 0}
+#historicalLinkedVisitSection h3{margin:0 0 10px;color:#4b351f}
+#historicalLinkedVisitSection p.help{font-size:.94rem;line-height:1.55}
+#postVisitNextSteps{margin-top:16px;padding:14px;border:1px solid #c9ad8b;border-radius:12px;background:#fffaf3}
+#postVisitNextSteps.hidden,#postVisitNextSteps[hidden]{display:none!important}
+.phms-postvisit-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.phms-postvisit-actions button{min-height:54px;white-space:normal;padding:9px;line-height:1.4}
+@media(max-width:390px){.phms-postvisit-actions{grid-template-columns:1fr}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1252,17 +1263,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
 <label for="arrival_lead_minutes" id="arrivalLeadLabel">ควรไปถึงโรงพยาบาลก่อนเวลานัดกี่นาที</label><select id="arrival_lead_minutes"><option value="15">15 นาที</option><option value="30" selected>30 นาที</option><option value="45">45 นาที</option><option value="60">1 ชั่วโมง</option><option value="90">1 ชั่วโมงครึ่ง</option><option value="120">2 ชั่วโมง</option><option value="150">2 ชั่วโมงครึ่ง</option><option value="180">3 ชั่วโมง</option></select><div id="arrivalLeadChoices" class="arrival-lead-choices" role="group" aria-labelledby="arrivalLeadLabel"></div><p id="arrivalLeadPreview" class="arrival-lead-preview" role="status" aria-live="polite" hidden></p><p class="help">15 นาทีเหมาะเฉพาะนัดที่โรงพยาบาลอนุญาตให้มาถึงใกล้เวลานัด โปรดตรวจสอบใบนัด</p></details>
 <details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล (ถ้ามี)</option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
-<details id="outcomeDetails" class="hidden"><summary>📋 ผลการไปพบแพทย์</summary>
-<label for="visit_outcome_notes">หมอบอกว่าอย่างไร หรือรักษาอะไร</label><textarea id="visit_outcome_notes" maxlength="1000" rows="2"></textarea>
-<label for="diagnosis_summary">การวินิจฉัยตามเอกสาร</label><textarea id="diagnosis_summary" maxlength="1000" rows="2"></textarea>
+<details id="outcomeDetails" class="hidden"><summary>📋 บันทึกหลังพบแพทย์</summary><p class="help">สำหรับวันที่ไปพบแพทย์มาแล้ว แม้ยังไม่เคยบันทึกนัดในระบบ · กรอกเท่าที่ทราบได้</p>
+<label for="visit_outcome_notes">หมอบอกว่าอย่างไร (ถ้าจำได้)</label><textarea id="visit_outcome_notes" maxlength="1000" rows="2"></textarea>
+<label for="diagnosis_summary">โรคที่แพทย์วินิจฉัย (ตามเอกสาร)</label><textarea id="diagnosis_summary" maxlength="1000" rows="2"></textarea>
 <label for="treatment_summary">การรักษาที่ได้รับ</label><textarea id="treatment_summary" maxlength="1000" rows="2"></textarea>
-<label for="test_results_summary">ผลตรวจ</label><textarea id="test_results_summary" maxlength="1000" rows="2"></textarea>
-<label for="medication_plan_notes">แผนยา</label><textarea id="medication_plan_notes" maxlength="1000" rows="2"></textarea>
+<label for="test_results_summary">สรุปผลตรวจ (ถ้ามี)</label><textarea id="test_results_summary" maxlength="1000" rows="2"></textarea>
+<label for="medication_plan_notes">คำแนะนำเรื่องยา (ถ้ามี)</label><textarea id="medication_plan_notes" maxlength="1000" rows="2"></textarea>
 <label for="next_steps">สิ่งที่ต้องทำต่อ</label><textarea id="next_steps" maxlength="1000" rows="2"></textarea>
-<p class="help">บันทึกตามข้อมูลจริง ไม่ถือเป็นผลที่แพทย์ยืนยันโดยอัตโนมัติ</p></details>
+<p class="help">ข้อมูลนี้เป็นบันทึกของครอบครัว ไม่ใช่ผลยืนยันจากแพทย์โดยอัตโนมัติ · รายการยาและผลตรวจแบบมีตัวเลขให้บันทึกในหมวดของตน</p></details>
 <section id="historicalLinkedVisitSection" class="historical-finance hidden" aria-label="เชื่อมค่าใช้จ่ายและยาเข้ากับนัดหมายจริง">
-<h3>💰 ค่าใช้จ่ายและ 💊 ยาจากนัดนี้</h3>
-<p class="help">ใช้ระบบค่าใช้จ่ายและทะเบียนยา PHMS เดิม ไม่ต้องสร้างข้อมูลซ้ำ</p>
+<h3>📌 เพิ่มข้อมูลจากการไปครั้งนี้</h3><p class="help">หนึ่งครั้งที่ไปโรงพยาบาล = หนึ่งนัดหลัก แล้วเพิ่มข้อมูลยา สุขภาพ และค่าใช้จ่ายในหมวดเดิม ไม่ต้องกรอกข้อมูลซ้ำ</p><p class="help"><strong>หากยังไม่มีนัดใน PHMS:</strong> กรอกบันทึกย้อนหลังให้ครบและบันทึกนัดหลักก่อน แล้วจึงกลับมาเพิ่มข้อมูลจากนัดนั้น</p>
+<p class="help">สำหรับนัดที่เคยบันทึกไว้แล้ว เลือกจากรายการด้านล่างเพื่อเพิ่มข้อมูลโดยเชื่อมกับนัดเดิม</p>
 <label for="linkedCareVisit">นัดที่บันทึกไว้แล้วใน LINE</label>
 <select id="linkedCareVisit"><option value="">เลือกนัดที่ไปมาแล้ว</option></select>
 <p id="linkedCareVisitStatus" class="help" role="status">กำลังตรวจประวัตินัดของบุคคลนี้</p>
@@ -1270,7 +1281,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <button id="openCanonicalFinance" type="button" class="secondary">💰 ค่าใช้จ่ายของนัดนี้</button>
 <button id="openCanonicalMedication" type="button" class="secondary">💊 เพิ่มยาจากนัดนี้</button>
 </div>
-<p class="help">ยังไม่มีนัดที่บันทึกไว้? ต้องบันทึกนัดก่อนจึงจะเพิ่มค่าใช้จ่ายหรือยาได้</p>
+<p class="help">🩺 ผลตรวจแบบมีค่าตัวเลข ให้บันทึกในหมวดสุขภาพของบุคคลนี้ · 📄 เอกสารให้เพิ่มในหมวดเอกสารตามสิทธิ์ที่มี</p>
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
 <details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจแนะนำ (เลือกได้หลายอย่าง)</p><p id="procedureHistoryHint" class="help">เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureHistoryCards" class="phms-choice-grid" role="group" aria-label="รายการตรวจจากประวัติ" hidden></div><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
@@ -1349,7 +1360,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help" id="registryHelp">ชื่อโรงพยาบาล แผนก และแพทย์จะเติมอัตโนมัติจากทะเบียนที่ตรวจสอบแล้ว หากยังไม่มีชื่อแพทย์ในทะเบียน สามารถบันทึกนัดโดยไม่ระบุแพทย์ได้เมื่อเปิดระบบจริง</p>
 <p class="error" id="error" role="alert"></p><div class="actions"><button id="review" type="button" disabled>ตรวจทานข้อมูล</button></div>
 </section>
-<section id="confirmation" class="box hidden"><h2>ตรวจทานก่อนบันทึก</h2><dl id="preview"></dl><p class="notice" id="saveStatus" role="status">ตรวจทานข้อมูลได้ แต่ยังไม่สามารถบันทึกนัดจริงในโหมดทดลองนี้</p><div class="actions"><button id="back" class="secondary">ย้อนกลับไปแก้ไข</button><button id="save" disabled type="button">บันทึกนัด (ยังไม่เปิด)</button></div></section>
+<section id="confirmation" class="box hidden"><h2>ตรวจทานก่อนบันทึก</h2><dl id="preview"></dl><p class="notice" id="saveStatus" role="status">ตรวจทานข้อมูลได้ แต่ยังไม่สามารถบันทึกนัดจริงในโหมดทดลองนี้</p><div class="actions"><button id="back" class="secondary">ย้อนกลับไปแก้ไข</button><button id="save" disabled type="button">บันทึกนัด (ยังไม่เปิด)</button></div><div id="postVisitNextSteps" class="phms-postvisit-next hidden" hidden><strong>✅ บันทึกการไปโรงพยาบาลครั้งนี้แล้ว</strong><p class="help">เพิ่มข้อมูลจากนัดเดียวกันต่อได้ ไม่จำเป็นต้องทำทั้งหมดในครั้งเดียว</p><div class="phms-postvisit-actions"><button type="button" id="postVisitExpense" class="secondary">💰 เพิ่มค่าใช้จ่ายจากนัดนี้</button><button type="button" id="postVisitMedication" class="secondary">💊 เพิ่มยาจากนัดนี้</button></div><p class="help">🩺 ผลตรวจสุขภาพและ 📄 เอกสาร: ไปที่หมวดสุขภาพ/เอกสารใน LINE แล้วเลือกบุคคลและการไปครั้งนี้ ก่อนบันทึกเพิ่มเติม</p><p id="postVisitHandoffStatus" class="help" role="status"></p></div></section>
 </main><script type="module">
 import {validateAppointmentDraft} from '../contracts/scenario-validator.mjs';
 import {prepareDraftForReview} from '../contracts/draft-packager.mjs';
@@ -1963,7 +1974,26 @@ if($('detail').value==='full'&&examPrepChoice.value){
 }
 
 if(!isPastAppointment()&&checklistItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='สิ่งที่ต้องเตรียม';const ul=document.createElement('ul');for(const item of checklistItems){const li=document.createElement('li');li.textContent=(item.status==='completed'?'☑ ':'☐ ')+item.title;ul.append(li);}dd.append(ul);dl.append(dt,dd);}{for(const [id,label] of Object.entries(detailNames)){const value=$(id).value.trim();if(!value)continue;if(id==='contact_phone')continue;if(id==='walk_in_reason'&&$('scenario').value!=='walk_in')continue;if(['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)&&!isPastAppointment())continue;const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=id==='arrival_lead_minutes'?value+' นาที':value;dl.append(dt,dd);}}if(procedurePreviewItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='รายการตรวจ (ทดลอง — ยังไม่บันทึก)';const ul=document.createElement('ul');for(const item of procedurePreviewItems){const li=document.createElement('li');li.textContent=item;ul.append(li);}dd.append(ul);dl.append(dt,dd);}if($('relatedSelect').value){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='นัดต้นทาง (ทดลอง)';dd.textContent=$('relatedSelect').selectedOptions[0]?.textContent||'';dl.append(dt,dd);}reviewedDraft={...v,provider_selection:{organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:selectedClinicianId()},hospital:$('hospital').value,department:$('department').value,doctor:$('doctor').value,purpose:$('purpose').value,additional_note:$('additionalNote').value,prep:isPastAppointment()?'':$('prep').value,preparation_items:isPastAppointment()?[]:checklistItems.map(x=>({...x})),extended_details:Object.fromEntries(Object.keys(detailNames).filter(id=>$(id).value.trim()&&(id!=='walk_in_reason'||$('scenario').value==='walk_in')&&(!['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)||isPastAppointment())).map(id=>[id,$(id).value.trim()])),documents:[...$('documents').files].map(f=>({name:f.name,type:f.type,size:f.size}))};if(packaged.draft.document_metadata.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='ไฟล์แนบ';dd.textContent=packaged.draft.document_metadata.map(f=>f.name).join(', ');dl.append(dt,dd)}$('editor').classList.add('hidden');$('confirmation').classList.remove('hidden');window.scrollTo(0,0)});
-$('save').addEventListener('click',async()=>{if(!confirmClient||!reviewedDraft)return;const button=$('save');button.disabled=true;button.textContent='กำลังตรวจสอบและบันทึก…';const result=await confirmClient({selectedPersonCode:memberId,draft:reviewedDraft});if(result.ok){button.textContent='บันทึกสำเร็จ';$('saveStatus').textContent='บันทึกนัดแล้ว เลขอ้างอิง: '+result.appointmentId;$('back').disabled=true;}else{button.textContent='ลองบันทึกอีกครั้ง';button.disabled=false;$('saveStatus').textContent='ยังไม่บันทึกนัด: '+result.error;}});
+let newlySavedHistoricalAppointmentId='';
+async function handoffJustSavedVisit(kind){
+ const status=$('postVisitHandoffStatus'),id=newlySavedHistoricalAppointmentId;
+ if(!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id)||$('scenario').value!=='historical'){
+  status.textContent='ยังไม่มีการบันทึกนัดย้อนหลังสำเร็จ จึงยังเชื่อมข้อมูลต่อไม่ได้';return;
+ }
+ const command=existingPHMSLineCommand(id,kind);
+ if(!window.confirm('ต้องการเปิดขั้นตอน'+(kind==='medication'?'เพิ่มยา':'เพิ่มค่าใช้จ่าย')+'สำหรับนัดที่เพิ่งบันทึกนี้ใช่ไหม?'))return;
+ try{
+  if(window.liff?.isInClient?.()&&typeof window.liff.sendMessages==='function'){
+   await window.liff.sendMessages([{type:'text',text:command}]);
+   status.textContent='ส่งคำสั่งเข้า LINE แล้ว กรุณาดำเนินการต่อในแชตอิ่มอุ่น';return;
+  }
+ }catch(e){console.warn('post_visit_handoff_failed',String(e).slice(0,100))}
+ status.textContent='ยังไม่ได้ส่งคำสั่ง ให้เปิดแชตอิ่มอุ่นและพิมพ์: '+command;
+ try{await navigator.clipboard.writeText(command);status.textContent+=' (คัดลอกแล้ว)'}catch{}
+}
+$('postVisitExpense').addEventListener('click',()=>handoffJustSavedVisit('finance'));
+$('postVisitMedication').addEventListener('click',()=>handoffJustSavedVisit('medication'));
+$('save').addEventListener('click',async()=>{if(!confirmClient||!reviewedDraft)return;const button=$('save');button.disabled=true;button.textContent='กำลังตรวจสอบและบันทึก…';const result=await confirmClient({selectedPersonCode:memberId,draft:reviewedDraft});if(result.ok){button.textContent='บันทึกสำเร็จ';$('saveStatus').textContent='บันทึกนัดแล้ว เลขอ้างอิง: '+result.appointmentId;$('back').disabled=true;newlySavedHistoricalAppointmentId=$('scenario').value==='historical'?result.appointmentId:'';$('postVisitNextSteps').hidden=!newlySavedHistoricalAppointmentId;$('postVisitNextSteps').classList.toggle('hidden',!newlySavedHistoricalAppointmentId);}else{button.textContent='ลองบันทึกอีกครั้ง';button.disabled=false;$('saveStatus').textContent='ยังไม่บันทึกนัด: '+result.error;newlySavedHistoricalAppointmentId='';$('postVisitNextSteps').hidden=true;$('postVisitNextSteps').classList.add('hidden');}});
 $('back').addEventListener('click',()=>{if($('back').disabled)return;$('confirmation').classList.add('hidden');$('editor').classList.remove('hidden')});
 let procedurePreviewItems=[];
 
