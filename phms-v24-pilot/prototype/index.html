@@ -2967,6 +2967,7 @@ function applySourceAppointment(){
  if(ARRIVAL_LEAD_OPTIONS.some(([n])=>n===priorMinutes)){
   setArrivalLeadMinutes(priorMinutes);sourceFilled.set('arrival_lead_minutes',String(priorMinutes));
  }
+ renderCareTopicSuggestions();
  $('relatedStatus').textContent='เติมข้อมูลจากนัดครั้งก่อนแล้ว — ตรวจสอบและแก้ไขข้อมูลสำหรับครั้งใหม่ได้ โดยวันที่และเวลาจะไม่ถูกคัดลอก';}
 let relatedAllItems=[],relatedExpanded=false,relatedLoadGeneration=0;
 function thaiSourceDate(value){
