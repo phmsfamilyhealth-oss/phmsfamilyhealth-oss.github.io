@@ -1171,6 +1171,19 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor .phms-emoji-choices button{min-height:48px;border:1px solid #c9ad8b;background:white;border-radius:10px;font-size:1.35rem}
 #editor .phms-emoji-choices button[aria-pressed="true"]{border:2px solid #92673a;background:#f1e5d6}
 #editor #careTopicAddNew{min-height:48px;margin:8px 0}
+
+/* Compact, readable reschedule history: align within the appointment type section. */
+#editor #appointmentStateBox{padding:12px!important;margin:10px 0 4px!important;border:1px solid #dac6aa!important;border-radius:12px!important}
+#editor #appointmentStateBox .phms-state-grid{gap:8px!important}
+#editor #appointmentStateBox .phms-state-card{min-height:50px!important;padding:8px 5px!important;font-size:.94rem!important;line-height:1.35!important}
+#editor #appointmentStateBox .phms-state-label{margin:3px 0 9px!important;font-size:.98rem!important}
+#editor #appointmentRescheduleCountArea:not(.hidden){margin:9px 0 0!important;padding:10px!important;background:#fffaf3!important}
+#editor .phms-reschedule-count-controls{display:grid!important;grid-template-columns:50px minmax(0,1fr) 50px!important;width:100%!important;max-width:100%!important;gap:8px!important}
+#editor .phms-reschedule-count-controls>button{width:50px!important;height:48px!important;min-height:48px!important;font-size:1.4rem!important}
+#editor #appointmentRescheduleCountText{font-size:1.05rem!important}
+#editor #appointmentStateNote{margin:8px 2px 0!important;font-size:.84rem!important;color:#65533e!important;line-height:1.35!important}
+#editor #doctorQuickCards .adaptive-provider-choice{min-height:52px}
+@media(max-width:375px){#editor #appointmentStateBox .phms-state-card{font-size:.85rem!important}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1511,7 +1524,15 @@ function drawAdaptiveProviderCards(kind,choices){
  const ui=adaptivePickers[kind];if(!ui)return;
  const entries=Array.isArray(choices)?choices:[];
  const selected=document.getElementById(kind==='hospital'?'providerOrg':'providerUnit').value;
- const featured=entries.length<=6?entries:[];
+ // Recent/selected items are visible as cards; the rest remain searchable.
+ // Never show the whole catalog as a wall of buttons.
+ const personVisits=Array.isArray(relatedAllItems)?relatedAllItems:[];
+ const historyNames=new Set(personVisits.map(a=>normalizedMasterName(
+  kind==='hospital'?(a.hospital_name||a.hospital):
+  (a.department_name||a.department||'')
+ )).filter(Boolean));
+ const featured=entries.filter(item=>item.value===selected||historyNames.has(normalizedMasterName(item.label||''))||
+  historyNames.has(normalizedMasterName(item.name||''))).slice(0,5);
  ui.cards.replaceChildren();
  for(const item of featured){
   const btn=document.createElement('button');btn.type='button';btn.className='adaptive-provider-choice';
@@ -1539,7 +1560,7 @@ function drawAdaptiveProviderCards(kind,choices){
  }
 
  // Six or fewer: cards only. The final card reveals the existing search field for a different/new name.
- const small=entries.length<=6;
+ const small=true;
  if(small){
   const other=document.createElement('button');other.type='button';
   other.className='adaptive-provider-choice adaptive-provider-more';
@@ -1552,11 +1573,35 @@ function drawAdaptiveProviderCards(kind,choices){
   });
   ui.cards.append(other);
  }
- ui.cards.classList.toggle('hidden',!small || !scenarioChoiceMade);
- ui.search.classList.toggle('adaptive-search-collapsed',small&&!ui.expanded);
- document.getElementById(kind+'SearchResults').classList.toggle('adaptive-search-collapsed',small&&!ui.expanded);
- ui.search.placeholder=kind==='hospital'?'🔎 ค้นหาหรือพิมพ์ชื่อโรงพยาบาล':'🔎 ค้นหาหรือพิมพ์ชื่อแผนกใหม่';
+ ui.cards.classList.toggle('hidden',!scenarioChoiceMade);
+ ui.search.classList.toggle('adaptive-search-collapsed',!ui.expanded);
+ document.getElementById(kind+'SearchResults').classList.toggle('adaptive-search-collapsed',!ui.expanded);
+ ui.search.placeholder=kind==='hospital'?'🔎 ค้นหาโรงพยาบาลจากทะเบียน':'🔎 ค้นหาหรือพิมพ์ชื่อแผนก';
 
+}
+// Doctors follow the same recent-first pattern, without showing unvisited names.
+const doctorQuickCards=document.createElement('div');
+doctorQuickCards.id='doctorQuickCards';doctorQuickCards.className='adaptive-provider-cards';doctorQuickCards.setAttribute('role','group');
+doctorQuickCards.setAttribute('aria-label','แพทย์ที่เคยพบ');
+document.getElementById('clinicianSearch').before(doctorQuickCards);
+function drawRecentDoctorCards(choices){
+ doctorQuickCards.replaceChildren();
+ const names=new Set((relatedAllItems||[]).map(a=>normalizedMasterName(a.doctor_name||a.clinician_name)).filter(Boolean));
+ const selected=document.getElementById('providerClinician').value;
+ const matched=(choices||[]).filter(x=>x.value===selected||names.has(normalizedMasterName(x.label||''))||names.has(normalizedMasterName(x.name||''))).slice(0,4);
+ for(const item of matched){
+  const button=document.createElement('button');button.type='button';button.className='adaptive-provider-choice';
+  button.textContent='👨‍⚕️ '+item.label;button.setAttribute('aria-pressed',String(item.value===selected));
+  button.addEventListener('click',()=>{
+   document.getElementById('providerClinician').value=item.value;
+   comboState.clinician.selectedItem=item;comboState.clinician.searchText=item.label;
+   document.getElementById('clinicianSearch').value=item.label;
+   closeCombo('clinician');syncProviderNames();drawRecentDoctorCards(choices);
+   document.getElementById('editor').dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  doctorQuickCards.append(button);
+ }
+ doctorQuickCards.classList.toggle('hidden',!matched.length);
 }
 let lastHnSelectedOrganizationId='';
 let lastLocationSelectedServiceUnitId='';
@@ -1571,6 +1616,7 @@ function refreshProviderPicker(changed=''){
  for(const [kind,choices] of [['hospital',state.organizations],['unit',state.units],['clinician',state.clinicians]])renderCombo(kind,choices);
  drawAdaptiveProviderCards('hospital',state.organizations);
  drawAdaptiveProviderCards('unit',state.units);
+ drawRecentDoctorCards(state.clinicians);
  document.getElementById('doctorHint').textContent=state.clinicians.length?'เลือกชื่อแพทย์จากทะเบียนหรือข้ามได้':'ไม่มีชื่อแพทย์ในทะเบียน — เว้นว่างได้';
  // Cards and search set the hidden organization ID programmatically; a native change
  // event is not fired by .value=. Notify the authorized HN synchronizer exactly
@@ -2670,7 +2716,7 @@ async function loadRelatedAppointments(){
  const picker=$('relatedSelect'),prior=picker.value;
  picker.replaceChildren(new Option('ไม่เชื่อมนัดเดิม',''),...relatedAllItems.map(a=>new Option(a.title||'นัดหมาย',a.id)));picker.disabled=false;
  if(sourceAppointments.has(prior))picker.value=prior;
- $('relatedAppointmentBox').hidden=relatedAllItems.length===0;if(!relatedAllItems.length){renderLinkedCareVisits();status.textContent='';return;}relatedAllItems.sort((a,b)=>String(b.planned_visit_date||b.appointment_at||'').localeCompare(String(a.planned_visit_date||a.appointment_at||'')));renderLinkedCareVisits();refreshTopicSuggestions();renderCareTopicSuggestions();relatedExpanded=false;renderRelatedCards();renderHistoricalProcedureSuggestions();
+ $('relatedAppointmentBox').hidden=relatedAllItems.length===0;if(!relatedAllItems.length){renderLinkedCareVisits();status.textContent='';return;}relatedAllItems.sort((a,b)=>String(b.planned_visit_date||b.appointment_at||'').localeCompare(String(a.planned_visit_date||a.appointment_at||'')));renderLinkedCareVisits();refreshTopicSuggestions();renderCareTopicSuggestions();relatedExpanded=false;renderRelatedCards();renderHistoricalProcedureSuggestions();refreshProviderPicker();
 }
 
 
