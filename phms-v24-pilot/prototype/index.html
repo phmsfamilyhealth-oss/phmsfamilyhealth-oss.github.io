@@ -1184,6 +1184,32 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #appointmentStateNote{margin:8px 2px 0!important;font-size:.84rem!important;color:#65533e!important;line-height:1.35!important}
 #editor #doctorQuickCards .adaptive-provider-choice{min-height:52px}
 @media(max-width:375px){#editor #appointmentStateBox .phms-state-card{font-size:.85rem!important}}
+
+/* Targeted repair on approved 974269e2 UI: provider fields always inline. */
+#editor #mainFlow #providerExtras.provider-inline-fields{
+ display:block!important;border:0!important;background:transparent!important;
+ padding:0!important;margin:12px 0!important;box-shadow:none!important;
+}
+#editor #mainFlow #providerExtras.provider-inline-fields>h3{
+ display:block!important;margin:8px 0 12px!important;padding:0!important;
+ font-size:1rem!important;font-weight:750!important;color:#3a2a1b!important;
+}
+#editor #mainFlow #providerExtras.provider-inline-fields>label{display:block!important}
+#editor #mainFlow #providerExtras.provider-inline-fields #unitQuickCards,
+#editor #mainFlow #providerExtras.provider-inline-fields #doctorQuickCards{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:9px!important;margin:6px 0 12px!important;
+}
+#editor #mainFlow #providerExtras.provider-inline-fields #doctorQuickCards.hidden{display:none!important}
+#editor #clinicianSearch.adaptive-search-collapsed,
+#editor #clinicianSearchResults.adaptive-search-collapsed{display:none!important}
+#editor #mainFlow #providerExtras.provider-inline-fields .adaptive-provider-more{
+ border-style:dashed!important;background:#faf5ec!important;
+}
+@media(max-width:380px){
+ #editor #mainFlow #providerExtras.provider-inline-fields #doctorQuickCards,
+ #editor #mainFlow #providerExtras.provider-inline-fields #unitQuickCards{gap:7px!important}
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1442,7 +1468,7 @@ function normalizedMasterName(value){return String(value||'').normalize('NFKC').
 function masterMatches(item,term){const q=normalizedMasterName(term);return !q||[item.label,item.name,item.display_name,item.code,item.external_code,...(Array.isArray(item.aliases)?item.aliases:[])].filter(Boolean).some(v=>normalizedMasterName(v).includes(q));}
 const comboState=Object.fromEntries(['hospital','unit','clinician'].map(kind=>[kind,{searchText:'',selectedItem:null,isOpen:false}]));
 function closeCombo(kind){comboState[kind].isOpen=false;const input=document.getElementById(kind+'Search');document.getElementById(kind+'SearchResults').classList.add('hidden');input.setAttribute('aria-expanded','false');}
-function renderCombo(kind,choices){const input=document.getElementById(kind+'Search'),list=document.getElementById(kind+'SearchResults'),state=comboState[kind];list.replaceChildren();if(!state.isOpen){closeCombo(kind);return;}const term=state.searchText.trim();const matched=choices.filter(x=>masterMatches(x,term)).slice(0,40);for(const item of matched){const button=document.createElement('button');button.type='button';button.setAttribute('role','option');button.textContent=item.label;button.addEventListener('click',()=>{const select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');select.value=item.value;state.selectedItem=item;state.searchText=item.label;input.value=item.label;closeCombo(kind);if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});list.append(button);}
+function renderCombo(kind,choices){const input=document.getElementById(kind+'Search'),list=document.getElementById(kind+'SearchResults'),state=comboState[kind];list.replaceChildren();if(!state.isOpen){closeCombo(kind);return;}const term=state.searchText.trim();const matched=choices.filter(x=>masterMatches(x,term)).slice(0,40);for(const item of matched){const button=document.createElement('button');button.type='button';button.setAttribute('role','option');button.textContent=item.label;button.addEventListener('click',()=>{const select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');select.value=item.value;state.selectedItem=item;state.searchText=item.label;input.value=item.label;if(kind==='clinician')doctorSearchExpanded=false;closeCombo(kind);if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});list.append(button);}
 if(term&&!matched.length){const msg=document.createElement('div');msg.className='unavailable';msg.textContent='ไม่พบรายการที่ตรงกัน';list.append(msg);}
 if(term&&!matched.length){
  const add=document.createElement('button');add.type='button';add.className='local-name-option';
@@ -1466,7 +1492,7 @@ if(term&&!matched.length){
    comboState.clinician.selectedItem=null;comboState.clinician.searchText='';
    document.getElementById('clinicianSearch').value='';document.getElementById('doctor').value='';
    refreshProviderPicker('providerUnit');
-  }else document.getElementById('doctor').value=label;
+  }else {document.getElementById('doctor').value=label;doctorSearchExpanded=false;}
   syncProviderNames();closeCombo(kind);document.getElementById('editor').dispatchEvent(new Event('change',{bubbles:true}));
  });
  list.append(add);
@@ -1594,11 +1620,22 @@ const doctorQuickCards=document.createElement('div');
 doctorQuickCards.id='doctorQuickCards';doctorQuickCards.className='adaptive-provider-cards';doctorQuickCards.setAttribute('role','group');
 doctorQuickCards.setAttribute('aria-label','แพทย์ที่เคยพบ');
 document.getElementById('clinicianSearch').before(doctorQuickCards);
+let doctorSearchExpanded=false;
+const doctorSearchInput=document.getElementById('clinicianSearch');
+doctorSearchInput.placeholder='🔎 ค้นหาหรือพิมพ์ชื่อแพทย์';
 function drawRecentDoctorCards(choices){
  doctorQuickCards.replaceChildren();
  const names=new Set((relatedAllItems||[]).map(a=>normalizedMasterName(a.doctor_name||a.clinician_name)).filter(Boolean));
  const selected=document.getElementById('providerClinician').value;
  const matched=(choices||[]).filter(x=>x.value===selected||names.has(normalizedMasterName(x.label||''))||names.has(normalizedMasterName(x.name||''))).slice(0,4);
+ const draft=comboState.clinician.selectedItem?.draftOnly?comboState.clinician.selectedItem:null;
+ if(draft){
+  const provisional=document.createElement('button');provisional.type='button';provisional.className='adaptive-provider-choice';
+  provisional.textContent='👨‍⚕️ '+draft.label+' · ร่าง';
+  provisional.setAttribute('aria-pressed','true');
+  provisional.addEventListener('click',()=>{doctorSearchExpanded=true;drawRecentDoctorCards(choices);doctorSearchInput.focus();});
+  doctorQuickCards.append(provisional);
+ }
  for(const item of matched){
   const button=document.createElement('button');button.type='button';button.className='adaptive-provider-choice';
   button.textContent='👨‍⚕️ '+item.label;button.setAttribute('aria-pressed',String(item.value===selected));
@@ -1606,18 +1643,31 @@ function drawRecentDoctorCards(choices){
    document.getElementById('providerClinician').value=item.value;
    comboState.clinician.selectedItem=item;comboState.clinician.searchText=item.label;
    document.getElementById('clinicianSearch').value=item.label;
-   closeCombo('clinician');syncProviderNames();drawRecentDoctorCards(choices);
+   doctorSearchExpanded=false;closeCombo('clinician');syncProviderNames();drawRecentDoctorCards(choices);
    document.getElementById('editor').dispatchEvent(new Event('change',{bubbles:true}));
   });
   doctorQuickCards.append(button);
  }
- doctorQuickCards.classList.toggle('hidden',!matched.length);
+ const other=document.createElement('button');other.type='button';
+ other.className='adaptive-provider-choice adaptive-provider-more';
+ other.textContent='＋ แพทย์อื่น / ค้นหา / พิมพ์ชื่อใหม่';
+ other.setAttribute('aria-expanded',String(doctorSearchExpanded));
+ other.addEventListener('click',()=>{
+  doctorSearchExpanded=!doctorSearchExpanded;
+  if(!doctorSearchExpanded)closeCombo('clinician');
+  drawRecentDoctorCards(choices);
+  if(doctorSearchExpanded)doctorSearchInput.focus();
+ });
+ doctorQuickCards.append(other);
+ doctorQuickCards.classList.toggle('hidden',!scenarioChoiceMade);
+ doctorSearchInput.classList.toggle('adaptive-search-collapsed',!doctorSearchExpanded);
+ document.getElementById('clinicianSearchResults').classList.toggle('adaptive-search-collapsed',!doctorSearchExpanded);
 }
 let lastHnSelectedOrganizationId='';
 let lastLocationSelectedServiceUnitId='';
 function refreshProviderPicker(changed=''){
  const org=document.getElementById('providerOrg').value,unit=changed==='providerOrg'?'':document.getElementById('providerUnit').value,clinician=(changed==='providerOrg'||changed==='providerUnit')?'':document.getElementById('providerClinician').value;
- if(changed==='providerOrg'||changed==='providerUnit'){comboState.clinician.selectedItem=null;comboState.clinician.searchText='';document.getElementById('clinicianSearch').value='';document.getElementById('doctor').value='';closeCombo('clinician');}
+ if(changed==='providerOrg'||changed==='providerUnit'){doctorSearchExpanded=false;comboState.clinician.selectedItem=null;comboState.clinician.searchText='';document.getElementById('clinicianSearch').value='';document.getElementById('doctor').value='';closeCombo('clinician');}
  if(changed==='providerOrg'){for(const kind of ['unit']){comboState[kind].selectedItem=null;comboState[kind].searchText='';document.getElementById(kind+'Search').value='';closeCombo(kind);}}
  const state=providerPickerState(authorizedCatalog,org,unit,clinician);
  fillOptions('providerOrg',state.organizations,'เลือกโรงพยาบาล');document.getElementById('providerOrg').value=state.organizationId;
@@ -3215,8 +3265,8 @@ function makeFlowSection(id,title){
  section.append(heading);return section;
 }
 // Optional provider fields remain in the original picker and are only relocated once.
-const providerExtras=document.createElement('details');providerExtras.id='providerExtras';providerExtras.className='progressive-extras';
-const providerSummary=document.createElement('summary');providerSummary.textContent='แผนกและแพทย์ (ถ้ามี)';providerExtras.append(providerSummary);
+const providerExtras=document.createElement('section');providerExtras.id='providerExtras';providerExtras.className='progressive-extras provider-inline-fields';
+const providerSummary=document.createElement('h3');providerSummary.textContent='แผนกและแพทย์ (ถ้ามี)';providerExtras.append(providerSummary);
 const unitFieldLabel=document.querySelector('label[for="unitSearch"]');unitFieldLabel.before(providerExtras);
 moveRangeTo(unitFieldLabel,$('doctorHint'),providerExtras);
 
