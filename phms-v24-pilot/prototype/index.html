@@ -1055,6 +1055,34 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #familyContactSave{width:100%;min-height:48px;text-align:center}
 #familyContactSaveStatus{margin:8px 0;line-height:1.5}
 
+
+/* PHMS v2.4 mobile accessibility: shorten visible headings, never ellipsize them.
+   Allow summary labels to wrap while the "มีข้อมูล" badge remains a distinct item.
+   Large iOS accessibility fonts may use two or more lines; grow the card height. */
+#editor #appointmentFlow summary.phms-summary-status-line>.phms-summary-label,
+#editor #details>details#simpleExtras>summary.phms-summary-status-line>.phms-summary-label,
+#editor #mainFlow #providerExtras>summary.phms-summary-status-line>.phms-summary-label,
+#editor #mainFlow #providerExtras>summary .provider-summary-title{
+ white-space:normal!important;overflow:visible!important;text-overflow:clip!important;
+ overflow-wrap:break-word!important;word-break:normal!important;
+}
+#editor #appointmentFlow details.phms-status-panel:not([open]),
+#editor #details>details#simpleExtras.phms-status-panel:not([open]){
+ height:auto!important;min-height:58px!important;max-height:none!important;
+ overflow:visible!important;
+}
+#editor #appointmentFlow details>summary.phms-summary-status-line,
+#editor #details>details#simpleExtras>summary.phms-summary-status-line,
+#editor #mainFlow #providerExtras>summary.phms-summary-status-line{
+ height:auto!important;max-height:none!important;white-space:normal!important;
+}
+@media(max-width:380px){
+ #editor #appointmentFlow details>summary.phms-summary-status-line,
+ #editor #details>details#simpleExtras>summary.phms-summary-status-line{
+  font-size:1rem!important;
+ }
+}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1076,13 +1104,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <input type="hidden" id="hospital">
 <input type="hidden" id="department">
 <div id="details" class="hidden">
-<details id="hospitalLocationDetails"><summary>🏥 ข้อมูลโรงพยาบาลเพิ่มเติม</summary>
+<details id="hospitalLocationDetails"><summary>🏥 ข้อมูล รพ.</summary>
 <label for="hospital_hn">เลข HN (ถ้ามี)</label><input id="hospital_hn" maxlength="80">
 <label for="hospital_vn">เลข VN (ถ้ามี)</label><input id="hospital_vn" maxlength="80">
 
 </details>
 <details id="primaryLocationDetails">
- <summary>📍 จุดติดต่อหลัก</summary>
+ <summary>📍 จุดติดต่อ</summary>
  <div id="journeySavedTemplate" class="phms-journey-template-suggestion hidden" hidden>
   <p id="journeySavedTemplateSummary">มีเส้นทางที่ครอบครัวเคยบันทึกไว้</p>
   <button id="journeyApplyTemplate" type="button" class="secondary">🔁 ใช้เส้นทางเดิม</button>
@@ -1101,7 +1129,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </div>
 </details>
 <details id="visitStepsDetails" class="visit-steps-detail">
- <summary>🧭 ขั้นตอนในวันนัด</summary>
+ <summary>🧭 ขั้นตอนวันนัด</summary>
  <p class="help">เพิ่มเฉพาะขั้นตอนที่ระบุในใบนัด เช่น เจาะเลือด เอกซเรย์ หรือยื่นใบนัด</p>
  <div id="visitStepsList" aria-live="polite"></div>
  <button id="visitStepAdd" class="secondary" type="button">＋ เพิ่มขั้นตอน</button>
@@ -1116,10 +1144,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  <button id="journeySaveTemplate" class="secondary" type="button">💾 บันทึกเส้นทางนี้ไว้ใช้ครั้งหน้า</button>
  <p id="journeySaveStatus" class="help" role="status">บันทึกเป็นเส้นทางประจำของครอบครัว ไม่เปลี่ยนทะเบียนโรงพยาบาล</p>
 </div>
-<details><summary>🩺 เรื่องที่ติดตามรักษา</summary>
+<details><summary>🩺 เรื่องที่รักษา</summary>
 <label for="care_topic">โรคหรือเรื่องที่ติดตาม</label><input id="care_topic" maxlength="500" placeholder="พิมพ์ค้นหาเรื่องเดิม หรือระบุเรื่องใหม่"><div id="careTopicSuggestions" class="topic-suggestions" role="group" aria-label="เลือกเรื่องที่เคยรักษา"></div><p class="help">เลือกเรื่องที่เคยรักษา หรือพิมพ์เรื่องใหม่สำหรับนัดนี้ได้ (ยังไม่เพิ่มลงทะเบียนโรคกลาง)</p>
 <p class="help">รายละเอียดที่กรอกเองยังไม่ถือว่าแพทย์ยืนยัน</p></details>
-<details><summary>🪪 สิทธิรักษาและการเดินทาง</summary>
+<details><summary>🪪 สิทธิและเดินทาง</summary>
 <label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
 <label for="arrival_lead_minutes" id="arrivalLeadLabel">ควรไปถึงโรงพยาบาลก่อนเวลานัดกี่นาที</label><select id="arrival_lead_minutes"><option value="15">15 นาที</option><option value="30" selected>30 นาที</option><option value="45">45 นาที</option><option value="60">1 ชั่วโมง</option><option value="90">1 ชั่วโมงครึ่ง</option><option value="120">2 ชั่วโมง</option><option value="150">2 ชั่วโมงครึ่ง</option><option value="180">3 ชั่วโมง</option></select><div id="arrivalLeadChoices" class="arrival-lead-choices" role="group" aria-labelledby="arrivalLeadLabel"></div><p id="arrivalLeadPreview" class="arrival-lead-preview" role="status" aria-live="polite" hidden></p><p class="help">15 นาทีเหมาะเฉพาะนัดที่โรงพยาบาลอนุญาตให้มาถึงใกล้เวลานัด โปรดตรวจสอบใบนัด</p></details>
 <details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล (ถ้ามี)</option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
@@ -1144,7 +1172,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help">ยังไม่มีนัดที่บันทึกไว้? ต้องบันทึกนัดก่อนจึงจะเพิ่มค่าใช้จ่ายหรือยาได้</p>
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
-<details id="procedurePreviewBox"><summary>🔬 รายการตรวจและหัตถการ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจที่พบบ่อย</p><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
+<details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจที่พบบ่อย</p><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดครั้งก่อน (ถ้ามี)</summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
@@ -1152,7 +1180,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <button type="button" id="relatedMore" class="secondary hidden" style="width:100%">ดูนัดเพิ่มเติม</button>
 <select id="relatedSelect" class="hidden" aria-label="นัดต้นทาง" disabled><option value="">ไม่เชื่อมนัดเดิม</option></select>
 </details>
-<details id="contactRescheduleBox"><summary>📞 ติดต่อโรงพยาบาลและเลื่อนนัด</summary>
+<details id="contactRescheduleBox"><summary>📞 ติดต่อเลื่อนนัด</summary>
 <p class="help">ติดต่อเพื่อขอเลื่อนนัดได้ แต่ระบบจะไม่เปลี่ยนวันนัดเดิมจนกว่าโรงพยาบาลจะยืนยัน</p>
 <div id="contactDetails" role="status" class="help">เปิดส่วนนี้เพื่อดูข้อมูลติดต่อที่โรงพยาบาล/แผนกบันทึกไว้</div>
 <div id="rescheduleContactEditor">
@@ -2599,7 +2627,7 @@ function toggleContactHours(value){
  select.dispatchEvent(new Event('change',{bubbles:true}));
 }
 for(const [value,label,hint] of [
- ['government','🏛️ วันราชการ','จันทร์–ศุกร์ 08:30–16:30 น. (แนะนำ)'],
+ ['government','🏛️ วันราชการ','จันทร์–ศุกร์'],
  ['specific','✏️ เลือกวันเอง','เลือกได้หลายวัน']
 ])makeContactOption('rescheduleDayCards',value,label,hint,$('rescheduleDays'));
 for(const [value,label,hint] of [

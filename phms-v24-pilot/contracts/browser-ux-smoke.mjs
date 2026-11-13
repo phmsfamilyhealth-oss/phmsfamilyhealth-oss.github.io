@@ -230,6 +230,29 @@ try {
    assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('span').textContent()).trim(),'💛 วันจันทร์');
    assert.equal((await page.locator('#rescheduleWeekdays .phms-pick').nth(0).locator('small').textContent()).trim(),'(MON)');
    assert.equal(await page.locator('#rescheduleDayCards .phms-pick').count(),2);
+   // Day card hint is intentionally short even when the selected mode supplies office hours.
+   const officeDay=page.locator('#rescheduleDayCards [data-choice="government"]');
+   assert.equal((await officeDay.locator('span').textContent()).trim(),'🏛️ วันราชการ');
+   assert.equal((await officeDay.locator('small').textContent()).trim(),'จันทร์–ศุกร์');
+   assert.ok(!(await officeDay.textContent()).includes('08:30'),'Day card must not repeat office time');
+   assert.ok(!(await officeDay.textContent()).includes('แนะนำ'),'Day card should not add an advisory label');
+   // Accessibility stress: on a narrow iPhone with 175% heading text,
+   // labels must wrap rather than silently truncate or overlap the status badge.
+   await page.setViewportSize({width:320,height:700});
+   const enlargedTitle=await page.locator('#contactRescheduleBox > summary').evaluate(summary=>{
+    const label=summary.querySelector('.phms-summary-label');
+    if(!label)return {found:false};
+    summary.style.setProperty('font-size','1.75rem','important');
+    const computed=getComputedStyle(label),rect=label.getBoundingClientRect();
+    const result={found:true,whiteSpace:computed.whiteSpace,
+      clipped:label.scrollWidth>label.clientWidth+1,height:rect.height};
+    summary.style.removeProperty('font-size');
+    return result;
+   });
+   assert.equal(enlargedTitle.found,true,'Optional summary should expose its label to assistive technology');
+   assert.equal(enlargedTitle.whiteSpace,'normal','Large fonts must wrap instead of ellipsizing');
+   assert.equal(enlargedTitle.clipped,false,'Large-font headings must not be horizontally clipped');
+   await page.setViewportSize({width:390,height:844});
    assert.equal(await page.locator('#rescheduleHourCards .phms-pick').count(),4);
    await page.locator('#rescheduleHourCards [data-choice="morning"]').click();
    assert.equal(await page.locator('#rescheduleHours').inputValue(),'morning');
@@ -360,8 +383,8 @@ try {
    assert.equal(journeyActions.filter(x=>x.action==='photo_reorder').length,2,'Image ordering is rechecked before and after upload');
    assert.equal(journeyActions.filter(x=>x.action==='template_save')[0].template.steps[0].time,'','A reusable route never copies appointment-specific time');
    assert.equal(await page.locator('#showJourneyElderPreview').count(),0,'Redundant detailed-mode viewer button is removed');
-   assert.equal((await page.locator('#primaryLocationDetails > summary .phms-summary-label').textContent()).trim(),'📍 จุดติดต่อหลัก','Primary point summary is concise without optional suffix');
-   assert.equal((await page.locator('#visitStepsDetails > summary .phms-summary-label').textContent()).trim(),'🧭 ขั้นตอนในวันนัด','Journey steps summary is concise without optional suffix');
+   assert.equal((await page.locator('#primaryLocationDetails > summary .phms-summary-label').textContent()).trim(),'📍 จุดติดต่อ','Primary point summary is concise without optional suffix');
+   assert.equal((await page.locator('#visitStepsDetails > summary .phms-summary-label').textContent()).trim(),'🧭 ขั้นตอนวันนัด','Journey steps summary is concise without optional suffix');
    await page.locator('.mode-choice[data-mode="simple"]').click();
    assert.ok(await page.locator('#details').evaluate(x=>x.classList.contains('hidden')),'Journey editing stays hidden in simple mode');
    assert.equal(await page.locator('#primaryJourneyPhotoCount').textContent(),'4/5 รูป','Switching modes preserves detailed photo draft');

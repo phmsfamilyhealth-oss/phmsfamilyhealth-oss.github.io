@@ -371,3 +371,14 @@ test('family contact server validation checks extensions, 30-minute time order a
  assert.equal(validate({...base,weekdays:['mon','mon']}).error,'invalid_weekdays');
  assert.equal(validate({...base,daysMode:'government',weekdays:['mon','tue']}).ok,true);
 });
+
+test('optional section headings stay concise, and government card shows weekdays only',()=>{
+ for(const heading of [
+  '🩺 เรื่องที่รักษา','🏥 ข้อมูล รพ.','📍 จุดติดต่อ','🧭 ขั้นตอนวันนัด',
+  '🪪 สิทธิและเดินทาง','🔬 รายการตรวจ','📞 ติดต่อเลื่อนนัด'
+ ])assert.ok(page.includes('<summary>'+heading+'</summary>'),heading+' missing');
+ assert.ok(script.includes("['government','🏛️ วันราชการ','จันทร์–ศุกร์']"));
+ assert.ok(!script.includes("['government','🏛️ วันราชการ','จันทร์–ศุกร์ 08:30"));
+ assert.ok(script.includes("if($('rescheduleDays').value==='government')"),'Selecting government days still preselects office hours');
+ assert.ok(page.includes('white-space:normal!important;overflow:visible!important;text-overflow:clip!important'),'Labels must wrap, not ellipsize');
+});
