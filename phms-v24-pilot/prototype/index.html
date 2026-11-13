@@ -1303,8 +1303,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  <textarea id="rescheduleInstructions" rows="2" maxlength="600" placeholder="เช่น ติดต่อเฉพาะช่วงเช้า หรือแจ้ง HN ก่อนเลื่อนนัด"></textarea>
  <p id="rescheduleDraftNote" class="help">แก้ไขข้อมูลได้สำหรับนัดนี้ · การเปลี่ยนแปลงยังไม่อัปเดตทะเบียนโรงพยาบาลที่ยืนยันแล้ว</p>
  <div id="familyContactSaveBox">
-  <button type="button" id="familyContactSave" class="secondary" disabled aria-describedby="familyContactSaveHint">💾 บันทึกข้อมูลติดต่อให้ครอบครัวใช้ซ้ำ</button>
-  <p id="familyContactSaveHint" class="phms-family-contact-hint" role="status">เลือกบุคคลและโรงพยาบาลก่อน · ปุ่มนี้ใช้ได้เฉพาะ Owner/Admin</p>
+  <button type="button" id="familyContactSave" class="secondary" disabled aria-describedby="familyContactSaveHint">💾 เก็บข้อมูลติดต่อไว้ใช้ครั้งหน้า</button>
+  <p id="familyContactSaveHint" class="phms-family-contact-hint" role="status">เลือกคนและโรงพยาบาลก่อน · เฉพาะเจ้าของหรือผู้ดูแลครอบครัว</p>
  </div>
  <p id="familyContactSaveStatus" role="status" class="help"></p>
 </div>
@@ -2582,12 +2582,12 @@ function syncFamilyContactSaveUI(phase=''){
  const button=$('familyContactSave'),hint=$('familyContactSaveHint');
  button.disabled=familyContactSaving||!ready||!familyContactCanWrite;
  button.setAttribute('aria-disabled',String(button.disabled));
- if(!ready)hint.textContent='เลือกบุคคลและโรงพยาบาลก่อน · บันทึกใช้ซ้ำได้เฉพาะ Owner/Admin';
+ if(!ready)hint.textContent='เลือกคนและโรงพยาบาลก่อน · เฉพาะเจ้าของหรือผู้ดูแลครอบครัว';
  else if(phase==='checking')hint.textContent='กำลังตรวจสิทธิ์บันทึกข้อมูลของครอบครัว…';
  else if(phase==='unavailable')hint.textContent='ยังตรวจสอบสิทธิ์ไม่ได้ · กรุณาลองเปิดหัวข้อนี้อีกครั้ง';
- else if(!familyContactCanWrite)hint.textContent='บัญชีนี้ไม่มีสิทธิ์บันทึกข้อมูลใช้ซ้ำ · เฉพาะ Owner/Admin';
+ else if(!familyContactCanWrite)hint.textContent='บัญชีนี้บันทึกไม่ได้ · ให้เจ้าของหรือผู้ดูแลครอบครัวบันทึก';
  else if(familyContactSaving)hint.textContent='กำลังบันทึกข้อมูลให้ครอบครัว…';
- else hint.textContent='Owner/Admin · บันทึกให้ครอบครัวใช้ร่วมกัน ไม่เปลี่ยนทะเบียนโรงพยาบาลกลาง';
+ else hint.textContent='บันทึกไว้ให้คนในครอบครัวใช้ครั้งหน้า · ไม่แก้ข้อมูลโรงพยาบาลกลาง';
 }
 syncFamilyContactSaveUI();
 async function familyContactApi(action,data){
