@@ -236,6 +236,23 @@ try {
    assert.equal((await officeDay.locator('small').textContent()).trim(),'จันทร์–ศุกร์');
    assert.ok(!(await officeDay.textContent()).includes('08:30'),'Day card must not repeat office time');
    assert.ok(!(await officeDay.textContent()).includes('แนะนำ'),'Day card should not add an advisory label');
+   // Accessibility stress: on a narrow iPhone with 175% heading text,
+   // labels must wrap rather than silently truncate or overlap the status badge.
+   await page.setViewportSize({width:320,height:700});
+   const enlargedTitle=await page.locator('#contactRescheduleBox > summary').evaluate(summary=>{
+    const label=summary.querySelector('.phms-summary-label');
+    if(!label)return {found:false};
+    summary.style.setProperty('font-size','1.75rem','important');
+    const computed=getComputedStyle(label),rect=label.getBoundingClientRect();
+    const result={found:true,whiteSpace:computed.whiteSpace,
+      clipped:label.scrollWidth>label.clientWidth+1,height:rect.height};
+    summary.style.removeProperty('font-size');
+    return result;
+   });
+   assert.equal(enlargedTitle.found,true,'Optional summary should expose its label to assistive technology');
+   assert.equal(enlargedTitle.whiteSpace,'normal','Large fonts must wrap instead of ellipsizing');
+   assert.equal(enlargedTitle.clipped,false,'Large-font headings must not be horizontally clipped');
+   await page.setViewportSize({width:390,height:844});
    assert.equal(await page.locator('#rescheduleHourCards .phms-pick').count(),4);
    await page.locator('#rescheduleHourCards [data-choice="morning"]').click();
    assert.equal(await page.locator('#rescheduleHours').inputValue(),'morning');
