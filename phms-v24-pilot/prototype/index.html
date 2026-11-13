@@ -1580,8 +1580,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #procedurePreviewBox #procedureHistoryHint[hidden],
 #editor #procedurePreviewBox #procedureSelectedHeading[hidden],
 #editor #procedurePreviewBox #procedureStatus[hidden]{display:none!important}
+/* PHMS v2.4.50 — same compact entry pattern as care topic; Enter or blur adds. */
+#editor #procedurePreviewBox #procedureEntry{width:100%!important;box-sizing:border-box!important;min-height:52px!important}
+#editor #procedurePreviewBox #procedureAdd[hidden]{display:none!important}
+#editor #procedurePreviewBox label[for="procedureEntry"].phms-choice-concealed{display:none!important}
+#editor #procedurePreviewBox .actions.phms-choice-concealed{display:none!important}
+#editor #procedurePreviewBox .actions:not(.phms-choice-concealed){display:block!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.49</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.50</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -1672,7 +1678,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help">ยังไม่มีนัดที่บันทึกไว้? ต้องบันทึกนัดก่อนจึงจะเพิ่มค่าใช้จ่ายหรือยาได้</p>
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
-<details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p id="procedureHistoryHint" class="help" hidden>เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureHistoryCards" class="phms-choice-grid" role="group" aria-label="รายการตรวจจากประวัติ" hidden></div><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์" hidden></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
+<details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p id="procedureHistoryHint" class="help" hidden>เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureHistoryCards" class="phms-choice-grid" role="group" aria-label="รายการตรวจจากประวัติ" hidden></div><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์" hidden></div><label for="procedureEntry" class="phms-choice-concealed">รายการตรวจอื่น</label><div class="actions phms-choice-concealed"><input id="procedureEntry" maxlength="160" autocomplete="off" placeholder="🔎 ค้นหาหรือพิมพ์รายการตรวจใหม่"><button type="button" id="procedureAdd" hidden>+ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 ใช้นัดเดิม </summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
@@ -2512,7 +2518,7 @@ procedureMoreButton.addEventListener('click',()=>{
 });
 $('procedureCommonCards').append(procedureMoreButton);
 const procedureCustomLabel=document.querySelector('label[for="procedureEntry"]');
-procedureCustomLabel.textContent='🔎 ค้นหาหรือพิมพ์รายการตรวจใหม่';
+procedureCustomLabel.textContent='รายการตรวจอื่น';
 const procedureCustomActions=$('procedureEntry').closest('.actions');
 function syncProcedureChoices(){
  // Procedures are multi-select: always show all preset and historical choices.
@@ -2556,10 +2562,11 @@ function renderProcedurePreview(){
 function addProcedurePreview(){
  const name=$('procedureEntry').value.trim(),key=name.normalize('NFKC').toLocaleLowerCase('th-TH');
  if(!name||name.length>160||procedurePreviewItems.length>=30||procedurePreviewItems.some(x=>x.normalize('NFKC').toLocaleLowerCase('th-TH')===key))return;
- procedurePreviewItems.push(name);$('procedureEntry').value='';renderProcedurePreview();
+ procedurePreviewItems.push(name);$('procedureEntry').value='';procedurePickerExpanded=false;renderProcedurePreview();
 }
 $('procedureAdd').addEventListener('click',addProcedurePreview);
 $('procedureEntry').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();addProcedurePreview();}});
+$('procedureEntry').addEventListener('blur',()=>{if(procedurePickerExpanded&&$('procedureEntry').value.trim())addProcedurePreview();});
 
 async function previewReadApi(action,parameters={}){
  const endpoint=document.querySelector('meta[name="phms-read-api"]')?.content;
