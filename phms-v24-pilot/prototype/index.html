@@ -1306,8 +1306,79 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  }
 }
 #editor .native-picker-shell.is-empty>.native-picker-prompt{color:#8c857d!important}
+
+/* PHMS v2.4.35 — compact consistent disclosure cards. */
+#editor #scenarioFlow #relatedAppointmentBox,
+#editor #scenarioFlow #appointmentHistoryDisclosure{
+ box-sizing:border-box!important;background:#fff!important;
+ border:1px solid #e6d7c4!important;border-radius:12px!important;
+ padding:9px 12px!important;margin:8px 0!important;
+ min-height:54px!important;
+}
+#editor #scenarioFlow #relatedAppointmentBox>summary,
+#editor #scenarioFlow #appointmentHistoryDisclosure>summary{
+ font-size:.98rem!important;font-weight:700!important;
+ line-height:1.5!important;padding:0!important;margin:0!important;
+ color:#302515!important;
+}
+#editor .phms-ui-version{font-size:.78rem;font-weight:650;color:#765a36;
+ background:#f5e7d3;border-radius:10px;padding:3px 8px;white-space:nowrap}
+/* Date and time: one complete border; one unobstructed icon; one Thai placeholder/value.
+   Desktop keeps native picker for keyboard and calendar access; touch keeps LINE LIFF behavior. */
+@media (hover:hover) and (pointer:fine){
+ #editor .native-picker-shell{
+  box-sizing:border-box!important;height:58px!important;min-height:58px!important;
+  border:1.5px solid #bea385!important;border-radius:12px!important;
+  overflow:hidden!important;background:#fff!important;isolation:isolate!important;
+ }
+ #editor .native-picker-shell:focus-within{
+  border-color:#936934!important;outline:1px solid #936934!important;outline-offset:0!important;
+ }
+ #editor .native-picker-shell>input[type="date"],
+ #editor .native-picker-shell>input[type="time"]{
+  position:absolute!important;inset:0!important;display:block!important;
+  opacity:1!important;height:100%!important;min-height:0!important;width:100%!important;
+  padding:0 12px!important;border:0!important;outline:0!important;
+  box-shadow:none!important;background:transparent!important;
+  z-index:2!important;appearance:auto!important;-webkit-appearance:auto!important;
+  color:transparent!important;-webkit-text-fill-color:transparent!important;
+ }
+ #editor .native-picker-shell:not(:focus-within)>input::-webkit-datetime-edit,
+ #editor .native-picker-shell:not(:focus-within)>input::-webkit-datetime-edit-fields-wrapper,
+ #editor .native-picker-shell:not(:focus-within)>input::-webkit-datetime-edit-text,
+ #editor .native-picker-shell:not(:focus-within)>input::-webkit-datetime-edit-day-field,
+ #editor .native-picker-shell:not(:focus-within)>input::-webkit-datetime-edit-month-field,
+ #editor .native-picker-shell:not(:focus-within)>input::-webkit-datetime-edit-year-field,
+ #editor .native-picker-shell:not(:focus-within)>input::-webkit-datetime-edit-hour-field,
+ #editor .native-picker-shell:not(:focus-within)>input::-webkit-datetime-edit-minute-field{
+  color:transparent!important;-webkit-text-fill-color:transparent!important;
+ }
+ #editor .native-picker-shell:focus-within>input[type="date"],
+ #editor .native-picker-shell:focus-within>input[type="time"],
+ #editor .native-picker-shell:focus-within>input::-webkit-datetime-edit{
+  color:#302519!important;-webkit-text-fill-color:#302519!important;
+ }
+ #editor .native-picker-shell>.native-picker-prompt{
+  position:absolute!important;display:flex!important;align-items:center!important;
+  left:14px!important;right:48px!important;top:0!important;bottom:0!important;
+  width:auto!important;min-height:0!important;padding:0!important;
+  margin:0!important;transform:none!important;background:transparent!important;
+  z-index:3!important;pointer-events:none!important;white-space:nowrap!important;
+  overflow:hidden!important;text-overflow:ellipsis!important;
+ }
+ #editor .native-picker-shell.is-empty>.native-picker-prompt{color:#958b81!important}
+ #editor .native-picker-shell:focus-within>.native-picker-prompt{display:none!important}
+ #editor .native-picker-shell>input::-webkit-calendar-picker-indicator{
+  opacity:1!important;display:block!important;cursor:pointer!important;
+  position:relative!important;z-index:4!important;pointer-events:auto!important;
+ }
+}
+/* Do not show a second selection field after a typed doctor is confirmed. */
+#editor #doctorQuickCards .adaptive-provider-choice[aria-pressed="true"]{
+ background:#fff0d9!important;border:2px solid #92683d!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.35</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -1396,7 +1467,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
 <details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจแนะนำ (เลือกได้หลายอย่าง)</p><p id="procedureHistoryHint" class="help">เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureHistoryCards" class="phms-choice-grid" role="group" aria-label="รายการตรวจจากประวัติ" hidden></div><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
-<details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดครั้งก่อน (ถ้ามี)</summary>
+<details id="relatedAppointmentBox"><summary>🔗 ใช้นัดเดิม (ถ้ามี)</summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
 <p id="relatedStatus" class="help" role="status">กำลังตรวจประวัตินัด…</p><button type="button" id="relatedClear" class="secondary hidden" style="margin-bottom:10px">ไม่เชื่อมนัดเดิม</button><div id="relatedCards" class="appointment-cards" role="group" aria-label="รายการนัดเดิม"></div>
@@ -1756,6 +1827,41 @@ function refreshProviderPicker(changed=''){
 function selectedClinicianId(){return document.getElementById('providerClinician').value;}
 for(const kind of ['hospital','unit','clinician']){const input=document.getElementById(kind+'Search');input.addEventListener('input',e=>{if(e.isComposing)return;const state=comboState[kind],select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');state.searchText=input.value;state.selectedItem=null;state.isOpen=true;select.value='';if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});input.addEventListener('focus',()=>{comboState[kind].searchText=input.value;comboState[kind].isOpen=true;refreshProviderPicker();});input.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCombo(kind);return;}if(e.key==='ArrowDown'){e.preventDefault();document.getElementById(kind+'SearchResults').querySelector('button:not(:disabled)')?.focus();}if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){const first=document.getElementById(kind+'SearchResults').querySelector('button:not(:disabled)');if(first){e.preventDefault();first.click();}}});}
 document.addEventListener('pointerdown',event=>{for(const kind of ['hospital','unit','clinician']){if(event.target!==document.getElementById(kind+'Search')&&!document.getElementById(kind+'SearchResults').contains(event.target))closeCombo(kind);}});
+
+/* Accept typed doctor names like the other appointment fields.
+   Draft is not a verified clinician and never creates a registry record. */
+function commitTypedClinician(){
+ const text=doctorSearchInput.value.trim().replace(/\s+/g,' ').slice(0,160);
+ if(!doctorSearchExpanded||!text)return;
+ const already=comboState.clinician.selectedItem;
+ if(already&&normalizedMasterName(already.label)===normalizedMasterName(text))return;
+ const state=providerPickerState(authorizedCatalog,
+  document.getElementById('providerOrg').value,
+  document.getElementById('providerUnit').value,
+  document.getElementById('providerClinician').value);
+ const match=(state.clinicians||[]).find(x=>normalizedMasterName(x.label)===normalizedMasterName(text));
+ const select=document.getElementById('providerClinician');
+ if(match){select.value=match.value;comboState.clinician.selectedItem=match;}
+ else{select.value='';comboState.clinician.selectedItem={draftOnly:true,label:text};}
+ comboState.clinician.searchText=match?match.label:text;
+ doctorSearchInput.value=comboState.clinician.searchText;
+ document.getElementById('doctor').value=text;
+ doctorSearchExpanded=false;
+ closeCombo('clinician');
+ syncProviderNames();
+ drawRecentDoctorCards(state.clinicians||[]);
+ document.getElementById('editor').dispatchEvent(new Event('change',{bubbles:true}));
+}
+doctorSearchInput.addEventListener('keydown',event=>{
+ if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229){
+  event.preventDefault();event.stopImmediatePropagation();
+  commitTypedClinician();doctorSearchInput.blur();
+ }
+},true);
+doctorSearchInput.addEventListener('blur',()=>{
+ // Allow click on a search suggestion to complete before converting typed text to a draft.
+ setTimeout(()=>{if(doctorSearchExpanded)commitTypedClinician();},0);
+});
 function syncProviderNames(){
  if(!authorizedCatalog)return;
  const org=authorizedCatalog.organizations.find(x=>x.id===document.getElementById('providerOrg').value);
@@ -2821,7 +2927,7 @@ function renderRelatedCards(){
  $('relatedStatus').textContent=filtered.length?'พบนัด '+filtered.length+' รายการ · เลือกนัดเดิมเพื่อเติมข้อมูล':'ไม่พบนัดเดิมที่ตรงกับคำค้น';
  const chosen=relatedAllItems.find(a=>a.id===selected);
  const summary=$('relatedAppointmentBox').querySelector('summary');
- summary.textContent=chosen?'🔗 ใช้ข้อมูลจากนัดเดิม: '+(chosen.title||'นัดหมาย'):'🔗 ใช้ข้อมูลจากนัดเดิม (ถ้ามี)';
+ summary.textContent=chosen?'🔗 ใช้นัดเดิม: '+(chosen.title||'นัดหมาย'):'🔗 ใช้นัดเดิม (ถ้ามี)';
  summary.setAttribute('aria-label',chosen?'แตะเพื่อเปลี่ยนนัดเดิม: '+(chosen.title||'นัดหมาย'):'แตะเพื่อเลือกข้อมูลจากนัดเดิม');
 }
 async function loadRelatedAppointments(){
@@ -3433,7 +3539,7 @@ const appointmentHistoryDisclosure=document.createElement('details');
 appointmentHistoryDisclosure.id='appointmentHistoryDisclosure';
 appointmentHistoryDisclosure.className='progressive-extras';
 const appointmentHistorySummary=document.createElement('summary');
-appointmentHistorySummary.textContent='🔄 ประวัติการเลื่อนนัดนี้ (ถ้ามี)';
+appointmentHistorySummary.textContent='🔄 เคยเลื่อนนัดไหม (ถ้ามี)';
 appointmentHistoryDisclosure.append(appointmentHistorySummary,appointmentStateBox);
 scenarioSection.append(appointmentHistoryDisclosure);
 function updateAppointmentStateUI(){
