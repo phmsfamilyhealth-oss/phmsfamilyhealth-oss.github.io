@@ -2051,8 +2051,32 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment[aria-pressed="true"]{
  background:#76532f!important;color:#fff!important;
 }
+
+/* PHMS v2.4.70 — reduce only the visual weight of the header mode switch. */
+.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented{
+ display:inline-flex!important;flex:0 0 auto!important;flex-direction:row!important;flex-wrap:nowrap!important;
+ width:max-content!important;min-width:0!important;max-width:100%!important;
+ margin:0!important;padding:2px!important;gap:2px!important;
+ border:0!important;outline:0!important;box-shadow:none!important;
+ border-radius:999px!important;background:#f4e9d9!important;
+}
+.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment{
+ display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:center!important;
+ width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:36px!important;
+ margin:0!important;padding:4px 10px!important;border:0!important;outline:0!important;box-shadow:none!important;
+ border-radius:999px!important;background:#f4e9d9!important;color:#704f31!important;
+ font-family:inherit!important;font-size:14px!important;font-weight:650!important;line-height:1.2!important;
+ white-space:nowrap!important;
+}
+.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment.is-active,
+.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment[aria-pressed="true"]{
+ border:0!important;outline:0!important;box-shadow:none!important;background:#76532f!important;color:#fff!important;font-weight:750!important;
+}
+@media(max-width:520px){
+ .phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment{min-height:34px!important;padding:4px 9px!important;font-size:13px!important}
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.69</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.70</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
