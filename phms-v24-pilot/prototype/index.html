@@ -1307,13 +1307,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 #editor .native-picker-shell.is-empty>.native-picker-prompt{color:#8c857d!important}
 
-/* PHMS v2.4.35 — compact consistent disclosure cards. */
+/* PHMS v2.4.36 — compact same-size disclosure cards, optional fields use * only. */
 #editor #scenarioFlow #relatedAppointmentBox,
 #editor #scenarioFlow #appointmentHistoryDisclosure{
  box-sizing:border-box!important;background:#fff!important;
  border:1px solid #e6d7c4!important;border-radius:12px!important;
- padding:9px 12px!important;margin:8px 0!important;
- min-height:54px!important;
+ padding:7px 12px!important;margin:8px 0!important;
+ min-height:0!important;
 }
 #editor #scenarioFlow #relatedAppointmentBox>summary,
 #editor #scenarioFlow #appointmentHistoryDisclosure>summary{
@@ -1377,8 +1377,19 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #doctorQuickCards .adaptive-provider-choice[aria-pressed="true"]{
  background:#fff0d9!important;border:2px solid #92683d!important;
 }
+
+/* v2.4.36: keep both collapsed disclosures at their original compact row height. */
+#editor #scenarioFlow #relatedAppointmentBox:not([open]),
+#editor #scenarioFlow #appointmentHistoryDisclosure:not([open]){
+ padding:7px 12px!important;min-height:0!important;height:auto!important;
+ border:1px solid #e6d7c4!important;background:#fff!important;
+}
+#editor #scenarioFlow #relatedAppointmentBox:not([open])>summary,
+#editor #scenarioFlow #appointmentHistoryDisclosure:not([open])>summary{
+ line-height:1.35!important;padding:0!important;margin:0!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.35</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.36</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -1388,7 +1399,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="timebox"><label for="time">เวลา <span id="timeRequired" class="required-star" aria-label="จำเป็นต้องกรอก">*</span></label><input type="time" id="time" step="300" aria-describedby="timeThaiPreview"><p id="timeThaiPreview" class="help thai-preview" aria-live="polite" hidden></p></div>
 <section id="appointmentPhotosSection" aria-label="รูปใบนัด">
 <div id="historicalPhotoChoice" class="hidden"><label for="hasAppointmentPhotos">มีรูปใบนัดหรือไม่</label><select id="hasAppointmentPhotos"><option value="">เลือกก่อนว่ามีรูปหรือไม่</option><option value="yes">มีรูปใบนัด</option><option value="no">ไม่มีรูปใบนัด</option></select></div>
-<div id="appointmentPhotoPicker" class="hidden"><label for="documents">รูปใบนัด (ถ้ามี)</label><p class="help">ใส่ได้สูงสุด 2 รูป เช่น ใบนัดกระดาษ หรือภาพนัดในแอป</p><input type="file" id="documents" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple class="hidden" aria-label="เลือกรูปใบนัด">
+<div id="appointmentPhotoPicker" class="hidden"><label for="documents">รูปใบนัด </label><p class="help">ใส่ได้สูงสุด 2 รูป เช่น ใบนัดกระดาษ หรือภาพนัดในแอป</p><input type="file" id="documents" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple class="hidden" aria-label="เลือกรูปใบนัด">
 <button type="button" id="addAppointmentPhoto" class="secondary">+ เพิ่มรูปใบนัด</button><p id="filehelp" class="help" role="status">0/2 รูป · ยังไม่บันทึกจริง</p><div id="appointmentPhotoList" class="appointment-photo-list"></div></div>
 <dialog id="appointmentPhotoDialog" aria-label="ดูรูปใบนัด"><img id="appointmentPhotoLarge" alt="รูปใบนัดที่เลือก"><button type="button" id="closeAppointmentPhoto" class="secondary">ปิดรูป</button></dialog>
 </section>
@@ -1399,8 +1410,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <input type="hidden" id="department">
 <div id="details" class="hidden">
 <details id="hospitalLocationDetails"><summary>🏥 ข้อมูล รพ.</summary>
-<label for="hospital_hn">เลข HN (ถ้ามี)</label><input id="hospital_hn" maxlength="80">
-<label for="hospital_vn">เลข VN (ถ้ามี)</label><input id="hospital_vn" maxlength="80">
+<label for="hospital_hn">เลข HN </label><input id="hospital_hn" maxlength="80">
+<label for="hospital_vn">เลข VN </label><input id="hospital_vn" maxlength="80">
 
 </details>
 <details id="primaryLocationDetails">
@@ -1412,9 +1423,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  </div>
  <label for="location_detail">สถานที่ / จุดยื่นใบนัด</label><input id="location_detail" maxlength="240" placeholder="เช่น อาคารผู้ป่วยนอก ชั้น 2 จุดยื่นใบนัด">
 <label for="location_directions">🚶 วิธีเดินไป (ถ้าทราบ)</label><textarea id="location_directions" maxlength="600" rows="2" placeholder="เช่น เข้าประตู 2 ขึ้นลิฟต์ฝั่งขวาไปชั้น 2"></textarea>
-<label for="location_note">📝 หมายเหตุจุดติดต่อ (ถ้ามี)</label><textarea id="location_note" maxlength="600" rows="2" placeholder="เช่น จุดนี้ใช้สำหรับยื่นใบนัดก่อนพบแพทย์"></textarea>
+<label for="location_note">📝 หมายเหตุจุดติดต่อ </label><textarea id="location_note" maxlength="600" rows="2" placeholder="เช่น จุดนี้ใช้สำหรับยื่นใบนัดก่อนพบแพทย์"></textarea>
 <div class="phms-journey-photo-section" id="primaryJourneyPhotos">
- <div class="phms-journey-photo-heading"><strong>📷 รูปจุดติดต่อหลัก (ถ้ามี)</strong><span id="primaryJourneyPhotoCount" class="phms-journey-count">0/5 รูป</span></div>
+ <div class="phms-journey-photo-heading"><strong>📷 รูปจุดติดต่อหลัก </strong><span id="primaryJourneyPhotoCount" class="phms-journey-count">0/5 รูป</span></div>
  <p class="help">เพิ่มได้ 5 รูปจากหลายมุม เช่น ป้ายอาคาร ทางเดิน ลิฟต์ และหน้าเคาน์เตอร์</p>
  <div id="primaryJourneyGallery" class="phms-journey-photo-grid" aria-live="polite"></div>
  <input id="primaryJourneyFileInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple hidden aria-label="เลือกรูปประกอบจุดติดต่อหลัก">
@@ -1444,7 +1455,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <details><summary>🪪 สิทธิและเดินทาง</summary>
 <label for="coverage_type">สิทธิรักษา (ถ้าทราบ)</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
 <label for="arrival_lead_minutes" id="arrivalLeadLabel">ควรไปถึงโรงพยาบาลก่อนเวลานัดกี่นาที</label><select id="arrival_lead_minutes"><option value="15">15 นาที</option><option value="30" selected>30 นาที</option><option value="45">45 นาที</option><option value="60">1 ชั่วโมง</option><option value="90">1 ชั่วโมงครึ่ง</option><option value="120">2 ชั่วโมง</option><option value="150">2 ชั่วโมงครึ่ง</option><option value="180">3 ชั่วโมง</option></select><div id="arrivalLeadChoices" class="arrival-lead-choices" role="group" aria-labelledby="arrivalLeadLabel"></div><p id="arrivalLeadPreview" class="arrival-lead-preview" role="status" aria-live="polite" hidden></p><p class="help">15 นาทีเหมาะเฉพาะนัดที่โรงพยาบาลอนุญาตให้มาถึงใกล้เวลานัด โปรดตรวจสอบใบนัด</p></details>
-<details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล (ถ้ามี)</option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
+<details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล </option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
 <details id="outcomeDetails" class="hidden"><summary>📋 ผลการไปพบแพทย์</summary>
 <label for="visit_outcome_notes">หมอบอกว่าอย่างไร หรือรักษาอะไร</label><textarea id="visit_outcome_notes" maxlength="1000" rows="2"></textarea>
 <label for="diagnosis_summary">การวินิจฉัยตามเอกสาร</label><textarea id="diagnosis_summary" maxlength="1000" rows="2"></textarea>
@@ -1467,7 +1478,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
 <details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจแนะนำ (เลือกได้หลายอย่าง)</p><p id="procedureHistoryHint" class="help">เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureHistoryCards" class="phms-choice-grid" role="group" aria-label="รายการตรวจจากประวัติ" hidden></div><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
-<details id="relatedAppointmentBox"><summary>🔗 ใช้นัดเดิม (ถ้ามี)</summary>
+<details id="relatedAppointmentBox"><summary>🔗 ใช้นัดเดิม </summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
 <p id="relatedStatus" class="help" role="status">กำลังตรวจประวัตินัด…</p><button type="button" id="relatedClear" class="secondary hidden" style="margin-bottom:10px">ไม่เชื่อมนัดเดิม</button><div id="relatedCards" class="appointment-cards" role="group" aria-label="รายการนัดเดิม"></div>
@@ -1537,7 +1548,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </div>
 </details>
 <p class="help">เอกสาร งานมอบหมาย และแจ้งเตือนยังรอ API ตรวจสิทธิ์ จึงยังไม่เปิดการบันทึก</p>
-<input type="hidden" id="doctor"></div><label for="purpose">ชื่อนัดหมาย</label><input id="purpose" type="text" maxlength="80" placeholder="เช่น ปวดเข่า, ฟังผลเลือด, รับยาเดิม" autocomplete="off"><p class="help">ตั้งชื่อสั้น ๆ เพื่อให้รู้ว่าไปโรงพยาบาลเรื่องอะไร</p><p id="historicalGuide" class="help hidden" role="status">บันทึกการไปพบแพทย์ย้อนหลัง: ระบุเหตุผลที่ไปและผลหลังพบแพทย์ตามข้อมูลที่ทราบ ไม่ต้องกรอกเรื่องที่อยากบอกแพทย์ในอนาคต</p><label id="previsitLabel" for="previsitSymptoms">อาการหรือเรื่องที่อยากบอกหมอ (ถ้ามี)</label><textarea id="previsitSymptoms" maxlength="1000" rows="2" placeholder="เช่น ปวดเข่ามา 3 วัน หรือมีคำถามเรื่องยา"></textarea><p id="previsitHelp" class="help">ข้อมูลที่ผู้ใช้แจ้งเอง ยังไม่ใช่การวินิจฉัยจากแพทย์ และยังไม่บันทึกในโหมดทดลอง</p><label id="additionalNoteLabel" for="additionalNote">รายละเอียดเพิ่มเติม (ถ้ามี)</label><textarea id="additionalNote" maxlength="1000" rows="3" placeholder="อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม"></textarea>
+<input type="hidden" id="doctor"></div><label for="purpose">ชื่อนัดหมาย</label><input id="purpose" type="text" maxlength="80" placeholder="เช่น ปวดเข่า, ฟังผลเลือด, รับยาเดิม" autocomplete="off"><p class="help">ตั้งชื่อสั้น ๆ เพื่อให้รู้ว่าไปโรงพยาบาลเรื่องอะไร</p><p id="historicalGuide" class="help hidden" role="status">บันทึกการไปพบแพทย์ย้อนหลัง: ระบุเหตุผลที่ไปและผลหลังพบแพทย์ตามข้อมูลที่ทราบ ไม่ต้องกรอกเรื่องที่อยากบอกแพทย์ในอนาคต</p><label id="previsitLabel" for="previsitSymptoms">อาการหรือเรื่องที่อยากบอกหมอ </label><textarea id="previsitSymptoms" maxlength="1000" rows="2" placeholder="เช่น ปวดเข่ามา 3 วัน หรือมีคำถามเรื่องยา"></textarea><p id="previsitHelp" class="help">ข้อมูลที่ผู้ใช้แจ้งเอง ยังไม่ใช่การวินิจฉัยจากแพทย์ และยังไม่บันทึกในโหมดทดลอง</p><label id="additionalNoteLabel" for="additionalNote">รายละเอียดเพิ่มเติม </label><textarea id="additionalNote" maxlength="1000" rows="3" placeholder="อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม"></textarea>
 <div id="checklistBox"><label for="prepEntry">สิ่งที่ต้องเตรียม</label><div class="actions"><input id="prepEntry" maxlength="160" placeholder="พิมพ์รายการที่ต้องเตรียม"><button id="prepAdd" type="button">+ เพิ่ม</button></div><p id="prepProgress" role="status">เตรียมแล้ว 0/0 รายการ</p><div id="prepItems"></div></div><input type="hidden" id="prep">
 <p class="help" id="registryHelp">ชื่อโรงพยาบาล แผนก และแพทย์จะเติมอัตโนมัติจากทะเบียนที่ตรวจสอบแล้ว หากยังไม่มีชื่อแพทย์ในทะเบียน สามารถบันทึกนัดโดยไม่ระบุแพทย์ได้เมื่อเปิดระบบจริง</p>
 <p class="error" id="error" role="alert"></p><div class="actions"><button id="review" type="button" disabled>ตรวจทานข้อมูล</button></div>
@@ -2366,7 +2377,7 @@ function bindJourneyGallery(gallery,label,{list,input,add,count,status}){
    img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showJourneyImage(photo);}});
    const name=document.createElement('p');name.className='phms-journey-photo-name';
    name.textContent='รูป '+(index+1)+' · '+photo.name;
-   const caption=document.createElement('label');caption.textContent='คำอธิบายรูป (ถ้ามี)';
+   const caption=document.createElement('label');caption.textContent='คำอธิบายรูป ';
    const capInput=document.createElement('input');capInput.type='text';capInput.maxLength=140;
    capInput.value=photo.caption;capInput.placeholder='เช่น ทางขวาหลังลิฟต์';
    capInput.setAttribute('aria-label','คำอธิบายรูป '+(index+1)+' '+label);
@@ -2434,7 +2445,7 @@ const mainJourneyPhotoUI=bindJourneyGallery(primaryJourney,'จุดติด�
 function makeStopGallery(stop,label){
  const section=document.createElement('div');section.className='phms-journey-photo-section';
  const top=document.createElement('div');top.className='phms-journey-photo-heading';
- const heading=document.createElement('strong');heading.textContent='📷 รูปสถานที่ (ถ้ามี)';
+ const heading=document.createElement('strong');heading.textContent='📷 รูปสถานที่ ';
  const count=document.createElement('span');count.className='phms-journey-count';
  top.append(heading,count);
  const hint=document.createElement('p');hint.className='help';hint.textContent='แนบได้ไม่เกิน 5 รูปต่อขั้นตอน';
@@ -2484,10 +2495,10 @@ function renderVisitStops(){
   };
   field('ทำอะไร','text','เช่น เจาะเลือด หรือยื่นใบนัด','title');
   field('ไปที่ไหน (ถ้าทราบ)','text','เช่น อาคาร A ชั้น 1','place');
-  field('เวลา (ถ้ามี)','time','','time');
+  field('เวลา ','time','','time');
   for(const [labelText,key,placeholder] of [
    ['🚶 วิธีเดินไป (ถ้าทราบ)','directions','เช่น ลงลิฟต์แล้วเลี้ยวขวา'],
-   ['📝 หมายเหตุ (ถ้ามี)','note','เช่น ยื่นใบส่งตรวจก่อน']]){
+   ['📝 หมายเหตุ ','note','เช่น ยื่นใบส่งตรวจก่อน']]){
    const label=document.createElement('label');label.textContent=labelText;
    const input=document.createElement('textarea');input.rows=2;input.maxLength=600;
    input.value=stop[key]||'';input.placeholder=placeholder;
@@ -2496,7 +2507,7 @@ function renderVisitStops(){
    label.append(input);card.append(label);
   }
   const instructions=document.createElement('div');instructions.className='visit-stop-instructions';
-  const subheading=document.createElement('strong');subheading.textContent='📋 วิธีทำ / ขั้นตอนย่อย (ถ้ามี)';
+  const subheading=document.createElement('strong');subheading.textContent='📋 วิธีทำ / ขั้นตอนย่อย ';
   const sublist=document.createElement('div');sublist.className='visit-substep-list';
   const renderSubsteps=()=>{
    sublist.replaceChildren();
@@ -2927,7 +2938,7 @@ function renderRelatedCards(){
  $('relatedStatus').textContent=filtered.length?'พบนัด '+filtered.length+' รายการ · เลือกนัดเดิมเพื่อเติมข้อมูล':'ไม่พบนัดเดิมที่ตรงกับคำค้น';
  const chosen=relatedAllItems.find(a=>a.id===selected);
  const summary=$('relatedAppointmentBox').querySelector('summary');
- summary.textContent=chosen?'🔗 ใช้นัดเดิม: '+(chosen.title||'นัดหมาย'):'🔗 ใช้นัดเดิม (ถ้ามี)';
+ summary.textContent=chosen?'🔗 ใช้นัดเดิม: '+(chosen.title||'นัดหมาย'):'🔗 ใช้นัดเดิม ';
  summary.setAttribute('aria-label',chosen?'แตะเพื่อเปลี่ยนนัดเดิม: '+(chosen.title||'นัดหมาย'):'แตะเพื่อเลือกข้อมูลจากนัดเดิม');
 }
 async function loadRelatedAppointments(){
@@ -3433,7 +3444,7 @@ function makeFlowSection(id,title){
 }
 // Optional provider fields remain in the original picker and are only relocated once.
 const providerExtras=document.createElement('section');providerExtras.id='providerExtras';providerExtras.className='progressive-extras provider-inline-fields';
-const providerSummary=document.createElement('h3');providerSummary.textContent='แผนกและแพทย์ (ถ้ามี)';
+const providerSummary=document.createElement('h3');providerSummary.textContent='แผนกและแพทย์ ';
 // Keep the internal title node for existing observers, but do not insert a duplicate heading.
 const unitFieldLabel=document.querySelector('label[for="unitSearch"]');unitFieldLabel.before(providerExtras);
 moveRangeTo(unitFieldLabel,$('doctorHint'),providerExtras);
@@ -3539,7 +3550,7 @@ const appointmentHistoryDisclosure=document.createElement('details');
 appointmentHistoryDisclosure.id='appointmentHistoryDisclosure';
 appointmentHistoryDisclosure.className='progressive-extras';
 const appointmentHistorySummary=document.createElement('summary');
-appointmentHistorySummary.textContent='🔄 เคยเลื่อนนัดไหม (ถ้ามี)';
+appointmentHistorySummary.textContent='🔄 เคยเลื่อนนัดไหม ';
 appointmentHistoryDisclosure.append(appointmentHistorySummary,appointmentStateBox);
 scenarioSection.append(appointmentHistoryDisclosure);
 function updateAppointmentStateUI(){
@@ -3658,7 +3669,7 @@ for(const id of ['date','time','purpose','hospitalSearch','providerOrg','scenari
 for(const id of ['date','time','purpose','hospitalSearch','providerOrg','scenario','known','unitSearch'])$(id)?.addEventListener('change',updateSameDayAppointmentNotice);
 moveLabelAndInput('known',timeSection);
 timeSection.append($('timebox'),conflictNotice,$('appointmentPhotosSection'));
-const extrasSection=makeFlowSection('extrasFlow','4. เพิ่มเติม (ถ้ามี)');flowRoot.append(extrasSection);
+const extrasSection=makeFlowSection('extrasFlow','4. เพิ่มเติม ');flowRoot.append(extrasSection);
 // Detailed-mode categories; never clone patient inputs or create alternate state.
 const detailed=$('details');extrasSection.append(detailed);
 // A read-only guide is accessible from BOTH modes; editing stays in Detailed mode.
@@ -3921,29 +3932,6 @@ for(const [id,icon] of fieldDecorations){
  const span=document.createElement('span');span.className='field-icon';span.textContent=icon+' ';
  label.prepend(span);
 }
-const optionalLabels=[
- 'unitSearch','clinicianSearch','care_topic','previsitSymptoms','additionalNote',
- 'hospital_hn','hospital_vn','location_detail','contact_phone','coverage_type',
- 'arrival_lead_minutes','procedureEntry'
-];
-for(const id of optionalLabels){
- const label=document.querySelector('label[for="'+id+'"]');
- if(!label||label.querySelector('.optional-hint')||label.querySelector('.required-star'))continue;
- const raw=label.textContent.trim();
- if(!raw.includes('(ถ้ามี)')&&!raw.includes('(ถ้าทราบ)')){
-  const hint=document.createElement('span');hint.className='optional-hint';hint.textContent=' (ถ้ามี)';label.append(hint);
- }else{
-  // Preserve wording while styling only the optional qualifier.
-  for(const child of [...label.childNodes]){
-   if(child.nodeType!==Node.TEXT_NODE)continue;
-   const m=child.textContent.match(/\s*\((ถ้ามี|ถ้าทราบ)\)/);
-   if(!m)continue;
-   const rest=child.textContent.split(m[0]);const hint=document.createElement('span');
-   hint.className='optional-hint';hint.textContent=' ('+m[1]+')';
-   child.textContent=rest[0];child.after(hint,document.createTextNode(rest.slice(1).join(m[0])));
-  }
- }
-}
 $('purpose').required=true;
 const inPerson=$('selectedPersonLabel');inPerson.classList.add('person-banner');
 // Integrate the familiar LINE-style header into the single appointment editor card.
@@ -4153,7 +4141,7 @@ function updateProgressiveLayout(){
  $('scenarioFlowTitle').textContent='📅 นัดแบบไหน';
  $('mainFlowTitle').textContent='📝 ข้อมูลนัดหมาย';
  $('timeFlowTitle').textContent='🕒 วันและเวลา';
- $('extrasFlowTitle').textContent='🗂️ ข้อมูลเพิ่มเติม (ถ้ามี)';
+ $('extrasFlowTitle').textContent='🗂️ ข้อมูลเพิ่มเติม ';
  // Reveal the existing input groups only after a scenario card has been chosen.
  for(const id of ['mainFlow','timeFlow','extrasFlow']){const node=$(id),visible=!!$('personSelect').value&&scenarioChoiceMade;node.classList.toggle('hidden',!visible);node.hidden=!visible;}
  $('hospitalQuickCards').classList.toggle('hidden',!scenarioChoiceMade || $('hospitalQuickCards').children.length===0);
@@ -4232,24 +4220,14 @@ $('hasAppointmentPhotos').addEventListener('change',syncChoiceCards);
 $('scenario').addEventListener('change',syncChoiceCards);
 // Normalize optional wording after dynamic headings/labels have been finalized.
 function decorateOptionalWording(){
- const roots=[$('editor'),$('personPicker')].filter(Boolean);
- for(const root of roots){
+ // UI v2.4.36: absence of * already means optional. Never create optional text.
+ for(const root of [$('editor'),$('personPicker')].filter(Boolean)){
+  for(const hint of root.querySelectorAll('.optional-hint'))hint.remove();
   for(const el of root.querySelectorAll('label,summary,h2,h3')){
-   if(el.querySelector('.required-star'))continue;
-   // Only decorate explicit optional qualifiers; preserve any existing badges and child inputs.
    for(const node of [...el.childNodes]){
     if(node.nodeType!==Node.TEXT_NODE)continue;
-    const text=node.textContent||'';
-    const regex=/\s*\((ถ้ามี|ถ้าทราบ|ไม่บังคับ)\)/g;
-    if(!regex.test(text))continue;
-    regex.lastIndex=0;
-    const fragment=document.createDocumentFragment();let start=0,match;
-    while((match=regex.exec(text))){
-     if(match.index>start)fragment.append(document.createTextNode(text.slice(start,match.index)));
-     const hint=document.createElement('span');hint.className='optional-hint';hint.textContent=' ('+match[1]+')';fragment.append(hint);start=regex.lastIndex;
-    }
-    if(start<text.length)fragment.append(document.createTextNode(text.slice(start)));
-    node.replaceWith(fragment);
+    const cleaned=(node.textContent||'').replace(/\s*\(ถ้ามี\)/g,'');
+    if(cleaned!==node.textContent)node.textContent=cleaned;
    }
   }
  }
@@ -4264,9 +4242,7 @@ for(const [id,icon] of [['purpose','📝'],['hospitalSearch','🏥'],['unitSearc
 // One-line accessible disclosure: the optional hint is hidden only when a saved choice exists.
 const providerTitle=document.createElement('span');providerTitle.className='provider-summary-title';
 providerTitle.textContent='🏷️ แผนกและแพทย์';
-const providerOptional=document.createElement('span');providerOptional.className='optional-hint provider-summary-optional';
-providerOptional.textContent=' (ถ้ามี)';
-providerTitle.append(providerOptional);providerSummary.replaceChildren(providerTitle);
+providerSummary.replaceChildren(providerTitle);
 decorateOptionalWording();
 // Titles are also updated dynamically when an existing appointment is selected.
 const optionalObserver=new MutationObserver(records=>{
