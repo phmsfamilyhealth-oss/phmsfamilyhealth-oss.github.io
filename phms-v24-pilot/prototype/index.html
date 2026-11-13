@@ -4582,7 +4582,7 @@ function coverageOptionLabel(value){
 }
 function coverageEnglishLabel(value){
  const key=String(value||'').trim();
- const explicit=/^.+?\\s*\\(([^()]+)\\)\\s*$/.exec(key);
+ const explicit=/^.+?\s*\\(([^()]+)\\)\s*$/.exec(key);
  return explicit?explicit[1].trim():(COVERAGE_ENGLISH[key]||'Other health coverage');
 }
 function makeCoverageCard(value,label,selected,action){
