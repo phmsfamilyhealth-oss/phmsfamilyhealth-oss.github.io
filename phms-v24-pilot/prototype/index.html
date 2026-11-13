@@ -1420,8 +1420,41 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #careTopicSearchBox[hidden],#editor #careTopicSearchBox.hidden{display:none!important}
 #editor #careTopicSearchBox input{width:100%!important;box-sizing:border-box!important}
 @media(max-width:390px){#editor .phms-treatment-cards{gap:7px!important}#editor .phms-treatment-card{font-size:.94rem!important;min-height:60px!important;padding:9px!important}}
+
+/* v2.4.38: slimmer folded history rows, same border/background */
+#editor #scenarioFlow #relatedAppointmentBox:not([open]),
+#editor #scenarioFlow #appointmentHistoryDisclosure:not([open]){
+ min-height:45px!important;padding:6px 12px!important;
+ background:#fff!important;border:1px solid #e6d7c4!important;
+ border-radius:12px!important;box-sizing:border-box!important;
+}
+#editor #scenarioFlow #relatedAppointmentBox:not([open])>summary,
+#editor #scenarioFlow #appointmentHistoryDisclosure:not([open])>summary{
+ line-height:1.35!important;padding:1px 0!important;margin:0!important;
+}
+/* Match appointment choice card border strength and selected-state emphasis */
+#editor .phms-treatment-card{
+ border:1.8px solid #bb8960!important;
+ min-height:80px!important;padding:12px!important;
+ background:#fff!important;font-size:1rem!important;
+}
+#editor .phms-treatment-card[aria-pressed="true"]{
+ border:2px solid #86592d!important;background:#fff0d9!important;
+}
+#editor .phms-treatment-more{
+ border:1.8px dashed #b7895e!important;background:#fcf7f0!important;
+}
+#editor .phms-purpose-choices{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0;
+}
+#editor .phms-purpose-choices.hidden{display:none!important}
+#editor .phms-purpose-choice{
+ border:1.5px solid #c9a987;border-radius:12px;background:#fffaf4;
+ padding:9px;font-weight:650;text-align:left;min-height:46px;
+}
+@media(max-width:390px){#editor .phms-treatment-card{min-height:72px!important}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.37</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.38</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -2124,6 +2157,25 @@ $('openCanonicalFinance').addEventListener('click',()=>openExistingAppointmentWo
 $('openCanonicalMedication').addEventListener('click',()=>openExistingAppointmentWorkflow('medication'));
 
 let careTopicSearchExpanded=false;
+/* Display-only emoji hints by topic words. Never imply a verified diagnosis. */
+function treatmentTopicEmoji(topic){
+ const t=String(topic||'').toLocaleLowerCase('th-TH');
+ const categories=[
+  [/ต้อหิน|ต้อกระจก|สายตา|จักษุ|ดวงตา|ตา:|ophth|glaucoma|retina/, '👁️'],
+  [/ปัสสาวะ|ทางเดินปัสสาวะ|กระเพาะปัสสาวะ|ไต|urolog|urinary|uti/, '🚻'],
+  [/เบาหวาน|น้ำตาล|diabetes|glucose|hba1c/, '🩸'],
+  [/สะโพก|กระดูก|ข้อเข่า|ปวดเข่า|ข้อเสื่อม|ปวดข้อ|orthop|knee|hip/, '🦴'],
+  [/หัวใจ|ความดัน|หลอดเลือด|cardio|heart/, '❤️'],
+  [/ฟัน|ทันต|ช่องปาก|dental|tooth/, '🦷'],
+  [/สมอง|ความจำ|ประสาท|neuro|brain/, '🧠'],
+  [/ปอด|หอบ|ไอ|ทางเดินหายใจ|respirat|lung/, '🫁'],
+  [/ผิวหนัง|ผื่น|แพ้|derma|skin/, '🩹'],
+  [/ติดตาม|follow-up|follow up/, '📋'],
+  [/ตรวจเลือด|เจาะเลือด|blood test/, '🧪'],
+  [/ยา|รับยา|medication/, '💊']
+ ];
+ return categories.find(([pattern])=>pattern.test(t))?.[1]||'🩺';
+}
 function renderCareTopicSuggestions(){
  const field=$('care_topic'),host=$('careTopicSuggestions'),current=field.value.trim();
  const same=(a,b)=>String(a||'').trim().toLocaleLowerCase('th-TH')===String(b||'').trim().toLocaleLowerCase('th-TH');
@@ -2132,7 +2184,7 @@ function renderCareTopicSuggestions(){
  host.replaceChildren();
  for(const value of entries.slice(0,7)){
   const button=document.createElement('button');button.type='button';button.className='phms-treatment-card';
-  button.textContent='🩺 '+value;button.setAttribute('aria-pressed',String(same(value,current)));
+  button.textContent=treatmentTopicEmoji(value)+' '+value;button.setAttribute('aria-pressed',String(same(value,current)));
   button.addEventListener('click',()=>{
    field.value=value;careTopicSearchExpanded=false;
    field.dispatchEvent(new Event('change',{bubbles:true}));
@@ -2894,7 +2946,7 @@ for(const id of ['time','known','scenario','date']){
 updateArrivalLeadUI();
 
 let sourceAppointments=new Map();
-function refreshTopicSuggestions(){renderCareTopicSuggestions();renderHistoricalProcedureSuggestions();}
+function refreshTopicSuggestions(){renderCareTopicSuggestions();renderHistoricalProcedureSuggestions();if(typeof renderPurposeRecentChoices==='function')renderPurposeRecentChoices();}
 let autoPurposeValue='',purposeManuallyEdited=false;
 function proposedFollowupTitle(title){
  const original=String(title||'นัดติดตาม').trim();
@@ -2926,6 +2978,32 @@ function applyFollowupTitle(src){
  purposeManuallyEdited=false;
 }
 $('purpose').addEventListener('input',()=>{purposeManuallyEdited=true;});
+// Optional quick choices from this person's previous visit titles.
+// The appointment title remains a free-text field, not a diagnosis/catalog ID.
+const purposeInput=$('purpose');
+const titleSuggestions=document.createElement('div');
+titleSuggestions.id='purposeRecentChoices';titleSuggestions.className='phms-purpose-choices hidden';
+titleSuggestions.setAttribute('role','group');titleSuggestions.setAttribute('aria-label','ชื่อนัดที่เคยใช้');
+purposeInput.after(titleSuggestions);
+function renderPurposeRecentChoices(){
+ const titles=[...new Set((relatedAllItems||[]).map(a=>String(a.title||'').trim()).filter(Boolean))].slice(0,4);
+ titleSuggestions.replaceChildren();
+ const chosen=purposeInput.value.trim();
+ const filtered=titles.filter(t=>t!==chosen);
+ for(const title of filtered){
+  const b=document.createElement('button');b.type='button';b.className='phms-purpose-choice';b.textContent='📋 '+title;
+  b.addEventListener('click',()=>{purposeInput.value=title;purposeManuallyEdited=true;autoPurposeValue='';titleSuggestions.classList.add('hidden');purposeInput.dispatchEvent(new Event('change',{bubbles:true}));});
+  titleSuggestions.append(b);
+ }
+ titleSuggestions.classList.toggle('hidden',!filtered.length||document.activeElement!==purposeInput);
+}
+purposeInput.addEventListener('focus',renderPurposeRecentChoices);
+purposeInput.addEventListener('input',renderPurposeRecentChoices);
+purposeInput.addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&!e.isComposing){e.preventDefault();purposeInput.value=purposeInput.value.trim().replace(/\\s+/g,' ');purposeManuallyEdited=true;titleSuggestions.classList.add('hidden');purposeInput.blur();}
+});
+purposeInput.addEventListener('blur',()=>{titleSuggestions.classList.add('hidden');});
+
 const sourceFilled=new Map();
 function clearSourceFilled({personChanged=false}={}){
  // Explicit unlink discards linked source fields. A patient switch must discard ALL patient-specific details.
