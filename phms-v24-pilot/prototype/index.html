@@ -2305,7 +2305,7 @@ let careTopicSearchExpanded=false;
 function treatmentTopicBilingual(topic){
  const raw=String(topic||'').trim();
  // Accept an explicitly supplied English name in parentheses or after a separator.
- const explicit=/^(.+?)\\s*\\(([^()]+)\\)\\s*$/.exec(raw)||/^(.+?)\\s+[|–—-]\\s+([A-Za-z][A-Za-z0-9 ,/+()-]*)$/.exec(raw);
+ const explicit=/^(.+?)\s*\(([^()]+)\)\s*$/.exec(raw)||/^(.+?)\s+[|–—-]\s+([A-Za-z][A-Za-z0-9 ,/+()-]*)$/.exec(raw);
  if(explicit)return {thai:explicit[1].trim(),english:explicit[2].trim()};
  const terms=[
   [/ต้อหิน|glaucoma/i,'Glaucoma'],[/ต้อกระจก/i,'Cataract'],[/ตาแดง|เยื่อบุตาอักเสบ/i,'Conjunctivitis'],[/จอประสาทตา/i,'Retinal disorder'],[/ติดเชื้อปัสสาวะ|กระเพาะปัสสาวะอักเสบ|ทางเดินปัสสาวะอักเสบ/i,'Urinary tract infection (UTI)'],[/ติดเชื้อปัสสาวะบ่อย/i,'Recurrent urinary tract infection'],[/ไตเรื้อรัง|โรคไตเรื้อรัง/i,'Chronic kidney disease (CKD)'],[/นิ่วในไต/i,'Kidney stones'],[/เบาหวานชนิดที่\s*2|เบาหวาน/i,'Type 2 diabetes mellitus'],[/ความดันโลหิตสูง|ความดันสูง/i,'Hypertension'],[/ไขมันในเลือดสูง/i,'Dyslipidemia'],[/ข้อเข่าเสื่อม|เข่าเสื่อม/i,'Knee osteoarthritis'],[/ข้อสะโพกเสื่อม/i,'Hip osteoarthritis'],[/กระดูกพรุน/i,'Osteoporosis'],[/หัวใจขาดเลือด/i,'Ischemic heart disease'],[/หัวใจล้มเหลว/i,'Heart failure'],[/หัวใจเต้นผิดจังหวะ/i,'Cardiac arrhythmia'],[/หลอดเลือดสมอง|อัมพฤกษ์|อัมพาต/i,'Stroke'],[/สมองเสื่อม/i,'Dementia'],[/พาร์กินสัน/i,'Parkinson disease'],[/หอบหืด/i,'Asthma'],[/ปอดอุดกั้นเรื้อรัง/i,'Chronic obstructive pulmonary disease (COPD)'],[/ภูมิแพ้/i,'Allergy'],[/ผื่นแพ้/i,'Allergic dermatitis'],[/กรดไหลย้อน/i,'Gastroesophageal reflux disease (GERD)'],[/กระเพาะอาหารอักเสบ/i,'Gastritis'],[/โลหิตจาง/i,'Anemia'],[/ธาลัสซีเมีย/i,'Thalassemia'],[/มะเร็ง/i,'Cancer'],[/ติดตามหลังผ่าตัด|ติดตามหลังการผ่าตัด/i,'Postoperative follow-up'],[/ผ่าตัดสะโพก/i,'Hip surgery follow-up'],[/ปวดเข่า/i,'Knee pain'],[/ปวดหลัง/i,'Back pain'],[/ปวดข้อ/i,'Joint pain'],[/นอนไม่หลับ/i,'Insomnia'],[/ความจำเสื่อม/i,'Memory impairment']
@@ -4578,11 +4578,12 @@ const COVERAGE_ENGLISH={
 };
 function coverageOptionLabel(value){
  const option=[...coverageSelect.options].find(x=>x.value===value);
- return (option?.textContent||value).replace(/\\s*\\/\\s*30\\s*บาท/,'').replace(/\\s*\\/\\s*เบิกตรง/,'').trim()||value;
+ return (option?.textContent||value).replace(/\s*\/\s*30\s*บาท/,'').replace(/\s*\/\s*เบิกตรง/,'').trim()||value;
 }
 function coverageEnglishLabel(value){
  const key=String(value||'').trim();
- return COVERAGE_ENGLISH[key]||'Other health coverage';
+ const explicit=/^.+?\\s*\\(([^()]+)\\)\\s*$/.exec(key);
+ return explicit?explicit[1].trim():(COVERAGE_ENGLISH[key]||'Other health coverage');
 }
 function makeCoverageCard(value,label,selected,action){
  const button=document.createElement('button');button.type='button';
