@@ -1531,9 +1531,19 @@ function drawAdaptiveProviderCards(kind,choices){
   kind==='hospital'?(a.hospital_name||a.hospital):
   (a.department_name||a.department||'')
  )).filter(Boolean));
- const featured=entries.filter(item=>item.value===selected||historyNames.has(normalizedMasterName(item.label||''))||
+ const featured=entries.filter(item=>item.value===selected||historyNames.has(normalizedMasterName(String(item.label||'').replace(/\s*\([^()]+\)\s*$/,'')))||
   historyNames.has(normalizedMasterName(item.name||''))).slice(0,5);
+ const draft=comboState[kind].selectedItem?.draftOnly?comboState[kind].selectedItem:null;
  ui.cards.replaceChildren();
+ if(draft){
+  const provisional=document.createElement('button');provisional.type='button';
+  provisional.className='adaptive-provider-choice';
+  provisional.textContent=(kind==='hospital'?'🏥 ':'🏷️ ')+draft.label+' · ร่าง';
+  provisional.setAttribute('aria-pressed','true');
+  provisional.setAttribute('aria-label','ชื่อที่พิมพ์ไว้ในร่างนัด ยังบันทึกจริงไม่ได้');
+  provisional.addEventListener('click',()=>{ui.expanded=true;drawAdaptiveProviderCards(kind,entries);ui.search.focus();});
+  ui.cards.append(provisional);
+ }
  for(const item of featured){
   const btn=document.createElement('button');btn.type='button';btn.className='adaptive-provider-choice';
   const active=item.value===selected;
