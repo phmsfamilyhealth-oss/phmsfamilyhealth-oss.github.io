@@ -1740,8 +1740,21 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .phms-appointment-header .phms-header-mode-switch .mode-choice{min-height:34px!important;padding:5px 11px!important;border-radius:7px!important;font-size:.84rem!important;line-height:1.2!important;}
 .phms-appointment-header .phms-header-mode-switch .mode-choice[aria-pressed=true]{background:#76532f!important;color:#fff!important;box-shadow:0 1px 2px #4d352022;}
 @media(max-width:380px){.phms-appointment-header .phms-header-mode-switch .mode-choice{padding:5px 8px!important;font-size:.8rem!important;}}
+
+/* v2.4.59 — One compact accessible toggle switch, aligned under the version at top-right. */
+.phms-appointment-header .phms-header-mode-switch{display:flex!important;flex-direction:row!important;justify-content:flex-end!important;align-items:center!important;width:100%!important;margin:3px 0 2px!important;padding:0!important;gap:0!important;background:transparent!important;border:0!important;}
+.phms-appointment-header .phms-header-mode-switch .mode-label,.phms-appointment-header .phms-header-mode-switch .mode-hint{display:none!important;}
+.phms-appointment-header .phms-mode-switch-wrap{display:flex!important;justify-content:flex-end!important;width:auto!important;padding:0!important;margin:0!important;background:transparent!important;border:0!important;}
+.phms-appointment-header .phms-mode-switch{display:inline-flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;min-height:30px!important;padding:3px 0 3px 8px!important;border:0!important;border-radius:18px!important;background:transparent!important;color:#65472b!important;font-size:12px!important;font-weight:700!important;line-height:1.2!important;box-shadow:none!important;cursor:pointer!important;}
+.phms-appointment-header .phms-mode-switch-label{white-space:nowrap!important;}
+.phms-appointment-header .phms-mode-switch-track{position:relative!important;display:inline-block!important;flex:0 0 40px!important;width:40px!important;height:23px!important;border-radius:20px!important;background:#c9bba8!important;border:1px solid #a98d6d!important;transition:background .16s ease!important;}
+.phms-appointment-header .phms-mode-switch-thumb{position:absolute!important;top:2px!important;left:2px!important;width:17px!important;height:17px!important;border-radius:50%!important;background:#fff!important;box-shadow:0 1px 3px #0003!important;transition:transform .16s ease!important;}
+.phms-appointment-header .phms-mode-switch[aria-checked=true] .phms-mode-switch-track{background:#76532f!important;border-color:#76532f!important;}
+.phms-appointment-header .phms-mode-switch[aria-checked=true] .phms-mode-switch-thumb{transform:translateX(17px)!important;}
+.phms-appointment-header .phms-mode-switch:focus-visible{outline:3px solid #93683f!important;outline-offset:3px!important;}
+@media(max-width:380px){.phms-appointment-header .phms-mode-switch{font-size:11px!important;gap:6px!important}.phms-appointment-header .phms-mode-switch-track{flex-basis:36px!important;width:36px!important}.phms-appointment-header .phms-mode-switch[aria-checked=true] .phms-mode-switch-thumb{transform:translateX(13px)!important}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.58</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.59</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4000,14 +4013,15 @@ const flowRoot=document.createElement('div');flowRoot.id='appointmentFlow';
 $('selectedPersonLabel').after(flowRoot);
 const modeBar=document.createElement('div');modeBar.className='appointment-mode-bar';
 const modeLabel=document.createElement('p');modeLabel.textContent='⚙️ วิธีกรอกข้อมูล';modeLabel.className='mode-label';modeBar.append(modeLabel);
-const modeChoices=document.createElement('div');modeChoices.className='mode-choices';modeChoices.setAttribute('role','group');modeChoices.setAttribute('aria-label','วิธีกรอกข้อมูล');
-const modeHint=document.createElement('p');modeHint.className='help mode-hint';modeHint.textContent='เริ่มด้วยแบบง่ายได้เลย เปลี่ยนเป็นแบบละเอียดเมื่อจำเป็น';
-for(const [value,text] of [['simple','แบบง่าย'],['full','แบบละเอียด']]){
- const button=document.createElement('button');button.type='button';button.textContent=(value==='simple'?'✨ ':'🛠️ ')+text;button.dataset.mode=value;button.className='mode-choice';
- button.addEventListener('click',()=>{$('detail').value=value;$('detail').dispatchEvent(new Event('change',{bubbles:true}));});
- modeChoices.append(button);
-}
-modeBar.append(modeChoices);modeBar.classList.add('phms-header-mode-switch');document.querySelector('.phms-appointment-header-top').after(modeBar);
+const modeChoices=document.createElement('div');modeChoices.className='mode-choices phms-mode-switch-wrap';
+modeChoices.setAttribute('role','group');modeChoices.setAttribute('aria-label','สลับวิธีกรอกข้อมูล');
+const modeSwitchButton=document.createElement('button');modeSwitchButton.type='button';modeSwitchButton.className='phms-mode-switch';modeSwitchButton.setAttribute('role','switch');modeSwitchButton.setAttribute('aria-label','สลับระหว่างแบบง่ายและแบบละเอียด');
+const modeSwitchLabel=document.createElement('span');modeSwitchLabel.className='phms-mode-switch-label';modeSwitchButton.append(modeSwitchLabel);
+const modeSwitchTrack=document.createElement('span');modeSwitchTrack.className='phms-mode-switch-track';modeSwitchTrack.setAttribute('aria-hidden','true');
+const modeSwitchThumb=document.createElement('span');modeSwitchThumb.className='phms-mode-switch-thumb';modeSwitchTrack.append(modeSwitchThumb);modeSwitchButton.append(modeSwitchTrack);
+modeSwitchButton.addEventListener('click',()=>{$('detail').value=$('detail').value==='simple'?'full':'simple';$('detail').dispatchEvent(new Event('change',{bubbles:true}));});
+modeChoices.append(modeSwitchButton);
+modeBar.replaceChildren(modeChoices);modeBar.classList.add('phms-header-mode-switch');document.querySelector('.phms-appointment-header-top').after(modeBar);
 const originalModeLabel=document.querySelector('label[for="detail"]');originalModeLabel.classList.add('visually-hidden-form');
 $('detail').classList.add('visually-hidden-form');$('detail').setAttribute('tabindex','-1');$('detail').setAttribute('aria-hidden','true');
 // Scenario selection remains a real form select so the existing validation and state stay intact.
@@ -4670,7 +4684,7 @@ function updateProgressiveLayout(){
  editor.classList.toggle('simple-ui',simple);document.body.classList.toggle('simple-entry',simple);
  if(simple){if(simpleExtras.parentElement!==extrasSection)extrasSection.insertBefore(simpleExtras,$('outcomeDetails'));}
  else if(simpleExtras.parentElement!==detailed)detailed.append(simpleExtras);
- for(const button of modeChoices.children)button.setAttribute('aria-pressed',String(button.dataset.mode===$('detail').value));
+ modeSwitchButton.setAttribute('aria-checked',String(!simple));modeSwitchLabel.textContent=simple?'แบบง่าย':'แบบละเอียด';modeSwitchButton.setAttribute('aria-label',simple?'กำลังใช้แบบง่าย กดเพื่อเปลี่ยนเป็นแบบละเอียด':'กำลังใช้แบบละเอียด กดเพื่อเปลี่ยนเป็นแบบง่าย');
  // The selected-person banner is always step 1, including LINE deep links.
  $('scenarioFlowTitle').textContent='📅 นัดแบบไหน';
  $('mainFlowTitle').textContent='📝 ข้อมูลนัดหมาย';
