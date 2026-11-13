@@ -1129,6 +1129,27 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  color:#645440!important;line-height:1.5!important;overflow-wrap:break-word!important;
 }
 
+
+/* One-question rescheduling history for older caregivers. Count appears on demand. */
+#editor #appointmentRescheduleCountArea:not(.hidden){
+ display:block!important;margin:13px 0 6px!important;padding:12px!important;
+ background:#fff9f0!important;border:1px solid #e2ceb2!important;border-radius:11px!important;
+}
+#editor #appointmentRescheduleCountArea .phms-state-label{margin:0 0 9px!important}
+#editor .phms-reschedule-count-controls{
+ display:grid!important;grid-template-columns:56px minmax(0,1fr) 56px!important;
+ align-items:center!important;gap:10px!important;max-width:340px!important;
+}
+#editor .phms-reschedule-count-controls>button{
+ box-sizing:border-box!important;min-width:0!important;width:56px!important;height:52px!important;
+ min-height:52px!important;font-size:1.65rem!important;font-weight:700!important;
+ border:1px solid #ae865a!important;border-radius:11px!important;
+ background:#f7ead7!important;color:#4e351e!important;
+}
+#editor .phms-reschedule-count-controls>button:disabled{opacity:.4!important}
+#editor #appointmentRescheduleCountText{font-size:1.2rem!important;font-weight:750!important;text-align:center!important;color:#3e2c1b!important}
+#editor #appointmentStateNote.hidden{display:none!important}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1287,8 +1308,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  </div>
  <p id="familyContactSaveStatus" role="status" class="help"></p>
 </div>
-<label for="reschedulePhase">ความคืบหน้าการติดต่อเพื่อเลื่อนนัด (ทดลอง)</label><select id="reschedulePhase"><option value="">ยังไม่ดำเนินการ</option><option value="requested">ต้องการเลื่อนนัด</option><option value="contact_pending">ติดต่อแล้ว รอยืนยัน</option><option value="confirmed">โรงพยาบาลยืนยันแล้ว</option></select>
-<p class="help">การเลือกสถานะนี้ยังไม่เปลี่ยนวันนัดหรือบันทึกข้อมูลในระบบ</p></details>
+</details>
 <p class="help">เอกสาร งานมอบหมาย และแจ้งเตือนยังรอ API ตรวจสิทธิ์ จึงยังไม่เปิดการบันทึก</p>
 <input type="hidden" id="doctor"></div><label for="purpose">ชื่อนัดหมาย</label><input id="purpose" type="text" maxlength="80" placeholder="เช่น ปวดเข่า, ฟังผลเลือด, รับยาเดิม" autocomplete="off"><p class="help">ตั้งชื่อสั้น ๆ เพื่อให้รู้ว่าไปโรงพยาบาลเรื่องอะไร</p><p id="historicalGuide" class="help hidden" role="status">บันทึกการไปพบแพทย์ย้อนหลัง: ระบุเหตุผลที่ไปและผลหลังพบแพทย์ตามข้อมูลที่ทราบ ไม่ต้องกรอกเรื่องที่อยากบอกแพทย์ในอนาคต</p><label id="previsitLabel" for="previsitSymptoms">อาการหรือเรื่องที่อยากบอกหมอ (ถ้ามี)</label><textarea id="previsitSymptoms" maxlength="1000" rows="2" placeholder="เช่น ปวดเข่ามา 3 วัน หรือมีคำถามเรื่องยา"></textarea><p id="previsitHelp" class="help">ข้อมูลที่ผู้ใช้แจ้งเอง ยังไม่ใช่การวินิจฉัยจากแพทย์ และยังไม่บันทึกในโหมดทดลอง</p><label id="additionalNoteLabel" for="additionalNote">รายละเอียดเพิ่มเติม (ถ้ามี)</label><textarea id="additionalNote" maxlength="1000" rows="3" placeholder="อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม"></textarea>
 <div id="checklistBox"><label for="prepEntry">สิ่งที่ต้องเตรียม</label><div class="actions"><input id="prepEntry" maxlength="160" placeholder="พิมพ์รายการที่ต้องเตรียม"><button id="prepAdd" type="button">+ เพิ่ม</button></div><p id="prepProgress" role="status">เตรียมแล้ว 0/0 รายการ</p><div id="prepItems"></div></div><input type="hidden" id="prep">
@@ -1771,10 +1791,10 @@ const personName=$('personSelect').selectedOptions?.[0]?.textContent||'';
 previewField('บุคคล',personName==='เลือกบุคคล'?'':personName);
 previewField('ประเภทนัด',{booked:'นัดตามใบนัด',walk_in:'ไปโรงพยาบาลเอง',historical:'บันทึกย้อนหลัง'}[$('scenario').value]);
 if($('scenario').value==='booked'){
- previewField('ที่มาของนัด',$('appointmentOrigin').selectedOptions[0]?.textContent.trim()||'');
- previewField('สถานะปัจจุบัน',$('appointmentLifecycle').selectedOptions[0]?.textContent.trim()||'');
- if($('appointmentOrigin').value==='rescheduled'||$('appointmentLifecycle').value!=='planned')
-  previewField('หมายเหตุสถานะ','ร่างทดลองเท่านั้น ยังไม่อัปเดตนัดเดิมหรือแจ้งโรงพยาบาล');
+ previewField('การเลื่อนนัด',$('appointmentOrigin').value==='rescheduled'
+  ?'เลื่อนมาแล้ว '+$('appointmentRescheduleCount').value+' ครั้ง':'ยังไม่เคยเลื่อน');
+ if($('appointmentOrigin').value==='rescheduled')
+  previewField('หมายเหตุ','ข้อมูลตามที่ทราบ · ยังไม่ได้เปลี่ยนวันนัดเดิม');
 }
 previewField('ชื่อนัดหมาย',$('purpose').value.trim());
 previewField('โรงพยาบาล',$('hospital').value.trim());
@@ -1823,7 +1843,7 @@ if($('detail').value==='full'&&examPrepChoice.value){
  if(['fasting','other'].includes(examPrepChoice.value))previewField('คำแนะนำก่อนตรวจ',examPrepDetails.value.trim());
 }
 
-if(!isPastAppointment()&&checklistItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='สิ่งที่ต้องเตรียม';const ul=document.createElement('ul');for(const item of checklistItems){const li=document.createElement('li');li.textContent=(item.status==='completed'?'☑ ':'☐ ')+item.title;ul.append(li);}dd.append(ul);dl.append(dt,dd);}{for(const [id,label] of Object.entries(detailNames)){const value=$(id).value.trim();if(!value)continue;if(id==='contact_phone')continue;if(id==='walk_in_reason'&&$('scenario').value!=='walk_in')continue;if(['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)&&!isPastAppointment())continue;const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=id==='arrival_lead_minutes'?value+' นาที':value;dl.append(dt,dd);}}if(procedurePreviewItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='รายการตรวจ (ทดลอง — ยังไม่บันทึก)';const ul=document.createElement('ul');for(const item of procedurePreviewItems){const li=document.createElement('li');li.textContent=item;ul.append(li);}dd.append(ul);dl.append(dt,dd);}if($('relatedSelect').value){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='นัดต้นทาง (ทดลอง)';dd.textContent=$('relatedSelect').selectedOptions[0]?.textContent||'';dl.append(dt,dd);}if($('reschedulePhase').value){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='สถานะขอเลื่อนนัด (ทดลอง)';dd.textContent=$('reschedulePhase').selectedOptions[0]?.textContent||'';dl.append(dt,dd);}reviewedDraft={...v,provider_selection:{organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:selectedClinicianId()},hospital:$('hospital').value,department:$('department').value,doctor:$('doctor').value,purpose:$('purpose').value,additional_note:$('additionalNote').value,prep:isPastAppointment()?'':$('prep').value,preparation_items:isPastAppointment()?[]:checklistItems.map(x=>({...x})),extended_details:Object.fromEntries(Object.keys(detailNames).filter(id=>$(id).value.trim()&&(id!=='walk_in_reason'||$('scenario').value==='walk_in')&&(!['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)||isPastAppointment())).map(id=>[id,$(id).value.trim()])),documents:[...$('documents').files].map(f=>({name:f.name,type:f.type,size:f.size}))};if(packaged.draft.document_metadata.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='ไฟล์แนบ';dd.textContent=packaged.draft.document_metadata.map(f=>f.name).join(', ');dl.append(dt,dd)}$('editor').classList.add('hidden');$('confirmation').classList.remove('hidden');window.scrollTo(0,0)});
+if(!isPastAppointment()&&checklistItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='สิ่งที่ต้องเตรียม';const ul=document.createElement('ul');for(const item of checklistItems){const li=document.createElement('li');li.textContent=(item.status==='completed'?'☑ ':'☐ ')+item.title;ul.append(li);}dd.append(ul);dl.append(dt,dd);}{for(const [id,label] of Object.entries(detailNames)){const value=$(id).value.trim();if(!value)continue;if(id==='contact_phone')continue;if(id==='walk_in_reason'&&$('scenario').value!=='walk_in')continue;if(['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)&&!isPastAppointment())continue;const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=id==='arrival_lead_minutes'?value+' นาที':value;dl.append(dt,dd);}}if(procedurePreviewItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='รายการตรวจ (ทดลอง — ยังไม่บันทึก)';const ul=document.createElement('ul');for(const item of procedurePreviewItems){const li=document.createElement('li');li.textContent=item;ul.append(li);}dd.append(ul);dl.append(dt,dd);}if($('relatedSelect').value){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='นัดต้นทาง (ทดลอง)';dd.textContent=$('relatedSelect').selectedOptions[0]?.textContent||'';dl.append(dt,dd);}reviewedDraft={...v,provider_selection:{organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:selectedClinicianId()},hospital:$('hospital').value,department:$('department').value,doctor:$('doctor').value,purpose:$('purpose').value,additional_note:$('additionalNote').value,prep:isPastAppointment()?'':$('prep').value,preparation_items:isPastAppointment()?[]:checklistItems.map(x=>({...x})),extended_details:Object.fromEntries(Object.keys(detailNames).filter(id=>$(id).value.trim()&&(id!=='walk_in_reason'||$('scenario').value==='walk_in')&&(!['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)||isPastAppointment())).map(id=>[id,$(id).value.trim()])),documents:[...$('documents').files].map(f=>({name:f.name,type:f.type,size:f.size}))};if(packaged.draft.document_metadata.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='ไฟล์แนบ';dd.textContent=packaged.draft.document_metadata.map(f=>f.name).join(', ');dl.append(dt,dd)}$('editor').classList.add('hidden');$('confirmation').classList.remove('hidden');window.scrollTo(0,0)});
 $('save').addEventListener('click',async()=>{if(!confirmClient||!reviewedDraft)return;const button=$('save');button.disabled=true;button.textContent='กำลังตรวจสอบและบันทึก…';const result=await confirmClient({selectedPersonCode:memberId,draft:reviewedDraft});if(result.ok){button.textContent='บันทึกสำเร็จ';$('saveStatus').textContent='บันทึกนัดแล้ว เลขอ้างอิง: '+result.appointmentId;$('back').disabled=true;}else{button.textContent='ลองบันทึกอีกครั้ง';button.disabled=false;$('saveStatus').textContent='ยังไม่บันทึกนัด: '+result.error;}});
 $('back').addEventListener('click',()=>{if($('back').disabled)return;$('confirmation').classList.add('hidden');$('editor').classList.remove('hidden')});
 let procedurePreviewItems=[];
@@ -2477,8 +2497,8 @@ function clearSourceFilled({personChanged=false}={}){
  }
  if(personChanged||(values.has('arrival_lead_minutes')&&$('arrival_lead_minutes').value===values.get('arrival_lead_minutes')))setArrivalLeadMinutes(30);
  if(personChanged){
-  if($('appointmentOrigin')){$('appointmentOrigin').value='new';$('appointmentLifecycle').value='planned';updateAppointmentStateUI();}
-  for(const id of ['examPrepChoice','examPrepDetails','hospital_hn','hospital_vn','location_detail','contact_phone','coverage_type','arrival_lead_minutes','previsitSymptoms','additionalNote','visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps','walk_in_reason','reschedulePhase']){
+  if($('appointmentOrigin')){$('appointmentOrigin').value='new';$('appointmentRescheduleCount').value='1';updateAppointmentStateUI();}
+  for(const id of ['examPrepChoice','examPrepDetails','hospital_hn','hospital_vn','location_detail','contact_phone','coverage_type','arrival_lead_minutes','previsitSymptoms','additionalNote','visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps','walk_in_reason']){
    if($(id))$(id).value='';
   }
   $('relatedSelect').value='';$('relatedQuery').value='';
@@ -3084,64 +3104,80 @@ scenarioGrid.setAttribute('aria-describedby','personFirstHint');
 scenarioSection.append(originalScenarioLabel,$('scenario'),personFirstHint,scenarioGrid,sourceBox);
 const mainSection=makeFlowSection('mainFlow','2. นัดเรื่องอะไร ที่ไหน');flowRoot.append(mainSection);
 
-/* Appointment provenance and current state are independent from the appointment type.
-   This is an editable PREVIEW only; changing it never updates an existing appointment. */
+/* Older-caregiver UI: one question about reschedule history.
+   This remains a local Pilot draft; no lifecycle mutation of an existing appointment. */
 const appointmentStateBox=document.createElement('section');
-appointmentStateBox.id='appointmentStateBox';appointmentStateBox.setAttribute('aria-label','ที่มาและสถานะของนัด');
-function newStateField(id,title,choices){
- const field=document.createElement('div');field.className='phms-state-field';
- const label=document.createElement('p');label.className='phms-state-label';label.textContent=title;label.id=id+'Label';
- const select=document.createElement('select');select.id=id;select.className='visually-hidden-form';
- select.setAttribute('tabindex','-1');select.setAttribute('aria-hidden','true');
- const cards=document.createElement('div');cards.id=id+'Cards';cards.className='phms-state-grid';
- cards.setAttribute('role','group');cards.setAttribute('aria-labelledby',label.id);
- for(const [value,caption] of choices){
-  const opt=new Option(caption,value);select.add(opt);
-  const btn=document.createElement('button');btn.type='button';btn.className='phms-state-card';
-  btn.textContent=caption;btn.dataset.choice=value;btn.setAttribute('aria-pressed','false');
-  btn.addEventListener('click',()=>{
-   select.value=value;select.dispatchEvent(new Event('change',{bubbles:true}));
-  });
-  cards.append(btn);
- }
- select.addEventListener('change',updateAppointmentStateUI);
- field.append(label,select,cards);return field;
+appointmentStateBox.id='appointmentStateBox';
+appointmentStateBox.setAttribute('aria-label','ประวัติการเลื่อนนัด');
+const appointmentOriginLabel=document.createElement('p');
+appointmentOriginLabel.id='appointmentOriginLabel';
+appointmentOriginLabel.className='phms-state-label';
+appointmentOriginLabel.textContent='🔄 นัดนี้เคยเลื่อนหรือยัง?';
+const appointmentOrigin=document.createElement('select');
+appointmentOrigin.id='appointmentOrigin';appointmentOrigin.className='visually-hidden-form';
+appointmentOrigin.setAttribute('tabindex','-1');appointmentOrigin.setAttribute('aria-hidden','true');
+const appointmentOriginCards=document.createElement('div');
+appointmentOriginCards.id='appointmentOriginCards';appointmentOriginCards.className='phms-state-grid';
+appointmentOriginCards.setAttribute('role','group');
+appointmentOriginCards.setAttribute('aria-labelledby',appointmentOriginLabel.id);
+for(const [value,label] of [['new','📅 ยังไม่เคยเลื่อน'],['rescheduled','🔄 เคยเลื่อนแล้ว']]){
+ appointmentOrigin.add(new Option(label,value));
+ const card=document.createElement('button');
+ card.type='button';card.className='phms-state-card';card.dataset.choice=value;card.textContent=label;
+ card.setAttribute('aria-pressed','false');
+ card.addEventListener('click',()=>{appointmentOrigin.value=value;updateAppointmentStateUI();});
+ appointmentOriginCards.append(card);
 }
-appointmentStateBox.append(
- newStateField('appointmentOrigin','📋 ที่มาของนัด',[
-  ['new','📅 นัดใหม่'],['rescheduled','🔄 นัดที่เลื่อนมา']
- ]),
- newStateField('appointmentLifecycle','📍 สถานะปัจจุบันของนัด',[
-  ['planned','📅 มีนัดตามกำหนด'],['awaiting_new_date','⏳ รอวันนัดใหม่'],
-  ['cancelled','🚫 ยกเลิกแล้ว'],['completed','✅ ไปพบแพทย์แล้ว']
- ])
-);
-const appointmentStateNote=document.createElement('p');appointmentStateNote.id='appointmentStateNote';
-appointmentStateNote.className='phms-state-note';appointmentStateNote.setAttribute('role','status');
-appointmentStateBox.append(appointmentStateNote);
+const appointmentRescheduleCountArea=document.createElement('div');
+appointmentRescheduleCountArea.id='appointmentRescheduleCountArea';
+appointmentRescheduleCountArea.className='phms-reschedule-count hidden';
+appointmentRescheduleCountArea.hidden=true;
+const countLabel=document.createElement('p');countLabel.className='phms-state-label';
+countLabel.id='appointmentRescheduleCountLabel';countLabel.textContent='เลื่อนมาแล้วกี่ครั้ง?';
+const countControls=document.createElement('div');countControls.className='phms-reschedule-count-controls';
+const countMinus=document.createElement('button');countMinus.type='button';
+countMinus.id='appointmentRescheduleMinus';countMinus.textContent='−';
+countMinus.setAttribute('aria-label','ลดจำนวนครั้งที่เลื่อนนัด');
+const countOutput=document.createElement('output');
+countOutput.id='appointmentRescheduleCountText';countOutput.textContent='1 ครั้ง';
+countOutput.setAttribute('aria-live','polite');
+const countPlus=document.createElement('button');countPlus.type='button';
+countPlus.id='appointmentReschedulePlus';countPlus.textContent='+';
+countPlus.setAttribute('aria-label','เพิ่มจำนวนครั้งที่เลื่อนนัด');
+const countInput=document.createElement('input');
+countInput.id='appointmentRescheduleCount';countInput.type='hidden';
+countInput.value='1';
+for(const [button,delta] of [[countMinus,-1],[countPlus,1]]){
+ button.addEventListener('click',()=>{
+  const current=Number(countInput.value)||1;
+  countInput.value=String(Math.max(1,Math.min(99,current+delta)));
+  updateAppointmentStateUI();
+ });
+}
+countControls.append(countMinus,countOutput,countPlus);
+appointmentRescheduleCountArea.append(countLabel,countControls,countInput);
+const appointmentStateNote=document.createElement('p');
+appointmentStateNote.id='appointmentStateNote';appointmentStateNote.className='phms-state-note hidden';
+appointmentStateNote.textContent='ข้อมูลตามที่ทราบ · ยังไม่ได้เปลี่ยนนัดเดิม';
+appointmentStateBox.append(appointmentOriginLabel,appointmentOrigin,appointmentOriginCards,
+ appointmentRescheduleCountArea,appointmentStateNote);
 mainSection.append(appointmentStateBox);
 function updateAppointmentStateUI(){
  const booked=$('scenario').value==='booked';
  appointmentStateBox.classList.toggle('hidden',!booked);
  appointmentStateBox.hidden=!booked;
- if(!booked){$('appointmentOrigin').value='new';$('appointmentLifecycle').value='planned';}
- for(const id of ['appointmentOrigin','appointmentLifecycle'])
-  for(const button of $(id+'Cards').children)
-   button.setAttribute('aria-pressed',String($(id).value===button.dataset.choice));
- const source=$('appointmentOrigin').value,state=$('appointmentLifecycle').value;
- const hasLinked=!!$('relatedSelect').value;
- appointmentStateNote.classList.toggle('attention',source==='rescheduled'||state!=='planned');
- if(state==='cancelled')appointmentStateNote.textContent=
-  '🚫 บันทึกสถานะยกเลิกเป็นร่างเท่านั้น ไม่ได้ยกเลิกนัดในระบบหรือที่โรงพยาบาล ต้องจัดการนัดเดิมเมื่อเปิดระบบจริง';
- else if(state==='awaiting_new_date')appointmentStateNote.textContent=
-  '⏳ นัดเดิมยังรอวันใหม่ กรุณาอย่าถือว่าวันที่กรอกเป็นวันที่โรงพยาบาลยืนยัน';
- else if(state==='completed')appointmentStateNote.textContent=
-  '✅ ใช้เมื่อไปพบแพทย์แล้วเท่านั้น ข้อมูลยังเป็นร่าง ไม่ได้ปิดนัดเดิม';
- else if(source==='rescheduled')appointmentStateNote.textContent=
-  hasLinked?'🔄 เลือกนัดเดิมแล้ว โปรดตรวจสอบว่าเป็นนัดที่เลื่อนจริง':'🔄 แนะนำให้เลือกนัดเดิมจากหัวข้อ “ใช้ข้อมูลจากนัดเดิม” ด้านบน เพื่อเชื่อมประวัติการเลื่อน';
- else appointmentStateNote.textContent='เลือกตามใบนัดจริง · สถานะนี้เป็นร่างทดลอง ยังไม่เปลี่ยนข้อมูลนัดเดิม';
+ if(!booked){appointmentOrigin.value='new';countInput.value='1';}
+ const rescheduled=booked&&appointmentOrigin.value==='rescheduled';
+ for(const button of appointmentOriginCards.children)
+  button.setAttribute('aria-pressed',String(button.dataset.choice===appointmentOrigin.value));
+ appointmentRescheduleCountArea.hidden=!rescheduled;
+ appointmentRescheduleCountArea.classList.toggle('hidden',!rescheduled);
+ const count=Math.max(1,Math.min(99,Math.trunc(Number(countInput.value)||1)));
+ countInput.value=String(count);countOutput.textContent=count+' ครั้ง';
+ countMinus.disabled=count<=1;countPlus.disabled=count>=99;
+ appointmentStateNote.classList.toggle('hidden',!rescheduled);
 }
-$('relatedSelect').addEventListener('change',updateAppointmentStateUI);
+appointmentOrigin.addEventListener('change',updateAppointmentStateUI);
 updateAppointmentStateUI();
 
 const purposeHelp=$('purpose').nextElementSibling;
@@ -3646,8 +3682,7 @@ function resetCurrentAppointmentDraft(){
  procedurePreviewItems=[];renderProcedurePreview();
  $('hasAppointmentPhotos').value='';
  resetContactDraft();
- $('reschedulePhase').value='';
- $('appointmentOrigin').value='new';$('appointmentLifecycle').value='planned';updateAppointmentStateUI();
+ $('appointmentOrigin').value='new';$('appointmentRescheduleCount').value='1';updateAppointmentStateUI();
  $('detail').value='simple';$('scenario').value='booked';$('known').value='yes';scenarioChoiceMade=false;syncScenarioCards();
  for(const panel of editor.querySelectorAll('details'))panel.open=false;
  reviewedDraft=null;$('confirmation').classList.add('hidden');editor.classList.remove('hidden');
@@ -3743,7 +3778,7 @@ $('detail').addEventListener('change',updateProgressiveLayout);
 $('scenario').addEventListener('change',updateProgressiveLayout);
 editor.addEventListener('input',()=>{updateFilledIndicators();updateRequiredFieldStatus();});editor.addEventListener('change',()=>{updateFilledIndicators();updateRequiredFieldStatus();});
 // Adaptive selection for existing bounded choices (no duplicate fields or new enum values).
-const adaptiveSelectIds=['known','hasAppointmentPhotos','coverage_type','walk_in_reason','reschedulePhase'];
+const adaptiveSelectIds=['known','hasAppointmentPhotos','coverage_type','walk_in_reason'];
 function installAdaptiveSelect(id){
  const select=$(id);if(!select)return;
  const host=document.createElement('div');host.className='adaptive-option-host';host.setAttribute('role','group');
