@@ -1150,6 +1150,25 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #appointmentRescheduleCountText{font-size:1.2rem!important;font-weight:750!important;text-align:center!important;color:#3e2c1b!important}
 #editor #appointmentStateNote.hidden{display:none!important}
 
+
+/* Desktop accessibility: use the actual native date/time control instead of an invisible overlay.
+   Keep the Thai summary overlay for touch devices (especially LINE LIFF on iOS). */
+@media (hover:hover) and (pointer:fine){
+ #editor .native-picker-shell>input[type="date"],
+ #editor .native-picker-shell>input[type="time"]{
+  position:relative!important;inset:auto!important;opacity:1!important;
+  height:56px!important;min-height:56px!important;padding:10px 14px!important;
+  -webkit-text-fill-color:currentColor!important;color:#352b22!important;
+  background:#fff!important;z-index:2!important;
+ }
+ #editor .native-picker-shell>.native-picker-prompt{display:none!important}
+ #editor .native-picker-shell>input::-webkit-calendar-picker-indicator{opacity:1!important;cursor:pointer!important}
+}
+/* Consistent two-column choice dimensions for arrival and procedure controls. */
+#editor .arrival-lead-choices .arrival-lead-choice,
+#editor .phms-choice-grid .phms-pick{min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#editor #procedurePreviewBox{border:1.5px solid #c9ad8b!important;border-radius:12px!important;background:#fff!important}
+#editor #procedurePreviewBox .phms-pick[aria-pressed="true"]{background:#f1e5d6!important;border:2px solid #92673a!important;color:#39291c!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
