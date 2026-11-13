@@ -1260,7 +1260,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help">ยังไม่มีนัดที่บันทึกไว้? ต้องบันทึกนัดก่อนจึงจะเพิ่มค่าใช้จ่ายหรือยาได้</p>
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
-<details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจแนะนำ (เลือกได้หลายอย่าง)</p><p id="procedureHistoryHint" class="help">เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
+<details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจแนะนำ (เลือกได้หลายอย่าง)</p><p id="procedureHistoryHint" class="help">เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureHistoryCards" class="phms-choice-grid" role="group" aria-label="รายการตรวจจากประวัติ" hidden></div><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 เชื่อมนัดครั้งก่อน (ถ้ามี)</summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
@@ -1921,6 +1921,40 @@ const PROCEDURE_PRESETS=[
  {name:'💻 พบแพทย์ออนไลน์',en:'Telemedicine',host:'procedureOtherCards'}
 ];
 const procedurePresetButtons=new Map();
+function historicalProcedureNames(visit){
+ const direct=visit?.procedure_items||visit?.procedures||visit?.test_items||visit?.extended_details?.procedure_items;
+ if(!Array.isArray(direct))return [];
+ return [...new Set(direct.map(x=>typeof x==='string'?x:(x?.name||x?.label||'')).map(x=>String(x).trim()).filter(Boolean))];
+}
+function renderHistoricalProcedureSuggestions(){
+ const host=$('procedureHistoryCards'),hint=$('procedureHistoryHint');
+ if(!host||!hint)return;
+ host.replaceChildren();
+ const normalized=x=>String(x||'').normalize('NFKC').toLocaleLowerCase('th-TH').trim();
+ const hospital=normalized($('hospital').value),department=normalized($('department').value);
+ const visits=(relatedAllItems||[]).filter(a=>a&&typeof a==='object');
+ const counts=new Map();
+ for(const a of visits){
+  const sameHospital=hospital&&normalized(a.hospital_name||a.hospital)===hospital;
+  const sameDept=department&&normalized(a.department_name||a.department)===department;
+  for(const name of historicalProcedureNames(a)){
+   const key=normalized(name),row=counts.get(key)||{name,count:0,hospital:0,department:0};
+   row.count++;if(sameHospital)row.hospital++;if(sameHospital&&sameDept)row.department++;
+   counts.set(key,row);
+  }
+ }
+ const recommendations=[...counts.values()].filter(x=>x.count>=3||x.department>0).sort((a,b)=>b.department-a.department||b.hospital-a.hospital||b.count-a.count).slice(0,6);
+ host.hidden=!recommendations.length;
+ hint.textContent=recommendations.length?'แนะนำจากประวัตินัดของคนนี้ · ตรวจสอบใบนัดก่อนเลือก':'เลือกรายการตรวจตามใบนัดจริง · ยังไม่มีประวัติรายการตรวจที่ใช้แนะนำได้';
+ for(const entry of recommendations){
+  const b=document.createElement('button');b.type='button';b.className='phms-pick';
+  b.textContent=entry.name+' ('+(entry.department?'เคยตรวจที่แผนกนี้':('เคยตรวจ '+entry.count+' ครั้ง'))+')';
+  b.setAttribute('aria-pressed',String(procedurePreviewItems.includes(entry.name)));
+  b.addEventListener('click',()=>{const i=procedurePreviewItems.indexOf(entry.name);if(i>=0)procedurePreviewItems.splice(i,1);else if(procedurePreviewItems.length<30)procedurePreviewItems.push(entry.name);renderProcedurePreview();});
+  host.append(b);
+ }
+}
+
 
 for(const preset of PROCEDURE_PRESETS){
  const button=document.createElement('button');button.type='button';button.className='phms-pick';
@@ -1953,6 +1987,7 @@ function renderProcedurePreview(){
  }
  $('procedureStatus').textContent=procedurePreviewItems.length?'ตรวจสอบรายการด้านบนก่อนบันทึกนัด':'ยังไม่ได้เลือกรายการตรวจ';$('procedureSelectedHeading').textContent='รายการตรวจที่เลือก ('+procedurePreviewItems.length+' รายการ)';
  syncProcedureChoices();
+ renderHistoricalProcedureSuggestions();
 }
 function addProcedurePreview(){
  const name=$('procedureEntry').value.trim(),key=name.normalize('NFKC').toLocaleLowerCase('th-TH');
@@ -2514,7 +2549,7 @@ for(const id of ['time','known','scenario','date']){
 updateArrivalLeadUI();
 
 let sourceAppointments=new Map();
-function refreshTopicSuggestions(){renderCareTopicSuggestions();}
+function refreshTopicSuggestions(){renderCareTopicSuggestions();renderHistoricalProcedureSuggestions();}
 let autoPurposeValue='',purposeManuallyEdited=false;
 function proposedFollowupTitle(title){
  const original=String(title||'นัดติดตาม').trim();
@@ -2635,7 +2670,7 @@ async function loadRelatedAppointments(){
  const picker=$('relatedSelect'),prior=picker.value;
  picker.replaceChildren(new Option('ไม่เชื่อมนัดเดิม',''),...relatedAllItems.map(a=>new Option(a.title||'นัดหมาย',a.id)));picker.disabled=false;
  if(sourceAppointments.has(prior))picker.value=prior;
- $('relatedAppointmentBox').hidden=relatedAllItems.length===0;if(!relatedAllItems.length){renderLinkedCareVisits();status.textContent='';return;}relatedAllItems.sort((a,b)=>String(b.planned_visit_date||b.appointment_at||'').localeCompare(String(a.planned_visit_date||a.appointment_at||'')));renderLinkedCareVisits();refreshTopicSuggestions();renderCareTopicSuggestions();relatedExpanded=false;renderRelatedCards();
+ $('relatedAppointmentBox').hidden=relatedAllItems.length===0;if(!relatedAllItems.length){renderLinkedCareVisits();status.textContent='';return;}relatedAllItems.sort((a,b)=>String(b.planned_visit_date||b.appointment_at||'').localeCompare(String(a.planned_visit_date||a.appointment_at||'')));renderLinkedCareVisits();refreshTopicSuggestions();renderCareTopicSuggestions();relatedExpanded=false;renderRelatedCards();renderHistoricalProcedureSuggestions();
 }
 
 
