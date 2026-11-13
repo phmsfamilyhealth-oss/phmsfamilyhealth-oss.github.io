@@ -1226,6 +1226,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #scenarioFlow #appointmentHistoryDisclosure[open] #appointmentStateBox{
  display:block!important;margin:12px 0 0!important;
 }
+
+/* A chosen name is a single card, never an extra always-visible search input. */
+#editor #hospitalSearch.adaptive-search-collapsed,
+#editor #unitSearch.adaptive-search-collapsed,
+#editor #clinicianSearch.adaptive-search-collapsed,
+#editor #hospitalSearchResults.adaptive-search-collapsed,
+#editor #unitSearchResults.adaptive-search-collapsed,
+#editor #clinicianSearchResults.adaptive-search-collapsed{display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1484,7 +1492,7 @@ function normalizedMasterName(value){return String(value||'').normalize('NFKC').
 function masterMatches(item,term){const q=normalizedMasterName(term);return !q||[item.label,item.name,item.display_name,item.code,item.external_code,...(Array.isArray(item.aliases)?item.aliases:[])].filter(Boolean).some(v=>normalizedMasterName(v).includes(q));}
 const comboState=Object.fromEntries(['hospital','unit','clinician'].map(kind=>[kind,{searchText:'',selectedItem:null,isOpen:false}]));
 function closeCombo(kind){comboState[kind].isOpen=false;const input=document.getElementById(kind+'Search');document.getElementById(kind+'SearchResults').classList.add('hidden');input.setAttribute('aria-expanded','false');}
-function renderCombo(kind,choices){const input=document.getElementById(kind+'Search'),list=document.getElementById(kind+'SearchResults'),state=comboState[kind];list.replaceChildren();if(!state.isOpen){closeCombo(kind);return;}const term=state.searchText.trim();const matched=choices.filter(x=>masterMatches(x,term)).slice(0,40);for(const item of matched){const button=document.createElement('button');button.type='button';button.setAttribute('role','option');button.textContent=item.label;button.addEventListener('click',()=>{const select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');select.value=item.value;state.selectedItem=item;state.searchText=item.label;input.value=item.label;if(kind==='clinician')doctorSearchExpanded=false;closeCombo(kind);if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});list.append(button);}
+function renderCombo(kind,choices){const input=document.getElementById(kind+'Search'),list=document.getElementById(kind+'SearchResults'),state=comboState[kind];list.replaceChildren();if(!state.isOpen){closeCombo(kind);return;}const term=state.searchText.trim();const matched=choices.filter(x=>masterMatches(x,term)).slice(0,40);for(const item of matched){const button=document.createElement('button');button.type='button';button.setAttribute('role','option');button.textContent=item.label;button.addEventListener('click',()=>{const select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');select.value=item.value;state.selectedItem=item;state.searchText=item.label;input.value=item.label;if(kind==='clinician')doctorSearchExpanded=false;else if(adaptivePickers[kind])adaptivePickers[kind].expanded=false;closeCombo(kind);if(kind==='hospital')refreshProviderPicker('providerOrg');else if(kind==='unit')refreshProviderPicker('providerUnit');else refreshProviderPicker();syncProviderNames();});list.append(button);}
 if(term&&!matched.length){const msg=document.createElement('div');msg.className='unavailable';msg.textContent='ไม่พบรายการที่ตรงกัน';list.append(msg);}
 if(term&&!matched.length){
  const add=document.createElement('button');add.type='button';add.className='local-name-option';
@@ -1492,6 +1500,7 @@ if(term&&!matched.length){
  add.addEventListener('click',()=>{
   const label=term.slice(0,160);
   state.selectedItem={draftOnly:true,label};state.searchText=label;input.value=label;
+  if(kind==='clinician')doctorSearchExpanded=false;else if(adaptivePickers[kind])adaptivePickers[kind].expanded=false;
   const select=document.getElementById(kind==='hospital'?'providerOrg':kind==='unit'?'providerUnit':'providerClinician');
   select.value='';
   if(kind==='hospital'){
@@ -2776,7 +2785,7 @@ function renderRelatedCards(){
  $('relatedStatus').textContent=filtered.length?'พบนัด '+filtered.length+' รายการ · เลือกนัดเดิมเพื่อเติมข้อมูล':'ไม่พบนัดเดิมที่ตรงกับคำค้น';
  const chosen=relatedAllItems.find(a=>a.id===selected);
  const summary=$('relatedAppointmentBox').querySelector('summary');
- summary.textContent=chosen?'🔁 ใช้ข้อมูลจากนัดเดิม: '+(chosen.title||'นัดหมาย'):'🔁 ใช้ข้อมูลจากนัดเดิม (ถ้ามี)';
+ summary.textContent=chosen?'🔗 ใช้ข้อมูลจากนัดเดิม: '+(chosen.title||'นัดหมาย'):'🔗 ใช้ข้อมูลจากนัดเดิม (ถ้ามี)';
  summary.setAttribute('aria-label',chosen?'แตะเพื่อเปลี่ยนนัดเดิม: '+(chosen.title||'นัดหมาย'):'แตะเพื่อเลือกข้อมูลจากนัดเดิม');
 }
 async function loadRelatedAppointments(){
@@ -3282,7 +3291,8 @@ function makeFlowSection(id,title){
 }
 // Optional provider fields remain in the original picker and are only relocated once.
 const providerExtras=document.createElement('section');providerExtras.id='providerExtras';providerExtras.className='progressive-extras provider-inline-fields';
-const providerSummary=document.createElement('h3');providerSummary.textContent='แผนกและแพทย์ (ถ้ามี)';providerExtras.append(providerSummary);
+const providerSummary=document.createElement('h3');providerSummary.textContent='แผนกและแพทย์ (ถ้ามี)';
+// Keep the internal title node for existing observers, but do not insert a duplicate heading.
 const unitFieldLabel=document.querySelector('label[for="unitSearch"]');unitFieldLabel.before(providerExtras);
 moveRangeTo(unitFieldLabel,$('doctorHint'),providerExtras);
 
