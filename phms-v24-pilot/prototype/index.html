@@ -1505,8 +1505,25 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   min-height:72px!important;padding:9px!important;
  }
 }
+
+/* PHMS v2.4.41: compact arrival choices, same interaction/selection as treatment cards. */
+#editor .arrival-lead-choices{gap:9px!important;margin:8px 0 10px!important}
+#editor .arrival-lead-choices .arrival-lead-choice{
+ box-sizing:border-box!important;width:100%!important;
+ min-height:62px!important;padding:9px 12px!important;
+ border:1.8px solid #bb8960!important;border-radius:12px!important;
+ font-size:1rem!important;font-weight:700!important;line-height:1.35!important;
+ background:#fff!important;color:#30261b!important;
+}
+#editor .arrival-lead-choices .arrival-lead-choice[aria-pressed="true"]{
+ border:2px solid #86592d!important;background:#fff0d9!important;color:#30261b!important;
+}
+@media(max-width:390px){
+ #editor .arrival-lead-choices{gap:7px!important}
+ #editor .arrival-lead-choices .arrival-lead-choice{min-height:58px!important;padding:8px!important}
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.40</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.41</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3847,13 +3864,13 @@ function updateSameDayAppointmentNotice(){
  const highRisk=reasons.size>0;
  conflictNotice.classList.toggle('high-risk',highRisk);
  const header=document.createElement('strong');
- header.textContent=reasons.has('duplicate')?'⚠️ อาจมีนัดนี้ในระบบแล้ว':reasons.has('hospital')?'⚠️ มีนัดต่างโรงพยาบาลในวันเดียวกัน':reasons.has('time')?'⚠️ เวลานัดตรงกับนัดเดิม':'📅 มีนัดในวันนี้ '+found.length+' รายการ';
+ header.textContent=reasons.has('duplicate')?'⚠️ วันนี้มีนัดอื่นแล้ว · อาจบันทึกซ้ำ':reasons.has('hospital')?'⚠️ วันนี้มีนัดอื่นแล้ว · ต่างโรงพยาบาล':reasons.has('time')?'⚠️ วันนี้มีนัดอื่นแล้ว · เวลาชนกัน':'📅 วันนี้มีนัดอื่นแล้ว ('+found.length+' นัด)';
  conflictNotice.append(header);
  const details=[];
  if(reasons.has('hospital'))details.push('คนละโรงพยาบาล: เสี่ยงเดินทางไม่ทัน');
  if(reasons.has('time'))details.push('เวลานัดชนกัน: กรุณาตรวจสอบ');
  if(reasons.has('duplicate'))details.push('อาจเป็นนัดซ้ำ: ตรวจสอบนัดเดิมก่อนกรอกเพิ่ม');
- if(!details.length)details.push('มีนัดอื่นในวันเดียวกัน สามารถเพิ่มหลายแผนกได้');
+ if(!details.length)details.push('ตรวจสอบแผนก แพทย์ และเวลาได้ · แยกนัดได้ตามใบนัดจริง');
  for(const message of details){const line=document.createElement('p');line.textContent=message;conflictNotice.append(line);}
  const list=document.createElement('ul');
  for(const a of found.slice(0,3)){
@@ -4526,6 +4543,8 @@ try{
    const nextLocationKey=personCode+'|'+orgId+'|'+unitId;
    if(hnKey!==nextHnKey){
     hnKey=nextHnKey;hnManual=false;hn.value='';vn.value='';
+    // Programmatic changes do not emit input/change events: refresh the filled badge.
+    hn.dispatchEvent(new Event('change',{bubbles:true}));
     note.textContent='กำลังตรวจสอบ HN ของโรงพยาบาลที่เลือก';
    }
    if(locationKey!==nextLocationKey){
@@ -4556,6 +4575,7 @@ try{
      const matches=(data.catalog?.personHospitalHns||[]).filter(x=>x.organizationId===orgId&&trim(x.value));
      if(matches.length===1){
       hn.value=trim(matches[0].value);
+      hn.dispatchEvent(new Event('change',{bubbles:true}));
       note.textContent=matches[0].verified?'เติม HN จากทะเบียนกลางแล้ว (แก้ไขเฉพาะนัดนี้ได้)'
       :'เติม HN จากทะเบียนกลางแล้ว โปรดตรวจสอบกับบัตรโรงพยาบาล';
      }else note.textContent='ยังไม่พบ HN ในทะเบียนกลาง สามารถกรอกเองได้';
