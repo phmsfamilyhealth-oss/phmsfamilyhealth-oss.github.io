@@ -1258,6 +1258,54 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   display:block!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;
  }
 }
+
+/* Match previous-appointment disclosure height and spacing. */
+#editor #scenarioFlow #appointmentHistoryDisclosure{
+ box-sizing:border-box!important;border:1px solid #e6d7c4!important;
+ border-radius:12px!important;padding:9px 12px!important;
+ margin:8px 0!important;background:#fff!important;
+}
+#editor #scenarioFlow #appointmentHistoryDisclosure>summary{
+ display:list-item!important;font-size:.98rem!important;font-weight:700!important;
+ line-height:1.5!important;padding:0!important;margin:0!important;
+}
+#editor #scenarioFlow #appointmentHistoryDisclosure[open]>summary{margin-bottom:10px!important}
+/* Fine pointer Chrome: Thai prompt visible when blurred; native picker works when focused. */
+@media (hover:hover) and (pointer:fine){
+ #editor .native-picker-shell{position:relative!important;min-height:56px!important;overflow:visible!important}
+ #editor .native-picker-shell>input[type="date"],
+ #editor .native-picker-shell>input[type="time"]{
+  position:relative!important;inset:auto!important;display:block!important;
+  opacity:1!important;appearance:auto!important;-webkit-appearance:auto!important;
+  height:56px!important;min-height:56px!important;
+  background:#fff!important;color:#302519!important;-webkit-text-fill-color:#302519!important;
+  z-index:2!important;pointer-events:auto!important;
+ }
+ #editor .native-picker-shell>input[type="date"]::-webkit-datetime-edit,
+ #editor .native-picker-shell>input[type="time"]::-webkit-datetime-edit{
+  color:transparent!important;-webkit-text-fill-color:transparent!important;
+ }
+ #editor .native-picker-shell:focus-within>input[type="date"]::-webkit-datetime-edit,
+ #editor .native-picker-shell:focus-within>input[type="time"]::-webkit-datetime-edit{
+  color:#302519!important;-webkit-text-fill-color:#302519!important;
+ }
+ #editor .native-picker-shell>.native-picker-prompt{
+  position:absolute!important;display:flex!important;align-items:center!important;
+  top:0!important;bottom:0!important;left:12px!important;right:48px!important;
+  width:auto!important;max-width:none!important;min-height:0!important;
+  padding:0!important;transform:none!important;z-index:4!important;
+  background:transparent!important;pointer-events:none!important;
+  font-size:16px!important;font-weight:500!important;color:#38291a!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+ }
+ #editor .native-picker-shell.is-empty>.native-picker-prompt{color:#8c857d!important}
+ #editor .native-picker-shell:focus-within>.native-picker-prompt{display:none!important}
+ #editor .native-picker-shell>input::-webkit-calendar-picker-indicator{
+  display:block!important;opacity:1!important;z-index:5!important;position:relative!important;
+  cursor:pointer!important;pointer-events:auto!important;
+ }
+}
+#editor .native-picker-shell.is-empty>.native-picker-prompt{color:#8c857d!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -1266,7 +1314,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <label for="scenario">รูปแบบการนัด <span class="required-star" aria-label="จำเป็นต้องกรอก">*</span></label><select id="scenario"><option value="booked">นัดตามวันและเวลาที่โรงพยาบาลแจ้ง</option><option value="walk_in">ไปโรงพยาบาลโดยไม่ได้นัด (Walk-in)</option><option value="historical">บันทึกวันที่ไปมาแล้ว</option></select>
 <label for="date">วันที่ <span class="required-star" aria-label="จำเป็นต้องกรอก">*</span></label><input type="date" id="date" required aria-describedby="dateThaiPreview dateRule"><p id="dateRule" class="help" role="status"></p><p id="dateThaiPreview" class="help thai-preview" aria-live="polite" hidden></p>
 <label for="known">ทราบเวลาหรือไม่</label><select id="known"><option value="">เลือกก่อนว่าทราบเวลาหรือไม่</option><option value="yes">ทราบเวลา</option><option value="no">ไม่ทราบเวลา</option></select>
-<div id="timebox"><label for="time">เวลา <span id="timeRequired" class="required-star" aria-label="จำเป็นต้องกรอก">*</span></label><input type="time" id="time" aria-describedby="timeThaiPreview"><p id="timeThaiPreview" class="help thai-preview" aria-live="polite" hidden></p></div>
+<div id="timebox"><label for="time">เวลา <span id="timeRequired" class="required-star" aria-label="จำเป็นต้องกรอก">*</span></label><input type="time" id="time" step="300" aria-describedby="timeThaiPreview"><p id="timeThaiPreview" class="help thai-preview" aria-live="polite" hidden></p></div>
 <section id="appointmentPhotosSection" aria-label="รูปใบนัด">
 <div id="historicalPhotoChoice" class="hidden"><label for="hasAppointmentPhotos">มีรูปใบนัดหรือไม่</label><select id="hasAppointmentPhotos"><option value="">เลือกก่อนว่ามีรูปหรือไม่</option><option value="yes">มีรูปใบนัด</option><option value="no">ไม่มีรูปใบนัด</option></select></div>
 <div id="appointmentPhotoPicker" class="hidden"><label for="documents">รูปใบนัด (ถ้ามี)</label><p class="help">ใส่ได้สูงสุด 2 รูป เช่น ใบนัดกระดาษ หรือภาพนัดในแอป</p><input type="file" id="documents" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple class="hidden" aria-label="เลือกรูปใบนัด">
@@ -3861,16 +3909,27 @@ const timePrompt=document.createElement('span');timePrompt.id='timeInputPrompt';
 const timeShell=document.createElement('div');timeShell.className='native-picker-shell';$('time').before(timeShell);timeShell.append($('time'),timePrompt);
 function syncPickerPrompts(){
  const dateText=thaiDateLabel($('date').value),timeValue=$('time').value;
- datePrompt.textContent='📅 '+(dateText||'แตะเพื่อเลือกวันที่');
- timePrompt.textContent='🕒 '+(timeValue?timeValue+' น. ('+thaiSpokenTime(timeValue)+')':'แตะเพื่อเลือกเวลา');
+ datePrompt.textContent='📅 '+(dateText?dateText.split('ที่ ').slice(1).join('ที่ ')||dateText:'กดเลือกวันที่');
+ timePrompt.textContent='🕒 '+(timeValue?timeValue.replace(':','.')+' น. ('+thaiSpokenTime(timeValue)+')':'กดเลือกเวลา');
  datePrompt.hidden=false;timePrompt.hidden=false;
+ datePrompt.setAttribute('aria-hidden','true');timePrompt.setAttribute('aria-hidden','true');
  dateShell.classList.toggle('has-display-value',!!dateText);
  timeShell.classList.toggle('has-display-value',!!timeValue);
  dateShell.classList.toggle('is-empty',!dateText);
  timeShell.classList.toggle('is-empty',!timeValue);
 }
 $('date').addEventListener('input',syncPickerPrompts);$('date').addEventListener('change',syncPickerPrompts);
-$('time').addEventListener('input',syncPickerPrompts);$('time').addEventListener('change',syncPickerPrompts);
+$('time').addEventListener('input',syncPickerPrompts);
+$('time').addEventListener('change',()=>{
+ const input=$('time'),match=/^(\d{2}):(\d{2})$/.exec(input.value);
+ if(match){const h=Number(match[1]),m=Number(match[2]);
+  if(h<24&&m<60){const mins=Math.min(1435,Math.round((h*60+m)/5)*5);
+   const normalized=String(Math.floor(mins/60)).padStart(2,'0')+':'+String(mins%60).padStart(2,'0');
+   if(normalized!==input.value)input.value=normalized;
+  }
+ }
+ syncPickerPrompts();
+});
 // Section status badges: collapsed groups retain their values and indicate when populated.
 // Reset only the current appointment draft; the selected authorized person remains unchanged.
 const resetButton=document.createElement('button');
