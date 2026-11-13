@@ -1558,9 +1558,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  outline:3px solid #93683f!important;
  outline-offset:2px!important;
 }
-/* PHMS v2.4.48: compact selected single care topic; procedures remain visible for multi-select. */
+/* PHMS v2.4.49: unified multi-select procedure list, single selected indicator, custom-only editor. */
 #editor .phms-choice-concealed{display:none!important}
-#editor #procedureOtherCards .phms-pick.phms-procedure-more{
+#editor #procedureCommonCards .phms-pick.phms-procedure-more{
  border:1.8px dashed #b7895e!important;background:#fcf7f0!important;
  color:#30261b!important;border-radius:12px!important;
  min-height:60px!important;font-weight:700!important;
@@ -1568,8 +1568,20 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #procedureOtherCards .phms-pick.phms-procedure-more:focus-visible{
  outline:3px solid #8c673e!important;outline-offset:2px!important;
 }
+/* Keep search/add tile visually identical to care-topic dashed tile, including when expanded. */
+#editor #procedureCommonCards .phms-pick.phms-procedure-more,
+#editor #procedureCommonCards .phms-pick.phms-procedure-more[aria-expanded="true"]{
+ border:1.8px dashed #b7895e!important;
+ background:#fcf7f0!important;color:#30261b!important;
+ border-radius:12px!important;font-size:1rem!important;
+ font-weight:700!important;min-height:65px!important;
+}
+#editor #procedureOtherCards{display:none!important}
+#editor #procedurePreviewBox #procedureHistoryHint[hidden],
+#editor #procedurePreviewBox #procedureSelectedHeading[hidden],
+#editor #procedurePreviewBox #procedureStatus[hidden]{display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.48</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.49</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -1660,7 +1672,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help">ยังไม่มีนัดที่บันทึกไว้? ต้องบันทึกนัดก่อนจึงจะเพิ่มค่าใช้จ่ายหรือยาได้</p>
 <p class="help" id="linkedCareMedicationGate">ปุ่มยาเปิดกระบวนการ “เพิ่มยาจากนัด” ใน LINE PHMS เดิม ส่วนตัวเลือกยาแบบละเอียด/คลังยา v2.3 ยังไม่เปิดทั่วไป และจะไม่เพิ่มยาเข้าคลังอัตโนมัติจนผ่านการตรวจทานและยืนยัน</p>
 </section>
-<details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p class="phms-mini-heading">รายการตรวจแนะนำ (เลือกได้หลายอย่าง)</p><p id="procedureHistoryHint" class="help">เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureHistoryCards" class="phms-choice-grid" role="group" aria-label="รายการตรวจจากประวัติ" hidden></div><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><p class="phms-mini-heading">รายการตรวจอื่น / รูปแบบการพบแพทย์</p><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์"></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
+<details id="procedurePreviewBox"><summary>🔬 รายการตรวจ</summary><p class="help">แตะเลือกเฉพาะรายการที่มีในใบนัด เพิ่มได้หลายอย่าง · ข้อมูลยังเป็นร่างทดลอง</p><p id="procedureHistoryHint" class="help" hidden>เลือกตามใบนัดจริงเท่านั้น ระบบยังไม่เลือกให้เอง</p><div id="procedureHistoryCards" class="phms-choice-grid" role="group" aria-label="รายการตรวจจากประวัติ" hidden></div><div id="procedureCommonCards" class="phms-choice-grid" role="group" aria-label="เลือกรายการตรวจที่พบบ่อย"></div><div id="procedureOtherCards" class="phms-choice-grid" role="group" aria-label="รายการอื่นและการพบแพทย์ออนไลน์" hidden></div><label for="procedureEntry">✏️ รายการอื่น (ถ้าไม่มีในตัวเลือก)</label><div class="actions"><input id="procedureEntry" maxlength="160" placeholder="เช่น ตรวจเลือด หรือตรวจคลื่นหัวใจ"><button type="button" id="procedureAdd">+ เพิ่ม</button></div><p id="procedureSelectedHeading" class="phms-mini-heading">รายการตรวจที่เลือก (0 รายการ)</p><div id="procedureItems" role="list"></div><p id="procedureStatus" class="help" role="status">ยังไม่มีรายการตรวจ</p></details>
 <details id="relatedAppointmentBox"><summary>🔗 ใช้นัดเดิม </summary>
 <p class="help">ค้นหาและเลือกนัดครั้งก่อน ระบบจะเติมข้อมูลให้อัตโนมัติ (ยังไม่บันทึกความเชื่อมโยง)</p>
 <label for="relatedQuery">ค้นหานัดครั้งก่อน</label><input id="relatedQuery" placeholder="ค้นหาโรค โรงพยาบาล หรือชื่อนัด" autocomplete="off">
@@ -2434,9 +2446,9 @@ const PROCEDURE_PRESETS=[
  {name:'🧪 เก็บปัสสาวะ',en:'Urine sample',host:'procedureCommonCards'},
  {name:'🩻 เอกซเรย์',en:'X-ray',host:'procedureCommonCards'},
  {name:'💓 ตรวจคลื่นไฟฟ้าหัวใจ',en:'ECG / EKG',host:'procedureCommonCards'},
- {name:'🧫 เก็บอุจจาระ',en:'Stool sample',host:'procedureOtherCards'},
- {name:'🫁 เก็บเสมหะ',en:'Sputum sample',host:'procedureOtherCards'},
- {name:'💻 พบแพทย์ออนไลน์',en:'Telemedicine',host:'procedureOtherCards'}
+ {name:'🧫 เก็บอุจจาระ',en:'Stool sample',host:'procedureCommonCards'},
+ {name:'🫁 เก็บเสมหะ',en:'Sputum sample',host:'procedureCommonCards'},
+ {name:'💻 พบแพทย์ออนไลน์',en:'Telemedicine',host:'procedureCommonCards'}
 ];
 const procedurePresetButtons=new Map();
 let procedurePickerExpanded=false;
@@ -2464,12 +2476,12 @@ function renderHistoricalProcedureSuggestions(){
  }
  const recommendations=[...counts.values()].filter(x=>x.count>=3||x.department>0).sort((a,b)=>b.department-a.department||b.hospital-a.hospital||b.count-a.count).slice(0,6);
  host.hidden=!recommendations.length;
- hint.textContent=recommendations.length?'แนะนำจากประวัตินัดของคนนี้ · ตรวจสอบใบนัดก่อนเลือก':'เลือกรายการตรวจตามใบนัดจริง · ยังไม่มีประวัติรายการตรวจที่ใช้แนะนำได้';
+ hint.hidden=true;
  for(const entry of recommendations){
   const b=document.createElement('button');b.type='button';b.className='phms-pick';
-  b.textContent=entry.name+' ('+(entry.department?'เคยตรวจที่แผนกนี้':('เคยตรวจ '+entry.count+' ครั้ง'))+')';
+  b.textContent=entry.name+' ('+(entry.department?'เคยตรวจที่แผนกนี้':('เคยตรวจ '+entry.count+' ครั้ง'))+')';b.dataset.procedureName=entry.name;
   b.setAttribute('aria-pressed',String(procedurePreviewItems.includes(entry.name)));
-  b.addEventListener('click',()=>{const i=procedurePreviewItems.indexOf(entry.name);if(i>=0)procedurePreviewItems.splice(i,1);else if(procedurePreviewItems.length<30)procedurePreviewItems.push(entry.name);procedurePickerExpanded=false;renderProcedurePreview();});
+  b.addEventListener('click',()=>{const i=procedurePreviewItems.indexOf(entry.name);if(i>=0)procedurePreviewItems.splice(i,1);else if(procedurePreviewItems.length<30)procedurePreviewItems.push(entry.name);renderProcedurePreview();});
   host.append(b);
  }
 }
@@ -2484,7 +2496,7 @@ for(const preset of PROCEDURE_PRESETS){
   const index=procedurePreviewItems.indexOf(preset.name);
   if(index>=0)procedurePreviewItems.splice(index,1);
   else if(procedurePreviewItems.length<30)procedurePreviewItems.push(preset.name);
-  procedurePickerExpanded=false;renderProcedurePreview();
+  renderProcedurePreview();
  });
  $(preset.host).append(button);procedurePresetButtons.set(preset.name,button);
 }
@@ -2498,8 +2510,9 @@ procedureMoreButton.addEventListener('click',()=>{
  renderProcedurePreview();
  if(procedurePickerExpanded)$('procedureEntry').focus();
 });
-$('procedureOtherCards').append(procedureMoreButton);
+$('procedureCommonCards').append(procedureMoreButton);
 const procedureCustomLabel=document.querySelector('label[for="procedureEntry"]');
+procedureCustomLabel.textContent='🔎 ค้นหาหรือพิมพ์รายการตรวจใหม่';
 const procedureCustomActions=$('procedureEntry').closest('.actions');
 function syncProcedureChoices(){
  // Procedures are multi-select: always show all preset and historical choices.
@@ -2507,38 +2520,43 @@ function syncProcedureChoices(){
   button.setAttribute('aria-pressed',String(procedurePreviewItems.includes(name)));
   button.classList.remove('phms-choice-concealed');
  }
- const historyCards=$('procedureHistoryCards');
- const historyHint=$('procedureHistoryHint');
- const commonHeading=$('procedureCommonCards').previousElementSibling;
- const otherHeading=$('procedureOtherCards').previousElementSibling;
- for(const element of [historyCards,historyHint,commonHeading,otherHeading]){
-  element?.classList.remove('phms-choice-concealed');
- }
+ // Recommendation cards stay available without separate category headings.
  procedureCustomLabel?.classList.toggle('phms-choice-concealed',!procedurePickerExpanded);
  procedureCustomActions?.classList.toggle('phms-choice-concealed',!procedurePickerExpanded);
  procedureMoreButton.setAttribute('aria-expanded',String(procedurePickerExpanded));
- procedureMoreButton.textContent=procedurePickerExpanded?'− ปิดช่องเพิ่มรายการ':'＋ เพิ่มรายการตรวจ / ค้นหา';
+ procedureMoreButton.textContent='＋ เพิ่มรายการตรวจ / ค้นหา';
 }
 
 function renderProcedurePreview(){
+ // One selected-state indicator per preset: the card itself. No duplicate editable row.
+ renderHistoricalProcedureSuggestions();
+ const presetNames=new Set(PROCEDURE_PRESETS.map(x=>x.name));
+ const historicalNames=new Set([...$('procedureHistoryCards').querySelectorAll('button')].map(b=>b.dataset.procedureName).filter(Boolean));
+ const customItems=procedurePreviewItems.map((item,index)=>({item,index})).filter(({item})=>!presetNames.has(item)&&!historicalNames.has(item));
  const list=$('procedureItems');list.replaceChildren();
- for(const [index,item] of procedurePreviewItems.entries()){
+ for(const {item,index} of customItems){
   const row=document.createElement('div');row.className='checklist-row phms-procedure-row';
-  const input=document.createElement('input');input.value=item;input.maxLength=160;input.setAttribute('aria-label','แก้ไขรายการตรวจที่ '+(index+1));
-  input.addEventListener('change',()=>{const name=input.value.trim(),key=name.normalize('NFKC').toLocaleLowerCase('th-TH');if(!name||procedurePreviewItems.some((x,i)=>i!==index&&x.normalize('NFKC').toLocaleLowerCase('th-TH')===key)){input.value=item;return;}procedurePreviewItems[index]=name;renderProcedurePreview();});
+  const input=document.createElement('input');input.value=item;input.maxLength=160;input.setAttribute('aria-label','แก้ไขรายการตรวจที่พิมพ์เอง');
+  input.addEventListener('change',()=>{
+   const name=input.value.trim(),key=name.normalize('NFKC').toLocaleLowerCase('th-TH');
+   if(!name||procedurePreviewItems.some((x,i)=>i!==index&&x.normalize('NFKC').toLocaleLowerCase('th-TH')===key)){input.value=item;return;}
+   procedurePreviewItems[index]=name;renderProcedurePreview();
+  });
   const remove=makePhmsDeleteButton('ลบรายการตรวจ '+item,()=>{
    procedurePreviewItems.splice(index,1);renderProcedurePreview();
   });
   row.append(input,remove);list.append(row);
  }
- $('procedureStatus').textContent=procedurePreviewItems.length?'ตรวจสอบรายการด้านบนก่อนบันทึกนัด':'ยังไม่ได้เลือกรายการตรวจ';$('procedureSelectedHeading').textContent='รายการตรวจที่เลือก ('+procedurePreviewItems.length+' รายการ)';
- renderHistoricalProcedureSuggestions();
+ const heading=$('procedureSelectedHeading'),status=$('procedureStatus');
+ heading.hidden=!customItems.length;
+ heading.textContent='รายการที่พิมพ์เพิ่ม ('+customItems.length+' รายการ)';
+ status.hidden=true;
  syncProcedureChoices();
 }
 function addProcedurePreview(){
  const name=$('procedureEntry').value.trim(),key=name.normalize('NFKC').toLocaleLowerCase('th-TH');
  if(!name||name.length>160||procedurePreviewItems.length>=30||procedurePreviewItems.some(x=>x.normalize('NFKC').toLocaleLowerCase('th-TH')===key))return;
- procedurePreviewItems.push(name);$('procedureEntry').value='';procedurePickerExpanded=false;renderProcedurePreview();
+ procedurePreviewItems.push(name);$('procedureEntry').value='';renderProcedurePreview();
 }
 $('procedureAdd').addEventListener('click',addProcedurePreview);
 $('procedureEntry').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();addProcedurePreview();}});
