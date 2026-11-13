@@ -1653,8 +1653,16 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* Consistent two-line labels for coverage cards; abbreviations avoid long wrapping. */
 #editor .phms-coverage-card{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important}
 #editor .phms-coverage-card small{font-size:.82em!important;line-height:1.25!important;color:#6d6258!important;font-weight:500!important}
+/* PHMS v2.4.54 — coverage history-first choices and hospital-style search results. */
+#editor #coverageSearchArea[hidden],#editor #coverageSearchArea.hidden{display:none!important}
+#editor #coverageSearchArea{margin-top:8px!important}
+#editor #coverageSearchChoices.combo-results{margin-top:7px!important;max-height:240px!important;overflow-y:auto!important}
+#editor #coverageSearchChoices.combo-results button{display:block!important;width:100%!important;min-height:52px!important;padding:9px 13px!important;text-align:left!important;background:#fff!important;color:#493526!important;border:0!important;border-bottom:1px solid #eadfD2!important;border-radius:0!important}
+#editor #coverageSearchChoices.combo-results button strong{display:block!important;font-weight:700!important}
+#editor #coverageSearchChoices.combo-results button small{display:block!important;color:#756758!important;font-size:.86rem!important;margin-top:2px!important}
+#editor #coverageSearchChoices.combo-results button:focus-visible{outline:3px solid #93683f!important;outline-offset:-3px!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.53</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.54</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3356,6 +3364,7 @@ async function loadRelatedAppointments(){
  if(!response.ok){relatedAllItems=[];updateSameDayAppointmentNotice();renderLinkedCareVisits();status.textContent='ยังตรวจสอบประวัตินัดไม่ได้ กรุณาลองใหม่';$('relatedAppointmentBox').hidden=true;return;}
  sourceAppointments=new Map();relatedAllItems=[];
  for(const a of response.appointments||[]){if(typeof a.id!=='string')continue;sourceAppointments.set(a.id,a);relatedAllItems.push(a);}
+ renderCoverageChoices();
  updateSameDayAppointmentNotice();
  const picker=$('relatedSelect'),prior=picker.value;
  picker.replaceChildren(new Option('ไม่เชื่อมนัดเดิม',''),...relatedAllItems.map(a=>new Option(a.title||'นัดหมาย',a.id)));picker.disabled=false;
@@ -4659,38 +4668,88 @@ function makeCoverageCard(value,label,selected,action){
  button.addEventListener('click',action);
  return button;
 }
+function coverageKey(value){return String(value||'').normalize('NFKC').trim().toLocaleLowerCase('th-TH');}
 function setCoverageChoice(value){
- if(value&&!Array.from(coverageSelect.options).some(x=>x.value===value)){
-  const opt=new Option(value+' (ร่าง)',value);
+ const clean=String(value||'').trim().slice(0,120);
+ if(!clean)return;
+ if(!Array.from(coverageSelect.options).some(x=>x.value===clean)){
+  const opt=new Option(clean+' (ร่าง)',clean);
   opt.dataset.unverified='true';coverageSelect.add(opt);
  }
- coverageSelect.value=value;
+ coverageSelect.value=clean;
+ // Always close search before dispatching change; selecting a card must never open it.
  coverageExpanded=false;
  coverageSearch.value='';
+ coverageSearchArea.hidden=true;
+ coverageSearchArea.classList.add('hidden');
  coverageSelect.dispatchEvent(new Event('change',{bubbles:true}));
+}
+function coverageHistoryCounts(){
+ const counts=new Map();
+ for(const appointment of (relatedAllItems||[])){
+  const raw=String(appointment?.coverage_type||appointment?.coverage||appointment?.insurance_type||'').trim();
+  if(!raw)continue;
+  const key=coverageKey(raw),entry=counts.get(key)||{value:raw,count:0};
+  entry.count++;counts.set(key,entry);
+ }
+ return counts;
 }
 function renderCoverageChoices(){
  const values=[...coverageSelect.options].filter(x=>x.value&&x.value!=='อื่น ๆ').map(x=>x.value);
- const used=new Set((relatedAllItems||[]).map(a=>String(a.coverage_type||a.coverage||'').trim()).filter(Boolean));
- const selected=coverageSelect.value;
- let visible=values.filter(v=>used.has(v)||v===selected).slice(0,5);
- if(!visible.length)visible=['บัตรทอง','ประกันสังคม','ข้าราชการ'].filter(v=>values.includes(v));
+ const counts=coverageHistoryCounts(),selected=coverageSelect.value;
+ const defaults=['ชำระเอง','บัตรทอง','ประกันสังคม'].filter(v=>values.includes(v));
+ const historical=[...counts.entries()]
+  .map(([key,row])=>({key,value:values.find(v=>coverageKey(v)===key)||row.value,count:row.count}))
+  .sort((a,b)=>b.count-a.count||a.value.localeCompare(b.value,'th'));
+ let visible=[];
+ if(historical.length){
+  visible=historical.slice(0,5).map(x=>x.value);
+  for(const value of defaults){if(visible.length>=5)break;if(!visible.some(v=>coverageKey(v)===coverageKey(value)))visible.push(value);}
+ }else visible=defaults;
+ if(selected&&!visible.some(v=>coverageKey(v)===coverageKey(selected)))visible.unshift(selected);
  coverageCards.replaceChildren();
- for(const value of visible)coverageCards.append(makeCoverageCard(value,coverageOptionLabel(value),selected===value,()=>setCoverageChoice(value)));
+ for(const value of visible.slice(0,6)){
+  coverageCards.append(makeCoverageCard(value,coverageOptionLabel(value),selected===value,()=>setCoverageChoice(value)));
+ }
  const more=makeCoverageCard('', '',false,()=>{
-  coverageExpanded=!coverageExpanded;renderCoverageChoices();if(coverageExpanded)coverageSearch.focus();
+  coverageExpanded=true;
+  coverageSearchArea.hidden=false;
+  coverageSearchArea.classList.remove('hidden');
+  renderCoverageChoices();
+  coverageSearch.focus();
  });
- more.setAttribute('aria-expanded',String(coverageExpanded));coverageCards.append(more);
+ more.classList.add('phms-coverage-more');
+ more.textContent='＋ สิทธิอื่น / ค้นหา';
+ more.setAttribute('aria-expanded',String(coverageExpanded));
+ coverageCards.append(more);
+ // Search is a progressive disclosure: never appears until the explicit add/search action.
  coverageSearchArea.hidden=!coverageExpanded;
  coverageSearchArea.classList.toggle('hidden',!coverageExpanded);
+ coverageSearch.setAttribute('role','combobox');
+ coverageSearch.setAttribute('aria-autocomplete','list');
+ coverageSearch.setAttribute('aria-expanded',String(coverageExpanded));
+ coverageSearch.setAttribute('aria-controls','coverageSearchChoices');
+ coverageSearchChoices.id='coverageSearchChoices';
+ coverageSearchChoices.className='combo-results';
  const query=coverageSearch.value.normalize('NFKC').toLocaleLowerCase('th-TH').trim();
  coverageSearchChoices.replaceChildren();
- for(const value of values.filter(v=>!query||coverageOptionLabel(v).normalize('NFKC').toLocaleLowerCase('th-TH').includes(query)).slice(0,12)){
-  coverageSearchChoices.append(makeCoverageCard(value,coverageOptionLabel(value),selected===value,()=>setCoverageChoice(value)));
+ const matches=values.filter(v=>!query||coverageOptionLabel(v).normalize('NFKC').toLocaleLowerCase('th-TH').includes(query)||coverageEnglishLabel(v).toLocaleLowerCase('en').includes(query)).slice(0,12);
+ for(const value of matches){
+  const button=document.createElement('button');button.type='button';button.setAttribute('role','option');
+  const title=document.createElement('strong');title.textContent=coverageIcon(value)+' '+coverageOptionLabel(value);
+  const subtitle=document.createElement('small');subtitle.textContent=coverageEnglishLabel(value);
+  button.append(title,subtitle);
+  button.addEventListener('click',()=>setCoverageChoice(value));
+  coverageSearchChoices.append(button);
  }
- if(query&&!values.some(v=>coverageOptionLabel(v).normalize('NFKC').toLocaleLowerCase('th-TH')===query)){
-  const b=makeCoverageCard(query,'ใช้ชื่อ "'+coverageSearch.value.trim()+'" ในร่างนัด',false,()=>setCoverageChoice(coverageSearch.value.trim().slice(0,120)));
-  b.classList.add('phms-coverage-more');coverageSearchChoices.append(b);
+ if(query&&!values.some(v=>coverageKey(coverageOptionLabel(v))===query||coverageKey(v)===query)){
+  const button=document.createElement('button');button.type='button';button.setAttribute('role','option');
+  const title=document.createElement('strong');title.textContent='＋ ใช้สิทธิ "'+coverageSearch.value.trim()+'"';
+  const subtitle=document.createElement('small');subtitle.textContent='เพิ่มเป็นสิทธิสำหรับนัดนี้';
+  button.append(title,subtitle);button.addEventListener('click',()=>setCoverageChoice(coverageSearch.value.trim().slice(0,120)));coverageSearchChoices.append(button);
+ }
+ if(coverageExpanded&&!coverageSearchChoices.children.length){
+  const empty=document.createElement('div');empty.className='unavailable';empty.textContent='ไม่พบสิทธิที่ค้นหา ลองพิมพ์คำอื่น';coverageSearchChoices.append(empty);
  }
 }
 coverageSearch.addEventListener('input',renderCoverageChoices);
