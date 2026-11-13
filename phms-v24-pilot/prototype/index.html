@@ -1732,7 +1732,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* Do not touch .arrival-lead-choice, reschedule notice/day/time controls,
    or any control in the reschedule-contact section. */
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.56</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.57</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -1988,6 +1988,44 @@ initializeLiff();
 // No fake catalog. A verified backend integration will invoke setAuthorizedCatalog after LINE authentication.
 let authorizedCatalog=null;
 function fillOptions(id,items,placeholder){const select=document.getElementById(id);select.replaceChildren(new Option(placeholder,''),...items.map(x=>new Option(x.label,x.value)));select.disabled=!items.length;}
+
+// Rank personal history by use frequency; ties are resolved by most recent appointment.
+// The source list is person-scoped and is never written to browser storage.
+function rankedPersonHistory(fieldNames){
+ const visits=Array.isArray(relatedAllItems)?relatedAllItems:[];
+ const ordered=[...visits].sort((a,b)=>String(b.planned_visit_date||b.appointment_at||'').localeCompare(String(a.planned_visit_date||a.appointment_at||'')));
+ const rows=new Map();
+ ordered.forEach((visit,index)=>{
+  let raw='';
+  for(const field of fieldNames){const value=visit?.[field];if(Array.isArray(value)){raw=value.map(x=>typeof x==='string'?x:(x?.name||x?.label||'')).filter(Boolean).join('|');}else if(value&&String(value).trim()){raw=String(value).trim();}if(raw)break;}
+  if(!raw)return;
+  for(const name of raw.split('|').map(x=>x.trim()).filter(Boolean)){
+   const key=normalizedMasterName(name);if(!key)continue;
+   const row=rows.get(key)||{name,count:0,lastIndex:index};
+   row.count++;row.lastIndex=Math.min(row.lastIndex,index);rows.set(key,row);
+  }
+ });
+ return [...rows.values()].sort((a,b)=>b.count-a.count||a.lastIndex-b.lastIndex||a.name.localeCompare(b.name,'th'));
+}
+function topHistoryNames(fieldNames,limit=3){
+ return rankedPersonHistory(fieldNames).slice(0,limit).map(x=>x.name);
+}
+function rankedCatalogChoices(kind,entries,selected){
+ const fields=kind==='hospital'?['hospital_name','hospital']:kind==='unit'?['department_name','department','unit_name']:['doctor_name','clinician_name','doctor'];
+ const ranked=rankedPersonHistory(fields),byName=new Map();
+ for(const item of (entries||[])){
+  for(const label of [item.label,item.name,item.display_name].filter(Boolean)){
+   const key=normalizedMasterName(String(label).replace(/\s*\([^()]+\)\s*$/,''));
+   if(key&&!byName.has(key))byName.set(key,item);
+  }
+ }
+ const result=[];
+ for(const row of ranked){const item=byName.get(normalizedMasterName(row.name));if(item&&!result.some(x=>x.value===item.value))result.push(item);if(result.length===3)break;}
+ if(selected&&!result.some(x=>x.value===selected)){
+  const item=(entries||[]).find(x=>x.value===selected);if(item){if(result.length>=3)result.pop();result.unshift(item);}
+ }
+ return result;
+}
 function normalizedMasterName(value){return String(value||'').normalize('NFKC').toLocaleLowerCase('th-TH').replace(/[\\s._()\u200b-\u200d-]+/g,'').replace(/^(?:โรงพยาบาล|รพ)/,'');}
 function masterMatches(item,term){const q=normalizedMasterName(term);return !q||[item.label,item.name,item.display_name,item.code,item.external_code,...(Array.isArray(item.aliases)?item.aliases:[])].filter(Boolean).some(v=>normalizedMasterName(v).includes(q));}
 const comboState=Object.fromEntries(['hospital','unit','clinician'].map(kind=>[kind,{searchText:'',selectedItem:null,isOpen:false}]));
@@ -2039,15 +2077,8 @@ function drawAdaptiveProviderCards(kind,choices){
  const ui=adaptivePickers[kind];if(!ui)return;
  const entries=Array.isArray(choices)?choices:[];
  const selected=document.getElementById(kind==='hospital'?'providerOrg':'providerUnit').value;
- // Recent/selected items are visible as cards; the rest remain searchable.
- // Never show the whole catalog as a wall of buttons.
- const personVisits=Array.isArray(relatedAllItems)?relatedAllItems:[];
- const historyNames=new Set(personVisits.map(a=>normalizedMasterName(
-  kind==='hospital'?(a.hospital_name||a.hospital):
-  (a.department_name||a.department||'')
- )).filter(Boolean));
- const featured=entries.filter(item=>item.value===selected||historyNames.has(normalizedMasterName(String(item.label||'').replace(/\s*\([^()]+\)\s*$/,'')))||
-  historyNames.has(normalizedMasterName(item.name||''))).slice(0,5);
+ // Show only the three most-used personal history entries; ties use recency.
+ const featured=rankedCatalogChoices(kind,entries,selected);
  const draft=comboState[kind].selectedItem?.draftOnly?comboState[kind].selectedItem:null;
  ui.cards.replaceChildren();
  if(draft){
@@ -2120,9 +2151,8 @@ const doctorSearchInput=document.getElementById('clinicianSearch');
 doctorSearchInput.placeholder='🔎 ค้นหาหรือพิมพ์ชื่อแพทย์';
 function drawRecentDoctorCards(choices){
  doctorQuickCards.replaceChildren();
- const names=new Set((relatedAllItems||[]).map(a=>normalizedMasterName(a.doctor_name||a.clinician_name)).filter(Boolean));
  const selected=document.getElementById('providerClinician').value;
- const matched=(choices||[]).filter(x=>x.value===selected||names.has(normalizedMasterName(x.label||''))||names.has(normalizedMasterName(x.name||''))).slice(0,4);
+ const matched=rankedCatalogChoices('clinician',choices,selected);
  const draft=comboState.clinician.selectedItem?.draftOnly?comboState.clinician.selectedItem:null;
  if(draft){
   const provisional=document.createElement('button');provisional.type='button';provisional.className='adaptive-provider-choice';
@@ -2475,10 +2505,11 @@ function treatmentTopicEmoji(topic){
 function renderCareTopicSuggestions(){
  const field=$('care_topic'),host=$('careTopicSuggestions'),current=field.value.trim();
  const same=(a,b)=>String(a||'').trim().toLocaleLowerCase('th-TH')===String(b||'').trim().toLocaleLowerCase('th-TH');
- const entries=[...new Set((relatedAllItems||[]).map(a=>String(a.care_topic||'').trim()).filter(Boolean))].slice(0,6);
- if(current&&!entries.some(x=>same(x,current)))entries.unshift(current);
+ const ranked=topHistoryNames(['care_topic','treatment_topic','diagnosis_name'],3);
+ const entries=ranked.map(name=>(relatedAllItems||[]).find(a=>String(a.care_topic||a.treatment_topic||a.diagnosis_name||'').trim()===name)?.care_topic||name);
+ if(current&&!entries.some(x=>same(x,current))){if(entries.length>=3)entries.pop();entries.unshift(current);}
  host.replaceChildren();
- for(const value of (current&&!careTopicSearchExpanded?[current]:entries.slice(0,7))){
+ for(const value of entries.slice(0,3)){
   const button=document.createElement('button');button.type='button';button.className='phms-treatment-card';
   const bilingual=treatmentTopicBilingual(value);
   const title=document.createElement('span');title.textContent=treatmentTopicEmoji(value)+' '+bilingual.thai;
@@ -2656,7 +2687,7 @@ const procedureCustomLabel=document.querySelector('label[for="procedureEntry"]')
 procedureCustomLabel.textContent='รายการตรวจอื่น';
 const procedureCustomActions=$('procedureEntry').closest('.actions');
 function renderHistoricalProcedureSuggestions(){
- // A single grid, sorted by actual appointment-history frequency (descending).
+ // A single grid: show the three most-used history choices first; reveal all on search.
  // Presets and history-derived entries are deduplicated; selections never disappear.
  const host=$('procedureCommonCards');
  const frequency=previousProcedureFrequency();
@@ -2677,7 +2708,8 @@ function renderHistoricalProcedureSuggestions(){
  }
  const rows=[...records.values()].sort((a,b)=>b.count-a.count||a.order-b.order||a.name.localeCompare(b.name,'th'));
  host.replaceChildren();
- for(const row of rows){
+ const visibleRows=procedurePickerExpanded?rows:rows.slice(0,3);
+ for(const row of visibleRows){
   const button=document.createElement('button');
   button.type='button';button.className='phms-pick';
   const selected=procedurePreviewItems.some(item=>procedureKey(item)===row.key);
@@ -4778,7 +4810,7 @@ function renderCoverageChoices(){
  }else visible=defaults;
  if(selected&&!visible.some(v=>coverageKey(v)===coverageKey(selected)))visible.unshift(selected);
  coverageCards.replaceChildren();
- for(const value of visible.slice(0,6)){
+ for(const value of visible.slice(0,3)){
   coverageCards.append(makeCoverageCard(value,coverageOptionLabel(value),selected===value,()=>setCoverageChoice(value)));
  }
  const more=makeCoverageCard('', '',false,()=>{
