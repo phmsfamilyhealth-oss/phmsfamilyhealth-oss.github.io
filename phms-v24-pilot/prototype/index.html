@@ -1750,8 +1750,61 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .phms-appointment-header .phms-mode-segment.is-active{background:#76532f!important;color:#fff!important;font-weight:700!important;box-shadow:0 1px 2px #4d352022!important;}
 .phms-appointment-header .phms-mode-segment:focus-visible{outline:3px solid #93683f!important;outline-offset:2px!important;}
 @media(max-width:420px){.phms-appointment-header .phms-mode-segment{min-width:0!important;min-height:42px!important;padding:8px 11px!important;font-size:14px!important;}}
+
+/* PHMS v2.4.61 — Choice-card system based on v2.4.57.
+   Four quick choices per category; additional records are revealed only on demand. */
+#editor #scenarioFlow .scenario-grid,
+#editor .phms-treatment-cards,
+#editor .phms-coverage-cards,
+#editor #procedureCommonCards{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:9px!important;
+}
+#editor #scenarioFlow .scenario-option,
+#editor .phms-treatment-cards .phms-treatment-card,
+#editor .phms-coverage-cards .phms-coverage-card:not(.phms-coverage-more),
+#editor #procedureCommonCards .phms-pick:not(.phms-procedure-more){
+ box-sizing:border-box!important;width:100%!important;min-height:68px!important;
+ padding:10px!important;border:1.8px solid #c58a55!important;border-radius:12px!important;
+ background:#fffaf4!important;color:#493526!important;font-family:inherit!important;
+ font-size:1rem!important;font-weight:700!important;line-height:1.35!important;
+ text-align:center!important;white-space:normal!important;overflow-wrap:anywhere!important;
+}
+#editor #scenarioFlow .scenario-option[aria-pressed="true"],
+#editor .phms-treatment-cards .phms-treatment-card[aria-pressed="true"],
+#editor .phms-coverage-cards .phms-coverage-card[aria-pressed="true"]:not(.phms-coverage-more),
+#editor #procedureCommonCards .phms-pick[aria-pressed="true"]:not(.phms-procedure-more){
+ border:2px solid #89592f!important;background:#f3dfc2!important;color:#3a2618!important;
+}
+#editor #scenarioFlow .scenario-option:focus-visible,
+#editor .phms-treatment-cards .phms-treatment-card:focus-visible,
+#editor .phms-coverage-cards .phms-coverage-card:focus-visible,
+#editor #procedureCommonCards .phms-pick:focus-visible{outline:3px solid #93683f!important;outline-offset:2px!important}
+#editor .phms-treatment-more,#editor .phms-coverage-more,#editor .phms-procedure-more{
+ border:1.8px dashed #c58a55!important;background:#fcf7f0!important;color:#493526!important;
+}
+#editor #careTopicHistoryResults.phms-choice-results,
+#editor #coverageSearchChoices.combo-results,
+#editor #procedureCommonCards.is-expanded{
+ max-height:240px!important;overflow-y:auto!important;overscroll-behavior:contain!important;
+ scrollbar-width:thin!important;border:1px solid #d7c2a8!important;border-radius:10px!important;
+}
+#editor #careTopicHistoryResults .phms-choice-result,
+#editor #coverageSearchChoices.combo-results button{
+ display:block!important;width:100%!important;min-height:50px!important;padding:9px 13px!important;
+ border:0!important;border-bottom:1px solid #eadfD2!important;border-radius:0!important;
+ background:#fff!important;color:#493526!important;text-align:left!important;
+}
+#editor #careTopicHistoryResults .phms-choice-result strong,
+#editor #careTopicHistoryResults .phms-choice-result small{display:block!important}
+#editor #careTopicHistoryResults .phms-choice-result small{margin-top:2px!important;color:#756758!important;font-size:.86rem!important}
+#editor #careTopicHistoryResults .phms-choice-empty{padding:12px!important;color:#756758!important}
+#editor #procedureCommonCards.is-expanded{display:flex!important;flex-direction:column!important;gap:0!important}
+#editor #procedureCommonCards.is-expanded .phms-pick:not(.phms-procedure-more){width:100%!important;min-height:50px!important;border:0!important;border-bottom:1px solid #eadfd2!important;border-radius:0!important;background:#fff!important;text-align:left!important}
+#editor #procedureCommonCards.is-expanded .phms-pick[aria-pressed="true"]:not(.phms-procedure-more){background:#f3dfc2!important;border-left:3px solid #89592f!important}
+@media(max-width:390px){#editor #scenarioFlow .scenario-option,#editor .phms-treatment-cards .phms-treatment-card,#editor .phms-coverage-cards .phms-coverage-card,#editor #procedureCommonCards .phms-pick{min-height:62px!important;padding:8px!important}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.60</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.61</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -2524,11 +2577,11 @@ function treatmentTopicEmoji(topic){
 function renderCareTopicSuggestions(){
  const field=$('care_topic'),host=$('careTopicSuggestions'),current=field.value.trim();
  const same=(a,b)=>String(a||'').trim().toLocaleLowerCase('th-TH')===String(b||'').trim().toLocaleLowerCase('th-TH');
- const ranked=topHistoryNames(['care_topic','treatment_topic','diagnosis_name'],3);
+ const ranked=topHistoryNames(['care_topic','treatment_topic','diagnosis_name'],4);
  const entries=ranked.map(name=>(relatedAllItems||[]).find(a=>String(a.care_topic||a.treatment_topic||a.diagnosis_name||'').trim()===name)?.care_topic||name);
- if(current&&!entries.some(x=>same(x,current))){if(entries.length>=3)entries.pop();entries.unshift(current);}
+ if(current&&!entries.some(x=>same(x,current))){if(entries.length>=4)entries.pop();entries.unshift(current);}
  host.replaceChildren();
- for(const value of entries.slice(0,3)){
+ for(const value of entries.slice(0,4)){
   const button=document.createElement('button');button.type='button';button.className='phms-treatment-card';
   const bilingual=treatmentTopicBilingual(value);
   const title=document.createElement('span');title.textContent=treatmentTopicEmoji(value)+' '+bilingual.thai;
@@ -2548,7 +2601,27 @@ function renderCareTopicSuggestions(){
   if(careTopicSearchExpanded){field.focus();field.select();}
  });host.append(other);
  const box=$('careTopicSearchBox');box.hidden=!careTopicSearchExpanded;box.classList.toggle('hidden',!careTopicSearchExpanded);
+ if(careTopicSearchExpanded)renderCareTopicHistoryResults();
 }
+const careTopicResults=document.createElement('div');careTopicResults.id='careTopicHistoryResults';careTopicResults.className='phms-choice-results';$('careTopicSearchBox').append(careTopicResults);
+function renderCareTopicHistoryResults(){
+ const query=$('care_topic').value.trim().toLocaleLowerCase('th-TH');
+ const current=$('care_topic').value.trim();
+ const rows=rankedPersonHistory(['care_topic','treatment_topic','diagnosis_name']).filter(row=>!query||row.name.toLocaleLowerCase('th-TH').includes(query)||treatmentTopicBilingual(row.name).english.toLocaleLowerCase('en').includes(query));
+ careTopicResults.replaceChildren();
+ for(const row of rows){
+  const button=document.createElement('button');button.type='button';button.className='phms-choice-result';
+  const bilingual=treatmentTopicBilingual(row.name);
+  const title=document.createElement('strong');title.textContent=treatmentTopicEmoji(row.name)+' '+bilingual.thai;
+  const sub=document.createElement('small');sub.textContent=bilingual.english+(row.count>1?' · ใช้ '+row.count+' ครั้ง':'');
+  button.append(title,sub);
+  button.addEventListener('mousedown',e=>e.preventDefault());
+  button.addEventListener('click',()=>{$('care_topic').value=row.name;careTopicSearchExpanded=false;$('careTopicDraftStatus').textContent='';$('care_topic').dispatchEvent(new Event('change',{bubbles:true}));renderCareTopicSuggestions();});
+  careTopicResults.append(button);
+ }
+ if(!rows.length){const empty=document.createElement('div');empty.className='phms-choice-empty';empty.textContent='ไม่พบประวัติที่ตรงกัน สามารถพิมพ์ชื่อเรื่องใหม่ได้';careTopicResults.append(empty);}
+}
+
 function confirmCareTopic(){
  if(!careTopicSearchExpanded)return;
  const field=$('care_topic'),value=field.value.trim().replace(/\s+/g,' ').slice(0,500);
@@ -2558,7 +2631,7 @@ function confirmCareTopic(){
 }
 $('care_topic').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();confirmCareTopic();}});
 $('care_topic').addEventListener('blur',()=>{if(careTopicSearchExpanded&&$('care_topic').value.trim())confirmCareTopic();});
-$('care_topic').addEventListener('input',()=>{$('careTopicDraftStatus').textContent='';});
+$('care_topic').addEventListener('input',()=>{$('careTopicDraftStatus').textContent='';if(careTopicSearchExpanded)renderCareTopicHistoryResults();});
 function refresh(){
  updateAppointmentPhotoVisibility();
  $('historicalLinkedVisitSection').classList.toggle('hidden',$('scenario').value!=='historical');
@@ -2699,12 +2772,14 @@ procedureMoreButton.textContent='＋ เพิ่มรายการตรว�
 procedureMoreButton.setAttribute('aria-expanded','false');
 procedureMoreButton.addEventListener('click',()=>{
  procedurePickerExpanded=!procedurePickerExpanded;
- syncProcedureChoices();
- if(procedurePickerExpanded)$('procedureEntry').focus();
+ syncProcedureChoices();renderProcedurePreview();
+ if(procedurePickerExpanded){$('procedureEntry').focus();$('procedureEntry').scrollIntoView({block:'nearest'});}
 });
 const procedureCustomLabel=document.querySelector('label[for="procedureEntry"]');
 procedureCustomLabel.textContent='รายการตรวจอื่น';
 const procedureCustomActions=$('procedureEntry').closest('.actions');
+procedureCustomActions.after($('procedureCommonCards'));
+$('procedureEntry').addEventListener('input',()=>{if(procedurePickerExpanded)renderProcedurePreview();});
 function renderHistoricalProcedureSuggestions(){
  // A single grid: show the three most-used history choices first; reveal all on search.
  // Presets and history-derived entries are deduplicated; selections never disappear.
@@ -2727,7 +2802,7 @@ function renderHistoricalProcedureSuggestions(){
  }
  const rows=[...records.values()].sort((a,b)=>b.count-a.count||a.order-b.order||a.name.localeCompare(b.name,'th'));
  host.replaceChildren();
- const visibleRows=procedurePickerExpanded?rows:rows.slice(0,3);
+ const procedureQuery=$('procedureEntry').value.trim().toLocaleLowerCase('th-TH');\n const visibleRows=procedurePickerExpanded?rows.filter(row=>!procedureQuery||row.name.toLocaleLowerCase('th-TH').includes(procedureQuery)||String(row.en||'').toLocaleLowerCase('en').includes(procedureQuery)):rows.slice(0,4);
  for(const row of visibleRows){
   const button=document.createElement('button');
   button.type='button';button.className='phms-pick';
@@ -4830,12 +4905,12 @@ function renderCoverageChoices(){
   .sort((a,b)=>b.count-a.count||(counts.get(a.key)?.lastIndex??999)-(counts.get(b.key)?.lastIndex??999));
  let visible=[];
  if(historical.length){
-  visible=historical.slice(0,3).map(x=>x.value);
-  for(const value of defaults){if(visible.length>=3)break;if(!visible.some(v=>coverageKey(v)===coverageKey(value)))visible.push(value);}
- }else visible=defaults.slice(0,3);
- if(selected&&!visible.some(v=>coverageKey(v)===coverageKey(selected))){if(visible.length>=3)visible.pop();visible.unshift(selected);}
+  visible=historical.slice(0,4).map(x=>x.value);
+  for(const value of defaults){if(visible.length>=4)break;if(!visible.some(v=>coverageKey(v)===coverageKey(value)))visible.push(value);}
+ }else visible=defaults.slice(0,4);
+ if(selected&&!visible.some(v=>coverageKey(v)===coverageKey(selected))){if(visible.length>=4)visible.pop();visible.unshift(selected);}
  coverageCards.replaceChildren();
- for(const value of visible.slice(0,3)){
+ for(const value of visible.slice(0,4)){
   coverageCards.append(makeCoverageCard(value,coverageOptionLabel(value),selected===value,()=>setCoverageChoice(value)));
  }
  const more=makeCoverageCard('', '',false,()=>{
