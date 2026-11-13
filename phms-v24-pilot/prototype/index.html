@@ -1731,8 +1731,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 /* Do not touch .arrival-lead-choice, reschedule notice/day/time controls,
    or any control in the reschedule-contact section. */
+
+/* Compact mode switch lives in the appointment header, directly beneath the version at right. */
+.phms-appointment-header .phms-header-mode-switch{display:flex!important;justify-content:flex-end!important;align-items:center!important;width:100%;margin:5px 0 0!important;}
+.phms-appointment-header .phms-header-mode-switch .mode-label,
+.phms-appointment-header .phms-header-mode-switch .mode-hint{display:none!important;}
+.phms-appointment-header .phms-header-mode-switch .mode-choices{display:inline-flex!important;width:auto!important;gap:2px!important;padding:3px!important;border:1px solid #e2d1b8;border-radius:10px;background:#f4eadc;}
+.phms-appointment-header .phms-header-mode-switch .mode-choice{min-height:34px!important;padding:5px 11px!important;border-radius:7px!important;font-size:.84rem!important;line-height:1.2!important;}
+.phms-appointment-header .phms-header-mode-switch .mode-choice[aria-pressed=true]{background:#76532f!important;color:#fff!important;box-shadow:0 1px 2px #4d352022;}
+@media(max-width:380px){.phms-appointment-header .phms-header-mode-switch .mode-choice{padding:5px 8px!important;font-size:.8rem!important;}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.57</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.58</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3998,7 +4007,7 @@ for(const [value,text] of [['simple','แบบง่าย'],['full','แบบ
  button.addEventListener('click',()=>{$('detail').value=value;$('detail').dispatchEvent(new Event('change',{bubbles:true}));});
  modeChoices.append(button);
 }
-modeBar.append(modeChoices);flowRoot.append(modeBar);
+modeBar.append(modeChoices);modeBar.classList.add('phms-header-mode-switch');document.querySelector('.phms-appointment-header-top').after(modeBar);
 const originalModeLabel=document.querySelector('label[for="detail"]');originalModeLabel.classList.add('visually-hidden-form');
 $('detail').classList.add('visually-hidden-form');$('detail').setAttribute('tabindex','-1');$('detail').setAttribute('aria-hidden','true');
 // Scenario selection remains a real form select so the existing validation and state stay intact.
