@@ -1591,8 +1591,70 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor .phms-treatment-card{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;text-align:center!important}
 #editor .phms-coverage-card small,
 #editor .phms-treatment-card small{display:block!important;font-size:.82em!important;font-weight:400!important;line-height:1.25!important;color:#6d6258!important}
+/* PHMS v2.4.53 — GLOBAL CHOICE DESIGN STANDARD
+   A: fixed choices use one consistent selected/unselected treatment.
+   B: only add/search actions use dashed cream styling.
+   Preserve existing selection cardinality and underlying form events. */
+#editor{
+ --phms-choice-bg:#fffaf4;
+ --phms-choice-border:#c5a17c;
+ --phms-choice-text:#493526;
+ --phms-choice-selected-bg:#f3dfc2;
+ --phms-choice-selected-border:#89592f;
+ --phms-choice-selected-text:#3a2618;
+ --phms-choice-add-bg:#fcf7f0;
+ --phms-choice-add-border:#c58a55;
+}
+#editor .arrival-lead-choice,
+#editor .phms-choice-grid .phms-pick,
+#editor .scenario-option,
+#editor .prep-choice-card,
+#editor .phms-coverage-card,
+#editor .phms-treatment-card,
+#editor .phms-state-card{
+ box-sizing:border-box!important;
+ border:1.5px solid var(--phms-choice-border)!important;
+ border-radius:12px!important;
+ background:var(--phms-choice-bg)!important;
+ color:var(--phms-choice-text)!important;
+}
+#editor .arrival-lead-choice[aria-pressed="true"],
+#editor .phms-choice-grid .phms-pick[aria-pressed="true"],
+#editor .scenario-option[aria-pressed="true"],
+#editor .prep-choice-card[aria-pressed="true"],
+#editor .phms-coverage-card[aria-pressed="true"],
+#editor .phms-treatment-card[aria-pressed="true"],
+#editor .phms-state-card[aria-pressed="true"]{
+ border:2px solid var(--phms-choice-selected-border)!important;
+ background:var(--phms-choice-selected-bg)!important;
+ color:var(--phms-choice-selected-text)!important;
+}
+/* B: dashed border is reserved for explicit add/search controls. */
+#editor .phms-coverage-card:last-child[aria-expanded],
+#editor .phms-coverage-more,
+#editor .phms-treatment-more,
+#editor .phms-choice-grid .phms-pick.phms-procedure-more,
+#editor .phms-choice-grid .phms-pick[data-choice-action="add"],
+#editor .phms-choice-grid .phms-pick[data-choice-action="search"]{
+ border:1.8px dashed var(--phms-choice-add-border)!important;
+ background:var(--phms-choice-add-bg)!important;
+ color:var(--phms-choice-text)!important;
+}
+/* Focus remains visible for keyboard and switch-control users. */
+#editor .arrival-lead-choice:focus-visible,
+#editor .phms-choice-grid .phms-pick:focus-visible,
+#editor .scenario-option:focus-visible,
+#editor .prep-choice-card:focus-visible,
+#editor .phms-coverage-card:focus-visible,
+#editor .phms-treatment-card:focus-visible,
+#editor .phms-state-card:focus-visible{
+ outline:3px solid #93683f!important;outline-offset:2px!important;
+}
+/* Consistent two-line labels for coverage cards; abbreviations avoid long wrapping. */
+#editor .phms-coverage-card{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important}
+#editor .phms-coverage-card small{font-size:.82em!important;line-height:1.25!important;color:#6d6258!important;font-weight:500!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.52</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.53</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4568,9 +4630,9 @@ coverageSelect.classList.add('adaptive-select-hidden');
 let coverageExpanded=false;
 const coverageIcon=value=>({'บัตรทอง':'🪪','ประกันสังคม':'🏥','ข้าราชการ':'🏛️','รัฐวิสาหกิจ':'🏢','ประกันสุขภาพเอกชน':'🛡️','ชำระเอง':'💳'}[value]||'🪪');
 const COVERAGE_ENGLISH={
- 'บัตรทอง':'Universal Coverage Scheme (UCS)',
- 'ประกันสังคม':'Social Security Scheme (SSS)',
- 'ข้าราชการ':'Civil Servant Medical Benefit Scheme (CSMBS)',
+ 'บัตรทอง':'UCS',
+ 'ประกันสังคม':'SSS',
+ 'ข้าราชการ':'CSMBS',
  'รัฐวิสาหกิจ':'State Enterprise Employee Benefits',
  'ประกันสุขภาพเอกชน':'Private Health Insurance',
  'ชำระเอง':'Self-pay',
