@@ -382,3 +382,25 @@ test('optional section headings stay concise, and government card shows weekdays
  assert.ok(script.includes("if($('rescheduleDays').value==='government')"),'Selecting government days still preselects office hours');
  assert.ok(page.includes('white-space:normal!important;overflow:visible!important;text-overflow:clip!important'),'Labels must wrap, not ellipsize');
 });
+
+test('reschedule cards use ergonomic 2-column order and no weekday brackets',()=>{
+ const expected=["['office','🏛️ เวลาราชการ'","['morning','🌤️ ช่วงเช้า'","['custom','🕘 เลือกเวลาเอง'","['afternoon','🌇 ช่วงบ่าย'"];
+ let last=-1;
+ for(const e of expected){const next=script.indexOf(e,last+1);assert.ok(next>last,'Out-of-order contact hour card: '+e);last=next;}
+ assert.ok(script.includes("en.textContent=short;en.lang='en'"),'English weekday abbreviations must be unparenthesized');
+ assert.ok(page.includes('class="phms-contact-days-title"'),'Custom day choices must have their own heading');
+ assert.ok(page.includes('#editor #rescheduleWeekdaysBox:not(.hidden)'),'Weekday selector must have a visual separator');
+ assert.ok(!page.includes('7 วันก่อนนัด (1 สัปดาห์)'),'7-day notice should not duplicate one-week wording');
+});
+test('phone delete and family save fit mobile and never hide the permission-gated button',()=>{
+ assert.ok(page.includes('grid-template-columns:minmax(0,1fr) 68px!important'),'Phone row must reserve room for the shared delete control');
+ assert.ok(page.includes('grid-template-columns:minmax(0,1fr) 62px!important'),'Phone row remains fitted on narrow screens');
+ assert.ok(page.includes('id="familyContactSaveBox">'),'Save container must not have hidden class');
+ assert.ok(page.includes('id="familyContactSave" class="secondary" disabled'),'Save action starts disabled before rights check');
+ assert.ok(page.includes('id="familyContactSaveHint"'),'The disabled reason must be visible');
+ assert.ok(script.includes('function syncFamilyContactSaveUI('));
+ assert.ok(script.includes("syncFamilyContactSaveUI(saved.ok?'':'unavailable')"));
+ assert.ok(!script.includes("$('familyContactSaveBox').classList.toggle('hidden'"),'Do not hide action from non-owners');
+ assert.ok(!script.includes("$('familyContactSaveBox').classList.add('hidden')"),'Reset cannot make the save action disappear');
+ assert.ok(script.includes("button.disabled=familyContactSaving||!ready||!familyContactCanWrite"),'Client gate must stay denied by default');
+});
