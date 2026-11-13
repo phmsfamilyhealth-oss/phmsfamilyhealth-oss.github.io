@@ -3915,6 +3915,14 @@ const scenarioChoices=[
  ['walk_in','🚶','ไปโรงพยาบาลเอง','ไปเองโดยไม่มีใบนัด'],
  ['historical','📋','บันทึกย้อนหลัง','ไปโรงพยาบาลมาแล้ว']
 ];
+// Keep all three valid appointment types, ordered by this person's historical use;
+// ties follow the most recent appointment. These are not hidden or removed.
+const scenarioHistory=rankedPersonHistory(['scenario']);
+const scenarioRank=new Map(scenarioHistory.map((row,index)=>[row.name,index]));
+scenarioChoices.sort((a,b)=>{
+ const rank=value=>{const found=scenarioHistory.findIndex(row=>normalizedMasterName(row.name)===normalizedMasterName(value));return found<0?999:found;};
+ return rank(a[0])-rank(b[0]);
+});
 let scenarioChoiceMade=false;
 const scenarioGrid=document.createElement('div');scenarioGrid.className='scenario-grid';scenarioGrid.setAttribute('role','group');scenarioGrid.setAttribute('aria-label','เลือกรูปแบบการนัด');
 $('scenario').classList.add('scenario-original');$('scenario').before(scenarioGrid);
