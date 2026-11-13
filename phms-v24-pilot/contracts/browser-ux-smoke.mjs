@@ -149,18 +149,28 @@ try {
   assert.equal(await page.locator('#prepItems .checklist-row input[type="checkbox"]:checked').count(),0,'Initial items must be pending, not completed');
   if(scenario==='line-selected'){
    await page.locator('#scenarioFlow .scenario-option[data-scenario="booked"]').click();
-   // Independent source/status fields are in the visible appointment form.
+   // One elder-first question tracks a history count, not current booking lifecycle.
    assert.equal(await page.locator('#appointmentOriginCards .phms-state-card').count(),2);
-   assert.equal(await page.locator('#appointmentLifecycleCards .phms-state-card').count(),4);
+   assert.equal(await page.locator('#appointmentLifecycleCards').count(),0,'Do not show four misleading lifecycle buttons');
+   assert.equal(await page.locator('#reschedulePhase').count(),0,'Contact progress should not duplicate appointment history');
    assert.ok(await page.locator('#appointmentStateBox').isVisible());
    assert.equal(await page.locator('#appointmentOrigin').inputValue(),'new');
-   assert.equal(await page.locator('#appointmentLifecycle').inputValue(),'planned');
+   assert.equal(await page.locator('#appointmentRescheduleCountArea').isVisible(),false);
    await page.locator('#appointmentOriginCards [data-choice="rescheduled"]').click();
    assert.equal(await page.locator('#appointmentOrigin').inputValue(),'rescheduled');
-   await page.locator('#appointmentLifecycleCards [data-choice="cancelled"]').click();
-   assert.match(await page.locator('#appointmentStateNote').textContent(),/ไม่ได้ยกเลิกนัดในระบบ/);
+   assert.ok(await page.locator('#appointmentRescheduleCountArea').isVisible());
+   assert.equal(await page.locator('#appointmentRescheduleCountText').textContent(),'1 ครั้ง');
+   await page.locator('#appointmentReschedulePlus').click();
+   await page.locator('#appointmentReschedulePlus').click();
+   assert.equal(await page.locator('#appointmentRescheduleCountText').textContent(),'3 ครั้ง');
+   await page.locator('#appointmentRescheduleMinus').click();
+   assert.equal(await page.locator('#appointmentRescheduleCount').inputValue(),'2');
+   assert.match(await page.locator('#appointmentStateNote').textContent(),/ยังไม่ได้เปลี่ยนนัดเดิม/);
    await page.locator('#appointmentOriginCards [data-choice="new"]').click();
-   await page.locator('#appointmentLifecycleCards [data-choice="planned"]').click();
+   assert.equal(await page.locator('#appointmentRescheduleCountArea').isVisible(),false);
+   await page.locator('#appointmentOriginCards [data-choice="rescheduled"]').click();
+   assert.equal(await page.locator('#appointmentRescheduleCountText').textContent(),'2 ครั้ง','History count persists when toggled within one form');
+   await page.locator('#appointmentOriginCards [data-choice="new"]').click();
 
    // The arrival selector has exactly eight options, two columns, with 30 minutes default.
    assert.equal(await page.locator('#arrivalLeadChoices .arrival-lead-choice').count(),8);
@@ -316,7 +326,7 @@ try {
    assert.equal(await page.locator('#rescheduleCustomHours').isVisible(),false);
    assert.equal(await page.locator('#familyContactSaveBox').evaluate(el=>el.classList.contains('hidden')),false,'Save option remains discoverable, not conditionally hidden');
    await page.waitForFunction(()=>!document.getElementById('familyContactSave').disabled);
-   assert.ok(await page.locator('#familyContactSaveHint').textContent().then(t=>t.includes('Owner/Admin')),'Authorized user needs an explanation of family-only saving');
+   assert.ok(await page.locator('#familyContactSaveHint').textContent().then(t=>t.includes('คนในครอบครัว')),'Explain authorized family saving in plain Thai');
    await page.locator('#familyContactSave').click();
    await page.waitForFunction(()=>document.getElementById('familyContactSaveStatus').textContent.includes('บันทึกข้อมูลติดต่อให้ครอบครัวใช้ซ้ำแล้ว'));
    assert.equal(familyContactWrites.length,1);

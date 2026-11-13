@@ -323,14 +323,31 @@ test('custom contact time uses only selectable half-hour slots and 1 3 5 7 day c
  assert.match(script,/08:30–16:30 น./);
 });
 
-test('booked appointment origin and lifecycle cards stay separate',()=>{
- for(const value of ['appointmentOrigin','appointmentLifecycle','updateAppointmentStateUI'])assert.ok(script.includes(value));
- for(const value of ['📅 นัดใหม่','🔄 นัดที่เลื่อนมา','📅 มีนัดตามกำหนด','⏳ รอวันนัดใหม่','🚫 ยกเลิกแล้ว','✅ ไปพบแพทย์แล้ว'])assert.ok(script.includes(value));
+test('booked appointment shows one understandable reschedule-history question and count',()=>{
+ for(const value of [
+  'appointmentOrigin','appointmentRescheduleCount','appointmentReschedulePlus',
+  'appointmentRescheduleMinus','updateAppointmentStateUI'
+ ])assert.ok(script.includes(value),value+' not found');
+ for(const caption of ['🔄 นัดนี้เคยเลื่อนหรือยัง?','📅 ยังไม่เคยเลื่อน','🔄 เคยเลื่อนแล้ว','เลื่อนมาแล้วกี่ครั้ง?'])
+  assert.ok(script.includes(caption),'Missing elder wording: '+caption);
  assert.ok(script.includes('mainSection.append(appointmentStateBox)'));
  assert.ok(script.includes("appointmentStateBox.classList.toggle('hidden',!booked)"));
- assert.ok(script.includes("previewField('ที่มาของนัด'"));
- assert.ok(script.includes("previewField('สถานะปัจจุบัน'"));
- assert.ok(script.includes('ยังไม่อัปเดตนัดเดิม'));
+ assert.ok(script.includes('appointmentRescheduleCountArea.hidden=!rescheduled'));
+ assert.ok(script.includes('Math.max(1,Math.min(99'));
+ assert.ok(script.includes("previewField('การเลื่อนนัด'"));
+ assert.ok(!script.includes('appointmentLifecycle'),'Creation UI must not contain unrelated cancellation/completion states');
+ assert.ok(!script.includes('reschedulePhase'),'Remove duplicate contact progress status');
+ assert.ok(!page.includes('ความคืบหน้าการติดต่อเพื่อเลื่อนนัด'));
+ assert.ok(script.includes('ยังไม่ได้เปลี่ยนวันนัดเดิม'),'Do not imply that booking was changed');
+});
+
+test('family save explains access in Thai, without leaking role codes into elder UI',()=>{
+ assert.ok(page.includes('💾 เก็บข้อมูลติดต่อไว้ใช้ครั้งหน้า'));
+ assert.ok(page.includes('เฉพาะเจ้าของหรือผู้ดูแลครอบครัว'));
+ assert.ok(!page.includes('Owner/Admin'),'Visible instructions should use plain Thai');
+ assert.ok(script.includes('บัญชีนี้บันทึกไม่ได้ · ให้เจ้าของหรือผู้ดูแลครอบครัวบันทึก'));
+ assert.ok(script.includes('button.disabled=familyContactSaving||!ready||!familyContactCanWrite'));
+ assert.ok(script.includes("familyContactApi('put'"),'Authorized family save remains functional');
 });
 test('reschedule has two day options, bilingual weekday cards and safe time order',()=>{
  const days=page.match(/<select id="rescheduleDays"[^>]*>([\s\S]*?)<\/select>/)?.[1]||'';
