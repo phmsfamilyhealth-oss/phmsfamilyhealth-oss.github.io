@@ -1210,6 +1210,22 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  #editor #mainFlow #providerExtras.provider-inline-fields #doctorQuickCards,
  #editor #mainFlow #providerExtras.provider-inline-fields #unitQuickCards{gap:7px!important}
 }
+
+/* Optional reschedule history: Detailed + booked/historical only, collapsed until tapped. */
+#editor #appointmentHistoryDisclosure.hidden,
+#editor #appointmentHistoryDisclosure[hidden]{display:none!important}
+#editor #scenarioFlow #appointmentHistoryDisclosure{
+ border:1px solid #e6d8c5!important;border-radius:12px!important;
+ background:#fff!important;padding:12px!important;margin:12px 0!important;
+}
+#editor #scenarioFlow #appointmentHistoryDisclosure>summary{
+ display:list-item!important;font-size:1rem!important;font-weight:750!important;
+ color:#302515!important;cursor:pointer!important;padding:4px 0!important;
+}
+#editor #scenarioFlow #appointmentHistoryDisclosure:not([open]) #appointmentStateBox{display:none!important}
+#editor #scenarioFlow #appointmentHistoryDisclosure[open] #appointmentStateBox{
+ display:block!important;margin:12px 0 0!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
 <header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
@@ -3366,13 +3382,23 @@ appointmentStateNote.id='appointmentStateNote';appointmentStateNote.className='p
 appointmentStateNote.textContent='บันทึกประวัติของนัดนี้เท่านั้น ไม่ได้สั่งเลื่อนนัด';
 appointmentStateBox.append(appointmentOriginLabel,appointmentOrigin,appointmentOriginCards,
  appointmentRescheduleCountArea,appointmentStateNote);
-scenarioSection.append(appointmentStateBox);
+// Optional history is a disclosure in Detailed mode only; no extra question in Simple mode.
+const appointmentHistoryDisclosure=document.createElement('details');
+appointmentHistoryDisclosure.id='appointmentHistoryDisclosure';
+appointmentHistoryDisclosure.className='progressive-extras';
+const appointmentHistorySummary=document.createElement('summary');
+appointmentHistorySummary.textContent='🔄 ประวัติการเลื่อนนัดนี้ (ถ้ามี)';
+appointmentHistoryDisclosure.append(appointmentHistorySummary,appointmentStateBox);
+scenarioSection.append(appointmentHistoryDisclosure);
 function updateAppointmentStateUI(){
- const booked=$('scenario').value==='booked';
- appointmentStateBox.classList.toggle('hidden',!booked);
- appointmentStateBox.hidden=!booked;
- if(!booked){appointmentOrigin.value='new';countInput.value='1';}
- const rescheduled=booked&&appointmentOrigin.value==='rescheduled';
+ const scenario=$('scenario').value;
+ const eligible=$('detail').value==='full'&&scenarioChoiceMade&&(scenario==='booked'||scenario==='historical');
+ appointmentHistoryDisclosure.hidden=!eligible;
+ appointmentHistoryDisclosure.classList.toggle('hidden',!eligible);
+ if(!eligible)appointmentHistoryDisclosure.open=false;
+ // Do not erase a historical count just because the user temporarily chooses Simple mode.
+ if(scenario==='walk_in'){appointmentOrigin.value='new';countInput.value='1';}
+ const rescheduled=eligible&&appointmentOrigin.value==='rescheduled';
  for(const button of appointmentOriginCards.children)
   button.setAttribute('aria-pressed',String(button.dataset.choice===appointmentOrigin.value));
  appointmentRescheduleCountArea.hidden=!rescheduled;
