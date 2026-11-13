@@ -1586,8 +1586,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #procedurePreviewBox label[for="procedureEntry"].phms-choice-concealed{display:none!important}
 #editor #procedurePreviewBox .actions.phms-choice-concealed{display:none!important}
 #editor #procedurePreviewBox .actions:not(.phms-choice-concealed){display:block!important}
+/* PHMS v2.4.52 — bilingual labels for coverage and care-topic cards. */
+#editor .phms-coverage-card,
+#editor .phms-treatment-card{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;text-align:center!important}
+#editor .phms-coverage-card small,
+#editor .phms-treatment-card small{display:block!important;font-size:.82em!important;font-weight:400!important;line-height:1.25!important;color:#6d6258!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.51</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.52</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -2297,6 +2302,18 @@ $('openCanonicalMedication').addEventListener('click',()=>openExistingAppointmen
 
 let careTopicSearchExpanded=false;
 /* Display-only emoji hints by topic words. Never imply a verified diagnosis. */
+function treatmentTopicBilingual(topic){
+ const raw=String(topic||'').trim();
+ // Accept an explicitly supplied English name in parentheses or after a separator.
+ const explicit=/^(.+?)\\s*\\(([^()]+)\\)\\s*$/.exec(raw)||/^(.+?)\\s+[|–—-]\\s+([A-Za-z][A-Za-z0-9 ,/+()-]*)$/.exec(raw);
+ if(explicit)return {thai:explicit[1].trim(),english:explicit[2].trim()};
+ const terms=[
+  [/ต้อหิน|glaucoma/i,'Glaucoma'],[/ต้อกระจก/i,'Cataract'],[/ตาแดง|เยื่อบุตาอักเสบ/i,'Conjunctivitis'],[/จอประสาทตา/i,'Retinal disorder'],[/ติดเชื้อปัสสาวะ|กระเพาะปัสสาวะอักเสบ|ทางเดินปัสสาวะอักเสบ/i,'Urinary tract infection (UTI)'],[/ติดเชื้อปัสสาวะบ่อย/i,'Recurrent urinary tract infection'],[/ไตเรื้อรัง|โรคไตเรื้อรัง/i,'Chronic kidney disease (CKD)'],[/นิ่วในไต/i,'Kidney stones'],[/เบาหวานชนิดที่\s*2|เบาหวาน/i,'Type 2 diabetes mellitus'],[/ความดันโลหิตสูง|ความดันสูง/i,'Hypertension'],[/ไขมันในเลือดสูง/i,'Dyslipidemia'],[/ข้อเข่าเสื่อม|เข่าเสื่อม/i,'Knee osteoarthritis'],[/ข้อสะโพกเสื่อม/i,'Hip osteoarthritis'],[/กระดูกพรุน/i,'Osteoporosis'],[/หัวใจขาดเลือด/i,'Ischemic heart disease'],[/หัวใจล้มเหลว/i,'Heart failure'],[/หัวใจเต้นผิดจังหวะ/i,'Cardiac arrhythmia'],[/หลอดเลือดสมอง|อัมพฤกษ์|อัมพาต/i,'Stroke'],[/สมองเสื่อม/i,'Dementia'],[/พาร์กินสัน/i,'Parkinson disease'],[/หอบหืด/i,'Asthma'],[/ปอดอุดกั้นเรื้อรัง/i,'Chronic obstructive pulmonary disease (COPD)'],[/ภูมิแพ้/i,'Allergy'],[/ผื่นแพ้/i,'Allergic dermatitis'],[/กรดไหลย้อน/i,'Gastroesophageal reflux disease (GERD)'],[/กระเพาะอาหารอักเสบ/i,'Gastritis'],[/โลหิตจาง/i,'Anemia'],[/ธาลัสซีเมีย/i,'Thalassemia'],[/มะเร็ง/i,'Cancer'],[/ติดตามหลังผ่าตัด|ติดตามหลังการผ่าตัด/i,'Postoperative follow-up'],[/ผ่าตัดสะโพก/i,'Hip surgery follow-up'],[/ปวดเข่า/i,'Knee pain'],[/ปวดหลัง/i,'Back pain'],[/ปวดข้อ/i,'Joint pain'],[/นอนไม่หลับ/i,'Insomnia'],[/ความจำเสื่อม/i,'Memory impairment']
+ ];
+ const found=terms.filter(([pattern])=>pattern.test(raw)).map(([,english])=>english);
+ const english=[...new Set(found)].join(' + ')||'Other medical condition';
+ return {thai:raw,english};
+}
 function treatmentTopicEmoji(topic){
  const t=String(topic||'').toLocaleLowerCase('th-TH');
  const categories=[
@@ -2323,7 +2340,10 @@ function renderCareTopicSuggestions(){
  host.replaceChildren();
  for(const value of (current&&!careTopicSearchExpanded?[current]:entries.slice(0,7))){
   const button=document.createElement('button');button.type='button';button.className='phms-treatment-card';
-  button.textContent=treatmentTopicEmoji(value)+' '+value;button.setAttribute('aria-pressed',String(same(value,current)));
+  const bilingual=treatmentTopicBilingual(value);
+  const title=document.createElement('span');title.textContent=treatmentTopicEmoji(value)+' '+bilingual.thai;
+  const en=document.createElement('small');en.textContent=bilingual.english;
+  button.append(title,en);button.setAttribute('aria-pressed',String(same(value,current)));
   button.addEventListener('click',()=>{
    field.value=value;careTopicSearchExpanded=false;
    field.dispatchEvent(new Event('change',{bubbles:true}));
@@ -4547,14 +4567,31 @@ coverageSelect.before(coverageCards,coverageSearchArea);
 coverageSelect.classList.add('adaptive-select-hidden');
 let coverageExpanded=false;
 const coverageIcon=value=>({'บัตรทอง':'🪪','ประกันสังคม':'🏥','ข้าราชการ':'🏛️','รัฐวิสาหกิจ':'🏢','ประกันสุขภาพเอกชน':'🛡️','ชำระเอง':'💳'}[value]||'🪪');
+const COVERAGE_ENGLISH={
+ 'บัตรทอง':'Universal Coverage Scheme (UCS)',
+ 'ประกันสังคม':'Social Security Scheme (SSS)',
+ 'ข้าราชการ':'Civil Servant Medical Benefit Scheme (CSMBS)',
+ 'รัฐวิสาหกิจ':'State Enterprise Employee Benefits',
+ 'ประกันสุขภาพเอกชน':'Private Health Insurance',
+ 'ชำระเอง':'Self-pay',
+ 'อื่น ๆ':'Other'
+};
 function coverageOptionLabel(value){
  const option=[...coverageSelect.options].find(x=>x.value===value);
- return option?.textContent||value;
+ return (option?.textContent||value).replace(/\\s*\\/\\s*30\\s*บาท/,'').replace(/\\s*\\/\\s*เบิกตรง/,'').trim()||value;
+}
+function coverageEnglishLabel(value){
+ const key=String(value||'').trim();
+ return COVERAGE_ENGLISH[key]||'Other health coverage';
 }
 function makeCoverageCard(value,label,selected,action){
  const button=document.createElement('button');button.type='button';
  button.className='phms-coverage-card';
- button.textContent=value?coverageIcon(value)+' '+label:'＋ สิทธิอื่น / ค้นหา';
+ if(value){
+  const title=document.createElement('span');title.textContent=coverageIcon(value)+' '+label;
+  const en=document.createElement('small');en.textContent=coverageEnglishLabel(value);
+  button.append(title,en);
+ }else button.textContent='＋ สิทธิอื่น / ค้นหา';
  button.setAttribute('aria-pressed',String(selected));
  button.addEventListener('click',action);
  return button;
