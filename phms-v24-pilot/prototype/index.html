@@ -1954,8 +1954,47 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  .phms-appointment-header .phms-header-person-mode-row .phms-mode-segment{min-height:32px!important;padding:5px 8px!important;font-size:13px!important}
  .phms-appointment-header .phms-header-person-mode-row .phms-mode-segmented{padding:2px!important;border-radius:16px!important}
 }
+
+/* PHMS v2.4.66 — keep selected-person status and mode selector on one horizontal row. */
+.phms-appointment-header .phms-header-person-mode-row{
+ display:grid!important;grid-template-columns:minmax(0,1fr) max-content!important;
+ grid-auto-flow:column!important;align-items:center!important;justify-content:stretch!important;
+ column-gap:12px!important;row-gap:0!important;width:100%!important;min-width:0!important;
+ margin:7px 0 2px!important;padding:0!important;
+}
+.phms-appointment-header .phms-header-person-mode-row #appointmentHeaderPerson{
+ display:block!important;grid-column:1!important;grid-row:1!important;
+ width:auto!important;min-width:0!important;max-width:none!important;min-height:0!important;
+ margin:0!important;padding:0!important;white-space:nowrap!important;word-break:keep-all!important;
+ overflow-wrap:normal!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important;
+ line-height:1.4!important;text-align:left!important;
+}
+.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch{
+ display:flex!important;grid-column:2!important;grid-row:1!important;
+ flex:0 0 auto!important;flex-direction:row!important;justify-content:flex-end!important;align-items:center!important;
+ width:max-content!important;min-width:0!important;max-width:100%!important;
+ margin:0!important;padding:0!important;gap:0!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
+}
+.phms-appointment-header .phms-header-person-mode-row .phms-mode-segmented{
+ display:inline-flex!important;flex:0 0 auto!important;flex-direction:row!important;flex-wrap:nowrap!important;
+ width:max-content!important;min-width:0!important;max-width:100%!important;
+ margin:0!important;padding:2px!important;gap:2px!important;
+ border:1px solid #f4e9d9!important;border-radius:16px!important;background:#f4e9d9!important;
+}
+.phms-appointment-header .phms-header-person-mode-row .phms-mode-segment{
+ display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;
+ min-height:32px!important;margin:0!important;padding:5px 9px!important;
+ border:1px solid #f4e9d9!important;border-radius:12px!important;
+ font-size:14px!important;line-height:1.2!important;white-space:nowrap!important;
+}
+@media(max-width:520px){
+ .phms-appointment-header .phms-header-person-mode-row{column-gap:6px!important}
+ .phms-appointment-header .phms-header-person-mode-row #appointmentHeaderPerson{font-size:clamp(12px,3.3vw,16px)!important}
+ .phms-appointment-header .phms-header-person-mode-row .phms-mode-segment{font-size:12px!important;padding:5px 6px!important;min-height:30px!important}
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.65</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.66</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
