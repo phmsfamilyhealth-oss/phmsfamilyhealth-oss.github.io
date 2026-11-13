@@ -4788,11 +4788,8 @@ function setCoverageChoice(value){
 }
 function coverageHistoryCounts(){
  const counts=new Map();
- for(const appointment of (relatedAllItems||[])){
-  const raw=String(appointment?.coverage_type||appointment?.coverage||appointment?.insurance_type||'').trim();
-  if(!raw)continue;
-  const key=coverageKey(raw),entry=counts.get(key)||{value:raw,count:0};
-  entry.count++;counts.set(key,entry);
+ for(const row of rankedPersonHistory(['coverage_type','coverage','insurance_type'])){
+  counts.set(coverageKey(row.name),{value:row.name,count:row.count,lastIndex:row.lastIndex});
  }
  return counts;
 }
@@ -4802,13 +4799,13 @@ function renderCoverageChoices(){
  const defaults=['ชำระเอง','บัตรทอง','ประกันสังคม'].filter(v=>values.includes(v));
  const historical=[...counts.entries()]
   .map(([key,row])=>({key,value:values.find(v=>coverageKey(v)===key)||row.value,count:row.count}))
-  .sort((a,b)=>b.count-a.count||a.value.localeCompare(b.value,'th'));
+  .sort((a,b)=>b.count-a.count||(counts.get(a.key)?.lastIndex??999)-(counts.get(b.key)?.lastIndex??999));
  let visible=[];
  if(historical.length){
-  visible=historical.slice(0,5).map(x=>x.value);
-  for(const value of defaults){if(visible.length>=5)break;if(!visible.some(v=>coverageKey(v)===coverageKey(value)))visible.push(value);}
- }else visible=defaults;
- if(selected&&!visible.some(v=>coverageKey(v)===coverageKey(selected)))visible.unshift(selected);
+  visible=historical.slice(0,3).map(x=>x.value);
+  for(const value of defaults){if(visible.length>=3)break;if(!visible.some(v=>coverageKey(v)===coverageKey(value)))visible.push(value);}
+ }else visible=defaults.slice(0,3);
+ if(selected&&!visible.some(v=>coverageKey(v)===coverageKey(selected))){if(visible.length>=3)visible.pop();visible.unshift(selected);}
  coverageCards.replaceChildren();
  for(const value of visible.slice(0,3)){
   coverageCards.append(makeCoverageCard(value,coverageOptionLabel(value),selected===value,()=>setCoverageChoice(value)));
