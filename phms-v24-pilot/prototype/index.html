@@ -2052,47 +2052,32 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  background:#76532f!important;color:#fff!important;
 }
 
-/* PHMS v2.4.72 — flush segmented switch, no cream halo around the selected side.
-   Wrapper clips the two segments together; active color reaches its outer rounded edge. */
-.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented{
- display:inline-flex!important;flex:0 0 auto!important;flex-direction:row!important;flex-wrap:nowrap!important;
- align-items:stretch!important;justify-content:stretch!important;box-sizing:border-box!important;
- width:max-content!important;min-width:0!important;max-width:100%!important;
- gap:0!important;padding:0!important;margin:0!important;
- border:none!important;outline:none!important;box-shadow:none!important;
- border-radius:15px!important;overflow:hidden!important;background:#f4e9d9!important;
+/* PHMS v2.4.73 — two flush segments, no outer cream ring. Inline-important sizing
+   is applied in JS to defeat legacy !important declarations safely. */
+.phms-appointment-header .phms-header-person-mode-row .phms-mode-segmented{
+ border:0!important;padding:0!important;gap:0!important;box-shadow:none!important;
+ border-radius:16px!important;overflow:hidden!important;background:transparent!important;
 }
-.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment,
-.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment.is-active,
-.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment[aria-pressed="true"]{
- display:inline-flex!important;flex:1 1 auto!important;align-items:center!important;justify-content:center!important;
- box-sizing:border-box!important;align-self:stretch!important;
- width:auto!important;min-width:0!important;max-width:none!important;
- height:38px!important;min-height:38px!important;max-height:38px!important;
- margin:0!important;padding:0 13px!important;gap:0!important;
- border:none!important;border-radius:0!important;outline:none!important;box-shadow:none!important;
- font-family:inherit!important;font-size:14px!important;font-weight:700!important;line-height:1!important;white-space:nowrap!important;
+.phms-appointment-header .phms-header-person-mode-row .phms-mode-segment{
+ border:0!important;border-radius:0!important;box-shadow:none!important;
 }
-.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment:not(.is-active):not([aria-pressed="true"]){
- background:#f4e9d9!important;color:#704f31!important;
+.phms-appointment-header .phms-header-person-mode-row .phms-mode-segment:first-child{
+ border-radius:16px 0 0 16px!important;
 }
-.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment.is-active,
-.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment[aria-pressed="true"]{
- background:#76532f!important;color:#fff!important;
+.phms-appointment-header .phms-header-person-mode-row .phms-mode-segment:last-child{
+ border-radius:0 16px 16px 0!important;
 }
-.phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment:focus-visible{
- outline:2px solid #a87c44!important;outline-offset:-3px!important;
+.phms-appointment-header .phms-header-person-mode-row .phms-mode-segment:focus-visible{
+ outline:2px solid #93683f!important;outline-offset:-3px!important;
 }
 @media(max-width:520px){
- .phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment,
- .phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment.is-active,
- .phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch .mode-choices.phms-mode-segmented .phms-mode-segment[aria-pressed="true"]{
+ .phms-appointment-header .phms-header-person-mode-row .phms-mode-segment{
   height:36px!important;min-height:36px!important;max-height:36px!important;
   padding:0 10px!important;font-size:13px!important;
  }
 }
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.72</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.73</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4374,6 +4359,13 @@ for(const [value,label] of [['simple','✨ แบบง่าย'],['full','🛠
  button.addEventListener('click',()=>{$('detail').value=value;$('detail').dispatchEvent(new Event('change',{bubbles:true}));});
  modeButtons.push(button);modeChoices.append(button);
 }
+// Use inline-important styles here because legacy CSS rules with !important target
+// the same control through multiple historical selectors.
+const switchStyle=(el,props)=>{for(const [name,value] of Object.entries(props))el.style.setProperty(name,value,'important');};
+switchStyle(modeChoices,{'display':'inline-flex','flex-direction':'row','flex-wrap':'nowrap','align-items':'stretch','gap':'0px','padding':'0px','margin':'0px','border':'0px','outline':'0px','box-shadow':'none','border-radius':'16px','overflow':'hidden','background':'transparent','width':'max-content','max-width':'100%'});
+for(const button of modeButtons){
+ switchStyle(button,{'display':'inline-flex','align-items':'center','justify-content':'center','flex':'0 0 auto','height':'38px','min-height':'38px','max-height':'38px','padding':'0 13px','margin':'0px','border':'0px','outline':'0px','box-shadow':'none','border-radius':'0px','font-size':'14px','font-weight':'700','line-height':'1','white-space':'nowrap'});
+}
 modeBar.replaceChildren(modeChoices);modeBar.classList.add('phms-header-mode-switch');
 const personModeRow=document.createElement('div');personModeRow.className='phms-header-person-mode-row';
 const headerPerson=document.getElementById('appointmentHeaderPerson');
@@ -5041,7 +5033,11 @@ function updateProgressiveLayout(){
  editor.classList.toggle('simple-ui',simple);document.body.classList.toggle('simple-entry',simple);
  if(simple){if(simpleExtras.parentElement!==extrasSection)extrasSection.insertBefore(simpleExtras,$('outcomeDetails'));}
  else if(simpleExtras.parentElement!==detailed)detailed.append(simpleExtras);
- for(const button of modeButtons){const active=button.dataset.mode===$('detail').value;button.setAttribute('aria-pressed',String(active));button.classList.toggle('is-active',active);}
+ for(const button of modeButtons){
+  const active=button.dataset.mode===$('detail').value;
+  button.setAttribute('aria-pressed',String(active));button.classList.toggle('is-active',active);
+  switchStyle(button,{'background':active?'#76532f':'#f4e9d9','color':active?'#ffffff':'#704f31'});
+ }
  // The selected-person banner is always step 1, including LINE deep links.
  $('scenarioFlowTitle').textContent='📅 นัดแบบไหน';
  $('mainFlowTitle').textContent='📝 ข้อมูลนัดหมาย';
