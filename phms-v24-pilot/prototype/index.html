@@ -2445,8 +2445,41 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   min-width:78px!important;padding:8px!important;font-size:15px!important;
  }
 }
+
+/* PHMS v2.4.90 — shared actual DOM class for all append-item controls.
+   Both use one row, identical editable input and same small action button.
+   Do not affect the reusable "other / search / new" selector cards. */
+#editor #appointmentFlow .phms-inline-add-row{
+ display:grid!important;grid-template-columns:minmax(0,1fr) 100px!important;
+ column-gap:8px!important;row-gap:0!important;
+ align-items:stretch!important;box-sizing:border-box!important;
+ width:100%!important;max-width:100%!important;
+ margin:8px 0 10px!important;padding:0!important;flex-wrap:nowrap!important;
+}
+#editor #appointmentFlow .phms-inline-add-row>input{
+ display:block!important;box-sizing:border-box!important;
+ width:100%!important;max-width:100%!important;min-width:0!important;
+ height:52px!important;min-height:52px!important;margin:0!important;
+ padding:10px 12px!important;font-size:16px!important;font-weight:400!important;
+ background:#fff!important;color:#30251a!important;
+ border:1px solid #c9ad91!important;border-radius:12px!important;
+}
+#editor #appointmentFlow .phms-inline-add-row>button{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ box-sizing:border-box!important;width:100px!important;min-width:0!important;
+ height:52px!important;min-height:52px!important;max-height:52px!important;
+ padding:8px 6px!important;margin:0!important;
+ font-size:16px!important;font-weight:700!important;line-height:1.2!important;
+ color:#533c25!important;background:#efe3d4!important;
+ border:1px solid #d8c6af!important;border-radius:12px!important;
+ white-space:nowrap!important;box-shadow:none!important;
+}
+@media(max-width:380px){
+ #editor #appointmentFlow .phms-inline-add-row{grid-template-columns:minmax(0,1fr) 84px!important;column-gap:7px!important}
+ #editor #appointmentFlow .phms-inline-add-row>button{width:84px!important;font-size:15px!important}
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.89</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -2575,11 +2608,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  <p id="rescheduleHoursSummary" class="help phms-contact-result" role="status"></p>
 </section>
 <label for="contactPhoneEntry">☎️ เบอร์ติดต่อของโรงพยาบาล / แผนก</label>
-<p class="help">พิมพ์เบอร์และเลขต่อได้ เช่น 02-123-4567 ต่อ 1234 · กด Enter หรือ ＋ เพิ่มเบอร์ เพื่อแยกแต่ละรายการ</p>
+<p class="help">กรอกเบอร์และเลขต่อได้ เช่น 02-123-4567 ต่อ 1234</p>
 <div id="contactPhoneList" class="phms-contact-phone-list" role="group" aria-label="รายการเบอร์ติดต่อ"></div>
-<div class="phms-contact-phone-add">
+<div class="phms-contact-phone-add phms-inline-add-row">
  <input id="contactPhoneEntry" type="text" inputmode="text" maxlength="120" enterkeyhint="done" autocomplete="off" placeholder="เช่น 02-123-4567 ต่อ 1234">
- <button id="contactPhoneAdd" type="button" class="secondary">＋ เพิ่มเบอร์</button>
+ <button id="contactPhoneAdd" type="button" class="secondary">＋ เพิ่ม</button>
 </div>
 <p id="contactPhoneStatus" class="help" role="status">ยังไม่ได้เพิ่มเบอร์ติดต่อ</p>
 <textarea id="contact_phone" class="visually-hidden-form" tabindex="-1" aria-hidden="true" rows="1" maxlength="500"></textarea>
@@ -2609,7 +2642,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </details>
 <p class="help">เอกสาร งานมอบหมาย และแจ้งเตือนยังรอ API ตรวจสิทธิ์ จึงยังไม่เปิดการบันทึก</p>
 <input type="hidden" id="doctor"></div><label for="purpose">ชื่อนัดหมาย</label><input id="purpose" type="text" maxlength="80" placeholder="เช่น ปวดเข่า, ฟังผลเลือด, รับยาเดิม" autocomplete="off"><p id="historicalGuide" class="help hidden" role="status">บันทึกการไปพบแพทย์ย้อนหลัง: ระบุเหตุผลที่ไปและผลหลังพบแพทย์ตามข้อมูลที่ทราบ ไม่ต้องกรอกเรื่องที่อยากบอกแพทย์ในอนาคต</p><label id="previsitLabel" for="previsitSymptoms">อาการหรือเรื่องที่อยากบอกหมอ </label><textarea id="previsitSymptoms" maxlength="1000" rows="2" placeholder="เช่น ปวดเข่ามา 3 วัน หรือมีคำถามเรื่องยา"></textarea><p id="previsitHelp" class="help">ข้อมูลที่ผู้ใช้แจ้งเอง ยังไม่ใช่การวินิจฉัยจากแพทย์ และยังไม่บันทึกในโหมดทดลอง</p><label id="additionalNoteLabel" for="additionalNote">รายละเอียดเพิ่มเติม </label><textarea id="additionalNote" maxlength="1000" rows="3" placeholder="อาการหรือรายละเอียดที่ต้องการบันทึกเพิ่มเติม"></textarea>
-<div id="checklistBox"><label for="prepEntry">สิ่งที่ต้องเตรียม</label><div class="actions"><input id="prepEntry" maxlength="160" placeholder="พิมพ์รายการที่ต้องเตรียม"><button id="prepAdd" type="button">+ เพิ่ม</button></div><p id="prepProgress" role="status">เตรียมแล้ว 0/0 รายการ</p><div id="prepItems"></div></div><input type="hidden" id="prep">
+<div id="checklistBox"><label for="prepEntry">สิ่งที่ต้องเตรียม</label><div class="actions phms-inline-add-row"><input id="prepEntry" maxlength="160" placeholder="พิมพ์รายการที่ต้องเตรียม"><button id="prepAdd" type="button">+ เพิ่ม</button></div><p id="prepProgress" role="status">เตรียมแล้ว 0/0 รายการ</p><div id="prepItems"></div></div><input type="hidden" id="prep">
 <p class="help" id="registryHelp">ชื่อโรงพยาบาล แผนก และแพทย์จะเติมอัตโนมัติจากทะเบียนที่ตรวจสอบแล้ว หากยังไม่มีชื่อแพทย์ในทะเบียน สามารถบันทึกนัดโดยไม่ระบุแพทย์ได้เมื่อเปิดระบบจริง</p>
 <p class="error" id="error" role="alert"></p><div class="actions"><button id="review" type="button" disabled>ตรวจทานข้อมูล</button></div>
 </section>
