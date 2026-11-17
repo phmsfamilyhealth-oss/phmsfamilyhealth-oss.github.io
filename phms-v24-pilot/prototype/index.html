@@ -3603,7 +3603,57 @@ reviewedDraft.reschedule_origin=$('appointmentOrigin').value||'';
 reviewedDraft.reschedule_count=Number($('appointmentRescheduleCount').value||0);
 reviewedDraft.exam_preparation={choice:examPrepChoice.value,details:examPrepDetails.value.trim()};
 if(packaged.draft.document_metadata.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='ไฟล์แนบ';dd.textContent=packaged.draft.document_metadata.map(f=>f.name).join(', ');dl.append(dt,dd)}$('editor').classList.add('hidden');$('confirmation').classList.remove('hidden');window.scrollTo(0,0)});
-$('save').addEventListener('click',async()=>{if(!confirmClient||!reviewedDraft)return;const button=$('save');button.disabled=true;button.textContent='กำลังตรวจสอบและบันทึก…';const result=await confirmClient({selectedPersonCode:memberId,draft:reviewedDraft});if(result.ok){button.textContent='บันทึกสำเร็จ';$('saveStatus').textContent='บันทึกนัดแล้ว เลขอ้างอิง: '+result.appointmentId;$('back').disabled=true;}else{button.textContent='ลองบันทึกอีกครั้ง';button.disabled=false;$('saveStatus').textContent='ยังไม่บันทึกนัด: '+result.error;}});
+let savedAppointmentId='',uploadedNoticeSlots=new Set();
+async function uploadAppointmentNotice(file,position,appointmentId){
+ const token=window.liff?.getIDToken?.();
+ if(!token)throw new Error('กรุณาเข้าสู่ LINE อีกครั้ง');
+ const img=await createImageBitmap(file);
+ const scale=Math.min(1,1600/Math.max(img.width,img.height));
+ const canvas=document.createElement('canvas');
+ canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));
+ const context=canvas.getContext('2d');if(!context)throw Error('ไม่รองรับการจัดเตรียมรูป');
+ context.drawImage(img,0,0,canvas.width,canvas.height);img.close();
+ let quality=.84,blob=null;
+ do{blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));quality-=.12}
+ while(blob&&blob.size>1800000&&quality>=.28);
+ if(!blob||blob.size>2*1024*1024)throw Error('รูปใหญ่เกินไป กรุณาใช้รูปที่เล็กลง');
+ const bytes=new Uint8Array(await blob.arrayBuffer());
+ let base64='';for(let i=0;i<bytes.length;i+=16384)base64+=String.fromCharCode(...bytes.subarray(i,i+16384));base64=btoa(base64);
+ const endpoint=document.querySelector('meta[name="phms-confirm-api"]').content;
+ const res=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},body:JSON.stringify({action:'appointment_photo_put',selectedPersonCode:memberId,appointmentId,position,fileName:file.name,mimeType:'image/jpeg',base64})});
+ const data=await res.json().catch(()=>({error:'invalid_response'}));
+ if(!res.ok||data.ok!==true)throw Error(data.error||'photo_upload_failed');
+ return data.documentId;
+}
+$('save').addEventListener('click',async()=>{
+ if(!confirmClient||!reviewedDraft)return;
+ const button=$('save');button.disabled=true;button.textContent='กำลังบันทึก…';
+ try{
+  if(!savedAppointmentId&&hasJourneyDetails()){
+   if(!journeySaveAllowed)throw Error('ยังไม่มีสิทธิ์บันทึกเส้นทางสำหรับบุคคลและแผนกนี้');
+   if(journeyNeedsReview)throw Error('กรุณาตรวจสอบเส้นทางที่เปลี่ยนก่อนบันทึกนัด');
+   const journeyOk=await persistJourneyTemplate();
+   if(!journeyOk)throw Error($('journeySaveStatus').textContent||'บันทึกเส้นทางไม่สำเร็จ');
+  }
+  if(!savedAppointmentId){
+   const result=await confirmClient({selectedPersonCode:memberId,draft:reviewedDraft});
+   if(!result.ok)throw Error(result.error);
+   savedAppointmentId=result.appointmentId;
+  }
+  for(let i=0;i<photoFiles.length;i++){
+   if(uploadedNoticeSlots.has(i+1))continue;
+   $('saveStatus').textContent='บันทึกนัดแล้ว กำลังจัดเก็บรูปใบนัด '+(i+1)+'/'+photoFiles.length;
+   await uploadAppointmentNotice(photoFiles[i],i+1,savedAppointmentId);
+   uploadedNoticeSlots.add(i+1);
+  }
+  button.textContent='บันทึกสำเร็จ';
+  $('saveStatus').textContent='บันทึกนัดและรูปใบนัดสำเร็จ · เลขอ้างอิง: '+savedAppointmentId;
+  $('back').disabled=true;
+ }catch(error){
+  button.disabled=false;button.textContent=savedAppointmentId?'ลองบันทึกรูปอีกครั้ง':'ลองบันทึกอีกครั้ง';
+  $('saveStatus').textContent=(savedAppointmentId?'บันทึกนัดแล้ว แต่รูปบางส่วนยังไม่สำเร็จ: ':'ยังไม่บันทึกนัด: ')+String(error?.message||'error');
+ }
+});
 $('back').addEventListener('click',()=>{if($('back').disabled)return;$('confirmation').classList.add('hidden');$('editor').classList.remove('hidden')});
 let procedurePreviewItems=[];
 
