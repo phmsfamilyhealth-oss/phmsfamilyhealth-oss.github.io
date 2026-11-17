@@ -2407,8 +2407,46 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  background:#f7f4f0!important;border-color:#d9c9b8!important;
  color:#766f67!important;
 }
+
+/* PHMS v2.4.88 — one date control, no duplicated helper row. */
+#editor #appointmentChooseToday{display:none!important}
+#editor #dateRule:empty{display:none!important}
+#editor #dateRule:not(:empty){margin:5px 0!important;line-height:1.4!important}
+/* One consistent append-item pattern for checklist and reschedule phone numbers. */
+#editor #checklistBox .actions,
+#editor .phms-contact-phone-add{
+ display:flex!important;flex-flow:row nowrap!important;align-items:stretch!important;
+ width:100%!important;gap:9px!important;margin:7px 0 10px!important;
+}
+#editor #checklistBox .actions>input#prepEntry,
+#editor .phms-contact-phone-add>input#contactPhoneEntry{
+ display:block!important;flex:1 1 0!important;min-width:0!important;
+ min-height:50px!important;box-sizing:border-box!important;
+ border:1px solid #c9ad91!important;border-radius:12px!important;
+ background:#fff!important;color:#30251a!important;
+ font-size:16px!important;padding:10px 12px!important;
+}
+#editor #checklistBox .actions>button#prepAdd,
+#editor .phms-contact-phone-add>button#contactPhoneAdd{
+ display:inline-flex!important;flex:0 0 auto!important;
+ align-items:center!important;justify-content:center!important;
+ min-width:94px!important;min-height:50px!important;height:auto!important;
+ padding:10px 12px!important;margin:0!important;
+ border:1px solid #d8c6af!important;border-radius:12px!important;
+ background:#efe3d4!important;color:#533c25!important;
+ font-size:16px!important;font-weight:700!important;white-space:nowrap!important;
+ box-shadow:none!important;
+}
+@media(max-width:380px){
+ #editor #checklistBox .actions,
+ #editor .phms-contact-phone-add{gap:7px!important}
+ #editor #checklistBox .actions>button#prepAdd,
+ #editor .phms-contact-phone-add>button#contactPhoneAdd{
+  min-width:78px!important;padding:8px!important;font-size:15px!important;
+ }
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.87</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.88</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3048,10 +3086,10 @@ function bangkokToday(){const parts=new Intl.DateTimeFormat('en-US',{timeZone:'A
 function checkDateRule(){
  const today=bangkokToday(),past=$('scenario').value==='historical',date=$('date').value;
  $('date').min=past?'':today;$('date').max=past?today:'';
- $('dateRule').textContent=past?'เลือกได้ถึงวันนี้':'เลือกวันนี้หรือวันข้างหน้า';
+ // Normal date range is enforced by the picker; only show date guidance on validation error.
  const message=date&&(past?date>today:date<today)?(past?'วันที่นี้ยังมาไม่ถึง กรุณาเลือกวันนี้หรือวันที่ผ่านมาแล้ว':'วันที่นี้ผ่านไปแล้ว กรุณาเลือกวันนี้หรือวันข้างหน้า'):'';
  $('date').setCustomValidity(message);
- $('dateRule').textContent=message||$('dateRule').textContent;
+ $('dateRule').textContent=message;
  $('dateRule').style.color=message?'#a51e2c':'';
  return !message;
 }
@@ -4810,25 +4848,7 @@ $('hospitalSearch').before($('hospitalQuickCards'));
 mainSection.append(providerExtras);
 const timeSection=makeFlowSection('timeFlow','3. วันและเวลา');flowRoot.append(timeSection);
 moveLabelAndInput('date',timeSection,['dateRule','dateThaiPreview']);
-const todayShortcut=document.createElement('button');
-todayShortcut.type='button';todayShortcut.id='appointmentChooseToday';todayShortcut.className='secondary today-shortcut';
-todayShortcut.textContent='📅 วันนี้';
-todayShortcut.setAttribute('aria-label','เลือกวันที่วันนี้');
-$('dateRule').before(todayShortcut);
-todayShortcut.addEventListener('click',()=>{
- $('date').value=bangkokToday();
- $('date').dispatchEvent(new Event('input',{bubbles:true}));
- $('date').dispatchEvent(new Event('change',{bubbles:true}));
-});
-function syncTodayShortcut(){
- const sameDay=!!$('date').value;
- todayShortcut.classList.toggle('hidden',sameDay);
- todayShortcut.hidden=sameDay;
- todayShortcut.textContent='📅 เลือกวันนี้';
-}
-$('date').addEventListener('input',syncTodayShortcut);
-$('date').addEventListener('change',syncTodayShortcut);
-syncTodayShortcut();
+// Today can be selected directly in the native date picker; avoid a duplicate full-width action.
 // Same-day advisory uses only appointments already returned for the authorized person.
 const conflictNotice=document.createElement('div');
 conflictNotice.id='sameDayAppointmentNotice';conflictNotice.className='same-day-notice hidden';
