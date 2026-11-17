@@ -2164,7 +2164,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  padding:0 2px!important;color:#665747!important;font-size:14px!important;
 }
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.79</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.80</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4667,7 +4667,8 @@ simpleJourneyOpen.textContent='🧭 ดูทางไปจุดนัดห�
 const simpleJourneyHint=document.createElement('p');
 simpleJourneyHint.id='simpleJourneyHint';simpleJourneyHint.className='help';
 simpleJourneyGuide.append(simpleJourneyOpen,simpleJourneyHint);
-extrasSection.append(simpleJourneyGuide);
+// The journey viewer belongs on the appointment details / day-of-visit screen, not the new-appointment form.
+// Keep the preview implementation available without mounting this UI in the editor.
 simpleJourneyOpen.addEventListener('click',()=>{
  if(journeyNeedsReview){
   $('detail').value='full';updateProgressiveLayout();
@@ -4856,7 +4857,9 @@ for(const choice of prepChoices){
  const section=document.createElement('section');section.id='prepSection-'+choice.key;section.className='prep-choice-content hidden';prepSections[choice.key]=section;
  button.setAttribute('aria-controls',section.id);
  button.addEventListener('click',()=>{
-  if(prepOpen.has(choice.key))prepOpen.delete(choice.key);else prepOpen.add(choice.key);
+  const wasOpen=prepOpen.has(choice.key);
+  prepOpen.clear(); // Only one editing panel visible at a time; keep all field values.
+  if(!wasOpen)prepOpen.add(choice.key);
   updatePrepChoices();
  });
 }
@@ -4868,7 +4871,7 @@ examPrepPanel.open=true; // The main card controls visibility; no nested disclos
 moveNodes('instructions',[examPrepLabel,prepOrderGrid,prepTimeArea,prepExtraTitle,prepExtraGrid,prepMedicineArea,prepOtherArea,examPrepChoice,examPrepDetailArea,examPrepHelp]);
 examPrepPanel.remove();
 procedureGuide.remove();
-const prepIntro=document.createElement('p');prepIntro.className='help prep-choice-intro';prepIntro.textContent='เลือกเฉพาะเรื่องที่ต้องการเพิ่ม';
+const prepIntro=document.createElement('p');prepIntro.className='help prep-choice-intro';prepIntro.textContent='เลือกหัวข้อที่ต้องการกรอก เปิดได้ทีละหัวข้อ';
 simpleExtras.prepend(prepIntro,prepChoiceGrid,...Object.values(prepSections));
 function updatePrepChoices(){
  const filled={
@@ -4881,6 +4884,7 @@ function updatePrepChoices(){
   const key=choice.key,active=prepOpen.has(key);
   prepSections[key].classList.toggle('hidden',!active);
   prepButtons[key].button.setAttribute('aria-pressed',String(active));
+  prepButtons[key].button.setAttribute('aria-expanded',String(active));
   prepButtons[key].indicator.textContent='มีข้อมูล';
   prepButtons[key].indicator.classList.toggle('hidden',!filled[key]);
  }
@@ -5022,6 +5026,8 @@ const resetActions=$('review').parentElement;
 resetActions.before(resetButton);
 function resetCurrentAppointmentDraft(){
  // Never reset personSelect, memberId, login, catalog or authorized options.
+ prepOpen.clear(); // Avoid carrying the previous person's expanded edit panel across drafts.
+ updatePrepChoices();
  clearSourceFilled({personChanged:true});
  for(const el of editor.querySelectorAll('input,select,textarea')){
   if(el.id==='personSelect'||el.id==='detail'||el.id==='scenario')continue;
