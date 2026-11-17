@@ -3,7 +3,7 @@
 export function makeLiffConfirmClient({liff,endpoint,fetchImpl=fetch,uuid=()=>crypto.randomUUID()}={}){
  if(!liff?.getIDToken||typeof fetchImpl!=='function'||typeof endpoint!=='string')throw new Error('liff_confirm_unconfigured');
  const url=new URL(endpoint);
- if(url.protocol!=='https:'||!(url.pathname.endsWith('/phms-v24-appointment-confirm')))throw new Error('unsafe_confirm_endpoint');
+ if(url.protocol!=='https:'||!((/\/phms-v24-appointment-confirm(?:-rc)?$/.test(url.pathname))))throw new Error('unsafe_confirm_endpoint');
  let pendingKey=null,pendingPayload=null;
  return async function confirm({selectedPersonCode,draft}){
   const idToken=liff.getIDToken();
