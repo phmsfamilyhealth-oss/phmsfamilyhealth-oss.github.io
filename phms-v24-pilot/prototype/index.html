@@ -2485,7 +2485,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  display:none!important;
 }
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.1</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.2</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -5210,7 +5210,9 @@ updatePrepChoices();
 const hospDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#hospital_hn'));
 const careDetails=Array.from(detailed.children).find(el=>el.querySelector?.('#care_topic'));
 if(careDetails&&hospDetails)detailed.prepend(careDetails,hospDetails);
-extrasSection.append(simpleExtras,$('outcomeDetails'));
+// Four shared prep fields come first in Additional Information; detailed-only sections follow.
+extrasSection.insertBefore(simpleExtras,detailed);
+extrasSection.append($('outcomeDetails'));
 // Simple mode keeps this panel outside detailed groups; detailed mode moves the same node inside the same details list.
 const linkedDisclosure=document.createElement('details');linkedDisclosure.className='progressive-extras';linkedDisclosure.id='linkedVisitDisclosure';
 const linkedSummary=document.createElement('summary');linkedSummary.textContent='ค่าใช้จ่ายและยาที่ได้รับ';linkedDisclosure.append(linkedSummary,$('historicalLinkedVisitSection'));
@@ -5443,11 +5445,10 @@ function updateProgressiveLayout(){
  // The four new prep accordions must never replace or hide this original group.
  detailed.classList.toggle('hidden',simple);
  detailed.hidden=!!simple;
- // Preserve every original Detailed-mode section (v2.4.81). The four new prep
- // disclosures are separate siblings AFTER the legacy Detailed section in BOTH modes.
- // Never append them into #details, which mixes two independent information groups.
- if(simpleExtras.parentElement!==extrasSection || simpleExtras.previousElementSibling!==detailed){
-  extrasSection.insertBefore(simpleExtras,$('outcomeDetails'));
+ // The four prep accordions are the FIRST children under Additional Information in both modes.
+ // Reuse their original DOM fields and keep all detailed-only headings intact below them.
+ if(simpleExtras.parentElement!==extrasSection || simpleExtras.nextElementSibling!==detailed){
+  extrasSection.insertBefore(simpleExtras,detailed);
  }
  for(const button of modeButtons){
   const active=button.dataset.mode===$('detail').value;
