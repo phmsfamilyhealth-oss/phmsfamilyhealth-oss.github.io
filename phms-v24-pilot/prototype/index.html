@@ -3197,6 +3197,10 @@ function syncProviderNames(){
  document.getElementById('department').value=unit?.name||local('unit');
  document.getElementById('doctor').value=clinician?.display_name||local('clinician');
  if(window.phmsProcedureReady)renderProcedurePreview();
+ if(window.phmsJourneyReady){
+  const contextKey=$('personSelect').value+'|'+$('providerOrg').value+'|'+$('providerUnit').value;
+  if(contextKey!==window.phmsJourneyContextKey){window.phmsJourneyContextKey=contextKey;onJourneyContextChange();}
+ }
 }
 // Registry remains disconnected until the protected API supplies a verified, authorized catalog.
 const $=id=>document.getElementById(id), ids=['detail','scenario','date','known','time','hospital','department','doctor','purpose','additionalNote','prep'];
@@ -4233,6 +4237,7 @@ const onJourneyContextChange=()=>{
  journeyPreviousContext=next;
  fetchSavedJourneySuggestion();
 };
+window.phmsJourneyReady=true;
 $('providerOrg').addEventListener('change',onJourneyContextChange);
 $('providerUnit').addEventListener('change',onJourneyContextChange);
 $('visitStepAdd').addEventListener('click',()=>{
@@ -4243,7 +4248,7 @@ $('visitStepAdd').addEventListener('click',()=>{
 $('personSelect').addEventListener('change',()=>{
  ++journeyLookupGeneration;setJourneySuggestion(null);
  clearJourneyDraft();$('location_directions').value='';$('location_note').value='';
- journeyPreviousContext='';refreshJourneyWarning();
+ journeyPreviousContext='';window.phmsJourneyContextKey='';refreshJourneyWarning();
 });
 renderVisitStops();
 
