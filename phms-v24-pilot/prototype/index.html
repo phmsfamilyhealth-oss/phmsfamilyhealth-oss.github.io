@@ -2478,8 +2478,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  #editor #appointmentFlow .phms-inline-add-row{grid-template-columns:minmax(0,1fr) 84px!important;column-gap:7px!important}
  #editor #appointmentFlow .phms-inline-add-row>button{width:84px!important;font-size:15px!important}
 }
+
+/* PHMS v2.4.90.1 — walk-in / historical time must remain hidden until explicit YES. */
+#editor #appointmentFlow #timeFlow #timebox[hidden],
+#editor #appointmentFlow #timeFlow #timebox.hidden{
+ display:none!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.1</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3335,7 +3341,12 @@ function refresh(){
   const el=$(id);
   if(el&&!el.textContent.trim().startsWith(icon))el.prepend(document.createTextNode(icon+' '));
  }
- updateThaiDateTime(); $('checklistBox').classList.toggle('hidden',!!isPastAppointment());$('details').classList.toggle('hidden',$('detail').value!=='full');$('walkInDetails').classList.toggle('hidden',$('scenario').value!=='walk_in');$('outcomeDetails').classList.toggle('hidden',!isPastAppointment());const showTime=!optionalTime||$('known').value==='yes';$('timebox').classList.toggle('hidden',!showTime);/* keep entered time on mode toggles; hidden value is never submitted */}
+ updateThaiDateTime(); $('checklistBox').classList.toggle('hidden',!!isPastAppointment());$('details').classList.toggle('hidden',$('detail').value!=='full');$('walkInDetails').classList.toggle('hidden',$('scenario').value!=='walk_in');$('outcomeDetails').classList.toggle('hidden',!isPastAppointment());const showTime=!optionalTime||$('known').value==='yes';
+ const timeBox=$('timebox');
+ timeBox.hidden=!showTime;
+ timeBox.classList.toggle('hidden',!showTime);
+ $('time').disabled=!showTime;
+ /* Time appears only after explicit 'ทราบเวลา' on walk-in/history; booked always requires time. */}
 $('date').addEventListener('input',()=>{const src=sourceAppointments.get($('relatedSelect').value);if(src&&!purposeManuallyEdited&&$('purpose').value===autoPurposeValue){$('purpose').value='';applyFollowupTitle(src);}});$('date').addEventListener('input',()=>{checkDateRule();updateThaiDateTime();});$('date').addEventListener('change',refresh);$('time').addEventListener('input',updateThaiDateTime);$('time').addEventListener('change',updateThaiDateTime);$('known').addEventListener('change',refresh);$('detail').addEventListener('change',refresh);
 $('scenario').addEventListener('input',refresh);
 $('scenario').addEventListener('change',()=>{if($('scenario').value==='booked')$('known').value='yes';refresh();});
@@ -4691,7 +4702,11 @@ $('scenario').classList.add('scenario-original');$('scenario').before(scenarioGr
 for(const [value,symbol,name,description] of scenarioChoices){
  const button=document.createElement('button');button.type='button';button.className='scenario-option';button.dataset.scenario=value;
  const words=document.createElement('span');words.className='scenario-copy';const heading=document.createElement('strong');heading.textContent=symbol+' '+name;const sub=document.createElement('small');sub.textContent=description;words.append(heading,sub);button.append(words);
- button.addEventListener('click',()=>{if(!$('personSelect').value){$('personSelect').focus();return;}if($('scenario').value!==value&&value!=='booked')$('known').value='';scenarioChoiceMade=true;$('scenario').value=value;$('scenario').dispatchEvent(new Event('change',{bubbles:true}));});
+ button.addEventListener('click',()=>{if(!$('personSelect').value){$('personSelect').focus();return;}if($('scenario').value!==value&&value!=='booked'){
+  $('known').value='';
+  $('time').value='';
+ }
+ scenarioChoiceMade=true;$('scenario').value=value;$('scenario').dispatchEvent(new Event('change',{bubbles:true}));});
  scenarioGrid.append(button);
 }
 function syncScenarioCards(){
@@ -5648,6 +5663,11 @@ coverageSearch.addEventListener('keydown',e=>{
 coverageSelect.addEventListener('change',renderCoverageChoices);
 renderCoverageChoices();
 function syncChoiceCards(){
+ // Apply the same known-time gate after card controls update their state.
+ const timeVisible=$('scenario').value==='booked'||$('known').value==='yes';
+ $('timebox').hidden=!timeVisible;
+ $('timebox').classList.toggle('hidden',!timeVisible);
+ $('time').disabled=!timeVisible;
  for(const id of ['known','hasAppointmentPhotos']){
   const select=$(id),host=select.previousElementSibling;
   if(!host?.classList.contains('adaptive-option-host'))continue;
