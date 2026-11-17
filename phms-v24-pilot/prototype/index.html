@@ -2163,8 +2163,44 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #extrasFlow #simpleJourneyGuide>p{
  padding:0 2px!important;color:#665747!important;font-size:14px!important;
 }
+
+/* PHMS v2.4.81 — shared optional accordion pattern across Simple and Detailed. */
+#editor #extrasFlow #simpleExtras{
+ border:1px solid #d9bb98!important;border-radius:13px!important;
+ background:#fffdf9!important;padding:0 14px 12px!important;
+ margin:10px 0!important;box-shadow:none!important;
+}
+#editor #extrasFlow #simpleExtras>summary.phms-summary-status-line{
+ background:transparent!important;border:0!important;border-radius:0!important;
+ min-height:56px!important;margin:0!important;padding:10px 0!important;
+ font-size:1rem!important;color:#29241e!important;
+}
+#editor #extrasFlow #simpleExtras[open]>summary.phms-summary-status-line{
+ border-bottom:1px solid #e7d6bf!important;margin:0 0 12px!important;
+ padding-bottom:10px!important;
+}
+#editor #extrasFlow #simpleExtras .prep-choice-intro{
+ font-size:14px!important;margin:0 0 9px!important;color:#665747!important;
+}
+#editor #extrasFlow #simpleExtras .prep-choice-card{
+ border:1.5px solid #d4b493!important;background:#fffaf4!important;
+ color:#2d261e!important;border-radius:12px!important;
+ min-height:78px!important;box-shadow:none!important;
+}
+#editor #extrasFlow #simpleExtras .prep-choice-card[aria-pressed="true"]{
+ border:2px solid #89592f!important;background:#fff1db!important;
+}
+#editor #extrasFlow #simpleExtras .prep-choice-card .prep-choice-filled{
+ font-size:12px!important;line-height:1.2!important;padding:4px 7px!important;
+}
+#editor #appointmentPhotoPicker #filehelp:empty{display:none!important}
+#editor #appointmentPhotoPicker #addAppointmentPhoto{
+ min-height:48px!important;border-radius:12px!important;
+ background:#fffaf4!important;border:1.5px dashed #c8a37b!important;
+ color:#664021!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.80</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.81</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -2830,8 +2866,8 @@ function renderAppointmentPhotos(){
   actions.append(view,remove);card.append(thumb,name,actions);list.append(card);
  });
  $('addAppointmentPhoto').classList.toggle('hidden',photoFiles.length>=2);
- $('addAppointmentPhoto').textContent=photoFiles.length?'📷 เพิ่มอีกรูป':'📷 เพิ่มรูปใบนัด';
- $('filehelp').textContent=photoFiles.length===2?'ครบ 2 รูปแล้ว':photoFiles.length+'/2 รูป';
+ $('addAppointmentPhoto').textContent=photoFiles.length?'📷 เพิ่มอีกรูป':'📷 เพิ่มรูปใบนัด (สูงสุด 2 รูป)';
+ $('filehelp').textContent=photoFiles.length===2?'ครบ 2 รูปแล้ว':(photoFiles.length?photoFiles.length+'/2 รูป':'');
 }
 function showAppointmentPhoto(index){if(!photoUrls[index])return;$('appointmentPhotoLarge').src=photoUrls[index];$('appointmentPhotoDialog').showModal();}
 $('closeAppointmentPhoto').addEventListener('click',()=>$('appointmentPhotoDialog').close());
@@ -2850,8 +2886,8 @@ function updateAppointmentPhotoVisibility(){
  $('appointmentPhotosSection').classList.toggle('hidden',mode==='walk_in');
  $('historicalPhotoChoice').classList.toggle('hidden',!historical);
  $('appointmentPhotoPicker').classList.toggle('hidden',!(booked||(historical&&$('hasAppointmentPhotos').value==='yes')));
- const notice=$('filehelp');
- if(notice&&photoFiles.length===0)notice.textContent='ยังไม่ได้เพิ่มรูป · 0/2 รูป';
+ // An empty upload has no status to announce; show counts only after an image was added.
+ if(!photoFiles.length)$('filehelp').textContent='';
 
 }
 const linkedVisitState={appointmentId:'',personId:''};
@@ -4980,8 +5016,8 @@ document.querySelector('label[for="hospitalSearch"]').innerHTML='โรงพย
 document.querySelector('label[for="unitSearch"]').textContent='แผนก / คลินิก';
 document.querySelector('label[for="clinicianSearch"]').textContent='แพทย์';
 const photoHelp=$('appointmentPhotoPicker').querySelector('p.help');
-if(photoHelp)photoHelp.textContent='ใส่ได้สูงสุด 2 รูป';
-$('filehelp').textContent='0/2 รูป';
+if(photoHelp)photoHelp.remove(); // The add-photo button is the only place that states the limit.
+$('filehelp').textContent='';
 const sourceSummary=sourceBox.querySelector('summary');if(sourceSummary)sourceSummary.textContent='ใช้ข้อมูลจากนัดครั้งก่อน';
 const sourceInstruction=sourceBox.querySelector('p.help:not(#relatedStatus)');if(sourceInstruction)sourceInstruction.remove();
 const simpleSummaryText={booked:'อาการและสิ่งที่ต้องเตรียม',walk_in:'เหตุผลที่ไปและอาการ',historical:'อาการก่อนพบแพทย์'};
