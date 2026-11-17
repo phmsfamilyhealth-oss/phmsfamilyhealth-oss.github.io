@@ -135,7 +135,7 @@ Deno.serve(async request=>{
    const d=draft.details;
    const appointmentAt=draft.time?draft.date+'T'+draft.time+':00+07:00':null;
    const status=draft.raw.scenario==='historical'?'completed':'planned';
-   const recordedEnd=status==='completed'?(appointmentAt||draft.date+'T12:00:00+07:00'):null;
+   const recordedEnd=status==='completed'&&appointmentAt?appointmentAt:null; // never invent an encounter time
    const values={
     id,family_id:person.familyId,family_person_id:person.familyPersonId,
     person_id:person.personId,title:draft.purpose,
