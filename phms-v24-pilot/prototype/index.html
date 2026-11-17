@@ -2505,8 +2505,46 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor:not(.simple-ui) #extrasFlow > details#prepDisclosure-notes[open] > .prep-choice-content{
  display:block!important;padding:0 0 12px!important;
 }
+
+/* PHMS v2.4.90.5 — one inset panel, two short hospital identifiers. */
+#editor #extrasFlow #hospitalLocationDetails{box-sizing:border-box!important;min-width:0!important;overflow:visible!important}
+#editor #extrasFlow #hospitalLocationDetails>.phms-hospital-number-fields{
+ display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+ gap:12px!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;
+ border:1px solid #e4ceb5!important;border-radius:13px!important;
+ background:#fffaf4!important;padding:12px!important;margin:10px 0 8px!important;
+}
+#editor #extrasFlow #hospitalLocationDetails .phms-hospital-number-field{
+ display:flex!important;flex-direction:column!important;gap:6px!important;min-width:0!important;
+}
+#editor #extrasFlow #hospitalLocationDetails .phms-hospital-number-field>label{
+ display:block!important;margin:0!important;line-height:1.4!important;font-weight:700!important;
+}
+#editor #extrasFlow #hospitalLocationDetails .phms-hospital-number-field>input{
+ display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;
+ box-sizing:border-box!important;margin:0!important;padding:9px 10px!important;
+ min-height:50px!important;height:50px!important;border-radius:11px!important;
+ border:1px solid #c8b29a!important;background:#fff!important;
+ font-size:16px!important;color:#30251a!important;
+}
+#editor #extrasFlow #hospitalLocationDetails .phms-hospital-number-field>input::placeholder{
+ color:#967f6a!important;opacity:1!important;-webkit-text-fill-color:#967f6a!important;
+ font-weight:400!important;font-size:14px!important;
+}
+#editor #extrasFlow #hospitalLocationDetails .phms-hospital-number-field>p.help{
+ font-size:12px!important;line-height:1.4!important;margin:2px 0 0!important;
+ color:#756653!important;overflow-wrap:anywhere!important;
+}
+#editor #extrasFlow #hospitalLocationDetails .phms-hospital-number-guide{
+ font-size:12px!important;line-height:1.45!important;color:#756653!important;
+ margin:4px 0 8px!important;
+}
+@media(max-width:380px){
+ #editor #extrasFlow #hospitalLocationDetails>.phms-hospital-number-fields{gap:8px!important;padding:9px!important}
+ #editor #extrasFlow #hospitalLocationDetails .phms-hospital-number-field>input{padding:8px!important}
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.4</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.5</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -2527,9 +2565,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <input type="hidden" id="department">
 <div id="details" class="hidden">
 <details id="hospitalLocationDetails"><summary>🏥 ข้อมูล รพ.</summary>
-<label for="hospital_hn">เลข HN </label><input id="hospital_hn" maxlength="80">
-<label for="hospital_vn">เลข VN </label><input id="hospital_vn" maxlength="80">
-
+<div class="phms-hospital-number-fields">
+ <div class="phms-hospital-number-field">
+  <label for="hospital_hn">เลข HN</label>
+  <input id="hospital_hn" maxlength="80" placeholder="เช่น 69011637" autocomplete="off">
+ </div>
+ <div class="phms-hospital-number-field">
+  <label for="hospital_vn">เลข VN</label>
+  <input id="hospital_vn" maxlength="80" placeholder="เลขรับบริการ (ถ้ามี)" autocomplete="off">
+ </div>
+</div>
+<p class="help phms-hospital-number-guide">HN = เลขประจำตัวผู้ป่วย · VN = เลขรับบริการแต่ละครั้ง (เลขรับไว้เป็นผู้ป่วยในมักใช้ AN)</p>
 </details>
 <details id="primaryLocationDetails">
  <summary>📍 จุดติดต่อ</summary>
