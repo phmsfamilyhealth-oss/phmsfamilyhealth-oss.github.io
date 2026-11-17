@@ -123,6 +123,15 @@ Deno.serve(async request=>{
       (doctors[0].service_unit_id&&unit&&doctors[0].service_unit_id!==unit.id))throw Error('invalid_provider');
     clinician=doctors[0];
    }
+   // Link only a previous appointment belonging to this exact family person.
+   let linkedId=null;
+   if(draft.raw.linked_appointment_id){
+    if(!UUID.test(draft.raw.linked_appointment_id))throw Error('invalid_link');
+    const linked=await tx.unsafe('select id from public.appointments where id=$1::uuid and family_person_id=$2::uuid and deleted_at is null limit 1',[draft.raw.linked_appointment_id,person.familyPersonId]);
+    if(linked.length!==1)throw Error('invalid_link');
+    linkedId=linked[0].id;
+   }
+   const isRescheduled=draft.raw.reschedule_origin==='rescheduled';
    const d=draft.details;
    const appointmentAt=draft.time?draft.date+'T'+draft.time+':00+07:00':null;
    const status=draft.raw.scenario==='historical'?'completed':'planned';
@@ -133,7 +142,9 @@ Deno.serve(async request=>{
     hospital_name:String(organization[0].display_name||organization[0].name),
     department:unit?.name||text(draft.raw.department,160),doctor_name:clinician?.display_name||'',
     organization_id:organization[0].id,service_unit_id:unit?.id||null,clinician_id:clinician?.id||null,
-    created_by:actor.userId,appointment_type:draft.raw.scenario==='walk_in'?'walk_in':'other',
+    created_by:actor.userId,appointment_type:draft.raw.scenario==='walk_in'?'walk_in':(isRescheduled?'rescheduled':(linkedId?'follow_up':'other')),
+    followup_of_appointment_id:linkedId&&!isRescheduled?linkedId:null,
+    rescheduled_from_appointment_id:linkedId&&isRescheduled?linkedId:null,
     visit_mode:draft.raw.scenario==='walk_in'?'walk_in':draft.raw.scenario==='booked'?'booked':'unspecified',
     visit_time_known:draft.raw.time_known,appointment_at:appointmentAt,
     planned_visit_date:draft.date,status,completed_at:recordedEnd,
@@ -165,7 +176,7 @@ Deno.serve(async request=>{
   return cors(reply(200,{ok:true,...result}));
  }catch(error){
   const code=String(error?.message||'');
-  if(['invalid_provider','idempotency_conflict'].includes(code))
+  if(['invalid_provider','idempotency_conflict','invalid_link'].includes(code))
    return cors(reply(409,{ok:false,error:code}));
   console.error('phms_v24_save_failed',String(error?.code||'unknown'));
   return cors(reply(503,{ok:false,error:'save_unavailable'}));
