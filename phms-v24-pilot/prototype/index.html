@@ -2634,7 +2634,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  margin-top:0!important;
 }
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.21</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.22</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -5757,7 +5757,7 @@ function draftPhotoMetadata(p){return {id:p.id,name:p.name,caption:p.caption||''
 function draftPayload(){
  return {version:1,fields:draftFieldValues(),
   checklist:checklistItems.map(x=>({...x})),
-  procedures:[...procedurePreviewItems],
+  procedures:[...procedurePreviewItems],contactPhones:[...contactPhoneItems],
   journey:{cover:primaryJourney.coverId,main:primaryJourney.photos.map(draftPhotoMetadata),
    stops:visitStops.map(x=>({...x,photos:(x.photos||[]).map(draftPhotoMetadata)}))},
   appointmentId:savedAppointmentId||'',uploadedSlots:[...uploadedNoticeSlots]};
@@ -5822,7 +5822,7 @@ systemDraftOpen.addEventListener('click',async()=>{
  const values=data.fields||{};
  const org=authorizedCatalog.organizations.find(x=>x.id===values.providerOrg);
  if(org){$('providerOrg').value=org.id;comboState.hospital.selectedItem={value:org.id,label:org.display_name||org.name};refreshProviderPicker('providerOrg');}
- const unit=authorizedCatalog.units.find(x=>x.id===values.providerUnit&&x.organization_id===values.providerOrg);
+ const unit=authorizedCatalog.units.find(x=>x.id===values.providerUnit&&(x.organization_id===values.providerOrg||x.organizationId===values.providerOrg));
  if(unit){$('providerUnit').value=unit.id;comboState.unit.selectedItem={value:unit.id,label:unit.name};refreshProviderPicker('providerUnit');}
  for(const [id,value] of Object.entries(values)){
   const el=$(id);if(!el||el.type==='file'||['personSelect','providerOrg','providerUnit'].includes(id))continue;
@@ -5832,6 +5832,7 @@ systemDraftOpen.addEventListener('click',async()=>{
  if(unit)$('unitSearch').value=unit.name;
  checklistItems=Array.isArray(data.checklist)?data.checklist:[];renderChecklist();
  procedurePreviewItems=Array.isArray(data.procedures)?data.procedures.slice(0,30):[];renderProcedurePreview();
+ setContactPhoneItems((data.contactPhones||[]).join('\n'));
  clearAppointmentPhotos();clearJourneyDraft();
  const photoMap=new Map((data.photos||[]).filter(p=>p?.url).map(p=>[p.slot,p]));
  async function restoreImage(slot){
