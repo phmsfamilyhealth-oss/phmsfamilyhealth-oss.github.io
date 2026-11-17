@@ -2550,8 +2550,41 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #extrasFlow>details#outcomeDetails.hidden,
 #editor #extrasFlow>details#outcomeDetails[hidden],
 #editor #linkedVisitDisclosure{display:none!important}
+
+/* PHMS v2.4.93 — field rendering recovery and consistent editor boundaries. */
+#editor #timeFlow #timebox[hidden],
+#editor #timeFlow #timebox.hidden,
+#editor #appointmentFlow #timebox[hidden],
+#editor #appointmentFlow #timebox.hidden{display:none!important}
+#editor #extrasFlow #hospitalLocationDetails,
+#editor #extrasFlow #visitStepsDetails,
+#editor #extrasFlow #procedurePreviewBox{
+ box-sizing:border-box!important;max-width:100%!important;min-width:0!important;
+ overflow-wrap:break-word!important;padding:0 14px 14px!important;
+}
+#editor #extrasFlow #hospitalLocationDetails .phms-hospital-id-pair{
+ max-width:100%!important;min-width:0!important;box-sizing:border-box!important;
+}
+#editor #extrasFlow #visitStepsDetails #visitStepsList,
+#editor #extrasFlow #procedurePreviewBox #procedureCommonCards,
+#editor #extrasFlow #careTopicSuggestions{
+ box-sizing:border-box!important;max-width:100%!important;min-width:0!important;
+}
+#editor #extrasFlow #visitStepsDetails #visitStepAdd{
+ box-sizing:border-box!important;min-height:48px!important;
+ margin:12px 0 0!important;padding:10px 16px!important;
+ border:1px solid #d8c6af!important;border-radius:12px!important;
+ background:#efe3d4!important;color:#533c25!important;
+}
+#editor #extrasFlow #checklistBox .checklist-row textarea.checklist-name{
+ display:block!important;visibility:visible!important;opacity:1!important;
+ color:#30251a!important;-webkit-text-fill-color:#30251a!important;
+ min-width:0!important;min-height:36px!important;line-height:1.45!important;
+}
+#editor #extrasFlow #checklistBox .checklist-row{min-width:0!important;max-width:100%!important}
+#editor #extrasFlow .phms-prep-disclosure:not([open]) > .prep-choice-content{display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.92</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.93</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -5555,7 +5588,8 @@ function updateProgressiveLayout(){
  outcome.classList.toggle('hidden',!pastVisit);outcome.hidden=!pastVisit;
  if(simple&&mode==='walk_in')$('checklistBox').classList.add('simple-walkin-checklist');
  else $('checklistBox').classList.remove('simple-walkin-checklist');
- syncPickerPrompts();updateFilledIndicators();updateRequiredFieldStatus();updateSimpleJourneyGuide();
+ // Run the authoritative known-time gate after all layout changes, including scenario switches.
+ refresh();syncPickerPrompts();updateFilledIndicators();updateRequiredFieldStatus();updateSimpleJourneyGuide();
 }
 $('detail').addEventListener('change',updateProgressiveLayout);
 $('scenario').addEventListener('change',updateProgressiveLayout);
@@ -5821,7 +5855,27 @@ function updateConnectionBanner(){
 }
 new MutationObserver(updateConnectionBanner).observe(connectionBanner,{childList:true,characterData:true,subtree:true});
 updateConnectionBanner();
+// The detailed choice sections can be opened before the asynchronous person history arrives.
+// Always render their actual cards upon opening; they are non-destructive visual rerenders.
+const treatmentPanel=$('careTopicSuggestions')?.closest('details');
+if(treatmentPanel)treatmentPanel.addEventListener('toggle',()=>{
+ if(treatmentPanel.open)renderCareTopicSuggestions();
+});
+const procedurePanel=$('procedurePreviewBox');
+if(procedurePanel)procedurePanel.addEventListener('toggle',()=>{
+ if(procedurePanel.open)renderProcedurePreview();
+});
+const thingsPanel=$('prepDisclosure-things');
+if(thingsPanel)thingsPanel.addEventListener('toggle',()=>{
+ if(!thingsPanel.open)return;
+ // Repair display-only empty editable rows without changing the checklist data model.
+ const names=$('prepItems').querySelectorAll('textarea.checklist-name');
+ if(names.length!==checklistItems.length || [...names].some((el,i)=>!el.value&&!!checklistItems[i]?.title)){
+  renderChecklist();
+ }
+});
 updateProgressiveLayout();refresh();syncChoiceCards();
+renderCareTopicSuggestions();renderProcedurePreview();
 </script><script type="module">
 // Optional location synchronizer. Existing protected API validates LINE identity and
 // person-scoped appointment read access. Never read another person's history.
