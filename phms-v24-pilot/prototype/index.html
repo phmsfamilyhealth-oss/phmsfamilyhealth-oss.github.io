@@ -2634,7 +2634,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  margin-top:0!important;
 }
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.16</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.17</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3607,7 +3607,7 @@ reviewedDraft.reschedule_origin=$('appointmentOrigin').value||'';
 reviewedDraft.reschedule_count=Number($('appointmentRescheduleCount').value||0);
 reviewedDraft.exam_preparation={choice:examPrepChoice.value,details:examPrepDetails.value.trim()};
 if(packaged.draft.document_metadata.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='ไฟล์แนบ';dd.textContent=packaged.draft.document_metadata.map(f=>f.name).join(', ');dl.append(dt,dd)}$('editor').classList.add('hidden');$('confirmation').classList.remove('hidden');window.scrollTo(0,0)});
-let savedAppointmentId='',uploadedNoticeSlots=new Set();
+let savedAppointmentId='',uploadedNoticeSlots=new Set(),journeyPersistedForSave=false;
 async function uploadAppointmentNotice(file,position,appointmentId){
  const token=window.liff?.getIDToken?.();
  if(!token)throw new Error('กรุณาเข้าสู่ LINE อีกครั้ง');
@@ -3633,17 +3633,23 @@ $('save').addEventListener('click',async()=>{
  if(!confirmClient||!reviewedDraft)return;
  const button=$('save');button.disabled=true;button.textContent='กำลังบันทึก…';
  try{
-  if(!savedAppointmentId&&hasJourneyDetails()){
-   if(!journeySaveAllowed)throw Error('ยังไม่มีสิทธิ์บันทึกเส้นทางสำหรับบุคคลและแผนกนี้');
-   if(journeyNeedsReview)throw Error('กรุณาตรวจสอบเส้นทางที่เปลี่ยนก่อนบันทึกนัด');
-   const journeyOk=await persistJourneyTemplate();
-   if(!journeyOk)throw Error($('journeySaveStatus').textContent||'บันทึกเส้นทางไม่สำเร็จ');
-  }
   if(!savedAppointmentId){
    const result=await confirmClient({selectedPersonCode:memberId,draft:reviewedDraft});
    if(!result.ok)throw Error(result.error);
    savedAppointmentId=result.appointmentId;
    $('back').disabled=true; // Prevent editing a persisted appointment during photo-upload retries.
+  }
+  if(hasJourneyDetails()&&!journeyPersistedForSave){
+   $('saveStatus').textContent='บันทึกนัดแล้ว กำลังบันทึกเส้นทางและรูปขั้นตอน…';
+   // Fetch capability fresh: previous lookup may have been skipped while selecting a clinic.
+   if(!journeySaveAllowed)await fetchSavedJourneySuggestion();
+   if(!journeySaveAllowed){
+    $('journeySaveStatus').textContent='นัดหมายบันทึกแล้ว แต่เส้นทางและรูปขั้นตอนยังไม่ถูกจัดเก็บ กรุณาเลือกแผนกจากทะเบียนโรงพยาบาลแล้วลองอีกครั้ง';
+   }else if(journeyNeedsReview){
+    $('journeySaveStatus').textContent='นัดหมายบันทึกแล้ว กรุณากลับไปตรวจสอบเส้นทางที่เปลี่ยนก่อนบันทึกรูป';
+   }else{
+    journeyPersistedForSave=await persistJourneyTemplate();
+   }
   }
   for(let i=0;i<photoFiles.length;i++){
    if(uploadedNoticeSlots.has(i+1))continue;
@@ -3651,11 +3657,14 @@ $('save').addEventListener('click',async()=>{
    await uploadAppointmentNotice(photoFiles[i],i+1,savedAppointmentId);
    uploadedNoticeSlots.add(i+1);
   }
-  button.textContent='บันทึกสำเร็จ';
-  $('saveStatus').textContent='บันทึกนัดสำเร็จ'+(photoFiles.length?' พร้อมรูปใบนัด '+photoFiles.length+' รูป':'')+' · เลขอ้างอิง: '+savedAppointmentId;
-  $('back').disabled=true;
+  const missingJourney=hasJourneyDetails()&&!journeyPersistedForSave;
+  button.textContent=missingJourney?'ลองบันทึกเส้นทางอีกครั้ง':'บันทึกสำเร็จ';
+  button.disabled=!missingJourney;
+  $('saveStatus').textContent='บันทึกนัดสำเร็จ'+(photoFiles.length?' พร้อมรูปใบนัด '+photoFiles.length+' รูป':'')+' · เลขอ้างอิง: '+savedAppointmentId+
+    (missingJourney?' · เส้นทาง/รูปขั้นตอนยังไม่บันทึก: '+$('journeySaveStatus').textContent:'');
+  $('back').disabled=!missingJourney;
  }catch(error){
-  button.disabled=false;button.textContent=savedAppointmentId?'ลองบันทึกรูปอีกครั้ง':'ลองบันทึกอีกครั้ง';
+  button.disabled=false;button.textContent=savedAppointmentId?'ลองบันทึกส่วนที่ค้าง':'ลองบันทึกอีกครั้ง';
   $('saveStatus').textContent=(savedAppointmentId?'บันทึกนัดแล้ว แต่รูปบางส่วนยังไม่สำเร็จ: ':'ยังไม่บันทึกนัด: ')+String(error?.message||'error');
  }
 });
