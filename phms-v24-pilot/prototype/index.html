@@ -2099,8 +2099,24 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  background:#fffaf4!important;
  color:#3a2618!important;
 }
+
+/* PHMS v2.4.78 — journey preview dismissal belongs in the top-right header. */
+.phms-journey-elder-dialog .phms-journey-elder-heading{
+ position:relative!important;padding-right:88px!important;min-height:48px!important;
+}
+.phms-journey-elder-dialog .phms-journey-elder-heading .phms-journey-elder-close{
+ position:absolute!important;right:0!important;top:0!important;
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ min-width:76px!important;min-height:44px!important;padding:7px 12px!important;
+ margin:0!important;border:1px solid #d77474!important;border-radius:12px!important;
+ background:#fff0f0!important;color:#b4232e!important;font-size:15px!important;
+ font-weight:700!important;line-height:1.2!important;box-shadow:none!important;
+}
+.phms-journey-elder-dialog .phms-journey-elder-heading .phms-journey-elder-close:focus-visible{
+ outline:3px solid #b4232e!important;outline-offset:2px!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.77</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.78</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3599,9 +3615,9 @@ function buildElderJourneyViewer(){
  const head=document.createElement('header');head.className='phms-journey-elder-heading';
  const title=document.createElement('h2');title.textContent='🧭 วันนี้ต้องไปไหนบ้าง';
  const subtitle=document.createElement('p');subtitle.textContent='ตัวอย่างคำแนะนำสำหรับผู้ไปโรงพยาบาล · ยังไม่ได้บันทึกนัดจริง';
- head.append(title,subtitle);
  const close=document.createElement('button');close.type='button';close.className='secondary phms-journey-elder-close';
- close.textContent='✕ ปิด';close.addEventListener('click',()=>journeyElderDialog.close());
+ close.textContent='✕ ปิด';close.setAttribute('aria-label','ปิดหน้าต่างคำแนะนำ');close.addEventListener('click',()=>journeyElderDialog.close());
+ head.append(title,subtitle,close);
  const list=document.createElement('div');list.className='phms-journey-elder-list';
  const formatRow=(label,value,parent)=>{
   if(!value||!String(value).trim())return;
@@ -3658,7 +3674,7 @@ function buildElderJourneyViewer(){
  }
  const footer=document.createElement('p');footer.className='phms-journey-elder-footnote';
  footer.textContent='ตำแหน่งและลำดับอาจเปลี่ยนได้ โปรดตรวจสอบกับใบนัดและเจ้าหน้าที่โรงพยาบาล';
- journeyElderDialog.append(head,close,list,footer);
+ journeyElderDialog.append(head,list,footer);
 }
 journeyElderDialog.addEventListener('click',event=>{if(event.target===journeyElderDialog)journeyElderDialog.close();});
 
