@@ -2446,7 +2446,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  }
 }
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.88</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.89</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4982,8 +4982,7 @@ prepOrderGrid.setAttribute('role','group');prepOrderGrid.setAttribute('aria-labe
 const prepOrderPresets=[
  ['none','ไม่ระบุคำสั่ง',''],['stop-food-water','🚫 งดอาหารและน้ำ','รวมถึงน้ำเปล่า'],
  ['water-ok','💧 งดอาหาร แต่น้ำเปล่าดื่มได้','งดเครื่องดื่มอื่น'],
- ['no-fast','✅ ไม่ต้องงดอาหารและน้ำ','ตามที่โรงพยาบาลแจ้ง'],
- ['special','📝 คำสั่งอื่น','ระบุเพิ่มเติม']
+ ['no-fast','✅ ไม่ต้องงดอาหารและน้ำ','ตามที่โรงพยาบาลแจ้ง']
 ];
 let selectedPrepOrder='none';
 const prepOrderButtons=new Map();
@@ -5056,7 +5055,7 @@ function syncPrepOrder(){
   selectedPrepOrder==='stop-food-water'&&prepExtraSelected.has('bring-water')
   ?'⚠️ คำสั่งงดน้ำและเตรียมน้ำอาจขัดกัน กรุณายืนยันกับโรงพยาบาล':'';
  prepMedicineArea.classList.toggle('hidden',!prepExtraSelected.has('medicine'));
- prepOtherArea.classList.toggle('hidden',selectedPrepOrder!=='special'&&!prepExtraSelected.has('more'));
+ prepOtherArea.classList.toggle('hidden',!prepExtraSelected.has('more'));
  const texts=[];
  if(selectedPrepOrder==='stop-food-water')texts.push('งดอาหารและน้ำ รวมถึงน้ำเปล่า');
  else if(selectedPrepOrder==='water-ok')texts.push('งดอาหารและเครื่องดื่มอื่น แต่น้ำเปล่าดื่มได้');
@@ -5065,8 +5064,8 @@ function syncPrepOrder(){
  if(prepExtraSelected.has('bring-water'))texts.push('เตรียมน้ำมาด้วย (ตามปริมาณที่โรงพยาบาลระบุ)');
  if(prepExtraSelected.has('hold-urine'))texts.push('กลั้นปัสสาวะก่อนตรวจ (ตามคำสั่งโรงพยาบาล)');
  if(prepExtraSelected.has('medicine'))texts.push('คำสั่งเรื่องยา: '+(prepMedicineText.value.trim()||'ยังไม่ได้ระบุรายละเอียด'));
- if((selectedPrepOrder==='special'||prepExtraSelected.has('more'))&&prepOtherText.value.trim())texts.push('คำสั่งอื่น: '+prepOtherText.value.trim());
- examPrepChoice.value=fasting?'fasting':selectedPrepOrder==='no-fast'?'normal':texts.length||selectedPrepOrder==='special'?'other':'';
+ if(prepExtraSelected.has('more')&&prepOtherText.value.trim())texts.push('คำสั่งอื่น: '+prepOtherText.value.trim());
+ examPrepChoice.value=fasting?'fasting':selectedPrepOrder==='no-fast'?'normal':texts.length||prepExtraSelected.has('more')?'other':'';
  examPrepDetails.value=texts.join('\n');
  if(typeof updatePrepChoices==='function')updatePrepChoices();
 }
