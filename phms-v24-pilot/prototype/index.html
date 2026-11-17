@@ -2272,8 +2272,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #extrasFlow #simpleExtras.phms-prep-accordion-list > details.phms-prep-disclosure > summary > .filled-indicator[hidden]{
  display:none!important;
 }
+
+/* PHMS v2.4.84 — safeguard original Detailed section and append four prep boxes below.
+   #details remains the original v2.4.81 collection; no child is replaced or moved. */
+#editor:not(.simple-ui) #extrasFlow > #details:not(.hidden){
+ display:flex!important;flex-direction:column!important;gap:1px!important;
+}
+#editor #extrasFlow > #simpleExtras.phms-prep-accordion-list{
+ width:100%!important;box-sizing:border-box!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.83</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.84</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -5237,8 +5246,12 @@ function updateProgressiveLayout(){
  const simple=$('detail').value==='simple',mode=$('scenario').value;
  updateAppointmentStateUI();
  editor.classList.toggle('simple-ui',simple);document.body.classList.toggle('simple-entry',simple);
- if(simple){if(simpleExtras.parentElement!==extrasSection)extrasSection.insertBefore(simpleExtras,$('outcomeDetails'));}
- else if(simpleExtras.parentElement!==detailed)detailed.append(simpleExtras);
+ // Preserve every original Detailed-mode section (v2.4.81). The four new prep
+ // disclosures are separate siblings AFTER the legacy Detailed section in BOTH modes.
+ // Never append them into #details, which mixes two independent information groups.
+ if(simpleExtras.parentElement!==extrasSection || simpleExtras.previousElementSibling!==detailed){
+  extrasSection.insertBefore(simpleExtras,$('outcomeDetails'));
+ }
  for(const button of modeButtons){
   const active=button.dataset.mode===$('detail').value;
   button.setAttribute('aria-pressed',String(active));button.classList.toggle('is-active',active);
