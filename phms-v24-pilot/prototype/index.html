@@ -2483,8 +2483,75 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #timeFlow #timebox.hidden,
 #editor #timeFlow #timebox[hidden]{display:none!important}
 #editor #extrasFlow #linkedVisitDisclosure{display:none!important}
+
+/* PHMS v2.4.92 — semantic card styles shared by both entry modes.
+   Select = solid 2px; add/search = dashed 2px with visibly lighter fill. */
+#editor #appointmentFlow button.phms-treatment-more,
+#editor #appointmentFlow button.phms-coverage-more,
+#editor #appointmentFlow button.phms-procedure-more,
+#editor #appointmentFlow button.adaptive-provider-more,
+#editor #appointmentFlow button[data-choice-action="add"],
+#editor #appointmentFlow button[data-choice-action="search"]{
+ box-sizing:border-box!important;border:2px dashed #a87746!important;
+ background:#fffefa!important;color:#704522!important;
+ border-radius:13px!important;box-shadow:none!important;
+}
+#editor #appointmentFlow button.phms-treatment-more[aria-expanded="true"],
+#editor #appointmentFlow button.phms-coverage-more[aria-expanded="true"],
+#editor #appointmentFlow button.phms-procedure-more[aria-expanded="true"],
+#editor #appointmentFlow button.adaptive-provider-more[aria-expanded="true"]{
+ background:#faf0e2!important;border-color:#89592f!important;
+}
+/* All fixed selection cards inside the reschedule-contact disclosure. */
+#editor #contactRescheduleBox .phms-choice-grid>button,
+#editor #contactRescheduleBox .phms-choice-grid>.phms-pick,
+#editor #contactRescheduleBox .reschedule-notice-choices>button,
+#editor #contactRescheduleBox .reschedule-days-choices>button,
+#editor #contactRescheduleBox .reschedule-hours-choices>button{
+ box-sizing:border-box!important;border:2px solid #c58a55!important;
+ background:#fffaf4!important;color:#3a2618!important;
+ border-radius:13px!important;box-shadow:none!important;
+}
+#editor #contactRescheduleBox .phms-choice-grid>button[aria-pressed="true"],
+#editor #contactRescheduleBox .phms-choice-grid>.phms-pick[aria-pressed="true"]{
+ border:2px solid #89592f!important;background:#f3dfc2!important;
+}
+#editor #hospitalLocationDetails .phms-hospital-id-pair{
+ display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+ gap:12px!important;padding:12px!important;
+ border:1px solid #e4ceb5!important;background:#fffaf4!important;
+ border-radius:12px!important;
+}
+#editor #hospitalLocationDetails .phms-hospital-id-cell{
+ min-width:0!important;display:flex!important;flex-direction:column!important;gap:6px!important;
+}
+#editor #hospitalLocationDetails .phms-hospital-id-cell>label{
+ display:block!important;margin:0!important;white-space:nowrap!important;
+}
+#editor #hospitalLocationDetails .phms-hospital-id-cell>input{
+ display:block!important;box-sizing:border-box!important;width:100%!important;
+ min-width:0!important;margin:0!important;min-height:52px!important;
+ padding:10px 11px!important;
+}
+#editor #extrasFlow>details#outcomeDetails:not(.hidden):not([hidden]){
+ display:block!important;box-sizing:border-box!important;
+ border:1px solid #d6b18b!important;background:#fff!important;
+ border-radius:13px!important;padding:0 14px!important;margin:10px 0!important;
+}
+#editor #extrasFlow>details#outcomeDetails>summary{
+ display:flex!important;align-items:center!important;min-height:56px!important;
+ padding:10px 0!important;margin:0!important;
+ background:transparent!important;color:#29241e!important;
+ font-weight:700!important;cursor:pointer!important;
+}
+#editor #extrasFlow>details#outcomeDetails[open]>summary{
+ border-bottom:1px solid #e7d6bf!important;margin-bottom:12px!important;
+}
+#editor #extrasFlow>details#outcomeDetails.hidden,
+#editor #extrasFlow>details#outcomeDetails[hidden],
+#editor #linkedVisitDisclosure{display:none!important}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.91</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.92</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -2554,7 +2621,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <label for="coverage_type">สิทธิรักษา</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
 <label for="arrival_lead_minutes" id="arrivalLeadLabel">ควรไปถึงโรงพยาบาลก่อนเวลานัดกี่นาที</label><select id="arrival_lead_minutes"><option value="15">15 นาที</option><option value="30" selected>30 นาที</option><option value="45">45 นาที</option><option value="60">1 ชั่วโมง</option><option value="90">1 ชั่วโมงครึ่ง</option><option value="120">2 ชั่วโมง</option><option value="150">2 ชั่วโมงครึ่ง</option><option value="180">3 ชั่วโมง</option></select><div id="arrivalLeadChoices" class="arrival-lead-choices" role="group" aria-labelledby="arrivalLeadLabel"></div><p id="arrivalLeadPreview" class="arrival-lead-preview" role="status" aria-live="polite" hidden></p><p class="help">15 นาทีเหมาะเฉพาะนัดที่โรงพยาบาลอนุญาตให้มาถึงใกล้เวลานัด โปรดตรวจสอบใบนัด</p></details>
 <details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล </option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
-<details id="outcomeDetails" class="hidden"><summary>📋 ผลการไปพบแพทย์</summary>
+<details id="outcomeDetails" class="hidden"><summary>📋 บันทึกหลังพบแพทย์</summary>
 <label for="visit_outcome_notes">หมอบอกว่าอย่างไร หรือรักษาอะไร</label><textarea id="visit_outcome_notes" maxlength="1000" rows="2"></textarea>
 <label for="diagnosis_summary">การวินิจฉัยตามเอกสาร</label><textarea id="diagnosis_summary" maxlength="1000" rows="2"></textarea>
 <label for="treatment_summary">การรักษาที่ได้รับ</label><textarea id="treatment_summary" maxlength="1000" rows="2"></textarea>
@@ -4966,6 +5033,20 @@ timeSection.append($('timebox'),conflictNotice,$('appointmentPhotosSection'));
 const extrasSection=makeFlowSection('extrasFlow','4. เพิ่มเติม ');flowRoot.append(extrasSection);
 // Detailed-mode categories; never clone patient inputs or create alternate state.
 const detailed=$('details');extrasSection.append(detailed);
+// Group the same short hospital identifiers without cloning inputs, labels or IDs.
+const hospitalIdPanel=$('hospitalLocationDetails');
+if(hospitalIdPanel){
+ const hn=$('hospital_hn'),vn=$('hospital_vn');
+ const hnLabel=hospitalIdPanel.querySelector('label[for="hospital_hn"]');
+ const vnLabel=hospitalIdPanel.querySelector('label[for="hospital_vn"]');
+ if(hn&&vn&&hnLabel&&vnLabel){
+  const pair=document.createElement('div');pair.className='phms-hospital-id-pair';
+  const hnCell=document.createElement('div');hnCell.className='phms-hospital-id-cell';
+  const vnCell=document.createElement('div');vnCell.className='phms-hospital-id-cell';
+  hnCell.append(hnLabel,hn);vnCell.append(vnLabel,vn);pair.append(hnCell,vnCell);
+  hospitalIdPanel.append(pair);
+ }
+}
 // A read-only guide is accessible from BOTH modes; editing stays in Detailed mode.
 const simpleJourneyGuide=document.createElement('section');
 simpleJourneyGuide.id='simpleJourneyGuide';simpleJourneyGuide.className='phms-simple-journey-view hidden';
@@ -5214,7 +5295,7 @@ const linkedDisclosure=document.createElement('details');linkedDisclosure.classN
 const linkedSummary=document.createElement('summary');linkedSummary.textContent='ค่าใช้จ่ายและยาที่ได้รับ';linkedDisclosure.append(linkedSummary,$('historicalLinkedVisitSection'));
 // Do not mount expense/medication handoff inside the new-appointment form.
 // The existing data fields and integration code remain intact for future use.
-linkedDisclosure.classList.add('hidden');linkedDisclosure.hidden=true;
+linkedDisclosure.classList.add('hidden');linkedDisclosure.hidden=true;linkedDisclosure.remove();
 $('registryHelp').hidden=true;
 $('editor').querySelector('h2').textContent='กรอกข้อมูลนัดหมาย';
 $('requiredLegend').innerHTML='<strong class="phms-required-mark">*</strong> <strong>จำเป็นต้องกรอก</strong>';
@@ -5468,7 +5549,10 @@ function updateProgressiveLayout(){
  syncScenarioCards();
  // Four direct prep disclosures share the same pattern as other optional fields.
  // No expense/medication accordion in either entry mode, including historical.
- linkedDisclosure.classList.add('hidden');linkedDisclosure.hidden=true;linkedDisclosure.open=false;
+ linkedDisclosure.classList.add('hidden');linkedDisclosure.hidden=true;linkedDisclosure.open=false;linkedDisclosure.remove();
+ // The historical visit summary must remain accessible from both modes.
+ const pastVisit=mode==='historical';
+ outcome.classList.toggle('hidden',!pastVisit);outcome.hidden=!pastVisit;
  if(simple&&mode==='walk_in')$('checklistBox').classList.add('simple-walkin-checklist');
  else $('checklistBox').classList.remove('simple-walkin-checklist');
  syncPickerPrompts();updateFilledIndicators();updateRequiredFieldStatus();updateSimpleJourneyGuide();
