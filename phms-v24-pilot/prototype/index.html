@@ -2115,8 +2115,56 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .phms-journey-elder-dialog .phms-journey-elder-heading .phms-journey-elder-close:focus-visible{
  outline:3px solid #b4232e!important;outline-offset:2px!important;
 }
+
+/* PHMS v2.4.79 — unify Additional Information with the cream appointment form.
+   All controls retain their existing event handlers and saved draft state. */
+#editor #extrasFlow #simpleExtras{
+ background:transparent!important;border:0!important;box-shadow:none!important;
+ border-radius:0!important;padding:0!important;margin:10px 0!important;
+}
+#editor #extrasFlow #simpleExtras>summary.phms-summary-status-line{
+ background:#f8f0e3!important;border:0!important;border-radius:12px!important;
+ padding:12px 14px!important;min-height:52px!important;margin:0 0 10px!important;
+}
+#editor #extrasFlow #simpleExtras[open]>summary.phms-summary-status-line{
+ border-bottom:0!important;margin-bottom:10px!important;
+}
+#editor #extrasFlow #simpleExtras .prep-choice-intro{
+ margin:4px 0 9px!important;font-size:14px!important;color:#665747!important;
+}
+#editor #extrasFlow #simpleExtras .prep-choice-grid{
+ gap:9px!important;margin:0 0 12px!important;
+}
+#editor #extrasFlow #simpleExtras .prep-choice-card{
+ background:#fffaf4!important;border:1.5px solid #c9ad8b!important;
+ color:#30251a!important;border-radius:12px!important;
+ min-height:82px!important;padding:11px 12px!important;box-shadow:none!important;
+}
+#editor #extrasFlow #simpleExtras .prep-choice-card[aria-pressed="true"]{
+ background:#fff1db!important;border:2px solid #89592f!important;
+ color:#30251a!important;box-shadow:none!important;
+}
+#editor #extrasFlow #simpleExtras .prep-choice-card small{
+ color:#665747!important;line-height:1.35!important;
+}
+#editor #extrasFlow #simpleExtras .prep-choice-content:not(.hidden){
+ border:1px solid #e4d3be!important;border-radius:12px!important;
+ padding:12px!important;margin:6px 0 12px!important;background:#fffdf9!important;
+}
+#editor #extrasFlow #simpleJourneyGuide{
+ background:transparent!important;border:0!important;padding:0!important;
+ margin:10px 0!important;box-shadow:none!important;
+}
+#editor #extrasFlow #simpleJourneyGuide>button{
+ background:#f8f0e3!important;color:#4b3521!important;
+ border:1px solid #d5b999!important;border-radius:12px!important;
+ min-height:48px!important;box-shadow:none!important;
+}
+#editor #extrasFlow #simpleJourneyGuide>p{
+ padding:0 2px!important;color:#665747!important;font-size:14px!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.78</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.79</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
