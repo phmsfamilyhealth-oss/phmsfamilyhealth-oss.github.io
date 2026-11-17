@@ -3195,6 +3195,7 @@ function syncProviderNames(){
  document.getElementById('hospital').value=org?(org.display_name||org.name):local('hospital');
  document.getElementById('department').value=unit?.name||local('unit');
  document.getElementById('doctor').value=clinician?.display_name||local('clinician');
+ if(window.phmsProcedureReady)renderProcedurePreview();
 }
 // Registry remains disconnected until the protected API supplies a verified, authorized catalog.
 const $=id=>document.getElementById(id), ids=['detail','scenario','date','known','time','hospital','department','doctor','purpose','additionalNote','prep'];
@@ -3613,6 +3614,25 @@ const PROCEDURE_PRESETS=[
  {name:'🫁 เก็บเสมหะ',en:'Sputum sample'},
  {name:'💻 พบแพทย์ออนไลน์',en:'Telemedicine'}
 ];
+const OPHTHALMOLOGY_PROCEDURES=[
+ {name:'👁️ ตรวจความชัดของการมองเห็น (VA)',en:'Visual acuity'},
+ {name:'👁️ วัดความดันลูกตา (IOP)',en:'Intraocular pressure'},
+ {name:'👓 วัดค่าสายตา',en:'Refraction'},
+ {name:'🔬 ตรวจตาด้วยกล้อง (Slit Lamp)',en:'Slit-lamp examination'},
+ {name:'👁️ ตรวจจอประสาทตา',en:'Fundus examination'},
+ {name:'👁️ ตรวจลานสายตา (VF)',en:'Visual field'},
+ {name:'👁️ สแกนจอประสาทตา/ขั้วประสาทตา (OCT)',en:'Optical coherence tomography'},
+ {name:'👁️ วัดความหนากระจกตา (CCT)',en:'Pachymetry'},
+ {name:'👁️ ตรวจมุมระบายน้ำในลูกตา',en:'Gonioscopy'},
+ {name:'📷 ถ่ายภาพจอประสาทตา',en:'Fundus photography'},
+ {name:'👁️ ตรวจตาหลังขยายม่านตา',en:'Dilated eye examination'}
+];
+function isOphthalmologyDepartment(){
+ const unit=authorizedCatalog?.units?.find(x=>String(x.id)===String($('providerUnit').value));
+ const source=[$('department').value,$('unitSearch').value,unit?.name,unit?.code,unit?.external_code,
+   comboState.unit.selectedItem?.label].filter(Boolean).join(' ').normalize('NFKC').toLocaleLowerCase('en-US');
+ return /จักษุ|คลินิกตา|แผนกตา|โรคตา|ophthal|eye\s*(clinic|center|centre|department|unit)|opd[-_\s]*eye/i.test(source);
+}
 let procedurePickerExpanded=false;
 // Names from appointments may omit emoji. Match the same clinical choice consistently.
 const procedureKey=value=>String(value||'').normalize('NFKC').replace(/^[^\p{L}\p{N}]+/u,'').trim().toLocaleLowerCase('th-TH');
@@ -3660,7 +3680,8 @@ function renderHistoricalProcedureSuggestions(){
  const host=$('procedureCommonCards');
  const frequency=previousProcedureFrequency();
  const records=new Map();
- PROCEDURE_PRESETS.forEach((preset,index)=>{
+ const activePresets=isOphthalmologyDepartment()?[...OPHTHALMOLOGY_PROCEDURES,...PROCEDURE_PRESETS]:PROCEDURE_PRESETS;
+ activePresets.forEach((preset,index)=>{
   const key=procedureKey(preset.name);
   records.set(key,{key,name:preset.name,en:preset.en,count:frequency.get(key)?.count||0,order:index});
  });
@@ -3718,7 +3739,7 @@ function addProcedurePreview(){
  const key=procedureKey(name);
  if(!name||name.length>160||!key)return;
  const frequency=previousProcedureFrequency();
- const match=PROCEDURE_PRESETS.find(p=>procedureKey(p.name)===key);
+ const match=[...PROCEDURE_PRESETS,...OPHTHALMOLOGY_PROCEDURES].find(p=>procedureKey(p.name)===key);
  const existing=frequency.get(key)?.name||procedureCustomCatalog.get(key);
  const canonical=match?.name||existing||name;
  if(!procedurePreviewItems.some(x=>procedureKey(x)===key)){
@@ -3737,6 +3758,10 @@ $('procedureEntry').addEventListener('keydown',e=>{
 $('procedureEntry').addEventListener('blur',()=>{
  if(procedurePickerExpanded&&$('procedureEntry').value.trim())addProcedurePreview();
 });
+
+window.phmsProcedureReady=true;
+$('unitSearch').addEventListener('input',renderProcedurePreview);
+$('providerUnit').addEventListener('change',renderProcedurePreview);
 
 async function previewReadApi(action,parameters={}){
  const endpoint=document.querySelector('meta[name="phms-read-api"]')?.content;
