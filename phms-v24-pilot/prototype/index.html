@@ -2484,8 +2484,29 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor #appointmentFlow #timeFlow #timebox.hidden{
  display:none!important;
 }
+
+/* PHMS v2.4.90.4 — reuse the same "บันทึกอื่น ๆ" panel as the last Detailed item. */
+#editor:not(.simple-ui) #extrasFlow > details#prepDisclosure-notes{
+ box-sizing:border-box!important;display:block!important;width:100%!important;
+ border:1px solid #d9bb98!important;border-radius:13px!important;
+ background:#fffdf9!important;padding:0 14px!important;margin:10px 0!important;
+}
+#editor:not(.simple-ui) #extrasFlow > details#prepDisclosure-notes > summary{
+ display:flex!important;align-items:center!important;min-height:56px!important;
+ padding:10px 0!important;margin:0!important;font-size:1rem!important;
+ font-weight:700!important;color:#29241e!important;cursor:pointer!important;
+}
+#editor:not(.simple-ui) #extrasFlow > details#prepDisclosure-notes[open] > summary{
+ border-bottom:1px solid #e7d6bf!important;margin-bottom:10px!important;
+}
+#editor:not(.simple-ui) #extrasFlow > details#prepDisclosure-notes:not([open]) > .prep-choice-content{
+ display:none!important;
+}
+#editor:not(.simple-ui) #extrasFlow > details#prepDisclosure-notes[open] > .prep-choice-content{
+ display:block!important;padding:0 0 12px!important;
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.3</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.4</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -5449,6 +5470,14 @@ function updateProgressiveLayout(){
  // Reuse their original DOM fields and keep all detailed-only headings intact below them.
  if(simpleExtras.parentElement!==extrasSection || simpleExtras.nextElementSibling!==detailed){
   extrasSection.insertBefore(simpleExtras,detailed);
+ }
+ // Move the SAME notes disclosure (and its existing textarea) to the final position
+ // only in Detailed mode; restore it as the fourth prep section in Simple mode.
+ const otherNotes=prepDisclosures.notes;
+ if(simple){
+  if(otherNotes.parentElement!==simpleExtras) simpleExtras.append(otherNotes);
+ }else if(otherNotes.parentElement!==extrasSection || otherNotes!==extrasSection.lastElementChild){
+  extrasSection.append(otherNotes);
  }
  for(const button of modeButtons){
   const active=button.dataset.mode===$('detail').value;
