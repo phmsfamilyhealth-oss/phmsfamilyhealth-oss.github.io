@@ -2595,13 +2595,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #editor:not(.simple-ui) #appointmentFlow #extrasFlow > #simpleExtras.phms-prep-accordion-list > details.phms-prep-disclosure + details.phms-prep-disclosure{
  margin-top:0!important;
 }
-/* Contact reschedule choice cards: match standard PHMS 1.8px outline.
-   Preserve stronger selected styling and avoid layout shift. */
-#editor #contactRescheduleBox #rescheduleContactEditor .phms-choice-grid .phms-pick{
+/* PHMS reschedule contact: same clearly visible 2px frame as test choices.
+   Scoped to the editor and the actual contact grid (not its parent disclosure). */
+#editor #rescheduleContactEditor .phms-choice-grid button.phms-pick{
  box-sizing:border-box!important;
- border:1.8px solid #c58a55!important;
+ border:2px solid #c58a55!important;
 }
-#editor #contactRescheduleBox #rescheduleContactEditor .phms-choice-grid .phms-pick[aria-pressed="true"]{
+#editor #rescheduleContactEditor .phms-choice-grid button.phms-pick[aria-pressed="true"]{
  border:2px solid #89592f!important;
 }
 /* Detailed post-appointment view: remove the legacy finance/medication
