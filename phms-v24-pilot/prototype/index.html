@@ -5509,7 +5509,7 @@ function installAdaptiveSelect(id){
   for(const button of host.querySelectorAll('button[data-choice]')){
    const active=button.dataset.choice===select.value;
    button.setAttribute('aria-pressed',String(active));
-   button.textContent=(active?'✓ ':'')+([...select.options].find(o=>o.value===button.dataset.choice)?.textContent||'');
+   button.textContent=(id==='known'?'':(active?'✓ ':''))+(id==='known'?(button.dataset.choice==='yes'?'🕒 ':'❔ '):'')+([...select.options].find(o=>o.value===button.dataset.choice)?.textContent||'');
   }
   if(id!=='known'&&id!=='hasAppointmentPhotos')host.classList.toggle('hidden',select.closest('.hidden')!==null);
  };
