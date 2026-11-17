@@ -4130,14 +4130,14 @@ async function fetchSavedJourneySuggestion(){
   if(data.ok===true){
    const reusable=data.template&&Array.isArray(data.template.steps)?data.template:null;
    setJourneySuggestion(reusable,data.canSaveTemplate===true);
-   if(reusable&&$('relatedSelect').value&&!hasJourneyDetails())$('journeyApplyTemplate').click();
+   if(reusable&&$('relatedSelect').value&&!hasJourneyDetails())void applyJourneyTemplate({automatic:true});
   }
  }catch{/* Private templates are optional; the form must remain usable without them. */}
 }
-$('journeyApplyTemplate').addEventListener('click',async()=>{
+async function applyJourneyTemplate({automatic=false}={}){
  const template=suggestedJourney;
  if(!template||!$('providerOrg').value||!$('providerUnit').value)return;
- if(hasJourneyDetails()&&!window.confirm('ต้องการแทนที่เส้นทางและรูปที่กรอกไว้ด้วยข้อมูลเดิมของครอบครัวหรือไม่?'))return;
+ if(hasJourneyDetails()&&!automatic&&!window.confirm('ต้องการแทนที่เส้นทางและรูปที่กรอกไว้ด้วยข้อมูลเดิมของครอบครัวหรือไม่?'))return;
  clearJourneyDraft();
  $('location_detail').value=String(template.mainLocation?.place||'').slice(0,240);
  $('location_detail').dispatchEvent(new Event('input',{bubbles:true}));
@@ -4173,13 +4173,14 @@ $('journeyApplyTemplate').addEventListener('click',async()=>{
  }
  if(!current())return;
  renderMainJourneyPhotos();renderVisitStops();
- journeyNeedsReview=true;refreshJourneyWarning();
+ journeyNeedsReview=!automatic;refreshJourneyWarning();
  $('primaryLocationDetails').open=true;
  $('primaryJourneyPhotoStatus').textContent=errors
   ?'ดึงข้อความแล้ว แต่รูปบางส่วนเปิดไม่ได้ กรุณาตรวจสอบอีกครั้ง'
   :'นำรูปจากแม่แบบครอบครัวมาใช้กับร่างนี้แล้ว';
  updateFilledIndicators();
-});
+}
+$('journeyApplyTemplate').addEventListener('click',()=>applyJourneyTemplate());
 
 async function persistJourneyTemplate(){
  if(journeySaveBusy||!journeySaveAllowed)return;
