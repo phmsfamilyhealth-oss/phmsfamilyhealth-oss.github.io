@@ -2705,8 +2705,43 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .phms-doctor-choice .phms-doctor-card-subtitle{display:block;font-size:.78rem;font-weight:400!important;line-height:1.35;color:#8b7966}
 .phms-doctor-choice[aria-pressed=true] .phms-doctor-card-subtitle{color:#796751;font-weight:400!important}
 
+
+/* v2.4.90.31 — visually mirror editor's cream section bar and outlined disclosure body. */
+#confirmation #preview.phms-review-layout{gap:17px!important}
+#confirmation #preview .phms-review-card,
+#confirmation #preview .phms-review-card:first-child{
+ display:flex!important;flex-direction:column!important;gap:10px!important;
+ padding:0!important;margin:0!important;max-width:100%!important;
+ background:transparent!important;border:0!important;border-radius:0!important;
+ box-shadow:none!important;overflow:visible!important
+}
+#confirmation #preview .phms-review-card>h3{
+ display:block!important;width:100%!important;box-sizing:border-box!important;
+ margin:0!important;padding:12px 16px!important;border:0!important;
+ border-radius:14px!important;background:#f7eee2!important;color:#432e1d!important;
+ font-family:inherit!important;font-size:1.04rem!important;font-weight:700!important;
+ line-height:1.5!important;box-shadow:none!important
+}
+#confirmation #preview .phms-review-body{
+ display:block!important;box-sizing:border-box!important;min-width:0!important;width:100%!important;
+ padding:7px 15px!important;background:#fff!important;border:1px solid #d68c50!important;
+ border-radius:15px!important;box-shadow:none!important
+}
+#confirmation #preview .phms-review-body dl{display:block!important;margin:0!important;padding:0!important}
+#confirmation #preview .phms-review-body .phms-review-pair{
+ border-bottom:1px solid #ead5bf!important;padding:11px 1px!important;
+ margin:0!important;min-width:0!important
+}
+#confirmation #preview .phms-review-body .phms-review-pair:last-child{border-bottom:none!important}
+#confirmation #preview .phms-review-body .phms-review-photo-note{margin:8px 0!important}
+@media(max-width:580px){
+ #confirmation #preview .phms-review-card>h3{padding:11px 13px!important}
+ #confirmation #preview .phms-review-body{padding:5px 12px!important}
+ #confirmation #preview .phms-review-body .phms-review-pair{padding:10px 1px!important}
+}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.30</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.31</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3799,14 +3834,15 @@ function renderAccessibleAppointmentReview(){
   const card=document.createElement('section');
   card.className='phms-review-card';card.setAttribute('aria-label',group.title);
   const title=document.createElement('h3');title.textContent=group.title;card.append(title);
-  const dl=document.createElement('dl');card.append(dl);
-  containers[group.id]={card,dl,count:0};
+  const body=document.createElement('div');body.className='phms-review-body';
+  const dl=document.createElement('dl');body.append(dl);card.append(body);
+  containers[group.id]={card,body,dl,count:0};
  }
  for(const entry of entries){
   if(entry.note){
    const n=entry.note;
    n.classList.add('phms-review-photo-note');
-   containers.journey.card.append(n);containers.journey.count++;continue;
+   containers.journey.body.append(n);containers.journey.count++;continue;
   }
   const groupId=byLabel.get(entry.label)||
    (entry.label.startsWith('รูปขั้นตอน')?'journey':
