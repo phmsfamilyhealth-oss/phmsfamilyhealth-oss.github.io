@@ -2697,7 +2697,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.25</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.26</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3144,17 +3144,53 @@ function clinicianEmoji(name){
 let doctorSearchExpanded=false;
 const doctorSearchInput=document.getElementById('clinicianSearch');
 doctorSearchInput.placeholder='🔎 ค้นหาหรือพิมพ์ชื่อแพทย์';
+// Past doctor names belong to the selected person AND the exact hospital/clinic.
+ // A historical free-text name is reusable, but is never promoted to verified registry data.
+function historicalDoctorsForSelectedClinic(){
+ const org=document.getElementById('providerOrg').value;
+ const unit=document.getElementById('providerUnit').value;
+ if(!org||!unit)return [];
+ const history=new Map();
+ for(const visit of (relatedAllItems||[])){
+  if(visit.organization_id!==org||visit.service_unit_id!==unit)continue;
+  const name=String(visit.doctor_name||'').trim();
+  const key=normalizedMasterName(name);
+  if(!key||name.length>160)continue;
+  const old=history.get(key);
+  const when=String(visit.created_at||visit.planned_visit_date||'');
+  if(!old){history.set(key,{name,count:1,when});}
+  else{old.count++;if(when>old.when){old.name=name;old.when=when;}}
+ }
+ return [...history.values()].sort((a,b)=>b.count-a.count||b.when.localeCompare(a.when)).slice(0,3);
+}
 function drawRecentDoctorCards(choices){
  doctorQuickCards.replaceChildren();
  const selected=document.getElementById('providerClinician').value;
  const matched=rankedCatalogChoices('clinician',choices,selected);
+ const history=historicalDoctorsForSelectedClinic();
+ const verifiedKeys=new Set((choices||[]).map(x=>normalizedMasterName(x.label)));
  const draft=comboState.clinician.selectedItem?.draftOnly?comboState.clinician.selectedItem:null;
  if(draft){
   const provisional=document.createElement('button');provisional.type='button';provisional.className='adaptive-provider-choice';
-  provisional.textContent=clinicianEmoji(draft.label)+' '+draft.label+' · ร่าง';
+  provisional.textContent=clinicianEmoji(draft.label)+' '+draft.label+(draft.fromHistory?' · เคยใช้':' · ชื่อใหม่');
   provisional.setAttribute('aria-pressed','true');
   provisional.addEventListener('click',()=>{doctorSearchExpanded=true;drawRecentDoctorCards(choices);doctorSearchInput.focus();});
   doctorQuickCards.append(provisional);
+ }
+ for(const item of history.filter(x=>!verifiedKeys.has(normalizedMasterName(x.name)))){
+  if(draft&&normalizedMasterName(draft.label)===normalizedMasterName(item.name))continue;
+  const button=document.createElement('button');button.type='button';button.className='adaptive-provider-choice';
+  button.textContent=clinicianEmoji(item.name)+' '+item.name;
+  button.setAttribute('aria-pressed','false');
+  button.setAttribute('aria-label','เลือกชื่อแพทย์ที่เคยบันทึกของแผนกและโรงพยาบาลนี้');
+  button.addEventListener('click',()=>{
+   document.getElementById('providerClinician').value='';
+   comboState.clinician.selectedItem={draftOnly:true,fromHistory:true,label:item.name};
+   comboState.clinician.searchText=item.name;doctorSearchInput.value=item.name;
+   doctorSearchExpanded=false;closeCombo('clinician');syncProviderNames();drawRecentDoctorCards(choices);
+   document.getElementById('editor').dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  doctorQuickCards.append(button);
  }
  for(const item of matched){
   const button=document.createElement('button');button.type='button';button.className='adaptive-provider-choice';
@@ -4664,7 +4700,7 @@ async function loadRelatedAppointments(){
  status.textContent='กำลังโหลดนัดเดิมที่ได้รับสิทธิ์…';
  const response=await previewReadApi('appointment_sources',{mode:'related',query:'',organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:$('providerClinician').value,careTopic:$('care_topic').value});
  if(chosenPerson!==memberId||sequence!==relatedLoadGeneration)return;
- if(!response.ok){relatedAllItems=[];updateSameDayAppointmentNotice();renderLinkedCareVisits();status.textContent='ยังตรวจสอบประวัตินัดไม่ได้ กรุณาลองใหม่';$('relatedAppointmentBox').hidden=true;return;}
+ if(!response.ok){relatedAllItems=[];updateSameDayAppointmentNotice();renderLinkedCareVisits();status.textContent='ยังตรวจสอบประวัตินัดไม่ได้ กรุณาลองใหม่';$('relatedAppointmentBox').hidden=true;refreshProviderPicker();return;}
  sourceAppointments=new Map();relatedAllItems=[];
  for(const a of response.appointments||[]){if(typeof a.id!=='string')continue;sourceAppointments.set(a.id,a);relatedAllItems.push(a);}
  renderCoverageChoices();
@@ -4672,7 +4708,7 @@ async function loadRelatedAppointments(){
  const picker=$('relatedSelect'),prior=picker.value;
  picker.replaceChildren(new Option('ไม่เชื่อมนัดเดิม',''),...relatedAllItems.map(a=>new Option(a.title||'นัดหมาย',a.id)));picker.disabled=false;
  if(sourceAppointments.has(prior))picker.value=prior;
- $('relatedAppointmentBox').hidden=relatedAllItems.length===0;if(!relatedAllItems.length){renderLinkedCareVisits();status.textContent='';return;}relatedAllItems.sort((a,b)=>String(b.planned_visit_date||b.appointment_at||'').localeCompare(String(a.planned_visit_date||a.appointment_at||'')));renderLinkedCareVisits();refreshTopicSuggestions();renderCareTopicSuggestions();relatedExpanded=false;renderRelatedCards();renderHistoricalProcedureSuggestions();refreshProviderPicker();
+ $('relatedAppointmentBox').hidden=relatedAllItems.length===0;if(!relatedAllItems.length){renderLinkedCareVisits();refreshProviderPicker();status.textContent='';return;}relatedAllItems.sort((a,b)=>String(b.planned_visit_date||b.appointment_at||'').localeCompare(String(a.planned_visit_date||a.appointment_at||'')));renderLinkedCareVisits();refreshTopicSuggestions();renderCareTopicSuggestions();relatedExpanded=false;renderRelatedCards();renderHistoricalProcedureSuggestions();refreshProviderPicker();
 }
 
 
