@@ -932,8 +932,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 @media(max-width:380px){#editor .phms-journey-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}#editor .phms-journey-photo-tile{padding:6px}#editor .phms-journey-photo-actions{gap:4px}#editor .phms-journey-photo-actions button{font-size:.8rem!important}#editor .visit-stop-card .visit-substep{grid-template-columns:minmax(0,1fr) 62px;gap:5px}}
 
 
-#editor .phms-journey-review-images{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0!important}
-#editor .phms-journey-review-images img{width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #d7c0a8}
+/* Review thumbnails are inside #confirmation, not #editor. */
+#confirmation dd.phms-journey-review-images{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(84px,96px));gap:10px!important;margin:8px 0 16px!important;min-width:0;width:100%;max-width:100%;box-sizing:border-box}
+#confirmation .phms-journey-review-images img{display:block!important;width:100%!important;max-width:96px!important;height:96px!important;max-height:96px!important;aspect-ratio:1/1;object-fit:cover!important;border-radius:9px;border:1px solid #d7c0a8;box-sizing:border-box;cursor:zoom-in}
+#confirmation dl#preview{min-width:0;max-width:100%;overflow-wrap:anywhere}
+#confirmation dl#preview>dd{min-width:0;max-width:100%;overflow-wrap:anywhere}
+@media(max-width:420px){#confirmation dd.phms-journey-review-images{grid-template-columns:repeat(auto-fill,minmax(72px,88px));gap:8px!important}#confirmation .phms-journey-review-images img{max-width:88px!important;height:88px!important;max-height:88px!important}}
 
 
 /* Mobile, read-only journey preview: separated from any editing form. */
@@ -2634,7 +2638,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  margin-top:0!important;
 }
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.22</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.23</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
