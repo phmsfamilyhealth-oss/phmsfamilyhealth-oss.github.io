@@ -2740,8 +2740,18 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  #confirmation #preview .phms-review-body .phms-review-pair{padding:10px 1px!important}
 }
 
+
+/* v2.4.90.34: photo evidence belongs beside appointment date/time.
+   Use contain (not cover) to preserve the whole appointment notice. */
+#confirmation .phms-notice-review-content{display:flex!important;flex-direction:column;gap:9px;align-items:flex-start}
+#confirmation .phms-notice-review-gallery{display:flex;flex-wrap:wrap;gap:10px;width:100%;min-width:0}
+#confirmation button.phms-notice-review-thumb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;width:104px;min-height:116px;padding:7px;border:1px solid #d5b493;border-radius:10px;background:#fffaf2;cursor:zoom-in;color:#5a432e;font:inherit}
+#confirmation .phms-notice-review-thumb img{display:block;width:88px;height:92px;object-fit:contain;border-radius:6px;background:white}
+#confirmation .phms-notice-review-thumb span{font-size:.8rem;font-weight:500;line-height:1.4}
+#confirmation .phms-notice-review-thumb:focus-visible{outline:3px solid #75512f;outline-offset:2px}
+@media(max-width:580px){#confirmation .phms-notice-review-gallery{gap:8px}#confirmation button.phms-notice-review-thumb{width:96px;padding:6px}#confirmation .phms-notice-review-thumb img{width:82px;height:88px}}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.33</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.34</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3718,7 +3728,25 @@ previewField('เวลา',v.time_known?displayThaiClock($('time').value):'ไ�
 previewField('ควรไปถึงโรงพยาบาล',displayThaiArrivalTime(arrivalTimeForAppointment()));
 previewField('แผนก',departmentChoiceDisplay());
 previewField('แพทย์',doctorChoiceDisplay());
-previewField('รูปใบนัด',photoFiles.length?photoFiles.length+' รูป':'');
+if(photoFiles.length){
+ const label=document.createElement('dt');label.textContent='รูปใบนัด';
+ const details=document.createElement('dd');details.className='phms-notice-review-content';
+ const count=document.createElement('span');count.textContent=photoFiles.length+' รูป';
+ const gallery=document.createElement('div');gallery.className='phms-notice-review-gallery';
+ gallery.setAttribute('aria-label','ตรวจสอบรูปใบนัดที่แนบ');
+ photoFiles.forEach((file,index)=>{
+  if(!photoUrls[index])return;
+  const thumb=document.createElement('button');thumb.type='button';thumb.className='phms-notice-review-thumb';
+  thumb.setAttribute('aria-label','เปิดดูรูปใบนัดที่ '+(index+1));
+  const image=document.createElement('img');image.src=photoUrls[index];
+  image.alt='รูปใบนัดที่ '+(index+1);image.loading='lazy';
+  const caption=document.createElement('span');caption.textContent='รูปที่ '+(index+1);
+  thumb.append(image,caption);
+  thumb.addEventListener('click',()=>showAppointmentPhoto(index));
+  gallery.append(thumb);
+ });
+ details.append(count,gallery);dl.append(label,details);
+}
 previewField('ติดต่อเลื่อนนัด · วัน',selectedContactDays());
 previewField('ติดต่อเลื่อนนัด · เวลา',selectedContactHours());
 previewField('ติดต่อเลื่อนนัด · ล่วงหน้า',selectedContactNotice());
@@ -3802,9 +3830,9 @@ function renderAccessibleAppointmentReview(){
  const source=$('preview');
  const headingMap=[
   {id:'overview',title:'📅 ข้อมูลนัดหมาย',labels:['ชื่อนัดหมาย','บุคคล','ประเภทนัด','ประวัติการเลื่อนนัด','หมายเหตุ','โรงพยาบาล','แผนก','แพทย์']},
-  {id:'datetime',title:'🕒 วันและเวลา',labels:['วันที่','เวลา','ควรไปถึงโรงพยาบาล','ไปถึงก่อนนัด (นาที)']},
+  {id:'datetime',title:'🕒 วันและเวลา',labels:['วันที่','เวลา','ควรไปถึงโรงพยาบาล','ไปถึงก่อนนัด (นาที)','รูปใบนัด']},
   {id:'journey',title:'📍 จุดติดต่อและ 🧭 ขั้นตอนวันนัด',labels:['จุดติดต่อหลัก','อาคาร / ชั้น / ห้องตรวจ','วิธีเดินไปจุดติดต่อหลัก','หมายเหตุจุดติดต่อ','รูปจุดติดต่อหลัก','ขั้นตอนในวันนัด']},
-  {id:'prepare',title:'🪪 สิ่งที่ต้องเตรียมและ 🔬 รายการตรวจ',labels:['สิ่งที่ต้องเตรียม','การเตรียมตัวก่อนตรวจ','คำแนะนำก่อนตรวจ','รายการตรวจ','รูปใบนัด','ไฟล์แนบ']},
+  {id:'prepare',title:'🪪 สิ่งที่ต้องเตรียมและ 🔬 รายการตรวจ',labels:['สิ่งที่ต้องเตรียม','การเตรียมตัวก่อนตรวจ','คำแนะนำก่อนตรวจ','รายการตรวจ','ไฟล์แนบ']},
   {id:'more',title:'📝 ข้อมูลเพิ่มเติม',labels:[]}
  ];
  const byLabel=new Map(headingMap.flatMap(group=>group.labels.map(label=>[label,group.id])));
