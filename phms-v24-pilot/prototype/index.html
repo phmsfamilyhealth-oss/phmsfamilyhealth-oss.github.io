@@ -2750,8 +2750,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #confirmation .phms-notice-review-thumb span{font-size:.8rem;font-weight:500;line-height:1.4}
 #confirmation .phms-notice-review-thumb:focus-visible{outline:3px solid #75512f;outline-offset:2px}
 @media(max-width:580px){#confirmation .phms-notice-review-gallery{gap:8px}#confirmation button.phms-notice-review-thumb{width:96px;padding:6px}#confirmation .phms-notice-review-thumb img{width:82px;height:88px}}
+.phms-system-draft-person{display:flex;flex-wrap:wrap;gap:8px;align-items:center;width:100%;min-width:0;background:#fbf4e9;padding:12px;border-radius:12px;box-sizing:border-box;border:1px solid #dfc3a7}
+.phms-system-draft-person[hidden],.phms-system-draft-person.hidden{display:none!important}
+.phms-system-draft-person label{width:100%;font-size:.96rem;font-weight:650;color:#4c3828}
+.phms-system-draft-person select{min-width:0;flex:1 1 200px;min-height:45px}
+.phms-system-draft-person button{flex:1 1 155px;min-height:45px}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.34</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.35</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -6016,9 +6021,14 @@ const draftButton=(title)=>{const b=document.createElement('button');b.type='but
 const systemDraftSave=draftButton('💾 บันทึกร่างในระบบ');
 const systemDraftOpen=draftButton('📂 เปิดร่างจากระบบ');
 const systemDraftDelete=draftButton('ลบร่าง');
+const draftPersonChoose=document.createElement('div');draftPersonChoose.className='phms-system-draft-person hidden';draftPersonChoose.hidden=true;
+const draftPersonLabel=document.createElement('label');draftPersonLabel.textContent='👤 เลือกร่างของใคร';draftPersonLabel.htmlFor='draftPersonSelect';
+const draftPersonSelect=document.createElement('select');draftPersonSelect.id='draftPersonSelect';
+const draftPersonConfirm=draftButton('📂 เปิดร่างของบุคคลนี้');
+draftPersonChoose.append(draftPersonLabel,draftPersonSelect,draftPersonConfirm);
 const draftStatus=document.createElement('p');draftStatus.className='help';draftStatus.style.width='100%';draftStatus.setAttribute('role','status');
 draftStatus.textContent='ร่างเก็บในระบบ PHMS ส่วนตัว เปิดต่อได้จากอุปกรณ์อื่นเมื่อเข้าสู่ LINE ด้วยบัญชีที่มีสิทธิ์';
-systemDraftBar.append(systemDraftSave,systemDraftOpen,systemDraftDelete,draftStatus);
+systemDraftBar.append(systemDraftSave,systemDraftOpen,systemDraftDelete,draftPersonChoose,draftStatus);
 $('review').parentElement.before(systemDraftBar);
 const confirmDraftSave=draftButton('💾 บันทึกร่างในระบบ');
 $('confirmation').querySelector('.actions').before(confirmDraftSave);
@@ -6101,13 +6111,24 @@ systemDraftDelete.addEventListener('click',async()=>{
  try{await systemDraftRequest('draft_delete');draftStatus.textContent='ลบร่างในระบบแล้ว';}
  catch(e){draftStatus.textContent=String(e?.message||e);}
 });
-systemDraftOpen.addEventListener('click',async()=>{
- if(!memberId||!authorizedCatalog||memberId!==$('personSelect').value){draftStatus.textContent='กรุณาเข้าสู่ LINE และเลือกบุคคลก่อนเปิดร่าง';return;}
+async function openSystemDraftForAuthorizedPerson(){
+ if(!window.liff?.getIDToken?.()){draftStatus.textContent='กรุณาเข้าสู่ LINE ก่อนเปิดร่าง';return;}
+ if(!memberId||memberId!==$('personSelect').value){draftStatus.textContent='กรุณาเลือกบุคคลที่ต้องการเปิดร่าง';return;}
+ draftPersonChoose.hidden=true;draftPersonChoose.classList.add('hidden');
+ draftStatus.textContent='กำลังเปิดร่างจากระบบ PHMS…';
  let result;
  try{result=await systemDraftRequest('draft_get');}catch(e){draftStatus.textContent=String(e?.message||e);return;}
  const data=result.draft;
- if(!data){draftStatus.textContent='ยังไม่มีร่างในระบบสำหรับบุคคลนี้';return;}
- if(!window.confirm('เปิดร่างที่บันทึกในระบบ? ข้อมูลที่กำลังกรอกจะถูกแทนที่'))return;
+ if(!data){draftStatus.textContent='ไม่พบร่างที่ยังไม่หมดอายุสำหรับบุคคลนี้ในระบบ PHMS';return;}
+ if(!authorizedCatalog){
+  draftStatus.textContent='พบร่างแล้ว กำลังโหลดทะเบียนโรงพยาบาล…';
+  const readEndpoint=document.querySelector('meta[name="phms-read-api"]')?.content;
+  const catalogResult=await makeLiffProviderCatalogClient({liff:window.liff,endpoint:readEndpoint})(memberId);
+  if(!catalogResult.ok||!catalogResult.catalog?.organizations?.length){draftStatus.textContent='พบร่าง แต่ยังโหลดทะเบียนโรงพยาบาลไม่ได้ กรุณาลองอีกครั้ง';return;}
+  authorizedCatalog=catalogResult.catalog;
+  refreshProviderPicker();
+ }
+ if(!window.confirm('เปิดร่างที่บันทึกในระบบ? ข้อมูลที่กำลังกรอกจะถูกแทนที่')){draftStatus.textContent='ยังไม่ได้เปิดร่าง ข้อมูลที่กรอกอยู่ไม่เปลี่ยนแปลง';return;}
  resetCurrentAppointmentDraft();
  const values=data.fields||{};
  const org=authorizedCatalog.organizations.find(x=>x.id===values.providerOrg);
@@ -6147,6 +6168,28 @@ systemDraftOpen.addEventListener('click',async()=>{
  reviewedDraft=null;$('back').disabled=false;$('confirmation').classList.add('hidden');editor.classList.remove('hidden');
  syncScenarioCards();refresh();updateProgressiveLayout();updateFilledIndicators();
  draftStatus.textContent='✅ เปิดร่างจากระบบ PHMS แล้ว · ตรวจทานก่อนบันทึกนัด';
+}
+function showDraftPersonChoices(){
+ const options=[...$('personSelect').options].filter(o=>o.value);
+ if(!options.length){draftStatus.textContent='ยังไม่พบรายชื่อผู้มีสิทธิ์ กรุณาเข้าสู่ LINE หรือรอให้โหลดรายชื่อเสร็จก่อน';return;}
+ draftPersonSelect.replaceChildren(new Option('เลือกบุคคลที่ต้องการเปิดร่าง',''),...options.map(o=>new Option(o.textContent,o.value)));
+ draftPersonSelect.value=memberId||'';
+ draftPersonChoose.hidden=false;draftPersonChoose.classList.remove('hidden');
+ draftStatus.textContent='เลือกบุคคล แล้วกด “เปิดร่างของบุคคลนี้”';
+ draftPersonSelect.focus({preventScroll:true});
+}
+systemDraftOpen.addEventListener('click',()=>{
+ if(!window.liff?.getIDToken?.()){draftStatus.textContent='กรุณาเข้าสู่ LINE ก่อนเปิดร่าง';return;}
+ if(memberId&&memberId===$('personSelect').value){void openSystemDraftForAuthorizedPerson();return;}
+ const options=[...$('personSelect').options].filter(o=>o.value);
+ if(options.length===1){$('personSelect').value=options[0].value;$('personSelect').dispatchEvent(new Event('change',{bubbles:true}));void openSystemDraftForAuthorizedPerson();return;}
+ showDraftPersonChoices();
+});
+draftPersonConfirm.addEventListener('click',()=>{
+ const selected=draftPersonSelect.value;
+ if(!selected||![...$('personSelect').options].some(o=>o.value===selected)){draftStatus.textContent='กรุณาเลือกบุคคลจากรายชื่อที่มีสิทธิ์';return;}
+ if($('personSelect').value!==selected){$('personSelect').value=selected;$('personSelect').dispatchEvent(new Event('change',{bubbles:true}));}
+ void openSystemDraftForAuthorizedPerson();
 });
 
 function updateFilledIndicators(){
