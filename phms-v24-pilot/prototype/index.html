@@ -2741,7 +2741,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.31</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.32</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -2817,7 +2817,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="help">เรื่องใหม่เป็นบันทึกสำหรับนัดนี้ ไม่ใช่การวินิจฉัยที่แพทย์ยืนยัน</p></details>
 <details><summary>🪪 สิทธิและเดินทาง</summary>
 <label for="coverage_type">สิทธิรักษา</label><select id="coverage_type"><option value="">เลือกสิทธิรักษา (ถ้าทราบ)</option><option value="บัตรทอง">บัตรทอง / 30 บาท</option><option value="ประกันสังคม">ประกันสังคม</option><option value="ข้าราชการ">สิทธิข้าราชการ / เบิกตรง</option><option value="รัฐวิสาหกิจ">สิทธิรัฐวิสาหกิจ</option><option value="ประกันสุขภาพเอกชน">ประกันสุขภาพเอกชน</option><option value="ชำระเอง">ชำระเอง</option><option value="อื่น ๆ">อื่น ๆ</option></select>
-<label for="arrival_lead_minutes" id="arrivalLeadLabel">ควรไปถึงโรงพยาบาลก่อนเวลานัดกี่นาที</label><select id="arrival_lead_minutes"><option value="15">15 นาที</option><option value="30" selected>30 นาที</option><option value="45">45 นาที</option><option value="60">1 ชั่วโมง</option><option value="90">1 ชั่วโมงครึ่ง</option><option value="120">2 ชั่วโมง</option><option value="150">2 ชั่วโมงครึ่ง</option><option value="180">3 ชั่วโมง</option></select><div id="arrivalLeadChoices" class="arrival-lead-choices" role="group" aria-labelledby="arrivalLeadLabel"></div><p id="arrivalLeadPreview" class="arrival-lead-preview" role="status" aria-live="polite" hidden></p><p class="help">15 นาทีเหมาะเฉพาะนัดที่โรงพยาบาลอนุญาตให้มาถึงใกล้เวลานัด โปรดตรวจสอบใบนัด</p></details>
+<label for="arrival_lead_minutes" id="arrivalLeadLabel">⏳ ควรไปถึงโรงพยาบาลก่อนเวลานัดกี่นาที</label><select id="arrival_lead_minutes"><option value="15">15 นาที</option><option value="30" selected>30 นาที</option><option value="45">45 นาที</option><option value="60">1 ชั่วโมง</option><option value="90">1 ชั่วโมงครึ่ง</option><option value="120">2 ชั่วโมง</option><option value="150">2 ชั่วโมงครึ่ง</option><option value="180">3 ชั่วโมง</option></select><div id="arrivalLeadChoices" class="arrival-lead-choices" role="group" aria-labelledby="arrivalLeadLabel"></div><p id="arrivalLeadPreview" class="arrival-lead-preview" role="status" aria-live="polite" hidden></p><p class="help">15 นาทีเหมาะเฉพาะนัดที่โรงพยาบาลอนุญาตให้มาถึงใกล้เวลานัด โปรดตรวจสอบใบนัด</p></details>
 <details id="walkInDetails" class="hidden"><summary>🚶 เหตุผลที่ไปโดยไม่ได้นัด</summary><label for="walk_in_reason">เหตุผลที่ไปโรงพยาบาล</label><select id="walk_in_reason"><option value="">เลือกเหตุผล </option><option value="queue_full">คิวเต็ม</option><option value="hospital_advised">โรงพยาบาลแนะนำให้มา</option><option value="no_booking">ไม่ได้จองล่วงหน้า</option><option value="urgent">จำเป็นต้องมาด่วน</option><option value="other">เหตุผลอื่น</option></select></details>
 <details id="outcomeDetails" class="hidden"><summary>📋 บันทึกหลังพบแพทย์</summary>
 <label for="visit_outcome_notes">หมอบอกว่าอย่างไร หรือรักษาอะไร</label><textarea id="visit_outcome_notes" maxlength="1000" rows="2"></textarea>
@@ -3810,8 +3810,8 @@ function renderAccessibleAppointmentReview(){
  const byLabel=new Map(headingMap.flatMap(group=>group.labels.map(label=>[label,group.id])));
  const reviewIcons={
   'บุคคล':'👤','ประเภทนัด':'🏷️','ชื่อนัดหมาย':'📅','โรงพยาบาล':'🏥','แผนก':'🩺','แพทย์':'👨‍⚕️',
-  'ประวัติการเลื่อนนัด':'🔄','วันที่':'📅','เวลา':'🕒','ควรไปถึงโรงพยาบาล':'🚶',
-  'ไปถึงก่อนนัด (นาที)':'🚶','จุดติดต่อหลัก':'📍','อาคาร / ชั้น / ห้องตรวจ':'🏢',
+  'ประวัติการเลื่อนนัด':'🔄','วันที่':'📅','เวลา':'🕒','ควรไปถึงโรงพยาบาล':'📍',
+  'ไปถึงก่อนนัด (นาที)':'⏳','จุดติดต่อหลัก':'📍','อาคาร / ชั้น / ห้องตรวจ':'🏢',
   'วิธีเดินไปจุดติดต่อหลัก':'🚶','หมายเหตุจุดติดต่อ':'📝','รูปจุดติดต่อหลัก':'📷',
   'ขั้นตอนในวันนัด':'🧭','สิ่งที่ต้องเตรียม':'🪪','รายการตรวจ':'🔬','รูปใบนัด':'📷',
   'การเตรียมตัวก่อนตรวจ':'🧪','คำแนะนำก่อนตรวจ':'📝','HN โรงพยาบาล':'🏥',
@@ -4638,7 +4638,7 @@ function updateArrivalLeadUI(){
  if(arrivalLeadSelect.value!==String(value))arrivalLeadSelect.value=String(value);
  for(const button of arrivalLeadButtons)button.setAttribute('aria-pressed',String(Number(button.dataset.minutes)===value));
  const preview=$('arrivalLeadPreview'),time=arrivalTimeForAppointment();
- preview.hidden=!time;preview.textContent=time?'🕒 ควรถึงโรงพยาบาลเวลา '+time:'';
+ preview.hidden=!time;preview.textContent=time?'📍 ควรถึงโรงพยาบาลเวลา '+time:'';
 }
 function setArrivalLeadMinutes(value){
  arrivalLeadSelect.value=String(normalizeArrivalLeadMinutes(value));updateArrivalLeadUI();
