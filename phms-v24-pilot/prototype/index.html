@@ -2637,8 +2637,40 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  border-top:0!important;
  margin-top:0!important;
 }
+
+/* PHMS v2.4.90.24 — elder-readable review, matching the cream/brown editor. */
+#confirmation{max-width:100%;box-sizing:border-box}
+#confirmation>h2{font-size:1.3rem;line-height:1.45;color:#39291c;margin:0 0 7px}
+#confirmation .phms-review-guide{font-size:.94rem;color:#665749;line-height:1.5;margin:0 0 16px}
+#confirmation #preview.phms-review-layout{display:flex!important;flex-direction:column;gap:14px;min-width:0;width:100%;max-width:100%;margin:0 0 16px}
+#confirmation .phms-review-card{min-width:0;max-width:100%;padding:15px 16px 16px;background:#fffdf9;border:1px solid #d9bea0;border-radius:15px;box-sizing:border-box}
+#confirmation .phms-review-card:first-child{background:#fffaf0;border-color:#bd956e}
+#confirmation .phms-review-card>h3{font-size:1.09rem;line-height:1.4;color:#543821;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #e8d6c1}
+#confirmation .phms-review-card dl{display:grid!important;grid-template-columns:minmax(105px,34%) minmax(0,1fr);column-gap:15px;row-gap:10px;margin:0;align-items:start}
+#confirmation .phms-review-card dt{font-size:.93rem;line-height:1.5;color:#6c5b4a;font-weight:500;margin:0;overflow-wrap:anywhere}
+#confirmation .phms-review-card dd{font-size:1rem;line-height:1.55;color:#2f261f;font-weight:600;margin:0;min-width:0;max-width:100%;overflow-wrap:anywhere;white-space:pre-line}
+#confirmation .phms-review-card .phms-review-main-label{font-size:.82rem;color:#8a7055}
+#confirmation .phms-review-card .phms-review-main-value{font-size:1.2rem;font-weight:750;color:#50341e;line-height:1.4}
+#confirmation .phms-review-card .phms-review-key-value{font-weight:750;color:#50341e}
+#confirmation .phms-review-card ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+#confirmation .phms-review-card li{background:#f9f2e7;border-radius:9px;padding:9px 11px;font-weight:500;line-height:1.5;overflow-wrap:anywhere}
+#confirmation .phms-review-card .phms-review-photo-note{font-size:.88rem;color:#726352;line-height:1.5;margin:9px 0}
+#confirmation .phms-review-card dd.phms-journey-review-images{grid-column:1/-1;display:grid!important;grid-template-columns:repeat(auto-fill,minmax(78px,92px));gap:8px;margin:0 0 6px!important}
+#confirmation .phms-review-card .phms-journey-review-images img{width:90px!important;max-width:100%!important;height:90px!important;object-fit:cover!important}
+#confirmation .phms-review-card .phms-review-warning{background:#fff5df;border:1px solid #e4c99c;border-radius:10px;padding:10px 12px;font-size:.9rem}
+#confirmation .phms-review-card .phms-review-empty{color:#786758;font-weight:400}
+@media(max-width:580px){
+ #confirmation .phms-review-card{padding:13px 12px}
+ #confirmation .phms-review-card dl{grid-template-columns:minmax(0,1fr);row-gap:3px}
+ #confirmation .phms-review-card dt{font-size:.88rem;margin-top:8px}
+ #confirmation .phms-review-card dt:first-child{margin-top:0}
+ #confirmation .phms-review-card dd{padding-bottom:4px}
+ #confirmation .phms-review-card .phms-review-main-value{font-size:1.13rem}
+ #confirmation .phms-review-card dd.phms-journey-review-images{grid-column:1;grid-template-columns:repeat(auto-fill,minmax(72px,86px))}
+}
+
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.23</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.24</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3610,7 +3642,60 @@ reviewedDraft.linked_appointment_id=$('relatedSelect').value||'';
 reviewedDraft.reschedule_origin=$('appointmentOrigin').value||'';
 reviewedDraft.reschedule_count=Number($('appointmentRescheduleCount').value||0);
 reviewedDraft.exam_preparation={choice:examPrepChoice.value,details:examPrepDetails.value.trim()};
-if(packaged.draft.document_metadata.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='ไฟล์แนบ';dd.textContent=packaged.draft.document_metadata.map(f=>f.name).join(', ');dl.append(dt,dd)}$('editor').classList.add('hidden');$('confirmation').classList.remove('hidden');window.scrollTo(0,0)});
+if(packaged.draft.document_metadata.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='ไฟล์แนบ';dd.textContent=packaged.draft.document_metadata.map(f=>f.name).join(', ');dl.append(dt,dd)}renderAccessibleAppointmentReview();$('editor').classList.add('hidden');$('confirmation').classList.remove('hidden');window.scrollTo(0,0)});
+
+function renderAccessibleAppointmentReview(){
+ const source=$('preview');
+ const headingMap=[
+  {id:'overview',title:'📅 สรุปนัดหมาย',labels:['ชื่อนัดหมาย','บุคคล','ประเภทนัด','ประวัติการเลื่อนนัด','หมายเหตุ','โรงพยาบาล','แผนก','แพทย์']},
+  {id:'datetime',title:'🗓️ วันและเวลา',labels:['วันที่','เวลา','ควรไปถึงโรงพยาบาล','ไปถึงก่อนนัด (นาที)']},
+  {id:'journey',title:'📍 จุดติดต่อและขั้นตอนวันนัด',labels:['จุดติดต่อหลัก','อาคาร / ชั้น / ห้องตรวจ','วิธีเดินไปจุดติดต่อหลัก','หมายเหตุจุดติดต่อ','รูปจุดติดต่อหลัก','ขั้นตอนในวันนัด']},
+  {id:'prepare',title:'👜 สิ่งที่ต้องเตรียม',labels:['สิ่งที่ต้องเตรียม','การเตรียมตัวก่อนตรวจ','คำแนะนำก่อนตรวจ','รายการตรวจ','รูปใบนัด','ไฟล์แนบ']},
+  {id:'more',title:'📝 ข้อมูลเพิ่มเติม',labels:[]}
+ ];
+ const byLabel=new Map(headingMap.flatMap(group=>group.labels.map(label=>[label,group.id])));
+ const nodes=[...source.children];
+ const entries=[];
+ for(let i=0;i<nodes.length;i++){
+  const node=nodes[i];
+  if(node.tagName==='DT'&&nodes[i+1]?.tagName==='DD'){
+   const label=(node.textContent||'').trim();
+   entries.push({label,dt:node,dd:nodes[++i]});
+  }else entries.push({note:node});
+ }
+ source.replaceChildren();source.classList.add('phms-review-layout');
+ const containers={};
+ for(const group of headingMap){
+  const card=document.createElement('section');
+  card.className='phms-review-card';card.setAttribute('aria-label',group.title);
+  const title=document.createElement('h3');title.textContent=group.title;card.append(title);
+  const dl=document.createElement('dl');card.append(dl);
+  containers[group.id]={card,dl,count:0};
+ }
+ for(const entry of entries){
+  if(entry.note){
+   const n=entry.note;
+   n.classList.add('phms-review-photo-note');
+   containers.journey.card.append(n);containers.journey.count++;continue;
+  }
+  const groupId=byLabel.get(entry.label)||
+   (entry.label.startsWith('รูปขั้นตอน')?'journey':
+    entry.label.startsWith('ติดต่อเลื่อนนัด')||entry.label==='เบอร์ติดต่อเลื่อนนัด'||entry.label==='เงื่อนไขการติดต่อ'?'more':'more');
+  const group=containers[groupId];
+  if(entry.label==='ชื่อนัดหมาย'){entry.dt.classList.add('phms-review-main-label');entry.dd.classList.add('phms-review-main-value');}
+  if(['วันที่','เวลา','โรงพยาบาล'].includes(entry.label))entry.dd.classList.add('phms-review-key-value');
+  if(entry.label==='ไปถึงก่อนนัด (นาที)'&&entry.dd.textContent&&!entry.dd.textContent.includes('นาที'))entry.dd.textContent+=' นาที';
+  group.dl.append(entry.dt,entry.dd);group.count++;
+ }
+ for(const group of headingMap)if(containers[group.id].count)source.append(containers[group.id].card);
+ let guide=$('phmsReviewGuide');
+ if(!guide){
+  guide=document.createElement('p');guide.id='phmsReviewGuide';guide.className='phms-review-guide';
+  $('confirmation').querySelector('h2').after(guide);
+ }
+ guide.textContent='ตรวจสอบวัน เวลา โรงพยาบาล และแผนกอีกครั้งก่อนบันทึก';
+}
+
 let savedAppointmentId='',uploadedNoticeSlots=new Set(),journeyPersistedForSave=false;
 async function uploadAppointmentNotice(file,position,appointmentId){
  const token=window.liff?.getIDToken?.();
