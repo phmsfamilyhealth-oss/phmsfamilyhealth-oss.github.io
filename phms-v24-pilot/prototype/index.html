@@ -2764,7 +2764,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #confirmation #preview .phms-notice-review-thumb img{width:100%!important;max-width:100%!important;height:auto!important;max-height:560px!important;object-fit:contain!important;object-position:center!important}
 @media(max-width:580px){#confirmation #preview button.phms-notice-review-thumb{padding:7px!important}#confirmation #preview .phms-notice-review-thumb img{max-height:480px!important}}
 
-/* PHMS v2.4.90.38 — LINE iPhone: keep the selected person's full name readable.
+/* PHMS v2.4.90.39 — LINE iPhone: keep the selected person's full name readable.
    The prior max-content two-column grid clipped the name under the mode switch.
    Presentation only: selection, LINE permissions and save logic are unchanged. */
 @media (max-width:600px){
@@ -2780,7 +2780,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   min-width:0!important;width:100%!important;max-width:100%!important;
   margin:0!important;white-space:normal!important;word-break:normal!important;
   overflow-wrap:anywhere!important;overflow:visible!important;
-  font-size:clamp(15px,4.1vw,18px)!important;line-height:1.5!important;
+  font-size:clamp(19px,5.2vw,21px)!important;font-weight:750!important;line-height:1.5!important;
   text-align:left!important;
  }
  #editor .phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch{
@@ -2791,7 +2791,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  }
 }
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.38</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.39</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -5404,7 +5404,7 @@ for(const [value,label] of [['simple','✨ แบบง่าย'],['full','🛠
 const switchStyle=(el,props)=>{for(const [name,value] of Object.entries(props))el.style.setProperty(name,value,'important');};
 switchStyle(modeChoices,{'display':'inline-flex','flex-direction':'row','flex-wrap':'nowrap','align-items':'stretch','gap':'2px','padding':'3px','margin':'0px','border':'0px','outline':'0px','box-shadow':'none','border-radius':'19px','overflow':'hidden','background':'#f4e9d9','width':'max-content','max-width':'100%'});
 for(const button of modeButtons){
- switchStyle(button,{'display':'inline-flex','align-items':'center','justify-content':'center','flex':'0 0 auto','height':'32px','min-height':'32px','max-height':'32px','padding':'0 9px','margin':'0px','border':'0px','outline':'0px','box-shadow':'none','border-radius':'15px','font-size':'12px','font-weight':'700','line-height':'1','white-space':'nowrap'});
+ switchStyle(button,{'display':'inline-flex','align-items':'center','justify-content':'center','flex':'0 0 auto','height':'32px','min-height':'32px','max-height':'32px','padding':window.matchMedia('(max-width:600px)').matches?'0 6px':'0 9px','margin':'0px','border':'0px','outline':'0px','box-shadow':'none','border-radius':'15px','font-size':window.matchMedia('(max-width:600px)').matches?'11.5px':'12px','font-weight':'700','line-height':'1','white-space':'nowrap'});
 }
 modeBar.replaceChildren(modeChoices);modeBar.classList.add('phms-header-mode-switch');
 const personModeRow=document.createElement('div');personModeRow.className='phms-header-person-mode-row';
