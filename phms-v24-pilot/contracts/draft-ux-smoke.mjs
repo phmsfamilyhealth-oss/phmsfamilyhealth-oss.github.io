@@ -27,7 +27,7 @@ try{
  const context=await browser.newContext({viewport:{width:390,height:844},locale:'th-TH'});
  const page=await context.newPage();
  const errors=[];
- page.on('pageerror',e=>errors.push(e.message));
+ page.on('pageerror',e=>errors.push(e.stack||e.message));
  page.on('console',m=>{if(m.text().startsWith('phms_draft_restore_failed'))console.log('DRAFT_STACK',m.text())});
  let stored=null;
  const calls=[];
