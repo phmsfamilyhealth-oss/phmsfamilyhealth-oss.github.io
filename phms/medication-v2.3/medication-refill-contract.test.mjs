@@ -1,0 +1,14 @@
+import test from "node:test";import assert from "node:assert/strict";import {validateRefillItem as v} from "./medication-refill-contract.mjs";
+const a={appointmentId:"appointment",personMedicationId:"medication",status:"PLANNED",familyAuthorized:true,personAuthorized:true,expectedQuantity:30,expectedUnit:"tablet"};
+test("planned refill does not create stock",()=>assert.equal(v(a).ok,true));
+test("actual receipt requires confirmation",()=>assert.ok(v({...a,status:"RECEIVED",receivedQuantity:30,receivedUnit:"tablet",requestStockMovement:true}).errors.includes("NO_PHYSICAL_RECEIPT")));
+test("no implicit stock from appointment",()=>assert.equal(v({...a,physicalReceiptConfirmed:false}).ok,true));
+test("partial receipt is legal",()=>assert.equal(v({...a,status:"PARTIALLY_RECEIVED",receivedQuantity:10,receivedUnit:"tablet"}).ok,true));
+test("cannot record received quantity under planned state",()=>assert.equal(v({...a,receivedQuantity:10,receivedUnit:"tablet"}).ok,false));
+test("cannot receive negative quantity",()=>assert.equal(v({...a,receivedQuantity:-2,receivedUnit:"tablet"}).ok,false));
+test("must not double-create expense",()=>assert.equal(v({...a,requestExpenseCreation:true,existingExpenseId:"existing"}).ok,false));
+test("hospital rule requires verified source",()=>assert.equal(v({...a,hospitalLateRuleDays:7}).ok,false));
+test("reject cross-family user",()=>assert.equal(v({...a,familyAuthorized:false}).ok,false));
+test("reject unauthorized person",()=>assert.equal(v({...a,personAuthorized:false}).ok,false));
+test("allow medication absent in person register with medication product ID",()=>assert.equal(v({...a,personMedicationId:null,medicationId:"product"}).ok,true));
+test("prevent duplicate stock mutation missing idempotency key",()=>assert.equal(v({...a,status:"RECEIVED",receivedQuantity:10,receivedUnit:"tablet",physicalReceiptConfirmed:true,requestStockMovement:true}).ok,false));

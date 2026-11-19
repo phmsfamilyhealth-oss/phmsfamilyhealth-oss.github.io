@@ -1,0 +1,11 @@
+import test from "node:test";import assert from "node:assert/strict";import {NON_DAILY_SCREENS,renderNonDailyFlex} from "./non-daily-flex.mjs";
+const theme={header:"#0066AA",primaryText:"#112233",background:"#FFFFFF",backBackground:"#DCECFB",backText:"#113355",buttonText:"#FFFFFF"};
+const a={label:"ต่อไป",token:"medctx:abcdefghijklmno"},back={label:"↩️ กลับ",token:"medctx:back-secure-12345"};
+for(const screen of NON_DAILY_SCREENS)test("Flex card "+screen,()=>{const x=renderNonDailyFlex({screen,subtitle:"สำหรับสมาชิก",lines:["ใช้เฉพาะวันที่ได้รับคำสั่ง"],actions:[a],backAction:back,theme});assert.equal(x.type,"flex");assert.equal(x.contents.footer.contents.at(-1).height,"44px");assert.equal(x.contents.footer.contents.at(-1).action.data,back.token)});
+test("all nine screens defined",()=>assert.equal(NON_DAILY_SCREENS.length,9));
+test("no insecure postback",()=>assert.throws(()=>renderNonDailyFlex({screen:"today",subtitle:"",actions:[{label:"wrong",token:"person=123"}],theme})));
+test("require central PHMS theme",()=>assert.throws(()=>renderNonDailyFlex({screen:"today",subtitle:"",theme:{}})));
+test("no duplicate back generated",()=>{const x=renderNonDailyFlex({screen:"today",subtitle:"",backAction:back,theme});assert.equal(x.contents.footer.contents.length,1)});
+test("pending renders as Flex",()=>assert.equal(renderNonDailyFlex({screen:"review",subtitle:"",theme,status:"PENDING_VERIFICATION"}).type,"flex"));
+test("permission denied renders as Flex",()=>assert.equal(renderNonDailyFlex({screen:"today",subtitle:"",theme,status:"PERMISSION_DENIED"}).type,"flex"));
+test("empty renders as Flex",()=>assert.equal(renderNonDailyFlex({screen:"weekly",subtitle:"",theme,status:"EMPTY"}).type,"flex"));

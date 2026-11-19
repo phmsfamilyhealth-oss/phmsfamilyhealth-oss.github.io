@@ -1,0 +1,12 @@
+import test from "node:test";import assert from "node:assert/strict";import {scheduleDates,missedOnlyScheduled} from "./non-daily-schedule.mjs";
+const r=(frequency,opts={})=>({frequency,orderVerified:true,...opts});
+test("Friday only",()=>assert.deepEqual(scheduleDates(r("weekly",{weekdays:["fri"]}),"2026-10-19","2026-11-01"),["2026-10-23","2026-10-30"]));
+test("every seven days anchored differs from Friday schedule",()=>assert.deepEqual(scheduleDates(r("every_n_days",{interval:7,anchorDate:"2026-10-22"}),"2026-10-19","2026-11-01"),["2026-10-22","2026-10-29"]));
+test("every two weeks",()=>assert.deepEqual(scheduleDates(r("every_n_weeks",{interval:2,anchorDate:"2026-10-22"}),"2026-10-22","2026-11-19"),["2026-10-22","2026-11-05","2026-11-19"]));
+test("two days per week",()=>assert.deepEqual(scheduleDates(r("selected_weekdays",{weekdays:["mon","thu"]}),"2026-10-19","2026-10-25"),["2026-10-19","2026-10-22"]));
+test("monthly on the tenth",()=>assert.deepEqual(scheduleDates(r("monthly",{anchorDate:"2026-10-10"}),"2026-10-01","2027-01-15"),["2026-10-10","2026-11-10","2026-12-10","2027-01-10"]));
+test("no missed flag on an unscheduled day",()=>assert.deepEqual(missedOnlyScheduled(["2026-10-23","2026-10-30"],[],"2026-10-25"),["2026-10-23"]));
+test("unverified order blocked",()=>assert.throws(()=>scheduleDates(r("weekly",{weekdays:["fri"],orderVerified:false}),"2026-10-01","2026-10-31")));
+test("PRN does not automatically schedule",()=>assert.deepEqual(scheduleDates(r("prn"),"2026-10-01","2026-10-31"),[]));
+test("interval required",()=>assert.throws(()=>scheduleDates(r("every_n_days",{anchorDate:"2026-10-01"}),"2026-10-01","2026-10-31")));
+test("weekday required",()=>assert.throws(()=>scheduleDates(r("weekly"),"2026-10-01","2026-10-31")));

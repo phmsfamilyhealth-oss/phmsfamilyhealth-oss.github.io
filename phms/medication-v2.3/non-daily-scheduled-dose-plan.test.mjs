@@ -1,0 +1,15 @@
+import test from "node:test";import assert from "node:assert/strict";
+import {planNonDailyScheduledDoses as p} from "./non-daily-scheduled-dose-plan.mjs";
+const order={id:"de8aee68-a9a7-455b-bd4e-f36b59070200",personId:"177ba0fa-bef7-4cf5-a7f0-a95ce12a8abd",personMedicationId:"fd3b5d9c-3c30-4189-8470-a4a817d5e7ca",status:"VERIFIED",verifiedAt:"2026-10-01T00:00:00Z",effectiveFrom:"2026-10-01T00:00:00Z"};
+const regimen={id:"a7752f9c-8e7a-43cf-8515-a168512967bb",frequency:"weekly",weekdays:["fri"]};
+const doses=[{slotKey:"morning",localTime:"08:00",quantity:1,unit:"tablet",timezone:"Asia/Bangkok"}];
+const plan=(o=order,r=regimen,d=doses)=>p({order:o,regimen:r,doses:d,startDate:"2026-10-19",endDate:"2026-11-01"});
+test("only scheduled Fridays inserted",()=>assert.deepEqual(plan().map(x=>x.planned_date),["2026-10-23","2026-10-30"]));
+test("idempotency keys stable on retry",()=>assert.deepEqual(plan(),plan()));
+test("separate dose slots do not duplicate order",()=>assert.equal(plan(order,regimen,[...doses,{...doses[0],slotKey:"evening",localTime:"18:00"}]).length,4));
+test("every seven days differs from Fridays",()=>assert.deepEqual(plan(order,{...regimen,frequency:"every_n_days",interval:7,anchorDate:"2026-10-22"}).map(x=>x.planned_date),["2026-10-22","2026-10-29"]));
+test("unverified order cannot generate schedule",()=>assert.throws(()=>plan({...order,status:"DRAFT"})));
+test("unverified dose rule cannot generate schedule",()=>assert.throws(()=>plan(order,regimen,[{...doses[0],quantity:0}])));
+test("duplicate dose rule is rejected",()=>assert.throws(()=>plan(order,regimen,[...doses,...doses])));
+test("respects verified order effective-to date",()=>assert.deepEqual(plan({...order,effectiveTo:"2026-10-25T00:00:00Z"}).map(x=>x.planned_date),["2026-10-23"]));
+test("does not create schedule for PRN",()=>assert.equal(plan(order,{...regimen,frequency:"prn"}).length,0));
