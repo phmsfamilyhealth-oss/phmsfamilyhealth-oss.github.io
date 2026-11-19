@@ -2880,8 +2880,43 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
 /* PHMS v2.4.90.43: contact edits belong to each appointment; no separate save button. */
 #editor #familyContactSaveBox,#editor #familyContactSaveStatus{display:none!important}
+
+/* PHMS v2.4.90.44 — iPhone LINE: stop-step time picker must not exceed its card.
+   Preserve iOS native time selector and underlying time value. */
+#editor #visitStepsDetails .visit-stop-card{
+ box-sizing:border-box!important;
+ min-width:0!important;
+ max-width:100%!important;
+}
+#editor #visitStepsDetails .visit-stop-card label{
+ display:block!important;
+ box-sizing:border-box!important;
+ width:100%!important;
+ min-width:0!important;
+ max-width:100%!important;
+}
+#editor #visitStepsDetails .visit-stop-card label>input[type="time"]{
+ display:block!important;
+ box-sizing:border-box!important;
+ width:100%!important;
+ min-width:0!important;
+ max-width:100%!important;
+ inline-size:100%!important;
+ min-inline-size:0!important;
+ max-inline-size:100%!important;
+ margin:0!important;
+ padding:10px 12px!important;
+ font-size:16px!important;
+ -webkit-appearance:auto!important;
+ appearance:auto!important;
+}
+@media(max-width:600px){
+ #editor #visitStepsDetails .visit-stop-card label>input[type="time"]{
+  overflow:hidden!important;
+ }
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.43</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.44</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
