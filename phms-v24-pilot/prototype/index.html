@@ -2764,7 +2764,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #confirmation #preview .phms-notice-review-thumb img{width:100%!important;max-width:100%!important;height:auto!important;max-height:560px!important;object-fit:contain!important;object-position:center!important}
 @media(max-width:580px){#confirmation #preview button.phms-notice-review-thumb{padding:7px!important}#confirmation #preview .phms-notice-review-thumb img{max-height:480px!important}}
 
-/* PHMS v2.4.90.39 — LINE iPhone: keep the selected person's full name readable.
+/* PHMS v2.4.90.40 — LINE iPhone: keep the selected person's full name readable.
    The prior max-content two-column grid clipped the name under the mode switch.
    Presentation only: selection, LINE permissions and save logic are unchanged. */
 @media (max-width:600px){
@@ -2790,8 +2790,26 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   margin:0!important;padding:0!important;
  }
 }
+
+/* PHMS v2.4.90.40 — preserve Thai hospital names on narrow LINE screens.
+   Only hospital-choice presentation changes; department/doctor grids remain intact. */
+@media(max-width:480px){
+ #editor #hospitalQuickCards.adaptive-provider-cards{
+  grid-template-columns:minmax(0,1fr)!important;
+ }
+ #editor #hospitalQuickCards .adaptive-provider-choice{
+  min-height:64px!important;
+  padding:11px 14px!important;
+ }
+ #editor #hospitalQuickCards .adaptive-provider-choice .adaptive-choice-th{
+  word-break:normal!important;overflow-wrap:normal!important;
+ }
+ #editor #hospitalQuickCards .phms-hospital-name-part{
+  display:inline-block;white-space:nowrap;
+ }
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.39</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.40</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3186,7 +3204,19 @@ function drawAdaptiveProviderCards(kind,choices){
   const th=match?match[1].trim():full;
   const code=match?match[2].trim():'';
   const symbol=/จักษุ|ตา/.test(th)?'👁️':/กระดูก|ข้อ|ออร์โธ/.test(th)?'🦴':/ทางเดินปัสสาวะ|ยูโร/.test(th)?'🩺':/หัวใจ/.test(th)?'❤️':/ทันต|ฟัน/.test(th)?'🦷':/เด็ก|กุมาร/.test(th)?'👶':'🏷️';
-  const name=document.createElement('span');name.className='adaptive-choice-th';name.textContent=(kind==='unit'?symbol+' ':'🏥 ')+th;
+  const name=document.createElement('span');name.className='adaptive-choice-th';
+  // Display-only slash grouping: avoid splitting a Thai hospital name in the middle.
+  // Keep item.label and the authorized catalog value unchanged.
+  if(kind==='hospital'&&th.includes('/')){
+   name.append(document.createTextNode('🏥 '));
+   th.split('/').forEach((part,index)=>{
+    if(index)name.append(document.createTextNode(' / '));
+    const segment=document.createElement('span');
+    segment.className='phms-hospital-name-part';
+    segment.textContent=part.trim();
+    name.append(segment);
+   });
+  }else name.textContent=(kind==='unit'?symbol+' ':'🏥 ')+th;
   btn.append(name);
   if(code){const sub=document.createElement('span');sub.className='adaptive-choice-code';sub.textContent='('+code+')';btn.append(sub);}
   btn.setAttribute('aria-label',full);
