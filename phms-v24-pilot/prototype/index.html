@@ -3040,8 +3040,46 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
 .phms-draft-dialog-actions>button{min-height:48px!important;font-size:.94rem!important;padding:8px 7px!important}
 .phms-draft-dialog-actions .phms-draft-accept{background:#63492e!important;color:#fff!important}
 .phms-draft-dialog-actions .phms-draft-danger{background:#9b4350!important;color:#fff!important}
+
+/* v2.4.90.53: a single elder-friendly draft action and quiet delete control. */
+#editor #draftOpenArea{
+ box-sizing:border-box!important;display:flex!important;flex-direction:column!important;
+ gap:7px!important;margin:12px 0 18px!important;padding:13px 14px!important;
+ border:1px solid #ddc6ad!important;border-radius:14px!important;background:#fffaf3!important
+}
+#editor #draftOpenArea .phms-draft-heading{
+ font:700 1rem/1.45 inherit!important;color:#503721!important;margin:0!important
+}
+#editor #draftOpenArea .phms-draft-hint{
+ font-size:.91rem!important;font-weight:400!important;line-height:1.5!important;
+ color:#72604d!important;margin:0 0 4px!important
+}
+#editor #draftOpenArea #systemDraftOpen{
+ width:100%!important;min-height:52px!important;margin:0!important;
+ padding:11px 14px!important;border-radius:11px!important;
+ background:#65482e!important;border:1px solid #65482e!important;
+ color:#fff!important;font-size:1.01rem!important;font-weight:700!important;line-height:1.5!important
+}
+#editor #draftOpenArea #systemDraftOpen:focus-visible,
+#editor #draftOpenArea #systemDraftDelete:focus-visible{outline:3px solid #ad773c!important;outline-offset:3px!important}
+#editor #draftOpenArea #draftManagement{
+ width:100%!important;display:flex!important;justify-content:flex-end!important;
+ margin:0!important;padding:1px 0 0!important;background:transparent!important;
+ border:0!important;border-radius:0!important
+}
+#editor #draftOpenArea #draftManagement[hidden]{display:none!important}
+#editor #draftOpenArea #systemDraftDelete{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ min-height:40px!important;width:auto!important;max-width:100%!important;
+ background:transparent!important;color:#95615e!important;border:0!important;
+ padding:5px 9px!important;font-size:.86rem!important;font-weight:500!important;
+ text-decoration:underline!important;text-underline-offset:3px!important
+}
+#editor #draftOpenArea .phms-draft-feedback{margin:2px 0!important}
+@media(max-width:430px){#editor #draftOpenArea{padding:12px!important}}
+
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.52</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.53</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -6506,18 +6544,18 @@ function ensurePhmsStatusSummary(summary){
 
 /* PHMS v2.4.90.50 — one draft workflow, clear placement and identity scope. */
 const draftButton=(title)=>{const b=document.createElement('button');b.type='button';b.className='secondary';b.textContent=title;return b;};
-const systemDraftOpen=draftButton('📂 เปิดร่างที่บันทึกไว้');
+const systemDraftOpen=draftButton('📂 เปิดร่างเพื่อกรอกต่อ');
 systemDraftOpen.id='systemDraftOpen';
 const draftOpenStatus=document.createElement('p');draftOpenStatus.id='draftOpenStatus';
 draftOpenStatus.className='phms-draft-feedback';draftOpenStatus.setAttribute('role','status');draftOpenStatus.setAttribute('aria-live','polite');draftOpenStatus.hidden=true;
 const systemDraftDelete=draftButton('ลบร่างที่บันทึกไว้');systemDraftDelete.id='systemDraftDelete';
-const draftManagement=document.createElement('details');draftManagement.id='draftManagement';draftManagement.hidden=true;
-const draftManageSummary=document.createElement('summary');draftManageSummary.textContent='จัดการร่างที่บันทึกไว้';
-const draftManageHelp=document.createElement('p');draftManageHelp.textContent='ลบเฉพาะร่างในบัญชี LINE นี้ ไม่ลบนัดหมายที่บันทึกจริง';
-draftManageHelp.className='help';
-draftManagement.append(draftManageSummary,draftManageHelp,systemDraftDelete);
-const draftOpenArea=document.createElement('section');draftOpenArea.id='draftOpenArea';draftOpenArea.setAttribute('aria-label','เปิดร่างเดิม');
-draftOpenArea.append(systemDraftOpen,draftOpenStatus,draftManagement);
+const draftManagement=document.createElement('div');draftManagement.id='draftManagement';draftManagement.hidden=true;
+systemDraftDelete.textContent='ลบร่างนี้';systemDraftDelete.setAttribute('aria-label','ลบร่างของบุคคลนี้ใน PHMS');
+draftManagement.append(systemDraftDelete);
+const draftOpenArea=document.createElement('section');draftOpenArea.id='draftOpenArea';draftOpenArea.setAttribute('aria-label','ร่างนัดหมายที่บันทึกไว้');
+const draftOpenHeading=document.createElement('p');draftOpenHeading.className='phms-draft-heading';draftOpenHeading.textContent='📂 ร่างนัดหมาย';
+const draftOpenHint=document.createElement('p');draftOpenHint.className='phms-draft-hint';draftOpenHint.textContent='เคยกรอกค้างไว้? เปิดร่างเพื่อกรอกต่อได้';
+draftOpenArea.append(draftOpenHeading,draftOpenHint,systemDraftOpen,draftOpenStatus,draftManagement);
 personSection.after(draftOpenArea);
 const systemDraftBar=document.createElement('div');systemDraftBar.id='systemDraftBar';
 const systemDraftSave=draftButton('💾 บันทึกไว้กรอกต่อ');systemDraftSave.id='systemDraftSave';
@@ -6575,7 +6613,6 @@ function draftDialogAnswer(dialog,yes,no){
 let draftKnown=false,draftOpening=false;
 function setDraftKnown(known){
  draftKnown=!!known;draftManagement.hidden=!draftKnown;
- if(!draftKnown)draftManagement.open=false;
 }
 $('personSelect').addEventListener('change',()=>{
  setDraftKnown(false);
@@ -6813,7 +6850,7 @@ async function openSystemDraftForAuthorizedPerson(){
   reviewedDraft=null;$('back').disabled=false;
   $('confirmation').classList.add('hidden');editor.classList.remove('hidden');
   syncScenarioCards();refresh();updateProgressiveLayout();updateFilledIndicators();syncPickerPrompts();
-  draftFeedback(draftOpenStatus,'✅ เปิดร่างสำเร็จ กรอกข้อมูลต่อได้เลย');
+  draftFeedback(draftOpenStatus,'✅ เปิดร่างแล้ว กรอกข้อมูลต่อได้เลย');
   draftFeedback(draftStatus,'');
  }catch(error){
   console.warn('phms_draft_restore_failed',String(error?.stack||error?.message||'unknown'));
