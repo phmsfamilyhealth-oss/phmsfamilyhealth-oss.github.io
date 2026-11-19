@@ -3020,8 +3020,28 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
  #appointmentSuccess .phms-save-success-summary{padding:4px 11px}
  #appointmentSuccess .phms-save-success-entry{grid-template-columns:minmax(0,1fr);gap:2px;padding:9px 0}
 }
+
+/* PHMS v2.4.90.50 — draft actions in their correct workflow locations. */
+#editor #draftOpenArea{margin:9px 0 16px;padding:0;min-width:0}
+#editor #draftOpenArea>button{min-height:46px!important;width:100%!important;padding:10px 14px!important;background:#faf3e9!important;color:#5d432e!important;border:1px solid #d9c0a1!important;border-radius:12px!important;text-align:center;font-size:.97rem!important}
+#editor #systemDraftBar{display:flex;flex-direction:column;align-items:stretch;gap:7px;min-width:0;margin:15px 0 9px}
+#editor #systemDraftSave{min-height:49px!important;width:100%!important;background:#eee2d2!important;color:#4e3826!important;border:1px solid #ddc8ae!important;border-radius:11px!important;font-weight:650!important}
+#editor .phms-draft-feedback{font-size:.91rem!important;line-height:1.55!important;color:#5f4831!important;background:#fbf5eb;border-radius:9px;padding:9px 11px;margin:6px 0!important;white-space:normal;overflow-wrap:anywhere}
+#editor .phms-draft-feedback[hidden],#editor #draftManagement[hidden]{display:none!important}
+#editor #draftManagement{padding:9px 10px;margin:9px 0 0;border:1px solid #e0cbb2;border-radius:11px;background:#fffaf3}
+#editor #draftManagement>summary{font-size:.9rem;cursor:pointer;color:#634931;font-weight:650;line-height:1.5}
+#editor #draftManagement .help{font-size:.84rem!important;margin:8px 0}
+#editor #systemDraftDelete{min-height:44px!important;min-width:0!important;width:100%!important;background:#fff1f0!important;color:#8b3740!important;border:1px solid #dfb5b4!important;font-size:.9rem!important}
+.phms-draft-dialog{max-width:min(90vw,420px);width:calc(100% - 30px);box-sizing:border-box;border:1px solid #d7b99c;border-radius:16px;padding:20px;background:#fffdf8;color:#352b20}
+.phms-draft-dialog::backdrop{background:rgba(27,19,13,.48)}
+.phms-draft-dialog h3{font-size:1.15rem;line-height:1.45;margin:0 0 8px}
+.phms-draft-dialog p{font-size:1rem;line-height:1.6;margin:0 0 15px}
+.phms-draft-dialog-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.phms-draft-dialog-actions>button{min-height:48px!important;font-size:.94rem!important;padding:8px 7px!important}
+.phms-draft-dialog-actions .phms-draft-accept{background:#63492e!important;color:#fff!important}
+.phms-draft-dialog-actions .phms-draft-danger{background:#9b4350!important;color:#fff!important}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.49</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.50</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -6482,38 +6502,110 @@ function ensurePhmsStatusSummary(summary){
 }
 
 
-/* Secure PHMS system drafts: server-side private table + private Storage.
-   LINE identity and person-specific create/view permissions are rechecked
-   by the Edge Function on every operation. No browser persistence. */
-const systemDraftBar=document.createElement('div');systemDraftBar.className='actions';
-systemDraftBar.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin:12px 0';
+/* PHMS v2.4.90.50 — one draft workflow, clear placement and identity scope. */
 const draftButton=(title)=>{const b=document.createElement('button');b.type='button';b.className='secondary';b.textContent=title;return b;};
-const systemDraftSave=draftButton('💾 บันทึกร่างในระบบ');
-const systemDraftOpen=draftButton('📂 เปิดร่างจากระบบ');
-const systemDraftDelete=draftButton('ลบร่าง');
-const draftPersonChoose=document.createElement('div');draftPersonChoose.className='phms-system-draft-person hidden';draftPersonChoose.hidden=true;
-const draftPersonLabel=document.createElement('label');draftPersonLabel.textContent='👤 เลือกร่างของใคร';draftPersonLabel.htmlFor='draftPersonSelect';
-const draftPersonSelect=document.createElement('select');draftPersonSelect.id='draftPersonSelect';
-const draftPersonConfirm=draftButton('📂 เปิดร่างของบุคคลนี้');
-draftPersonChoose.append(draftPersonLabel,draftPersonSelect,draftPersonConfirm);
-const draftStatus=document.createElement('p');draftStatus.className='help';draftStatus.style.width='100%';draftStatus.setAttribute('role','status');
-draftStatus.textContent='ร่างเก็บในระบบ PHMS ส่วนตัว เปิดต่อได้จากอุปกรณ์อื่นเมื่อเข้าสู่ LINE ด้วยบัญชีที่มีสิทธิ์';
-systemDraftBar.append(systemDraftSave,systemDraftOpen,systemDraftDelete,draftPersonChoose,draftStatus);
+const systemDraftOpen=draftButton('📂 เปิดร่างที่บันทึกไว้');
+systemDraftOpen.id='systemDraftOpen';
+const draftOpenStatus=document.createElement('p');draftOpenStatus.id='draftOpenStatus';
+draftOpenStatus.className='phms-draft-feedback';draftOpenStatus.setAttribute('role','status');draftOpenStatus.setAttribute('aria-live','polite');draftOpenStatus.hidden=true;
+const systemDraftDelete=draftButton('ลบร่างที่บันทึกไว้');systemDraftDelete.id='systemDraftDelete';
+const draftManagement=document.createElement('details');draftManagement.id='draftManagement';draftManagement.hidden=true;
+const draftManageSummary=document.createElement('summary');draftManageSummary.textContent='จัดการร่างที่บันทึกไว้';
+const draftManageHelp=document.createElement('p');draftManageHelp.textContent='ลบเฉพาะร่างในบัญชี LINE นี้ ไม่ลบนัดหมายที่บันทึกจริง';
+draftManageHelp.className='help';
+draftManagement.append(draftManageSummary,draftManageHelp,systemDraftDelete);
+const draftOpenArea=document.createElement('section');draftOpenArea.id='draftOpenArea';draftOpenArea.setAttribute('aria-label','เปิดร่างเดิม');
+draftOpenArea.append(systemDraftOpen,draftOpenStatus,draftManagement);
+personSection.after(draftOpenArea);
+const systemDraftBar=document.createElement('div');systemDraftBar.id='systemDraftBar';
+const systemDraftSave=draftButton('💾 บันทึกไว้กรอกต่อ');systemDraftSave.id='systemDraftSave';
+const draftStatus=document.createElement('p');draftStatus.id='draftSaveStatus';
+draftStatus.className='phms-draft-feedback';draftStatus.setAttribute('role','status');draftStatus.setAttribute('aria-live','polite');draftStatus.hidden=true;
+systemDraftBar.append(systemDraftSave,draftStatus);
 $('review').parentElement.before(systemDraftBar);
-const confirmDraftSave=draftButton('💾 บันทึกร่างในระบบ');
-$('confirmation').querySelector('.actions').before(confirmDraftSave);
 const reauthAfterDraft=draftButton('🔑 เข้าสู่ LINE ใหม่');
 reauthAfterDraft.id='reauthAfterDraft';reauthAfterDraft.hidden=true;
 $('confirmation').querySelector('.actions').append(reauthAfterDraft);
+const draftOverwriteDialog=document.createElement('dialog');
+draftOverwriteDialog.id='draftOverwriteDialog';draftOverwriteDialog.className='phms-draft-dialog';
+const overwriteHeading=document.createElement('h3');overwriteHeading.textContent='เปิดร่างที่เคยบันทึก?';
+const overwriteExplain=document.createElement('p');
+overwriteExplain.textContent='ข้อมูลที่กำลังกรอกอยู่จะเปลี่ยนเป็นข้อมูลจากร่างที่บันทึกไว้';
+const overwriteCancel=draftButton('ยกเลิก');
+const overwriteAccept=draftButton('ใช้ร่างที่บันทึกไว้');
+overwriteAccept.classList.add('phms-draft-accept');
+const overwriteActions=document.createElement('div');overwriteActions.className='phms-draft-dialog-actions';
+overwriteActions.append(overwriteCancel,overwriteAccept);
+draftOverwriteDialog.append(overwriteHeading,overwriteExplain,overwriteActions);document.body.append(draftOverwriteDialog);
+const draftDeleteDialog=document.createElement('dialog');
+draftDeleteDialog.id='draftDeleteDialog';draftDeleteDialog.className='phms-draft-dialog';
+const deleteHeading=document.createElement('h3');deleteHeading.textContent='ลบร่างที่บันทึกไว้?';
+const deleteExplain=document.createElement('p');
+deleteExplain.textContent='ลบข้อมูลร่างในระบบของบุคคลนี้เท่านั้น นัดหมายที่บันทึกจริงไม่ถูกลบ';
+const deleteCancel=draftButton('ยกเลิก');
+const deleteAccept=draftButton('ยืนยันลบร่าง');deleteAccept.classList.add('phms-draft-danger');
+const deleteActions=document.createElement('div');deleteActions.className='phms-draft-dialog-actions';
+deleteActions.append(deleteCancel,deleteAccept);
+draftDeleteDialog.append(deleteHeading,deleteExplain,deleteActions);document.body.append(draftDeleteDialog);
+function draftFeedback(node,message){
+ node.textContent=String(message||'');node.hidden=!message;
+}
+function draftDialogAnswer(dialog,yes,no){
+ return new Promise(resolve=>{
+  if(typeof dialog.showModal!=='function'){
+   resolve(window.confirm(dialog===draftDeleteDialog?'ลบร่างที่บันทึกไว้? ไม่ลบนัดจริง':'ใช้ร่างที่บันทึกไว้แทนข้อมูลที่กำลังกรอก?'));return;
+  }
+  let settled=false;
+  const finish=value=>{
+   if(settled)return;
+   settled=true;
+   yes.removeEventListener('click',accept);no.removeEventListener('click',decline);
+   dialog.removeEventListener('cancel',cancel);
+   if(dialog.open)dialog.close();
+   resolve(value);
+  };
+  const accept=()=>finish(true),decline=()=>finish(false),cancel=()=>finish(false);
+  yes.addEventListener('click',accept);no.addEventListener('click',decline);
+  dialog.addEventListener('cancel',cancel);
+  dialog.showModal();
+ });
+}
+let draftKnown=false,draftOpening=false;
+function setDraftKnown(known){
+ draftKnown=!!known;draftManagement.hidden=!draftKnown;
+ if(!draftKnown)draftManagement.open=false;
+}
+$('personSelect').addEventListener('change',()=>{
+ setDraftKnown(false);
+ draftFeedback(draftOpenStatus,'');
+ draftFeedback(draftStatus,'');
+});
 async function systemDraftRequest(action,extra={}){
  const token=window.liff?.getIDToken?.();
  const endpoint=document.querySelector('meta[name="phms-confirm-api"]')?.content;
- if(!token||!memberId||!endpoint)throw Error('LINE_session_required');
- const resp=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},
-  body:JSON.stringify({action,selectedPersonCode:memberId,...extra})});
- const body=await resp.json().catch(()=>({error:'invalid_response'}));
- if(!resp.ok||body.ok!==true)throw Error(body.error==='unauthenticated'?'LINE หมดอายุ กรุณาเข้าสู่ระบบใหม่':body.error||'draft_unavailable');
- return body;
+ if(!token||!memberId||!endpoint)throw Error('กรุณาเปิดฟอร์มผ่าน LINE แล้วเลือกบุคคล');
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),18000);
+ let body={},resp;
+ try{
+  resp=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},
+   body:JSON.stringify({action,selectedPersonCode:memberId,...extra}),signal:controller.signal});
+  body=await resp.json().catch(()=>({error:'invalid_response'}));
+ }catch(e){
+  if(e?.name==='AbortError')throw Error('เชื่อมต่อระบบนานเกินไป กรุณาลองอีกครั้ง');
+  throw Error('เชื่อมต่อระบบร่างไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่');
+ }finally{clearTimeout(timer);}
+ if(resp.ok&&body.ok===true)return body;
+ const explanation={
+  unauthenticated:'LINE หมดอายุ กรุณาปิดแล้วเปิดฟอร์มจาก LINE ใหม่',
+  permission_denied:'บัญชี LINE นี้ไม่มีสิทธิ์จัดการร่างของบุคคลที่เลือก',
+  draft_not_found:'ไม่พบร่างที่บันทึกไว้ของบุคคลนี้',
+  draft_unavailable:'ยังเข้าถึงร่างในระบบไม่ได้ กรุณาลองใหม่',
+  draft_photo_storage_unavailable:'บันทึกรูปของร่างไม่สำเร็จ กรุณาลองใหม่',
+  invalid_draft:'รูปแบบข้อมูลร่างไม่ถูกต้อง กรุณาลองใหม่',
+  draft_too_large:'ข้อมูลร่างมากเกินไป กรุณาลดจำนวนข้อมูลหรือรูป'
+ };
+ throw Error(explanation[body.error]||'ไม่สามารถดำเนินการกับร่างได้ ('+String(body.error||resp.status)+')');
 }
 function draftFieldValues(){
  const values={};
@@ -6521,6 +6613,7 @@ function draftFieldValues(){
   if(el.id==='personSelect'||el.type==='file'||/password|token|secret/i.test(el.id))continue;
   values[el.id]=el.type==='checkbox'||el.type==='radio'?el.checked:el.value;
  }
+ values.__contactWeekdays=[...chosenContactWeekdays];
  return values;
 }
 function draftPhotoMetadata(p){return {id:p.id,name:p.name,caption:p.caption||'',remotePhotoId:p.remotePhotoId||null,sourceTemplateId:p.sourceTemplateId||null};}
@@ -6550,9 +6643,9 @@ let systemDraftBusy=false;
 async function saveSystemDraft(){
  if(systemDraftBusy)return false;
  if(!memberId||memberId!==$('personSelect').value){draftStatus.textContent='กรุณาเลือกบุคคลก่อนบันทึกร่าง';return false;}
- systemDraftBusy=true;systemDraftSave.disabled=true;confirmDraftSave.disabled=true;
+ systemDraftBusy=true;systemDraftSave.disabled=true;
  try{
-  draftStatus.textContent='กำลังบันทึกร่างในระบบ PHMS…';
+  draftFeedback(draftStatus,'กำลังบันทึกร่างในระบบ…');
   const saved=await systemDraftRequest('draft_save',{payload:draftPayload()});
   const uploads=[];
   photoFiles.slice(0,2).forEach((blob,i)=>uploads.push({slot:'notice-'+(i+1),blob,name:blob.name||'รูปใบนัด'}));
@@ -6560,16 +6653,16 @@ async function saveSystemDraft(){
   visitStops.slice(0,40).forEach((stop,i)=>stop.photos.slice(0,5).forEach((p,j)=>{if(p.blob)uploads.push({slot:'step-'+i+'-'+(j+1),blob:p.blob,name:p.name||'รูปขั้นตอน'});}));
   let count=0;
   for(const item of uploads){
-   draftStatus.textContent='บันทึกข้อความแล้ว กำลังบันทึกรูป '+(++count)+'/'+uploads.length;
+   draftFeedback(draftStatus,'บันทึกข้อความแล้ว กำลังบันทึกรูป '+(++count)+'/'+uploads.length);
    await systemDraftRequest('draft_photo_put',{slot:item.slot,fileName:item.name,mimeType:'image/jpeg',base64:await draftPhotoBase64(item.blob)});
   }
-  draftStatus.textContent='✅ บันทึกร่างในระบบ PHMS สำเร็จ รวม '+uploads.length+' รูป · เปิดต่อจากอุปกรณ์อื่นได้';
+  draftFeedback(draftStatus,'✅ เก็บร่างแล้ว สามารถเปิดต่อด้วยบัญชี LINE เดิม'+(uploads.length?' (รูป '+uploads.length+' รูป)':''));
+  setDraftKnown(true);draftFeedback(draftOpenStatus,'มีร่างที่บันทึกไว้สำหรับบุคคลนี้');
   return true;
- }catch(e){draftStatus.textContent='บันทึกร่างในระบบยังไม่ครบ: '+String(e?.message||e);return false;}
- finally{systemDraftBusy=false;systemDraftSave.disabled=false;confirmDraftSave.disabled=false;}
+ }catch(e){draftFeedback(draftStatus,'ยังบันทึกร่างไม่ครบ: '+String(e?.message||e));return false;}
+ finally{systemDraftBusy=false;systemDraftSave.disabled=false;}
 }
 systemDraftSave.addEventListener('click',saveSystemDraft);
-confirmDraftSave.addEventListener('click',saveSystemDraft);
 reauthAfterDraft.addEventListener('click',()=>{
  // Reload/login never silently discards a draft; saving with expired token is impossible.
  if(!window.confirm('การเข้าสู่ LINE ใหม่จะเปลี่ยนหน้าเว็บ โปรดแน่ใจว่าร่างถูกบันทึกในระบบแล้ว หรือเก็บข้อมูลในหน้านี้ไว้ก่อน'))return;
@@ -6577,90 +6670,156 @@ reauthAfterDraft.addEventListener('click',()=>{
  catch{draftStatus.textContent='กรุณาเปิดผ่าน LINE ใหม่';}
 });
 systemDraftDelete.addEventListener('click',async()=>{
- if(!memberId||!window.confirm('ลบร่างในระบบของบุคคลนี้? การลบนี้ไม่ลบนัดที่บันทึกจริง'))return;
- try{await systemDraftRequest('draft_delete');draftStatus.textContent='ลบร่างในระบบแล้ว';}
- catch(e){draftStatus.textContent=String(e?.message||e);}
+ if(!draftKnown||!memberId||memberId!==$('personSelect').value)return;
+ if(!await draftDialogAnswer(draftDeleteDialog,deleteAccept,deleteCancel))return;
+ systemDraftDelete.disabled=true;
+ const originalMember=memberId;
+ try{
+  await systemDraftRequest('draft_delete');
+  if(originalMember!==memberId)return;
+  setDraftKnown(false);
+  draftFeedback(draftOpenStatus,'ลบร่างที่บันทึกไว้แล้ว · นัดหมายจริงยังอยู่');
+  draftFeedback(draftStatus,'');
+ }catch(error){
+  draftFeedback(draftOpenStatus,'ลบร่างไม่สำเร็จ: '+String(error?.message||error));
+ }finally{systemDraftDelete.disabled=false;}
 });
 async function openSystemDraftForAuthorizedPerson(){
- if(!window.liff?.getIDToken?.()){draftStatus.textContent='กรุณาเข้าสู่ LINE ก่อนเปิดร่าง';return;}
- if(!memberId||memberId!==$('personSelect').value){draftStatus.textContent='กรุณาเลือกบุคคลที่ต้องการเปิดร่าง';return;}
- draftPersonChoose.hidden=true;draftPersonChoose.classList.add('hidden');
- draftStatus.textContent='กำลังเปิดร่างจากระบบ PHMS…';
- let result;
- try{result=await systemDraftRequest('draft_get');}catch(e){draftStatus.textContent=String(e?.message||e);return;}
- const data=result.draft;
- if(!data){draftStatus.textContent='ไม่พบร่างที่ยังไม่หมดอายุสำหรับบุคคลนี้ในระบบ PHMS';return;}
- if(!authorizedCatalog){
-  draftStatus.textContent='พบร่างแล้ว กำลังโหลดทะเบียนโรงพยาบาล…';
-  const readEndpoint=document.querySelector('meta[name="phms-read-api"]')?.content;
-  const catalogResult=await makeLiffProviderCatalogClient({liff:window.liff,endpoint:readEndpoint})(memberId);
-  if(!catalogResult.ok||!catalogResult.catalog?.organizations?.length){draftStatus.textContent='พบร่าง แต่ยังโหลดทะเบียนโรงพยาบาลไม่ได้ กรุณาลองอีกครั้ง';return;}
-  authorizedCatalog=catalogResult.catalog;
-  refreshProviderPicker();
+ if(draftOpening)return;
+ const requestedPerson=memberId;
+ if(!requestedPerson||requestedPerson!==$('personSelect').value){
+  draftFeedback(draftOpenStatus,'กรุณาเลือกบุคคลที่ต้องการเปิดร่างก่อน');
+  $('personSelect').focus({preventScroll:true});return;
  }
- if(!window.confirm('เปิดร่างที่บันทึกในระบบ? ข้อมูลที่กำลังกรอกจะถูกแทนที่')){draftStatus.textContent='ยังไม่ได้เปิดร่าง ข้อมูลที่กรอกอยู่ไม่เปลี่ยนแปลง';return;}
- resetCurrentAppointmentDraft();
- const values=data.fields||{};
- const org=authorizedCatalog.organizations.find(x=>x.id===values.providerOrg);
- if(org){$('providerOrg').value=org.id;comboState.hospital.selectedItem={value:org.id,label:org.display_name||org.name};refreshProviderPicker('providerOrg');}
- const unit=authorizedCatalog.units.find(x=>x.id===values.providerUnit&&(x.organization_id===values.providerOrg||x.organizationId===values.providerOrg));
- if(unit){$('providerUnit').value=unit.id;comboState.unit.selectedItem={value:unit.id,label:unit.name};refreshProviderPicker('providerUnit');}
- for(const [id,value] of Object.entries(values)){
-  const el=$(id);if(!el||el.type==='file'||['personSelect','providerOrg','providerUnit'].includes(id))continue;
-  if(el.type==='checkbox'||el.type==='radio')el.checked=!!value;else el.value=String(value??'');
+ if(!window.liff?.getIDToken?.()){
+  draftFeedback(draftOpenStatus,'กรุณาเปิดผ่าน LINE เพื่อยืนยันตัวตน');return;
  }
- if(org)$('hospitalSearch').value=org.display_name||org.name;
- if(unit)$('unitSearch').value=unit.name;
- checklistItems=Array.isArray(data.checklist)?data.checklist:[];renderChecklist();
- procedurePreviewItems=Array.isArray(data.procedures)?data.procedures.slice(0,30):[];renderProcedurePreview();
- setContactPhoneItems((data.contactPhones||[]).join('\n'));
- clearAppointmentPhotos();clearJourneyDraft();
- const photoMap=new Map((data.photos||[]).filter(p=>p?.url).map(p=>[p.slot,p]));
- async function restoreImage(slot){
-  const p=photoMap.get(slot);if(!p)return null;
-  try{const response=await fetch(p.url);if(!response.ok)return null;return await response.blob();}
-  catch{return null;}
+ draftOpening=true;systemDraftOpen.disabled=true;
+ draftFeedback(draftOpenStatus,'กำลังค้นหาร่างที่บันทึกไว้…');
+ try{
+  const result=await systemDraftRequest('draft_get');
+  if(memberId!==requestedPerson)return;
+  const data=result.draft;
+  if(!data){
+   setDraftKnown(false);
+   draftFeedback(draftOpenStatus,'ยังไม่มีร่างที่บันทึกไว้ของบุคคลนี้ในบัญชี LINE นี้');
+   return;
+  }
+  if(!data.fields||typeof data.fields!=='object'||Array.isArray(data.fields))
+   throw Error('ข้อมูลร่างไม่ครบ กรุณาอย่าลบร่างและติดต่อผู้ดูแลระบบ');
+  setDraftKnown(true);
+  if(!authorizedCatalog){
+   draftFeedback(draftOpenStatus,'พบร่างแล้ว กำลังเตรียมข้อมูลโรงพยาบาล…');
+   const readEndpoint=document.querySelector('meta[name="phms-read-api"]')?.content;
+   const catalogResult=await makeLiffProviderCatalogClient({liff:window.liff,endpoint:readEndpoint})(requestedPerson);
+   if(!catalogResult.ok||!catalogResult.catalog?.organizations?.length)
+    throw Error('พบร่างแล้ว แต่ยังโหลดรายชื่อโรงพยาบาลไม่ได้ กรุณาลองอีกครั้ง');
+   if(memberId!==requestedPerson)return;
+   authorizedCatalog=catalogResult.catalog;
+   refreshProviderPicker();
+  }
+  // Download signed images before altering the current screen. A failed image download
+  // must never silently overwrite a complete draft with missing attachments.
+  const photoMap=new Map((data.photos||[]).filter(p=>p?.url&&p?.slot).map(p=>[p.slot,p]));
+  const loadedPhotos=new Map();
+  if(photoMap.size){
+   draftFeedback(draftOpenStatus,'พบร่างแล้ว กำลังโหลดรูป '+photoMap.size+' รูป…');
+   await Promise.all([...photoMap].map(async ([slot,p])=>{
+    let response;
+    try{response=await fetch(p.url,{cache:'no-store'});}catch{throw Error('โหลดรูปจากร่างไม่สำเร็จ กรุณาลองใหม่');}
+    if(!response.ok)throw Error('รูปบางรูปเปิดไม่ได้ กรุณาลองใหม่');
+    const blob=await response.blob();
+    if(blob.size===0||!(blob.type||p.mimeType||'').startsWith('image/'))
+     throw Error('รูปในร่างไม่ถูกต้อง กรุณาลองใหม่');
+    loadedPhotos.set(slot,blob);
+   }));
+  }
+  if(memberId!==requestedPerson)return;
+  const editingNow=!!($('purpose').value.trim()||$('date').value||
+   $('additionalNote').value.trim()||$('previsitSymptoms').value.trim()||
+   photoFiles.length||visitStops.length);
+  if(editingNow&&!await draftDialogAnswer(draftOverwriteDialog,overwriteAccept,overwriteCancel)){
+   draftFeedback(draftOpenStatus,'ยกเลิกการเปิดร่าง · ข้อมูลที่กำลังกรอกยังอยู่');
+   return;
+  }
+  if(memberId!==requestedPerson)return;
+  resetCurrentAppointmentDraft();
+  const values=data.fields;
+  const org=authorizedCatalog.organizations.find(x=>x.id===values.providerOrg);
+  if(org){
+   $('providerOrg').value=org.id;
+   comboState.hospital.selectedItem={value:org.id,label:org.display_name||org.name};
+   refreshProviderPicker();
+  }
+  const unit=authorizedCatalog.units.find(x=>x.id===values.providerUnit&&
+   (x.organization_id===values.providerOrg||x.organizationId===values.providerOrg));
+  if(unit){
+   $('providerUnit').value=unit.id;
+   comboState.unit.selectedItem={value:unit.id,label:unit.name};
+   refreshProviderPicker();
+  }
+  for(const [id,value] of Object.entries(values)){
+   if(id.startsWith('__'))continue;
+   const el=$(id);
+   if(!el||el.type==='file'||['personSelect','providerOrg','providerUnit'].includes(id))continue;
+   if(el.type==='checkbox'||el.type==='radio')el.checked=!!value;
+   else el.value=String(value??'');
+  }
+  if(org)$('hospitalSearch').value=org.display_name||org.name;
+  if(unit)$('unitSearch').value=unit.name;
+  if(values.providerClinician){
+   $('providerClinician').value=values.providerClinician;
+   refreshProviderPicker();
+  }
+  syncProviderNames();
+  chosenContactWeekdays.clear();
+  if(Array.isArray(values.__contactWeekdays))for(const k of values.__contactWeekdays)
+   if(contactWeekdayValues.some(([key])=>key===k))chosenContactWeekdays.add(k);
+  syncContactFields();
+  checklistItems=Array.isArray(data.checklist)?data.checklist:[];renderChecklist();
+  procedurePreviewItems=Array.isArray(data.procedures)?data.procedures.slice(0,30):[];renderProcedurePreview();
+  setContactPhoneItems((data.contactPhones||[]).join('\n'));
+  clearAppointmentPhotos();clearJourneyDraft();
+  const photoFile=(slot,fallback)=>{
+   const p=photoMap.get(slot),blob=loadedPhotos.get(slot);
+   if(!blob)return null;
+   return new File([blob],p?.name||fallback,{type:blob.type||p?.mimeType||'image/jpeg'});
+  };
+  for(let i=0;i<2;i++){
+   const file=photoFile('notice-'+(i+1),'รูปใบนัด-'+(i+1)+'.jpg');
+   if(file){photoFiles.push(file);photoUrls.push(URL.createObjectURL(file));}
+  }
+  renderAppointmentPhotos();
+  const journey=data.journey||{};
+  primaryJourney.coverId=journey.cover||null;primaryJourney.photos=[];
+  for(let i=0;i<(journey.main||[]).length;i++){
+   const info=journey.main[i],file=photoFile('main-'+(i+1),'จุดติดต่อ-'+(i+1)+'.jpg');
+   if(file)primaryJourney.photos.push({...info,blob:file,url:URL.createObjectURL(file)});
+  }
+  visitStops=[];
+  for(let i=0;i<(journey.stops||[]).length;i++){
+   const step=journey.stops[i],photos=[];
+   for(let j=0;j<(step.photos||[]).length;j++){
+    const info=step.photos[j],file=photoFile('step-'+i+'-'+(j+1),'ขั้นตอน-'+(i+1)+'-'+(j+1)+'.jpg');
+    if(file)photos.push({...info,blob:file,url:URL.createObjectURL(file)});
+   }
+   visitStops.push(ensureVisitStop({...step,photos}));
+  }
+  renderMainJourneyPhotos();renderVisitStops();
+  savedAppointmentId=data.appointmentId||'';
+  uploadedNoticeSlots=new Set(data.uploadedSlots||[]);
+  reviewedDraft=null;$('back').disabled=false;
+  $('confirmation').classList.add('hidden');editor.classList.remove('hidden');
+  syncScenarioCards();refresh();updateProgressiveLayout();updateFilledIndicators();syncPickerPrompts();
+  draftFeedback(draftOpenStatus,'✅ เปิดร่างสำเร็จ กรอกข้อมูลต่อได้เลย');
+  draftFeedback(draftStatus,'');
+ }catch(error){
+  draftFeedback(draftOpenStatus,'เปิดร่างไม่สำเร็จ: '+String(error?.message||error));
+ }finally{
+  draftOpening=false;systemDraftOpen.disabled=false;
  }
- for(let i=0;i<2;i++){const blob=await restoreImage('notice-'+(i+1));if(blob){photoFiles.push(new File([blob],photoMap.get('notice-'+(i+1)).name,{type:blob.type||'image/jpeg'}));photoUrls.push(URL.createObjectURL(blob));}}
- renderAppointmentPhotos();
- const journey=data.journey||{};
- primaryJourney.coverId=journey.cover||null;
- primaryJourney.photos=[];
- for(let i=0;i<(journey.main||[]).length;i++){const p=journey.main[i],blob=await restoreImage('main-'+(i+1));if(blob)primaryJourney.photos.push({...p,blob,url:URL.createObjectURL(blob)});}
- visitStops=[];
- for(let i=0;i<(journey.stops||[]).length;i++){
-  const x=journey.stops[i],photos=[];
-  for(let j=0;j<(x.photos||[]).length;j++){const p=x.photos[j],blob=await restoreImage('step-'+i+'-'+(j+1));if(blob)photos.push({...p,blob,url:URL.createObjectURL(blob)});}
-  visitStops.push(ensureVisitStop({...x,photos}));
- }
- renderMainJourneyPhotos();renderVisitStops();
- savedAppointmentId=data.appointmentId||'';uploadedNoticeSlots=new Set(data.uploadedSlots||[]);
- reviewedDraft=null;$('back').disabled=false;$('confirmation').classList.add('hidden');editor.classList.remove('hidden');
- syncScenarioCards();refresh();updateProgressiveLayout();updateFilledIndicators();
- draftStatus.textContent='✅ เปิดร่างจากระบบ PHMS แล้ว · ตรวจทานก่อนบันทึกนัด';
 }
-function showDraftPersonChoices(){
- const options=[...$('personSelect').options].filter(o=>o.value);
- if(!options.length){draftStatus.textContent='ยังไม่พบรายชื่อผู้มีสิทธิ์ กรุณาเข้าสู่ LINE หรือรอให้โหลดรายชื่อเสร็จก่อน';return;}
- draftPersonSelect.replaceChildren(new Option('เลือกบุคคลที่ต้องการเปิดร่าง',''),...options.map(o=>new Option(o.textContent,o.value)));
- draftPersonSelect.value=memberId||'';
- draftPersonChoose.hidden=false;draftPersonChoose.classList.remove('hidden');
- draftStatus.textContent='เลือกบุคคล แล้วกด “เปิดร่างของบุคคลนี้”';
- draftPersonSelect.focus({preventScroll:true});
-}
-systemDraftOpen.addEventListener('click',()=>{
- if(!window.liff?.getIDToken?.()){draftStatus.textContent='กรุณาเข้าสู่ LINE ก่อนเปิดร่าง';return;}
- if(memberId&&memberId===$('personSelect').value){void openSystemDraftForAuthorizedPerson();return;}
- const options=[...$('personSelect').options].filter(o=>o.value);
- if(options.length===1){$('personSelect').value=options[0].value;$('personSelect').dispatchEvent(new Event('change',{bubbles:true}));void openSystemDraftForAuthorizedPerson();return;}
- showDraftPersonChoices();
-});
-draftPersonConfirm.addEventListener('click',()=>{
- const selected=draftPersonSelect.value;
- if(!selected||![...$('personSelect').options].some(o=>o.value===selected)){draftStatus.textContent='กรุณาเลือกบุคคลจากรายชื่อที่มีสิทธิ์';return;}
- if($('personSelect').value!==selected){$('personSelect').value=selected;$('personSelect').dispatchEvent(new Event('change',{bubbles:true}));}
- void openSystemDraftForAuthorizedPerson();
-});
+systemDraftOpen.addEventListener('click',()=>{void openSystemDraftForAuthorizedPerson();});
 
 function updateFilledIndicators(){
  for(const panel of optionalPanels){
