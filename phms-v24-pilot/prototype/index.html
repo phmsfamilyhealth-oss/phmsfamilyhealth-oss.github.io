@@ -3086,8 +3086,48 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
 #editor .phms-draft-list-item strong{font-size:1rem;line-height:1.5;overflow-wrap:anywhere}
 #editor .phms-draft-list-item small{font-size:.87rem;line-height:1.5;font-weight:400;color:#756451}
 #editor .phms-draft-list-item span{font-size:.86rem;font-weight:650;text-align:right;color:#735033}
+
+/* PHMS v2.4.90.55 — two-column appointment-slip review (tap to enlarge).
+   Strictly review-only: entry gallery, original image and upload remain unchanged. */
+#confirmation #preview .phms-notice-review-gallery{
+ display:grid!important;
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ align-items:start!important;
+ gap:10px!important;
+ width:100%!important;
+ max-width:100%!important;
+}
+#confirmation #preview button.phms-notice-review-thumb{
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ width:100%!important;
+ max-width:100%!important;
+ min-width:0!important;
+ height:190px!important;
+ max-height:190px!important;
+ padding:4px!important;
+ border:1px solid #e4d2bc!important;
+ border-radius:10px!important;
+ background:#fff!important;
+ cursor:zoom-in!important;
+ overflow:hidden!important;
+ line-height:normal!important;
+}
+#confirmation #preview button.phms-notice-review-thumb img{
+ width:100%!important;
+ max-width:100%!important;
+ height:100%!important;
+ max-height:100%!important;
+ object-fit:contain!important;
+ border-radius:7px!important;
+}
+@media(max-width:420px){
+ #confirmation #preview .phms-notice-review-gallery{gap:8px!important}
+ #confirmation #preview button.phms-notice-review-thumb{height:156px!important;max-height:156px!important}
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.54</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.55</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4095,6 +4135,7 @@ if(photoFiles.length){
   if(!photoUrls[index])return;
   const thumb=document.createElement('button');thumb.type='button';thumb.className='phms-notice-review-thumb';
   thumb.setAttribute('aria-label','เปิดดูรูปใบนัดที่ '+(index+1));
+  thumb.title='แตะเพื่อขยายรูปใบนัด';
   const image=document.createElement('img');image.src=photoUrls[index];
   image.alt='รูปใบนัดที่ '+(index+1);image.loading='lazy';
   thumb.append(image);
