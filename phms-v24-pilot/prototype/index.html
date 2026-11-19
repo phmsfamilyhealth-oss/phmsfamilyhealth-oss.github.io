@@ -3127,7 +3127,7 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
  #confirmation #preview button.phms-notice-review-thumb{height:156px!important;max-height:156px!important}
 }
 
-/* PHMS v2.4.90.56 — compact, readable two-column appointment-step review. */
+/* PHMS v2.4.90.57 — one detail per row, label left / value right. */
 #confirmation #preview .phms-review-stop-head{
  display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;
  align-items:baseline!important;justify-content:flex-start!important;
@@ -3137,42 +3137,49 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
 #confirmation #preview .phms-review-stop-head.has-details{
  padding-bottom:10px!important;border-bottom:1px solid #ecdcc9!important;
 }
-#confirmation #preview .phms-review-stop-number{
- flex:0 0 auto!important;white-space:nowrap!important;
-}
-#confirmation #preview .phms-review-stop-head h4{
- flex:1 1 180px!important;min-width:0!important;margin:0!important;
-}
+#confirmation #preview .phms-review-stop-number{flex:0 0 auto!important;white-space:nowrap!important}
+#confirmation #preview .phms-review-stop-head h4{flex:1 1 180px!important;min-width:0!important;margin:0!important}
 #confirmation #preview .phms-review-stop-details{
- display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
- align-items:start!important;gap:8px 14px!important;padding:10px 0 0!important;
- min-width:0!important;
+ display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+ gap:0!important;padding:0!important;min-width:0!important;
 }
-#confirmation #preview .phms-review-stop-detail{
- min-width:0!important;overflow-wrap:anywhere!important;line-height:1.6!important;
+#confirmation #preview .phms-review-stop-detail,
+#confirmation #preview .phms-review-stop-instructions{
+ display:grid!important;grid-template-columns:minmax(0,40%) minmax(0,60%)!important;
+ align-items:start!important;gap:10px!important;
+ min-width:0!important;width:100%!important;box-sizing:border-box!important;
+ padding:10px 0!important;margin:0!important;
+ border:0!important;border-radius:0!important;background:transparent!important;
 }
-#confirmation #preview .phms-review-stop-detail-name{
- display:inline!important;margin:0!important;font-size:.94rem!important;
- font-weight:700!important;line-height:1.6!important;
+#confirmation #preview .phms-review-stop-details > :not(:last-child){
+ border-bottom:1px solid #ecdcc9!important;
+}
+#confirmation #preview .phms-review-stop-detail-name,
+#confirmation #preview .phms-review-stop-instructions>strong{
+ display:block!important;margin:0!important;font-size:.94rem!important;
+ font-weight:700!important;line-height:1.6!important;color:#69533d!important;
 }
 #confirmation #preview .phms-review-stop-detail p{
- display:inline!important;margin:0!important;padding:0!important;
- font-size:.98rem!important;line-height:1.6!important;
- font-weight:500!important;white-space:pre-wrap!important;
- overflow-wrap:anywhere!important;
+ display:block!important;margin:0!important;padding:0!important;
+ font-size:.98rem!important;line-height:1.6!important;font-weight:500!important;
+ white-space:pre-wrap!important;overflow-wrap:anywhere!important;
 }
-#confirmation #preview .phms-review-stop-instructions{
- grid-column:1/-1!important;
+#confirmation #preview .phms-review-stop-instructions ol{
+ margin:0!important;padding-left:20px!important;min-width:0!important;
 }
 @media(max-width:420px){
  #confirmation #preview .phms-review-stop-head{column-gap:8px!important}
  #confirmation #preview .phms-review-stop-head h4{flex-basis:120px!important}
- #confirmation #preview .phms-review-stop-details{column-gap:10px!important}
+ #confirmation #preview .phms-review-stop-detail,
+ #confirmation #preview .phms-review-stop-instructions{
+  grid-template-columns:minmax(0,39%) minmax(0,61%)!important;gap:7px!important;
+ }
  #confirmation #preview .phms-review-stop-detail-name,
+ #confirmation #preview .phms-review-stop-instructions>strong,
  #confirmation #preview .phms-review-stop-detail p{font-size:.92rem!important}
 }
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.56</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.57</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4349,7 +4356,7 @@ function renderAccessibleAppointmentReview(){
    if(!content)return;
    const row=document.createElement('div');row.className='phms-review-stop-detail';
    const name=document.createElement('span');name.className='phms-review-stop-detail-name';
-   name.textContent=label+': ';
+   name.textContent=label;
    const description=document.createElement('p');description.textContent=content;
    row.append(name,description);target.append(row);
   };
