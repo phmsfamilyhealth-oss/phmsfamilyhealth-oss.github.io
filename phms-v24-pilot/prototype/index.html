@@ -3078,8 +3078,16 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
 #editor #draftOpenArea .phms-draft-feedback{margin:2px 0!important}
 @media(max-width:430px){#editor #draftOpenArea{padding:12px!important}}
 
+
+#editor #draftChoiceList[hidden]{display:none!important}
+#editor #draftChoiceList{display:flex;flex-direction:column;gap:9px;margin-top:9px;width:100%}
+#editor .phms-draft-list-title{font-size:.96rem;font-weight:700;color:#523a26;margin:0}
+#editor .phms-draft-list-item{display:flex!important;flex-direction:column!important;text-align:left!important;align-items:stretch!important;gap:5px;width:100%!important;padding:12px!important;background:white!important;color:#42301e!important;border:1px solid #d9baa0!important;border-radius:11px!important;min-height:70px!important}
+#editor .phms-draft-list-item strong{font-size:1rem;line-height:1.5;overflow-wrap:anywhere}
+#editor .phms-draft-list-item small{font-size:.87rem;line-height:1.5;font-weight:400;color:#756451}
+#editor .phms-draft-list-item span{font-size:.86rem;font-weight:650;text-align:right;color:#735033}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.53</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.54</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -6489,6 +6497,7 @@ function resetCurrentAppointmentDraft(){
  $('hasAppointmentPhotos').value='';
  resetContactDraft();
  $('appointmentOrigin').value='new';$('appointmentRescheduleCount').value='1';updateAppointmentStateUI();
+ activeSystemDraftId='';
  // Preserve the user's chosen Simple/Detailed mode when switching people or clearing a draft.
  // The initial HTML select still defaults to Simple for a fresh form.
  $('scenario').value='booked';$('known').value='yes';scenarioChoiceMade=false;syncScenarioCards();
@@ -6555,7 +6564,8 @@ draftManagement.append(systemDraftDelete);
 const draftOpenArea=document.createElement('section');draftOpenArea.id='draftOpenArea';draftOpenArea.setAttribute('aria-label','ร่างนัดหมายที่บันทึกไว้');
 const draftOpenHeading=document.createElement('p');draftOpenHeading.className='phms-draft-heading';draftOpenHeading.textContent='📂 ร่างนัดหมาย';
 const draftOpenHint=document.createElement('p');draftOpenHint.className='phms-draft-hint';draftOpenHint.textContent='เคยกรอกค้างไว้? เปิดร่างเพื่อกรอกต่อได้';
-draftOpenArea.append(draftOpenHeading,draftOpenHint,systemDraftOpen,draftOpenStatus,draftManagement);
+const draftChoiceList=document.createElement('div');draftChoiceList.id='draftChoiceList';draftChoiceList.hidden=true;
+draftOpenArea.append(draftOpenHeading,draftOpenHint,systemDraftOpen,draftOpenStatus,draftChoiceList,draftManagement);
 personSection.after(draftOpenArea);
 const systemDraftBar=document.createElement('div');systemDraftBar.id='systemDraftBar';
 const systemDraftSave=draftButton('💾 บันทึกไว้กรอกต่อ');systemDraftSave.id='systemDraftSave';
@@ -6610,12 +6620,27 @@ function draftDialogAnswer(dialog,yes,no){
   dialog.showModal();
  });
 }
-let draftKnown=false,draftOpening=false;
+let draftKnown=false,draftOpening=false,activeSystemDraftId='';
+function renderDraftChoices(items){
+ draftChoiceList.replaceChildren();draftChoiceList.hidden=!items.length;
+ const title=document.createElement('p');title.textContent='เลือกจาก '+items.length+' ร่างที่บันทึกไว้';title.className='phms-draft-list-title';draftChoiceList.append(title);
+ for(const item of items){
+  const button=draftButton('');button.className='phms-draft-list-item';
+  const heading=document.createElement('strong');heading.textContent=item.title||'ยังไม่ตั้งชื่อนัด';
+  const sub=document.createElement('small');
+  const types={booked:'นัดตามใบนัด',walk_in:'ไปโรงพยาบาลเอง',historical:'บันทึกย้อนหลัง'};
+  sub.textContent=[types[item.scenario]||'นัดตามใบนัด',item.date||'ยังไม่กำหนดวัน',item.detail==='full'?'แบบละเอียด':'แบบง่าย'].join(' · ');
+  const hint=document.createElement('span');hint.textContent='เปิดร่างนี้';
+  button.append(heading,sub,hint);
+  button.addEventListener('click',()=>{draftChoiceList.hidden=true;void openSystemDraftForAuthorizedPerson(item.id);});
+  draftChoiceList.append(button);
+ }
+}
 function setDraftKnown(known){
  draftKnown=!!known;draftManagement.hidden=!draftKnown;
 }
 $('personSelect').addEventListener('change',()=>{
- setDraftKnown(false);
+ setDraftKnown(false);activeSystemDraftId='';draftChoiceList.hidden=true;draftChoiceList.replaceChildren();
  draftFeedback(draftOpenStatus,'');
  draftFeedback(draftStatus,'');
 });
@@ -6685,7 +6710,9 @@ async function saveSystemDraft(){
  systemDraftBusy=true;systemDraftSave.disabled=true;
  try{
   draftFeedback(draftStatus,'กำลังบันทึกร่างในระบบ…');
-  const saved=await systemDraftRequest('draft_save',{payload:draftPayload()});
+  const newId=activeSystemDraftId||crypto.randomUUID();
+  const saved=await systemDraftRequest('draft_save',{draftId:newId,payload:draftPayload()});
+  activeSystemDraftId=saved.draftId||newId;
   const uploads=[];
   photoFiles.slice(0,2).forEach((blob,i)=>uploads.push({slot:'notice-'+(i+1),blob,name:blob.name||'รูปใบนัด'}));
   primaryJourney.photos.slice(0,5).forEach((p,i)=>{if(p.blob)uploads.push({slot:'main-'+(i+1),blob:p.blob,name:p.name||'รูปจุดติดต่อ'});});
@@ -6693,7 +6720,7 @@ async function saveSystemDraft(){
   let count=0;
   for(const item of uploads){
    draftFeedback(draftStatus,'บันทึกข้อความแล้ว กำลังบันทึกรูป '+(++count)+'/'+uploads.length);
-   await systemDraftRequest('draft_photo_put',{slot:item.slot,fileName:item.name,mimeType:'image/jpeg',base64:await draftPhotoBase64(item.blob)});
+   await systemDraftRequest('draft_photo_put',{draftId:activeSystemDraftId,slot:item.slot,fileName:item.name,mimeType:'image/jpeg',base64:await draftPhotoBase64(item.blob)});
   }
   draftFeedback(draftStatus,'✅ เก็บร่างแล้ว สามารถเปิดต่อด้วยบัญชี LINE เดิม'+(uploads.length?' (รูป '+uploads.length+' รูป)':''));
   setDraftKnown(true);draftFeedback(draftOpenStatus,'มีร่างที่บันทึกไว้สำหรับบุคคลนี้');
@@ -6714,16 +6741,16 @@ systemDraftDelete.addEventListener('click',async()=>{
  systemDraftDelete.disabled=true;
  const originalMember=memberId;
  try{
-  await systemDraftRequest('draft_delete');
+  await systemDraftRequest('draft_delete',{draftId:activeSystemDraftId});
   if(originalMember!==memberId)return;
   setDraftKnown(false);
-  draftFeedback(draftOpenStatus,'ลบร่างที่บันทึกไว้แล้ว · นัดหมายจริงยังอยู่');
+  activeSystemDraftId='';draftFeedback(draftOpenStatus,'ลบร่างนี้แล้ว · นัดหมายจริงยังอยู่');
   draftFeedback(draftStatus,'');
  }catch(error){
   draftFeedback(draftOpenStatus,'ลบร่างไม่สำเร็จ: '+String(error?.message||error));
  }finally{systemDraftDelete.disabled=false;}
 });
-async function openSystemDraftForAuthorizedPerson(){
+async function openSystemDraftForAuthorizedPerson(selectedDraftId){
  if(draftOpening)return;
  const requestedPerson=memberId;
  if(!requestedPerson||requestedPerson!==$('personSelect').value){
@@ -6736,7 +6763,7 @@ async function openSystemDraftForAuthorizedPerson(){
  draftOpening=true;systemDraftOpen.disabled=true;
  draftFeedback(draftOpenStatus,'กำลังค้นหาร่างที่บันทึกไว้…');
  try{
-  const result=await systemDraftRequest('draft_get');
+  const result=await systemDraftRequest('draft_get',{draftId:selectedDraftId});
   if(memberId!==requestedPerson)return;
   const data=result.draft;
   if(!data){
@@ -6845,10 +6872,14 @@ async function openSystemDraftForAuthorizedPerson(){
    visitStops.push(ensureVisitStop({...step,photos}));
   }
   renderMainJourneyPhotos();renderVisitStops();
+  activeSystemDraftId=result.draftId||selectedDraftId;
   savedAppointmentId=data.appointmentId||'';
   uploadedNoticeSlots=new Set(data.uploadedSlots||[]);
   reviewedDraft=null;$('back').disabled=false;
   $('confirmation').classList.add('hidden');editor.classList.remove('hidden');
+  scenarioChoiceMade=['booked','walk_in','historical'].includes(values.scenario);
+  $('scenario').dispatchEvent(new Event('change',{bubbles:true}));
+  $('detail').dispatchEvent(new Event('change',{bubbles:true}));
   syncScenarioCards();refresh();updateProgressiveLayout();updateFilledIndicators();syncPickerPrompts();
   draftFeedback(draftOpenStatus,'✅ เปิดร่างแล้ว กรอกข้อมูลต่อได้เลย');
   draftFeedback(draftStatus,'');
@@ -6859,7 +6890,21 @@ async function openSystemDraftForAuthorizedPerson(){
   draftOpening=false;systemDraftOpen.disabled=false;
  }
 }
-systemDraftOpen.addEventListener('click',()=>{void openSystemDraftForAuthorizedPerson();});
+systemDraftOpen.addEventListener('click',async()=>{
+ if(draftOpening)return;
+ if(!memberId||memberId!==$('personSelect').value){draftFeedback(draftOpenStatus,'กรุณาเลือกบุคคลก่อนเปิดร่าง');return;}
+ systemDraftOpen.disabled=true;
+ draftFeedback(draftOpenStatus,'กำลังค้นหาร่าง…');
+ try{
+  const response=await systemDraftRequest('draft_list');
+  const items=Array.isArray(response.drafts)?response.drafts:[];
+  renderDraftChoices(items);
+  if(!items.length){setDraftKnown(false);draftFeedback(draftOpenStatus,'ยังไม่มีร่างของบุคคลนี้');}
+  else if(items.length===1){draftChoiceList.hidden=true;draftFeedback(draftOpenStatus,'');await openSystemDraftForAuthorizedPerson(items[0].id);}
+  else draftFeedback(draftOpenStatus,'เลือกนัดที่ต้องการเปิดจากรายการด้านล่าง');
+ }catch(e){draftFeedback(draftOpenStatus,'ค้นหาร่างไม่สำเร็จ: '+String(e?.message||e));}
+ finally{systemDraftOpen.disabled=false;}
+});
 
 function updateFilledIndicators(){
  for(const panel of optionalPanels){
