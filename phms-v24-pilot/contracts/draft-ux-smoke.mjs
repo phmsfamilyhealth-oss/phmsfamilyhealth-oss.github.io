@@ -103,7 +103,9 @@ try{
  await page.waitForFunction(()=>document.getElementById('draftOverwriteDialog').open);
  assert.equal(await page.locator('#purpose').inputValue(),'ข้อความที่ยังไม่ได้เก็บ');
  await page.locator('#draftOverwriteDialog .phms-draft-accept').click();
- await page.waitForFunction(()=>document.getElementById('draftOpenStatus').textContent.includes('เปิดร่างสำเร็จ'),{timeout:10000});
+ await page.waitForTimeout(1000);
+ console.log('DRAFT_OPEN_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>({status:document.getElementById('draftOpenStatus')?.textContent,formPurpose:document.getElementById('purpose')?.value,errors:document.getElementById('error')?.textContent,person:document.getElementById('personSelect')?.value})),errors));
+ await page.waitForFunction(()=>document.getElementById('draftOpenStatus').textContent.includes('เปิดร่างสำเร็จ'),{timeout:5000});
  assert.equal(await page.locator('#purpose').inputValue(),'ตรวจเข่าครั้งแรก');
  assert.equal(await page.locator('#additionalNote').inputValue(),'หมายเหตุทดสอบ');
  assert.equal(await page.locator('#personSelect').inputValue(),member);
