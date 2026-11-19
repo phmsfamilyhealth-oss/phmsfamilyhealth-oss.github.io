@@ -3178,8 +3178,40 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
  #confirmation #preview .phms-review-stop-instructions>strong,
  #confirmation #preview .phms-review-stop-detail p{font-size:.92rem!important}
 }
+
+/* PHMS v2.4.90.58 — concise senior-friendly same-day appointment notice. */
+#editor .same-day-notice{
+ padding:13px 15px!important;margin:12px 0!important;
+ font-size:17px!important;line-height:1.55!important;
+}
+#editor .same-day-notice-title{
+ display:block!important;margin:0!important;
+ font-size:18px!important;font-weight:750!important;line-height:1.45!important;
+}
+#editor .same-day-notice-list{
+ list-style:none!important;padding:0!important;margin:7px 0 0!important;
+ display:grid!important;gap:4px!important;
+}
+#editor .same-day-notice-list.hidden{display:none!important}
+#editor .same-day-notice-list li{
+ display:block!important;padding:0!important;margin:0!important;
+ font-size:16px!important;line-height:1.5!important;
+ overflow-wrap:anywhere!important;
+}
+#editor .same-day-notice-more{
+ display:inline-flex!important;width:auto!important;min-height:42px!important;
+ margin:10px 0 0!important;padding:8px 13px!important;
+ border:1px solid currentColor!important;border-radius:10px!important;
+ color:inherit!important;background:transparent!important;
+ font-size:16px!important;font-weight:700!important;cursor:pointer!important;
+}
+@media(max-width:420px){
+ #editor .same-day-notice{padding:12px!important}
+ #editor .same-day-notice-title{font-size:17px!important}
+ #editor .same-day-notice-list li{font-size:16px!important}
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.57</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.58</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -6143,43 +6175,64 @@ function sameDayAppointmentConflicts(){
 }
 function updateSameDayAppointmentNotice(){
  const found=sameDayAppointmentConflicts();
- conflictNotice.replaceChildren();conflictNotice.classList.toggle('hidden',!found.length);
+ conflictNotice.replaceChildren();
+ conflictNotice.classList.toggle('hidden',!found.length);
  if(!found.length)return;
  const currentPlace=normalizeAppointmentPlace($('hospital').value||$('hospitalSearch').value);
  const currentTitle=String($('purpose').value||'').trim().toLocaleLowerCase('th-TH');
  const currentTime=$('scenario').value==='booked'||$('known').value==='yes'?$('time').value:'';
  const currentUnit=String($('department').value||'').trim().toLocaleLowerCase('th-TH');
- const reasons=new Set();
+ let differentHospital=false,sameTime=false,possibleDuplicate=false;
  for(const a of found){
   const otherPlace=normalizeAppointmentPlace(a.hospital_name);
   const otherTitle=String(a.title||'').trim().toLocaleLowerCase('th-TH');
   const otherUnit=String(a.department||'').trim().toLocaleLowerCase('th-TH');
   const otherTime=appointmentBangkokParts(a).time;
-  const differentPlace=!!currentPlace&&!!otherPlace&&currentPlace!==otherPlace;
+  // Equal clock times are conflicts; nearby times are NOT automatically collisions.
   const exactTime=!!currentTime&&!!otherTime&&currentTime===otherTime;
-  if(differentPlace)reasons.add('hospital');
-  if(exactTime)reasons.add('time');
-  if(currentTitle&&otherTitle===currentTitle&&currentPlace&&otherPlace===currentPlace&&(!currentUnit||!otherUnit||currentUnit===otherUnit)&&(!currentTime||!otherTime||exactTime))reasons.add('duplicate');
+  if(currentPlace&&otherPlace&&currentPlace!==otherPlace)differentHospital=true;
+  if(exactTime)sameTime=true;
+  if(currentTitle&&otherTitle===currentTitle&&currentPlace&&otherPlace===currentPlace&&
+    (!currentUnit||!otherUnit||currentUnit===otherUnit)&&(!currentTime||!otherTime||exactTime))
+   possibleDuplicate=true;
  }
- const highRisk=reasons.size>0;
+ const highRisk=differentHospital||sameTime||possibleDuplicate;
  conflictNotice.classList.toggle('high-risk',highRisk);
  const header=document.createElement('strong');
- header.textContent=reasons.has('duplicate')?'⚠️ วันนี้มีนัดอื่นแล้ว · อาจบันทึกซ้ำ':reasons.has('hospital')?'⚠️ วันนี้มีนัดอื่นแล้ว · ต่างโรงพยาบาล':reasons.has('time')?'⚠️ วันนี้มีนัดอื่นแล้ว · เวลาชนกัน':'📅 วันนี้มีนัดอื่นแล้ว ('+found.length+' นัด)';
+ header.className='same-day-notice-title';
+ header.textContent=differentHospital&&sameTime?'⚠️ เวลานัดชนกัน · คนละโรงพยาบาล!':
+  sameTime?'⚠️ เวลานัดชนกัน!':
+  differentHospital?'⚠️ นัดคนละโรงพยาบาล!':
+  possibleDuplicate?'⚠️ อาจเป็นนัดซ้ำ!':
+  '📅 วันนี้มีอีก '+found.length+' นัด';
  conflictNotice.append(header);
- const details=[];
- if(reasons.has('hospital'))details.push('คนละโรงพยาบาล: เสี่ยงเดินทางไม่ทัน');
- if(reasons.has('time'))details.push('เวลานัดชนกัน: กรุณาตรวจสอบ');
- if(reasons.has('duplicate'))details.push('อาจเป็นนัดซ้ำ: ตรวจสอบนัดเดิมก่อนกรอกเพิ่ม');
- if(!details.length)details.push('ตรวจสอบแผนก แพทย์ และเวลาได้ · แยกนัดได้ตามใบนัดจริง');
- for(const message of details){const line=document.createElement('p');line.textContent=message;conflictNotice.append(line);}
  const list=document.createElement('ul');
- for(const a of found.slice(0,3)){
+ list.className='same-day-notice-list';
+ const addAppointment=a=>{
   const li=document.createElement('li'),at=appointmentBangkokParts(a);
   li.textContent=[at.time?at.time+' น.':'ไม่ระบุเวลา',a.title||'นัดหมาย',a.hospital_name||'ไม่ระบุโรงพยาบาล'].join(' · ');
-  list.append(li);
- }
+  return li;
+ };
+ for(const a of found.slice(0,3))list.append(addAppointment(a));
  conflictNotice.append(list);
- if(found.length>3){const line=document.createElement('p');line.textContent='และอีก '+(found.length-3)+' รายการ';conflictNotice.append(line);}
+ if(found.length>3){
+  const extra=document.createElement('ul');
+  extra.className='same-day-notice-list hidden';
+  extra.id='sameDayAppointmentMore';
+  for(const a of found.slice(3))extra.append(addAppointment(a));
+  const button=document.createElement('button');
+  button.type='button';button.className='same-day-notice-more';
+  button.textContent='ดูนัดอื่น ('+(found.length-3)+')';
+  button.setAttribute('aria-expanded','false');
+  button.setAttribute('aria-controls',extra.id);
+  button.addEventListener('click',()=>{
+   const expanded=button.getAttribute('aria-expanded')==='true';
+   button.setAttribute('aria-expanded',String(!expanded));
+   button.textContent=expanded?'ดูนัดอื่น ('+(found.length-3)+')':'ซ่อนนัดอื่น';
+   extra.classList.toggle('hidden',expanded);
+  });
+  conflictNotice.append(extra,button);
+ }
 }
 for(const id of ['date','time','purpose','hospitalSearch','providerOrg','scenario','known','unitSearch'])$(id)?.addEventListener('input',updateSameDayAppointmentNotice);
 for(const id of ['date','time','purpose','hospitalSearch','providerOrg','scenario','known','unitSearch'])$(id)?.addEventListener('change',updateSameDayAppointmentNotice);
