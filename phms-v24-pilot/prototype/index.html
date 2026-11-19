@@ -6814,6 +6814,7 @@ async function openSystemDraftForAuthorizedPerson(){
   draftFeedback(draftOpenStatus,'✅ เปิดร่างสำเร็จ กรอกข้อมูลต่อได้เลย');
   draftFeedback(draftStatus,'');
  }catch(error){
+  console.warn('phms_draft_restore_failed',String(error?.stack||error?.message||'unknown'));
   draftFeedback(draftOpenStatus,'เปิดร่างไม่สำเร็จ: '+String(error?.message||error));
  }finally{
   draftOpening=false;systemDraftOpen.disabled=false;
