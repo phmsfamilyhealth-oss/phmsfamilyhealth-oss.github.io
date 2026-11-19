@@ -2877,8 +2877,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  #editor .phms-appointment-header .phms-appointment-header-top h1{font-size:20px!important}
  #editor .phms-appointment-header .phms-ui-version{font-size:10px!important;padding:3px 5px!important}
 }
+
+/* PHMS v2.4.90.43: contact edits belong to each appointment; no separate save button. */
+#editor #familyContactSaveBox,#editor #familyContactSaveStatus{display:none!important}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.42</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.43</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4880,48 +4883,115 @@ purposeInput.addEventListener('blur',()=>{titleSuggestions.classList.add('hidden
 
 const sourceFilled=new Map();
 function clearSourceFilled({personChanged=false}={}){
- // Explicit unlink discards linked source fields. A patient switch must discard ALL patient-specific details.
- const values=new Map(sourceFilled);
- const linked=!!$('relatedSelect').value||values.size>0||!!autoPurposeValue;
- if(personChanged||linked){
-  for(const id of ['hospitalSearch','unitSearch','clinicianSearch','providerOrg','providerUnit','providerClinician','hospital','department','doctor','care_topic']){
+ // Preserve every field typed or changed by the user. Only undo values we
+ // auto-filled from the selected source, and only while still unchanged.
+ const previous=new Map(sourceFilled);
+ for(const [id,value] of previous){
+  if(id==='arrival_lead_minutes'){
+   if($('arrival_lead_minutes').value===String(value))setArrivalLeadMinutes(30);
+  }else if(id==='contact_phone'){
+   if($('contact_phone').value===String(value)){setContactPhoneItems('');contactEditVersion++;}
+  }else if($(id)&&$(id).value===String(value))$(id).value='';
+ }
+ if(personChanged){
+  // A person switch must discard ALL person-specific draft values, not just source defaults.
+  for(const id of ['hospitalSearch','unitSearch','clinicianSearch','providerOrg','providerUnit','providerClinician',
+   'hospital','department','doctor','care_topic','examPrepChoice','examPrepDetails','hospital_hn','hospital_vn',
+   'location_detail','contact_phone','coverage_type','arrival_lead_minutes','previsitSymptoms','additionalNote',
+   'visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes',
+   'next_steps','walk_in_reason']){
    if($(id))$(id).value='';
   }
-  for(const kind of ['hospital','unit','clinician']){
+  if($('appointmentOrigin')){$('appointmentOrigin').value='new';$('appointmentRescheduleCount').value='1';updateAppointmentStateUI();}
+  $('relatedSelect').value='';$('relatedQuery').value='';
+  resetContactDraft();setArrivalLeadMinutes(30);resetPrepOrderCards();
+  sourceAppointments=new Map();
+ }
+ for(const [kind,ids] of Object.entries({
+  hospital:['providerOrg','hospitalSearch'],unit:['providerUnit','unitSearch'],clinician:['providerClinician','clinicianSearch']
+ })){
+  if(personChanged||(!$(ids[0]).value&&!$(ids[1]).value.trim())){
    comboState[kind]={searchText:'',selectedItem:null,isOpen:false};closeCombo(kind);
   }
  }
- if(personChanged||(values.has('arrival_lead_minutes')&&$('arrival_lead_minutes').value===values.get('arrival_lead_minutes')))setArrivalLeadMinutes(30);
- if(personChanged){
-  if($('appointmentOrigin')){$('appointmentOrigin').value='new';$('appointmentRescheduleCount').value='1';updateAppointmentStateUI();}
-  for(const id of ['examPrepChoice','examPrepDetails','hospital_hn','hospital_vn','location_detail','contact_phone','coverage_type','arrival_lead_minutes','previsitSymptoms','additionalNote','visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps','walk_in_reason']){
-   if($(id))$(id).value='';
-  }
-  $('relatedSelect').value='';$('relatedQuery').value='';
-  resetContactDraft();
-  setArrivalLeadMinutes(30);
-  resetPrepOrderCards();
+ if($('purpose').value===autoPurposeValue&&autoPurposeValue){
+  $('purpose').value='';purposeManuallyEdited=false;
  }
- if($('purpose').value===autoPurposeValue&&autoPurposeValue){$('purpose').value='';purposeManuallyEdited=false;}
  sourceFilled.clear();autoPurposeValue='';
- // Reset catalog selections before syncing hidden values so they cannot reappear.
  refreshProviderPicker();syncProviderNames();
 }
 function applySourceAppointment(){
  const src=sourceAppointments.get($('relatedSelect').value);if(!src)return;
  clearSourceFilled();
- const assign=(id,value)=>{if(value&&!$(id).value.trim()){const text=String(value);$(id).value=text;sourceFilled.set(id,text);}};
- applyFollowupTitle(src);assign('care_topic',src.care_topic);assign('hospitalSearch',src.hospital_name);assign('unitSearch',src.department);assign('clinicianSearch',src.doctor_name);const catalog=authorizedCatalog;if(catalog){const org=catalog.organizations.find(x=>x.id===src.organization_id);if(org){sourceFilled.set('providerOrg',org.id);$('providerOrg').value=org.id;comboState.hospital.selectedItem={value:org.id,label:org.display_name||org.name};refreshProviderPicker('providerOrg');$('hospitalSearch').value=org.display_name||org.name;}const unit=catalog.units.find(x=>x.id===src.service_unit_id);if(unit){sourceFilled.set('providerUnit',unit.id);$('providerUnit').value=unit.id;comboState.unit.selectedItem={value:unit.id,label:unit.name};refreshProviderPicker('providerUnit');$('unitSearch').value=unit.name;}const clinician=catalog.clinicians.find(x=>x.id===src.clinician_id);if(clinician){sourceFilled.set('providerClinician',clinician.id);$('providerClinician').value=clinician.id;$('clinicianSearch').value=clinician.display_name||clinician.name;}syncProviderNames();
- for(const id of ['hospitalSearch','unitSearch','clinicianSearch','providerOrg','providerUnit','providerClinician','hospital','department','doctor']){
-  if($(id)?.value)sourceFilled.set(id,$(id).value);
+ const assign=(id,value)=>{
+  const input=$(id);
+  if(!input||value===null||value===undefined||String(value).trim()===''||String(input.value||'').trim())return false;
+  const text=String(value).trim().slice(0,input.maxLength>0?input.maxLength:4000);
+  input.value=text;
+  if(String(input.value)!==text)return false; // Never force an unknown select option.
+  sourceFilled.set(id,input.value);
+  return true;
+ };
+ applyFollowupTitle(src);
+ const catalog=authorizedCatalog;
+ const org=catalog?.organizations?.find(x=>x.id===src.organization_id);
+ if(!$('providerOrg').value&&!$('hospitalSearch').value.trim()){
+  if(org){
+   $('providerOrg').value=org.id;
+   comboState.hospital.selectedItem={value:org.id,label:org.display_name||org.name};
+   refreshProviderPicker('providerOrg');
+   $('hospitalSearch').value=org.display_name||org.name;
+   sourceFilled.set('providerOrg',org.id);sourceFilled.set('hospitalSearch',$('hospitalSearch').value);
+  }else assign('hospitalSearch',src.hospital_name);
  }
-} const priorMinutes=Number(src.arrival_lead_minutes??src.extended_details?.arrival_lead_minutes);
- if(ARRIVAL_LEAD_OPTIONS.some(([n])=>n===priorMinutes)){
+ // Only inherit department/doctor within the matching authorized organization.
+ if($('providerOrg').value===src.organization_id){
+  const unit=catalog?.units?.find(x=>x.id===src.service_unit_id&&x.organization_id===src.organization_id);
+  if(unit&&!$('providerUnit').value&&!$('unitSearch').value.trim()){
+   $('providerUnit').value=unit.id;
+   comboState.unit.selectedItem={value:unit.id,label:unit.name};
+   refreshProviderPicker('providerUnit');$('unitSearch').value=unit.name;
+   sourceFilled.set('providerUnit',unit.id);sourceFilled.set('unitSearch',$('unitSearch').value);
+  }else if(!$('providerUnit').value)assign('unitSearch',src.department);
+  const clinician=catalog?.clinicians?.find(x=>x.id===src.clinician_id&&x.organization_id===src.organization_id);
+  if(clinician&&!$('providerClinician').value&&!$('clinicianSearch').value.trim()){
+   $('providerClinician').value=clinician.id;
+   $('clinicianSearch').value=clinician.display_name||clinician.name;
+   sourceFilled.set('providerClinician',clinician.id);sourceFilled.set('clinicianSearch',$('clinicianSearch').value);
+  }else if(!$('providerClinician').value)assign('clinicianSearch',src.doctor_name);
+ }
+ syncProviderNames();
+ assign('care_topic',src.care_topic);
+ assign('hospital_hn',src.hospital_hn);
+ assign('location_detail',src.location_detail);
+ assign('coverage_type',src.coverage_type);
+ // Stored appointment.note is the free-text "รายละเอียดเพิ่มเติม" field.
+ assign('additionalNote',src.note);
+ // Keep visit-specific VN, date/time and previous clinical outcomes out of a new encounter.
+ if(!contactPhoneItems.length&&src.contact_phone){
+  setContactPhoneItems(String(src.contact_phone),true);
+  if($('contact_phone').value)sourceFilled.set('contact_phone',$('contact_phone').value);
+ }
+ // Merge reusable preparation items with the two editable defaults, never duplicating.
+ if(src.preparation_notes&&!isPastAppointment()){
+  const existing=new Set(checklistItems.map(x=>x.title.trim().toLocaleLowerCase('th-TH')));
+  let added=false;
+  for(const line of String(src.preparation_notes).split(/\r?\n/)){
+   const title=line.trim().slice(0,160),key=title.toLocaleLowerCase('th-TH');
+   if(!title||existing.has(key)||checklistItems.length>=20)continue;
+   checklistItems.push({title,status:'pending'});existing.add(key);added=true;
+  }
+  if(added)renderChecklist();
+ }
+ const priorMinutes=Number(src.arrival_lead_minutes);
+ if(ARRIVAL_LEAD_OPTIONS.some(([n])=>n===priorMinutes)&&
+    ($('arrival_lead_minutes').value==='30'||!$('arrival_lead_minutes').value)){
   setArrivalLeadMinutes(priorMinutes);sourceFilled.set('arrival_lead_minutes',String(priorMinutes));
  }
- renderCareTopicSuggestions();
+ renderCareTopicSuggestions();renderCoverageChoices();syncContactFields();
  void fetchSavedJourneySuggestion();
- $('relatedStatus').textContent='เติมข้อมูลจากนัดครั้งก่อนแล้ว — ตรวจสอบและแก้ไขข้อมูลสำหรับครั้งใหม่ได้ โดยวันที่และเวลาจะไม่ถูกคัดลอก';}
+ $('relatedStatus').textContent='เติมเฉพาะช่องที่ยังว่างจากนัดเดิมแล้ว รวมถึงรายละเอียดเพิ่มเติมและข้อมูลติดต่อที่บันทึกไว้ · โปรดตรวจสอบก่อนบันทึกนัดใหม่ (ไม่คัดลอกวันที่ เวลา VN และผลตรวจเดิม)';
+}
 let relatedAllItems=[],relatedExpanded=false,relatedLoadGeneration=0;
 function thaiSourceDate(value){
  const raw=String(value||'').slice(0,10);const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
