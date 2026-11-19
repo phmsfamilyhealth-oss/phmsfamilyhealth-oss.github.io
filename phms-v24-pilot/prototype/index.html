@@ -2998,8 +2998,30 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #confirmation #preview .phms-review-reference-hint{font-size:.86rem;line-height:1.4;font-weight:400;color:#74604d;overflow-wrap:anywhere}
 #confirmation #preview .phms-review-reference-disclosure>.phms-review-body{padding:5px 13px!important;border:0!important;border-top:1px solid #ebdcc9!important;border-radius:0!important;background:#fff!important}
 #confirmation #preview .phms-review-reference-disclosure .phms-review-pair:last-child{border-bottom:0!important}
+
+/* PHMS v2.4.90.49 — save completion is a separate clean receipt, not the edit/review form.
+   No UUID, draft controls, or duplicate-save actions are shown after complete success. */
+main #appointmentSuccess.hidden,main #appointmentSuccess[hidden]{display:none!important}
+main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-width:100%;min-width:0;margin:18px auto 0;padding:23px 17px 22px;background:#fffdfa;border:1px solid #decbaf;border-radius:18px;box-shadow:0 2px 8px #523d2812;text-align:center;color:#32281f}
+#appointmentSuccess .phms-save-success-mark{display:flex;align-items:center;justify-content:center;width:60px;height:60px;margin:0 auto 12px;border-radius:50%;background:#e5f1e6;color:#226739;font-size:2rem;font-weight:800;line-height:1}
+#appointmentSuccess #appointmentSuccessTitle{font-size:1.32rem;line-height:1.45;font-weight:750;color:#35291c;margin:0 0 6px}
+#appointmentSuccess .phms-save-success-intro{font-size:.95rem;line-height:1.55;color:#665647;margin:0 auto 20px;max-width:25rem}
+#appointmentSuccess .phms-save-success-summary{display:block;box-sizing:border-box;width:100%;margin:0 0 15px;padding:4px 14px;border:1px solid #e6d7c6;border-radius:13px;background:#fff;text-align:left}
+#appointmentSuccess .phms-save-success-entry{display:grid;grid-template-columns:minmax(0,33%) minmax(0,1fr);column-gap:11px;align-items:start;gap:8px;padding:11px 0;border-bottom:1px solid #f0e5d9;min-width:0}
+#appointmentSuccess .phms-save-success-entry:last-child{border:0}
+#appointmentSuccess .phms-save-success-entry dt,#appointmentSuccess .phms-save-success-entry dd{margin:0;min-width:0;overflow-wrap:anywhere;white-space:pre-line;font-size:.97rem;line-height:1.55}
+#appointmentSuccess .phms-save-success-entry dt{font-weight:500;color:#715f4e}
+#appointmentSuccess .phms-save-success-entry dd{font-weight:650;color:#33271f}
+#appointmentSuccess .phms-save-success-photo{font-size:.92rem;line-height:1.5;color:#54724f;margin:2px 0 16px}
+#appointmentSuccess .phms-save-success-finish{width:100%;min-height:52px;border-radius:12px;background:#644a30;color:#fff;font-size:1.04rem;font-weight:700;margin:6px 0 0}
+#appointmentSuccess #appointmentSuccessCloseHint{margin:12px 0 0;font-size:.9rem;line-height:1.5}
+@media(max-width:420px){
+ main #appointmentSuccess.phms-save-success{padding:20px 13px}
+ #appointmentSuccess .phms-save-success-summary{padding:4px 11px}
+ #appointmentSuccess .phms-save-success-entry{grid-template-columns:minmax(0,1fr);gap:2px;padding:9px 0}
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.48</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.49</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3175,6 +3197,15 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <p class="error" id="error" role="alert"></p><div class="actions"><button id="review" type="button" disabled>ตรวจทานข้อมูล</button></div>
 </section>
 <section id="confirmation" class="box hidden"><h2>ตรวจทานก่อนบันทึก</h2><dl id="preview"></dl><p class="notice" id="saveStatus" role="status">ตรวจทานข้อมูลได้ แต่ยังไม่สามารถบันทึกนัดจริงในโหมดทดลองนี้</p><div class="actions"><button id="back" class="secondary">ย้อนกลับไปแก้ไข</button><button id="save" disabled type="button">บันทึกนัด (ยังไม่เปิด)</button></div></section>
+<section id="appointmentSuccess" class="box phms-save-success hidden" hidden aria-labelledby="appointmentSuccessTitle">
+ <div class="phms-save-success-mark" aria-hidden="true">✓</div>
+ <h2 id="appointmentSuccessTitle">บันทึกนัดหมายสำเร็จ</h2>
+ <p class="phms-save-success-intro">บันทึกข้อมูลเข้าระบบ PHMS เรียบร้อยแล้ว</p>
+ <dl id="appointmentSuccessSummary" class="phms-save-success-summary"></dl>
+ <p id="appointmentSuccessPhotos" class="phms-save-success-photo hidden"></p>
+ <button id="appointmentSuccessFinish" type="button" class="phms-save-success-finish">เสร็จสิ้น</button>
+ <p id="appointmentSuccessCloseHint" class="help hidden" role="status"></p>
+</section>
 </main><script type="module">
 import {validateAppointmentDraft} from '../contracts/scenario-validator.mjs';
 import {prepareDraftForReview} from '../contracts/draft-packager.mjs';
@@ -4225,6 +4256,48 @@ function renderAccessibleAppointmentReview(){
  guide.textContent='ตรวจสอบวัน เวลา โรงพยาบาล และแผนกอีกครั้งก่อนบันทึก';
 }
 
+
+/* Receipt is shown only after server appointment commit AND all selected attachments
+   have completed. Partial errors remain in the existing retry screen. */
+function showAppointmentSaveSuccess(){
+ const receipt=$('appointmentSuccess'),summary=$('appointmentSuccessSummary');
+ summary.replaceChildren();
+ const field=(label,value)=>{
+  const content=String(value||'').trim();
+  if(!content)return;
+  const entry=document.createElement('div');entry.className='phms-save-success-entry';
+  const dt=document.createElement('dt');dt.textContent=label;
+  const dd=document.createElement('dd');dd.textContent=content;
+  entry.append(dt,dd);summary.append(entry);
+ };
+ const person=$('personSelect').selectedOptions?.[0]?.textContent||'';
+ field('ผู้รับนัด',person==='เลือกบุคคล'?'':person);
+ field('ชื่อนัด',$('purpose').value);
+ field('โรงพยาบาล',$('hospital').value);
+ field('วันที่',thaiDateLabel($('date').value));
+ field('เวลา',reviewedDraft?.time_known?displayThaiClock($('time').value):'ไม่ทราบเวลา');
+ field('แผนก',$('department').value);
+ const photos=$('appointmentSuccessPhotos');
+ photos.textContent=photoFiles.length?'✓ บันทึกรูปใบนัด '+photoFiles.length+' รูปแล้ว':'';
+ photos.classList.toggle('hidden',!photoFiles.length);
+ $('confirmation').classList.add('hidden');
+ $('editor').classList.add('hidden');
+ $('personPicker').classList.add('hidden');
+ const status=$('connectionStatus');status.classList.add('hidden');
+ const pageHeader=document.querySelector('.phms-appointment-header h1');
+ if(pageHeader)pageHeader.textContent='📅 นัดหมายที่บันทึกแล้ว';
+ document.title='PHMS — บันทึกนัดหมายสำเร็จ';
+ receipt.hidden=false;receipt.classList.remove('hidden');
+ window.scrollTo(0,0);
+}
+$('appointmentSuccessFinish').addEventListener('click',()=>{
+ const hint=$('appointmentSuccessCloseHint');
+ if(window.liff?.isInClient?.()&&typeof window.liff.closeWindow==='function'){
+  try{window.liff.closeWindow();return;}catch{}
+ }
+ hint.textContent='บันทึกเรียบร้อยแล้ว สามารถปิดหน้านี้เพื่อกลับไป LINE ได้';
+ hint.classList.remove('hidden');
+});
 let savedAppointmentId='',uploadedNoticeSlots=new Set(),journeyPersistedForSave=false;
 async function uploadAppointmentNotice(file,position,appointmentId){
  const token=window.liff?.getIDToken?.();
@@ -4276,11 +4349,18 @@ $('save').addEventListener('click',async()=>{
    uploadedNoticeSlots.add(i+1);
   }
   const missingJourney=hasJourneyDetails()&&!journeyPersistedForSave;
-  button.textContent=missingJourney?'ลองบันทึกเส้นทางอีกครั้ง':'บันทึกสำเร็จ';
-  button.disabled=!missingJourney;
-  $('saveStatus').textContent='บันทึกนัดสำเร็จ'+(photoFiles.length?' พร้อมรูปใบนัด '+photoFiles.length+' รูป':'')+' · เลขอ้างอิง: '+savedAppointmentId+
-    (missingJourney?' · เส้นทาง/รูปขั้นตอนยังไม่บันทึก: '+$('journeySaveStatus').textContent:'');
-  $('back').disabled=!missingJourney;
+  if(missingJourney){
+   // The appointment itself exists, but its attached journey is not yet complete.
+   // Do not show a full-success receipt while a part remains unsaved.
+   button.textContent='ลองบันทึกเส้นทางอีกครั้ง';button.disabled=false;
+   $('saveStatus').textContent='บันทึกนัดหมายแล้ว แต่เส้นทางหรือรูปขั้นตอนยังไม่ครบ: '+$('journeySaveStatus').textContent;
+   $('back').disabled=false;
+  }else{
+   button.textContent='บันทึกสำเร็จ';button.disabled=true;
+   $('back').disabled=true;
+   $('saveStatus').textContent='บันทึกนัดหมายสำเร็จ';
+   showAppointmentSaveSuccess();
+  }
  }catch(error){
   button.disabled=false;button.textContent=savedAppointmentId?'ลองบันทึกส่วนที่ค้าง':'ลองบันทึกอีกครั้ง';
   const expired=String(error?.message||'')==='unauthenticated';
