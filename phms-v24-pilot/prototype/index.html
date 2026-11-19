@@ -2763,8 +2763,35 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #confirmation #preview button.phms-notice-review-thumb{width:100%!important;max-width:100%!important;min-height:0!important;padding:10px!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important}
 #confirmation #preview .phms-notice-review-thumb img{width:100%!important;max-width:100%!important;height:auto!important;max-height:560px!important;object-fit:contain!important;object-position:center!important}
 @media(max-width:580px){#confirmation #preview button.phms-notice-review-thumb{padding:7px!important}#confirmation #preview .phms-notice-review-thumb img{max-height:480px!important}}
+
+/* PHMS v2.4.90.37 — LINE iPhone: keep the selected person's full name readable.
+   The prior max-content two-column grid clipped the name under the mode switch.
+   Presentation only: selection, LINE permissions and save logic are unchanged. */
+@media (max-width:600px){
+ #editor .phms-appointment-header .phms-header-person-mode-row{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:auto auto!important;grid-auto-flow:row!important;
+  align-items:start!important;justify-items:stretch!important;
+  column-gap:0!important;row-gap:8px!important;
+  min-width:0!important;width:100%!important;
+ }
+ #editor .phms-appointment-header .phms-header-person-mode-row #appointmentHeaderPerson{
+  display:block!important;grid-column:1!important;grid-row:1!important;
+  min-width:0!important;width:100%!important;max-width:100%!important;
+  margin:0!important;white-space:normal!important;word-break:normal!important;
+  overflow-wrap:anywhere!important;overflow:visible!important;
+  font-size:clamp(15px,4.1vw,18px)!important;line-height:1.5!important;
+  text-align:left!important;
+ }
+ #editor .phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch{
+  display:flex!important;grid-column:1!important;grid-row:2!important;
+  justify-self:end!important;justify-content:flex-end!important;
+  width:auto!important;max-width:100%!important;min-width:0!important;
+  margin:0!important;padding:0!important;
+ }
+}
 </style></head><body><main><aside role="status" id="pilotNotice" class="box" style="border-color:#e9bc76;background:#fff6e8"><strong>🧪 แบบทดลอง · ยังบันทึกไม่ได้</strong><p class="help" style="margin-bottom:0">ทดลองกรอกข้อมูลและตรวจทานได้ ข้อมูลในหน้านี้ยังไม่ถูกบันทึกลงระบบสุขภาพ กรุณาอย่าใช้แทนการเพิ่มนัดจริงผ่าน LINE</p></aside>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.36</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.37</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
