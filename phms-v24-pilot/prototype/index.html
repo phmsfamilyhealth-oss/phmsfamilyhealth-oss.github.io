@@ -2957,8 +2957,35 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  border-radius:10px!important;background:transparent!important;
  object-fit:contain!important;object-position:center!important;
 }
+
+/* PHMS v2.4.90.47 — appointment review: elder-readable steps with photos in place. */
+#confirmation #preview .phms-review-journey-guide{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;width:100%;min-width:0;padding:10px 0 5px}
+#confirmation #preview .phms-review-stop{box-sizing:border-box;min-width:0;max-width:100%;padding:13px 13px 14px;border:1px solid #d9c1a5;border-radius:14px;background:#fffaf2;overflow-wrap:anywhere}
+#confirmation #preview .phms-review-stop-head{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:0 0 10px;border-bottom:1px solid #ecdcc9}
+#confirmation #preview .phms-review-stop-number{display:inline-block;font-size:.85rem;line-height:1.4;font-weight:700;color:#68482a;background:#f1e1cf;padding:4px 10px;border-radius:8px}
+#confirmation #preview .phms-review-stop-head h4{font-size:1.11rem;line-height:1.5;font-weight:750;color:#33261b;white-space:normal;overflow-wrap:anywhere;margin:0}
+#confirmation #preview .phms-review-stop-details{display:grid;gap:11px;padding:11px 0 0}
+#confirmation #preview .phms-review-stop-detail{min-width:0}
+#confirmation #preview .phms-review-stop-detail-name{display:block;font-size:.88rem;line-height:1.45;font-weight:700;color:#69533d;margin:0 0 3px}
+#confirmation #preview .phms-review-stop-detail p{margin:0!important;padding:0!important;font-size:1rem!important;line-height:1.65!important;font-weight:500;color:#2e2720;white-space:pre-wrap;overflow-wrap:anywhere}
+#confirmation #preview .phms-review-stop-instructions{min-width:0;border:1px solid #e9d7be;border-radius:11px;padding:10px 12px;background:#fff}
+#confirmation #preview .phms-review-stop-instructions>strong{display:block;font-size:.9rem;color:#5a432e;margin-bottom:6px}
+#confirmation #preview .phms-review-stop-instructions ol{display:grid;gap:8px;list-style:decimal!important;padding:0 0 0 24px!important;margin:0!important}
+#confirmation #preview .phms-review-stop-instructions li{display:list-item!important;font-size:1rem!important;line-height:1.6!important;font-weight:500!important;padding:0!important;margin:0!important;background:transparent!important;color:#332920!important;white-space:pre-wrap;overflow-wrap:anywhere}
+#confirmation #preview .phms-review-main-photos{padding:13px 0 5px;margin-top:4px;border-top:1px solid #ead8c3;min-width:0}
+#confirmation #preview .phms-review-main-photos>h4{font-size:1rem;line-height:1.5;color:#59412c;margin:0 0 10px}
+#confirmation #preview .phms-review-step-photos{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important;min-width:0;width:100%;margin:12px 0 0}
+#confirmation #preview button.phms-review-step-photo{display:flex!important;flex-direction:column;gap:6px;align-items:stretch;justify-content:center;box-sizing:border-box!important;min-width:0!important;max-width:100%!important;width:100%!important;min-height:48px!important;padding:7px!important;background:#fff!important;border:1px solid #dbc4aa!important;border-radius:11px!important;color:#3c2d20!important;cursor:zoom-in!important;box-shadow:none!important}
+#confirmation #preview button.phms-review-step-photo img{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:360px!important;object-fit:contain!important;object-position:center!important;background:transparent!important;border:0!important;border-radius:7px!important}
+#confirmation #preview .phms-review-step-photo-caption{display:block;font-size:.87rem;line-height:1.5;font-weight:500;text-align:left;color:#61503e;white-space:normal;overflow-wrap:anywhere}
+#confirmation #preview button.phms-review-step-photo:focus-visible{outline:3px solid #8b6137!important;outline-offset:2px}
+@media(max-width:420px){
+ #confirmation #preview .phms-review-stop{padding:12px 11px}
+ #confirmation #preview .phms-review-stop-head h4{font-size:1.08rem}
+ #confirmation #preview .phms-review-stop-detail p,#confirmation #preview .phms-review-stop-instructions li{font-size:1rem!important}
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.46</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.47</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3971,30 +3998,6 @@ previewField('เบอร์ติดต่อเลื่อนนัด',cont
 previewField('จุดติดต่อหลัก',$('location_detail').value.trim());
 previewField('วิธีเดินไปจุดติดต่อหลัก',$('location_directions').value.trim());
 previewField('หมายเหตุจุดติดต่อ',$('location_note').value.trim());
-previewField('รูปจุดติดต่อหลัก',primaryJourney.photos.length?primaryJourney.photos.length+' รูป (บันทึกพร้อมนัดหมาย)':'');
-previewField('ขั้นตอนในวันนัด',visitStops.map((x,i)=>[
- 'ขั้นตอน '+(i+1)+': '+(x.title||'ยังไม่ระบุ').trim(),
- x.place?.trim(),x.time?x.time+' น.':'',x.directions?.trim(),
- x.instructions?.filter(Boolean).map((a,j)=>(j+1)+'. '+a).join(' / '),
- x.note?.trim(),x.photos?.length?x.photos.length+' รูป':''
- ].filter(Boolean).join(' · ')).join('\n'));
-if(primaryJourney.photos.length||visitStops.some(x=>x.photos?.length)){
- const warn=document.createElement('p');warn.className='help';
- warn.textContent='📷 รูปสถานที่จะจัดเก็บในเส้นทางของครอบครัวเมื่อยืนยันบันทึกนัด';
- dl.append(warn);
- for(const [heading,gallery] of [
-  ['รูปจุดติดต่อหลัก',primaryJourney],...visitStops.map((x,i)=>['รูปขั้นตอน '+(i+1),x])]){
-  if(!gallery.photos?.length)continue;
-  const title=document.createElement('dt');title.textContent=heading;
-  const pictures=document.createElement('dd');pictures.className='phms-journey-review-images';
-  for(const photo of gallery.photos){
-   const image=document.createElement('img');image.src=photo.url;
-   image.alt=photo.caption||photo.name;image.title=photo.caption||photo.name;
-   image.addEventListener('click',()=>showJourneyImage(photo));pictures.append(image);
-  }
-  dl.append(title,pictures);
- }
-}
 previewField('อาการหรือเรื่องที่ไป',$('previsitSymptoms').value.trim());
 previewField('รายละเอียดเพิ่มเติม',$('additionalNote').value.trim());
 if($('detail').value==='full'&&examPrepChoice.value){
@@ -4105,6 +4108,82 @@ function renderAccessibleAppointmentReview(){
   if(labelIcon){const icon=document.createElement('span');icon.className='phms-review-icon';icon.setAttribute('aria-hidden','true');icon.textContent=labelIcon;entry.dt.prepend(icon);}
   // Preserve original content including checklists and clickable photo previews.
   pair.append(entry.dt,entry.dd);group.dl.append(pair);group.count++;
+ }
+
+ // Journey Guide review: keep each step, its instructions, and its photos together.
+ // Display only entered information; preserve the draft order and original photo order.
+ const journeyReview=containers.journey;
+ const addJourneyPhotoGallery=(items,locationLabel)=>{
+  const valid=Array.isArray(items)?items.filter(p=>p&&p.url):[];
+  if(!valid.length)return null;
+  const gallery=document.createElement('div');gallery.className='phms-review-step-photos';
+  gallery.setAttribute('aria-label','รูปประกอบ'+locationLabel);
+  for(const [photoIndex,photo] of valid.entries()){
+   const button=document.createElement('button');button.type='button';
+   button.className='phms-review-step-photo';
+   button.setAttribute('aria-label','ขยายรูปประกอบ'+locationLabel+' '+(photoIndex+1));
+   const image=document.createElement('img');image.src=photo.url;
+   image.alt=photo.caption||photo.name||'รูปประกอบ'+locationLabel;
+   image.loading='lazy';
+   button.append(image);
+   if(photo.caption){
+    const caption=document.createElement('span');caption.className='phms-review-step-photo-caption';
+    caption.textContent=photo.caption;button.append(caption);
+   }
+   button.addEventListener('click',()=>showJourneyImage(photo));
+   gallery.append(button);
+  }
+  return gallery;
+ };
+ const mainPhotos=addJourneyPhotoGallery(primaryJourney.photos,'จุดติดต่อหลัก');
+ if(mainPhotos){
+  const section=document.createElement('section');section.className='phms-review-main-photos';
+  const title=document.createElement('h4');title.textContent='📷 รูปจุดติดต่อหลัก';
+  section.append(title,mainPhotos);journeyReview.body.append(section);journeyReview.count++;
+ }
+ if(visitStops.length){
+  const guide=document.createElement('div');guide.className='phms-review-journey-guide';
+  guide.setAttribute('aria-label','ขั้นตอนในวันนัดตามลำดับ');
+  const addDetail=(target,label,value)=>{
+   const content=String(value||'').trim();
+   if(!content)return;
+   const row=document.createElement('div');row.className='phms-review-stop-detail';
+   const name=document.createElement('span');name.className='phms-review-stop-detail-name';
+   name.textContent=label;
+   const description=document.createElement('p');description.textContent=content;
+   row.append(name,description);target.append(row);
+  };
+  for(const [i,rawStep] of visitStops.entries()){
+   const step=ensureVisitStop(rawStep);
+   const card=document.createElement('section');card.className='phms-review-stop';
+   card.setAttribute('aria-label','ขั้นตอน '+(i+1)+' '+(step.title||''));
+   const heading=document.createElement('div');heading.className='phms-review-stop-head';
+   const number=document.createElement('span');number.className='phms-review-stop-number';
+   number.textContent='ขั้นตอน '+(i+1);
+   const title=document.createElement('h4');title.textContent=String(step.title||'').trim()||'ยังไม่ได้ระบุ';
+   heading.append(number,title);card.append(heading);
+   const details=document.createElement('div');details.className='phms-review-stop-details';
+   addDetail(details,'📍 ไปที่',step.place);
+   addDetail(details,'🕒 เวลา',step.time?displayThaiClock(step.time):'');
+   addDetail(details,'🚶 วิธีเดิน',step.directions);
+   const instructions=Array.isArray(step.instructions)?
+    step.instructions.map(x=>String(x||'').trim()).filter(Boolean):[];
+   if(instructions.length){
+    const block=document.createElement('div');block.className='phms-review-stop-instructions';
+    const label=document.createElement('strong');label.textContent='วิธีทำ';
+    const list=document.createElement('ol');
+    for(const instruction of instructions){
+     const item=document.createElement('li');item.textContent=instruction;list.append(item);
+    }
+    block.append(label,list);details.append(block);
+   }
+   addDetail(details,'📝 หมายเหตุ',step.note);
+   if(details.childElementCount)card.append(details);
+   const images=addJourneyPhotoGallery(step.photos,'ขั้นตอน '+(i+1));
+   if(images)card.append(images);
+   guide.append(card);
+  }
+  journeyReview.body.append(guide);journeyReview.count++;
  }
  const notice=[...containers.datetime.dl.children].find(n=>n.dataset.reviewLabel==='รูปใบนัด');
  if(notice)containers.datetime.dl.append(notice);
