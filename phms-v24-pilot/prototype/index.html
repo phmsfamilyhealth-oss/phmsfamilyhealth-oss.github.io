@@ -3210,8 +3210,22 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
  #editor .same-day-notice-title{font-size:17px!important}
  #editor .same-day-notice-list li{font-size:16px!important}
 }
+
+/* PHMS v2.4.90.59 — actionable review disclosure and edit-return controls. */
+#confirmation #preview .phms-review-reference-disclosure>summary{
+ pointer-events:auto!important;position:relative!important;z-index:1!important;
+ touch-action:manipulation!important;user-select:none!important;
+ min-height:60px!important;
+}
+#confirmation .actions #back{
+ pointer-events:auto!important;touch-action:manipulation!important;
+ position:relative!important;z-index:1!important;
+}
+#confirmation #preview .phms-review-reference-disclosure:not([open])>.phms-review-body{
+ display:none!important;
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.58</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.59</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3386,7 +3400,7 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
 <p class="help" id="registryHelp">ชื่อโรงพยาบาล แผนก และแพทย์จะเติมอัตโนมัติจากทะเบียนที่ตรวจสอบแล้ว หากยังไม่มีชื่อแพทย์ในทะเบียน สามารถบันทึกนัดโดยไม่ระบุแพทย์ได้เมื่อเปิดระบบจริง</p>
 <p class="error" id="error" role="alert"></p><div class="actions"><button id="review" type="button" disabled>ตรวจทานข้อมูล</button></div>
 </section>
-<section id="confirmation" class="box hidden"><h2>ตรวจทานก่อนบันทึก</h2><dl id="preview"></dl><p class="notice" id="saveStatus" role="status">ตรวจทานข้อมูลได้ แต่ยังไม่สามารถบันทึกนัดจริงในโหมดทดลองนี้</p><div class="actions"><button id="back" class="secondary">ย้อนกลับไปแก้ไข</button><button id="save" disabled type="button">บันทึกนัด (ยังไม่เปิด)</button></div></section>
+<section id="confirmation" class="box hidden"><h2>ตรวจทานก่อนบันทึก</h2><dl id="preview"></dl><p class="notice" id="saveStatus" role="status">ตรวจทานข้อมูลได้ แต่ยังไม่สามารถบันทึกนัดจริงในโหมดทดลองนี้</p><div class="actions"><button id="back" type="button" class="secondary">ย้อนกลับไปแก้ไข</button><button id="save" disabled type="button">บันทึกนัด (ยังไม่เปิด)</button></div></section>
 <section id="appointmentSuccess" class="box phms-save-success hidden" hidden aria-labelledby="appointmentSuccessTitle">
  <div class="phms-save-success-mark" aria-hidden="true">✓</div>
  <h2 id="appointmentSuccessTitle">บันทึกนัดหมายสำเร็จ</h2>
@@ -4253,7 +4267,7 @@ reviewedDraft.linked_appointment_id=$('relatedSelect').value||'';
 reviewedDraft.reschedule_origin=$('appointmentOrigin').value||'';
 reviewedDraft.reschedule_count=Number($('appointmentRescheduleCount').value||0);
 reviewedDraft.exam_preparation={choice:examPrepChoice.value,details:examPrepDetails.value.trim()};
-if(packaged.draft.document_metadata.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='ไฟล์แนบ';dd.textContent=packaged.draft.document_metadata.map(f=>f.name).join(', ');dl.append(dt,dd)}renderAccessibleAppointmentReview();$('editor').classList.add('hidden');$('confirmation').classList.remove('hidden');window.scrollTo(0,0)});
+if(packaged.draft.document_metadata.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='ไฟล์แนบ';dd.textContent=packaged.draft.document_metadata.map(f=>f.name).join(', ');dl.append(dt,dd)}renderAccessibleAppointmentReview();$('back').disabled=!!savedAppointmentId;$('editor').classList.add('hidden');$('confirmation').classList.remove('hidden');window.scrollTo(0,0)});
 
 // Formatting only: saved appointment fields stay unchanged.
 function displayThaiClock(value){
@@ -4437,7 +4451,22 @@ function renderAccessibleAppointmentReview(){
   const info=document.createElement('span');info.className='phms-review-reference-hint';info.textContent='ติดต่อเลื่อนนัด · HN / VN · แตะเพื่อดู';
   const text=document.createElement('span');text.className='phms-review-reference-summary-text';
   text.append(heading,info);
-  summary.append(text);disclosure.append(summary,group.body);
+  summary.append(text);
+  // Explicit toggle also supports in-app browsers where nested disclosure clicks
+  // are swallowed inside the review layout. Prevent the native double-toggle.
+  summary.setAttribute('role','button');
+  summary.setAttribute('aria-expanded','false');
+  summary.tabIndex=0;
+  const toggleReference=()=>{
+   const next=!disclosure.open;
+   disclosure.open=next;
+   summary.setAttribute('aria-expanded',String(next));
+  };
+  summary.addEventListener('click',event=>{event.preventDefault();toggleReference();});
+  summary.addEventListener('keydown',event=>{
+   if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleReference();}
+  });
+  disclosure.append(summary,group.body);
   group.card.replaceChildren(disclosure);group.card.classList.add('phms-review-reference-card');
  }
  const notice=[...containers.datetime.dl.children].find(n=>n.dataset.reviewLabel==='รูปใบนัด');
@@ -4563,7 +4592,7 @@ $('save').addEventListener('click',async()=>{
   $('reauthAfterDraft').hidden=!expired;
  }
 });
-$('back').addEventListener('click',()=>{if($('back').disabled)return;$('confirmation').classList.add('hidden');$('editor').classList.remove('hidden')});
+$('back').addEventListener('click',()=>{if($('back').disabled)return;$('confirmation').classList.add('hidden');$('editor').classList.remove('hidden');updateProgressiveLayout();window.scrollTo({top:0,behavior:'instant'});});
 let procedurePreviewItems=[];
 
 const PROCEDURE_PRESETS=[
