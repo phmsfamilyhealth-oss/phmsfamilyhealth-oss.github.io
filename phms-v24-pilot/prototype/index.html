@@ -11,8 +11,6 @@
 
 /* Compact elder-friendly entry mode, leaving the underlying draft fields intact. */
 #editor.simple-ui{padding:16px}#personPicker{padding:16px}
-#pilotNotice{padding:12px 14px;margin:5px 0 10px;border-radius:12px;box-shadow:none}
-#pilotNotice strong{font-size:.98rem}.simple-entry #pilotNotice .help{display:none}
 #connectionStatus{margin:8px 0;padding:9px 12px;border-radius:10px;font-size:.9rem}
 #editor.simple-ui h2{font-size:1.16rem;margin:4px 0 8px}
 #editor.simple-ui label{font-size:1rem;margin:11px 0 5px}
@@ -112,7 +110,6 @@
 #appointmentPhotosSection{margin:8px 0}
 #filehelp{font-size:.89rem}
 #review{width:100%;margin-top:6px}
-#pilotNotice{padding:10px 13px!important;margin:9px 0!important}#pilotNotice .help{display:none!important}
 #connectionStatus{font-size:.92rem!important;padding:9px 12px!important;margin:8px 0!important}
 .native-picker-shell{position:relative;min-height:52px}
 .native-picker-shell>input{width:100%;min-height:52px}
@@ -2808,8 +2805,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   display:inline-block;white-space:nowrap;
  }
 }
+/* PHMS v2.4.90.41: prevent obsolete status banner display in legacy LIFF markup. */
+#pilotNotice{display:none!important}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.40</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.41</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -6734,6 +6733,8 @@ try{
  }
 }catch(error){console.warn('hospital_detail_sync_unavailable',error);}
 </script><script type="module">
+// Safely remove the retired status card, not real connection or save errors.
+document.getElementById('pilotNotice')?.remove();
 // Independent presentation safety-net: keep LINE person identity visible even if
 // optional progressive-layout enhancement fails. Authorization stays in the read API.
 (() => {
