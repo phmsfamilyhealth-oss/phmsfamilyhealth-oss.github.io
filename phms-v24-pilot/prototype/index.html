@@ -2915,8 +2915,38 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   overflow:hidden!important;
  }
 }
+
+/* PHMS v2.4.90.45 — Keep the outer review card as the only frame for notice photos.
+   Two notices stack vertically; all photos show their full aspect ratio. */
+#confirmation #preview .phms-notice-review-pair dd.phms-notice-review-content{
+ display:block!important;box-sizing:border-box!important;
+ width:100%!important;min-width:0!important;max-width:100%!important;
+ padding:0!important;margin:0!important;border:0!important;
+ background:transparent!important;box-shadow:none!important;
+}
+#confirmation #preview .phms-notice-review-gallery{
+ display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;
+ align-items:stretch!important;gap:10px!important;
+ width:100%!important;min-width:0!important;max-width:100%!important;
+ padding:0!important;margin:0!important;background:transparent!important;
+}
+#confirmation #preview button.phms-notice-review-thumb{
+ display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;
+ min-height:0!important;height:auto!important;
+ padding:0!important;margin:0!important;border:0!important;
+ border-radius:10px!important;overflow:hidden!important;
+ background:transparent!important;box-shadow:none!important;
+ box-sizing:border-box!important;line-height:0!important;cursor:zoom-in!important;
+}
+#confirmation #preview button.phms-notice-review-thumb img{
+ display:block!important;width:100%!important;max-width:100%!important;
+ height:auto!important;max-height:none!important;
+ padding:0!important;margin:0!important;border:0!important;
+ border-radius:10px!important;background:transparent!important;
+ object-fit:contain!important;object-position:center!important;
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.44</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.45</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3906,7 +3936,7 @@ previewField('แพทย์',doctorChoiceDisplay());
 if(photoFiles.length){
  const label=document.createElement('dt');label.textContent='รูปใบนัด';
  const details=document.createElement('dd');details.className='phms-notice-review-content';
- const count=document.createElement('span');count.textContent=photoFiles.length+' รูป';
+ // Count is for upload validation only; omit it from the visual review.
  const gallery=document.createElement('div');gallery.className='phms-notice-review-gallery';
  gallery.setAttribute('aria-label','ตรวจสอบรูปใบนัดที่แนบ');
  photoFiles.forEach((file,index)=>{
@@ -3919,7 +3949,7 @@ if(photoFiles.length){
   thumb.addEventListener('click',()=>showAppointmentPhoto(index));
   gallery.append(thumb);
  });
- details.append(count,gallery);dl.append(label,details);
+ details.append(gallery);dl.append(label,details);
 }
 previewField('ติดต่อเลื่อนนัด · วัน',selectedContactDays());
 previewField('ติดต่อเลื่อนนัด · เวลา',selectedContactHours());
