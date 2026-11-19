@@ -2984,8 +2984,22 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
  #confirmation #preview .phms-review-stop-head h4{font-size:1.08rem}
  #confirmation #preview .phms-review-stop-detail p,#confirmation #preview .phms-review-stop-instructions li{font-size:1rem!important}
 }
+
+/* PHMS v2.4.90.48 — fold administrative contact rules and hospital identifiers. */
+#confirmation #preview .phms-review-reference-card{min-width:0!important;max-width:100%!important}
+#confirmation #preview .phms-review-reference-disclosure{display:block;box-sizing:border-box;min-width:0;width:100%;margin:0;padding:0;border:1px solid #dfc6aa;border-radius:14px;background:#fffdf9;overflow:hidden}
+#confirmation #preview .phms-review-reference-disclosure>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:60px;box-sizing:border-box;width:100%;padding:10px 14px;cursor:pointer;color:#45311e;background:#f7eee2;list-style:none;outline-offset:3px}
+#confirmation #preview .phms-review-reference-disclosure>summary::-webkit-details-marker{display:none}
+#confirmation #preview .phms-review-reference-disclosure>summary::after{content:'⌄';flex:none;font-size:1.4rem;line-height:1;font-weight:700;color:#6a4a2c}
+#confirmation #preview .phms-review-reference-disclosure[open]>summary::after{transform:rotate(180deg)}
+#confirmation #preview .phms-review-reference-disclosure>summary:focus-visible{outline:3px solid #875c31}
+#confirmation #preview .phms-review-reference-summary-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+#confirmation #preview .phms-review-reference-heading{font-size:1.02rem;font-weight:750;line-height:1.4;color:#45311e}
+#confirmation #preview .phms-review-reference-hint{font-size:.86rem;line-height:1.4;font-weight:400;color:#74604d;overflow-wrap:anywhere}
+#confirmation #preview .phms-review-reference-disclosure>.phms-review-body{padding:5px 13px!important;border:0!important;border-top:1px solid #ebdcc9!important;border-radius:0!important;background:#fff!important}
+#confirmation #preview .phms-review-reference-disclosure .phms-review-pair:last-child{border-bottom:0!important}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.47</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.48</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4052,7 +4066,8 @@ function renderAccessibleAppointmentReview(){
   {id:'datetime',title:'🕒 วันและเวลา',labels:['วันที่','เวลา','ควรไปถึงโรงพยาบาล','ไปถึงก่อนนัด (นาที)','รูปใบนัด']},
   {id:'journey',title:'📍 จุดติดต่อและ 🧭 ขั้นตอนวันนัด',labels:['จุดติดต่อหลัก','อาคาร / ชั้น / ห้องตรวจ','วิธีเดินไปจุดติดต่อหลัก','หมายเหตุจุดติดต่อ','รูปจุดติดต่อหลัก','ขั้นตอนในวันนัด']},
   {id:'prepare',title:'🪪 สิ่งที่ต้องเตรียมและ 🔬 รายการตรวจ',labels:['สิ่งที่ต้องเตรียม','การเตรียมตัวก่อนตรวจ','คำแนะนำก่อนตรวจ','รายการตรวจ','ไฟล์แนบ']},
-  {id:'more',title:'📝 ข้อมูลเพิ่มเติม',labels:[]}
+  {id:'more',title:'📝 ข้อมูลเพิ่มเติม',labels:[]},
+  {id:'reference',title:'📂 ข้อมูลอ้างอิง',labels:['HN โรงพยาบาล','VN ครั้งนี้','เบอร์ติดต่อโรงพยาบาล','เงื่อนไขการติดต่อ','เบอร์ติดต่อเลื่อนนัด','ติดต่อเลื่อนนัด · วัน','ติดต่อเลื่อนนัด · เวลา','ติดต่อเลื่อนนัด · ล่วงหน้า']}
  ];
  const byLabel=new Map(headingMap.flatMap(group=>group.labels.map(label=>[label,group.id])));
  const reviewIcons={
@@ -4093,7 +4108,7 @@ function renderAccessibleAppointmentReview(){
   }
   const groupId=byLabel.get(entry.label)||
    (entry.label.startsWith('รูปขั้นตอน')?'journey':
-    entry.label.startsWith('ติดต่อเลื่อนนัด')||entry.label==='เบอร์ติดต่อเลื่อนนัด'||entry.label==='เงื่อนไขการติดต่อ'?'more':'more');
+    entry.label.startsWith('ติดต่อเลื่อนนัด')||entry.label==='เบอร์ติดต่อเลื่อนนัด'||entry.label==='เงื่อนไขการติดต่อ'?'reference':'more');
   const group=containers[groupId];
   if(entry.label==='ไปถึงก่อนนัด (นาที)'&&entry.dd.textContent&&!entry.dd.textContent.includes('นาที'))entry.dd.textContent+=' นาที';
   // Group each label-value pair so font and alignment stay identical for all entries.
@@ -4184,6 +4199,20 @@ function renderAccessibleAppointmentReview(){
    guide.append(card);
   }
   journeyReview.body.append(guide);journeyReview.count++;
+ }
+
+ // Low-priority administrative information is folded by default, at the end.
+ // Only the review presentation changes; keep the save draft and stored fields.
+ if(containers.reference.count){
+  const group=containers.reference;
+  const disclosure=document.createElement('details');disclosure.className='phms-review-reference-disclosure';
+  const summary=document.createElement('summary');
+  const heading=document.createElement('span');heading.className='phms-review-reference-heading';heading.textContent='📂 ข้อมูลอ้างอิง';
+  const info=document.createElement('span');info.className='phms-review-reference-hint';info.textContent='ติดต่อเลื่อนนัด · HN / VN · แตะเพื่อดู';
+  const text=document.createElement('span');text.className='phms-review-reference-summary-text';
+  text.append(heading,info);
+  summary.append(text);disclosure.append(summary,group.body);
+  group.card.replaceChildren(disclosure);group.card.classList.add('phms-review-reference-card');
  }
  const notice=[...containers.datetime.dl.children].find(n=>n.dataset.reviewLabel==='รูปใบนัด');
  if(notice)containers.datetime.dl.append(notice);
