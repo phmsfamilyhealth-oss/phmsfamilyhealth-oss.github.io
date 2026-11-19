@@ -28,6 +28,7 @@ try{
  const page=await context.newPage();
  const errors=[];
  page.on('pageerror',e=>errors.push(e.message));
+ page.on('console',m=>{if(m.text().startsWith('phms_draft_restore_failed'))console.log('DRAFT_STACK',m.text())});
  let stored=null;
  const calls=[];
  await page.route('https://static.line-scdn.net/liff/edge/2/sdk.js',route=>route.fulfill({
