@@ -3351,8 +3351,69 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
   padding:9px!important;font-size:.95rem!important;
  }
 }
+
+/* PHMS v2.4.90.64 — distinct starting point and chronological steps, with photos attached to their own locations. */
+#editor #visitStepsDetails .phms-journey-first-stop-option{
+ display:flex!important;align-items:center!important;gap:10px!important;
+ background:#fff8ed!important;border:1px solid #e5cdb0!important;
+ border-radius:11px!important;padding:11px 13px!important;margin:10px 0 14px!important;
+ font-size:16px!important;font-weight:600!important;line-height:1.5!important;
+}
+#editor #visitStepsDetails .phms-journey-first-stop-option input{
+ width:21px!important;height:21px!important;min-height:21px!important;
+ margin:0!important;flex:none!important;
+}
+#confirmation #preview .phms-review-location-card{
+ box-sizing:border-box!important;min-width:0!important;
+ border:1px solid #d9c1a5!important;border-radius:14px!important;
+ background:#fffaf2!important;padding:13px!important;margin:4px 0 14px!important;
+}
+#confirmation #preview .phms-review-location-card>h4,
+#confirmation #preview .phms-review-journey-title{
+ font-size:1.06rem!important;font-weight:750!important;color:#44301e!important;
+ margin:0 0 8px!important;line-height:1.5!important;
+}
+#confirmation #preview .phms-review-location-hint{
+ font-size:.93rem!important;line-height:1.5!important;color:#695845!important;
+ margin:0 0 9px!important;
+}
+#confirmation #preview .phms-review-location-card dl{
+ display:block!important;padding:0!important;margin:0!important;min-width:0!important;
+}
+#confirmation #preview .phms-review-location-card .phms-review-pair{
+ display:grid!important;grid-template-columns:minmax(0,38%) minmax(0,1fr)!important;
+ gap:12px!important;padding:9px 0!important;
+ border-bottom:1px solid #ead8c3!important;
+}
+#confirmation #preview .phms-review-location-relation{
+ margin:10px 0!important;padding:9px 12px!important;
+ border-radius:9px!important;background:#f1e4d3!important;
+ color:#5e452f!important;font-weight:650!important;font-size:.96rem!important;
+}
+#confirmation #preview .phms-review-location-photos{
+ margin:12px 0 0!important;padding:10px 0 0!important;
+ border-top:1px solid #ead8c3!important;
+}
+#confirmation #preview .phms-review-location-photos>strong{
+ display:block!important;margin:0 0 8px!important;font-size:.97rem!important;color:#5e452f!important;
+}
+#confirmation #preview .phms-review-location-photos .phms-review-step-photos{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;
+ margin:0!important;
+}
+#confirmation #preview .phms-review-location-photos button.phms-review-step-photo{
+ min-width:0!important;max-height:250px!important;overflow:hidden!important;
+}
+#confirmation #preview .phms-review-location-photos .phms-review-step-photo img{
+ width:100%!important;max-height:230px!important;object-fit:contain!important;
+}
+#confirmation #preview .phms-review-journey-title{margin:14px 0 9px!important}
+@media(max-width:420px){
+ #confirmation #preview .phms-review-location-card{padding:11px!important}
+ #confirmation #preview .phms-review-location-card .phms-review-pair{gap:8px!important}
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.63</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.64</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3407,6 +3468,7 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
 <details id="visitStepsDetails" class="visit-steps-detail">
  <summary>🧭 ขั้นตอนวันนัด</summary>
  <p class="help">เพิ่มเฉพาะขั้นตอนที่ระบุในใบนัด เช่น เจาะเลือด เอกซเรย์ หรือยื่นใบนัด</p>
+ <label class="phms-journey-first-stop-option" for="journeyFirstStopSame"><input type="checkbox" id="journeyFirstStopSame"> จุดติดต่อหลักเป็นจุดเริ่มต้นของขั้นตอนวันนัด</label>
  <div id="visitStepsList" aria-live="polite"></div>
  <button id="visitStepAdd" class="secondary" type="button">＋ เพิ่มขั้นตอน</button>
  <p class="help" id="visitStepsHelp">จัดเรียงได้ตามลำดับที่ต้องไปจริง จุดติดต่อแต่ละขั้นตอนอาจอยู่คนละอาคารหรือชั้น</p>
@@ -4388,7 +4450,7 @@ if(!isPastAppointment()&&checklistItems.length){const dt=document.createElement(
 // a future server transaction; never silently drop a user-entered field.
 reviewedDraft.procedure_items=procedurePreviewItems.map(name=>String(name).trim()).filter(Boolean);
 reviewedDraft.contact_rules={days:selectedContactDays(),hours:selectedContactHours(),notice:selectedContactNotice(),instructions:$('rescheduleInstructions').value.trim(),phones:[...contactPhoneItems]};
-reviewedDraft.journey_details={main:{location:$('location_detail').value.trim(),directions:$('location_directions').value.trim(),note:$('location_note').value.trim()},steps:visitStops.map(x=>({title:x.title||'',place:x.place||'',time:x.time||'',directions:x.directions||'',instructions:[...(x.instructions||[])],note:x.note||''}))};
+reviewedDraft.journey_details={main:{location:$('location_detail').value.trim(),directions:$('location_directions').value.trim(),note:$('location_note').value.trim(),sameAsFirstStep:$('journeyFirstStopSame').checked},steps:visitStops.map(x=>({title:x.title||'',place:x.place||'',time:x.time||'',directions:x.directions||'',instructions:[...(x.instructions||[])],note:x.note||''}))};
 reviewedDraft.previsit_symptoms=$('previsitSymptoms').value.trim();
 reviewedDraft.linked_appointment_id=$('relatedSelect').value||'';
 reviewedDraft.reschedule_origin=$('appointmentOrigin').value||'';
@@ -4529,12 +4591,34 @@ function renderAccessibleAppointmentReview(){
   return gallery;
  };
  const mainPhotos=addJourneyPhotoGallery(primaryJourney.photos,'จุดติดต่อหลัก');
- if(mainPhotos){
-  const section=document.createElement('section');section.className='phms-review-main-photos';
-  const title=document.createElement('h4');title.textContent='📷 รูปจุดติดต่อหลัก';
-  section.append(title,mainPhotos);journeyReview.body.append(section);journeyReview.count++;
+ // Move the original location fields into their own card, retaining the same
+ // nodes and source values. Pictures remain with the place they describe.
+ const mainRows=journeyReview.dl.querySelectorAll('.phms-review-pair');
+ if(mainRows.length||mainPhotos){
+  const section=document.createElement('section');section.className='phms-review-location-card';
+  const title=document.createElement('h4');title.textContent='📍 จุดติดต่อหลัก';
+  const hint=document.createElement('p');hint.className='phms-review-location-hint';
+  hint.textContent='สถานที่สำหรับเริ่มต้นติดต่อโรงพยาบาล';
+  section.append(title,hint);
+  if(mainRows.length)section.append(journeyReview.dl);
+  if($('journeyFirstStopSame').checked&&visitStops.length){
+   const relation=document.createElement('p');relation.className='phms-review-location-relation';
+   relation.textContent='✓ จุดนี้เป็นจุดเริ่มต้นของขั้นตอนวันนัด';
+   section.append(relation);
+  }
+  if(mainPhotos){
+   const photos=document.createElement('div');photos.className='phms-review-location-photos';
+   const photoLabel=document.createElement('strong');photoLabel.textContent='📷 รูปสถานที่ (แตะเพื่อขยาย)';
+   photos.append(photoLabel,mainPhotos);section.append(photos);
+  }
+  journeyReview.body.append(section);
+  if(mainPhotos)journeyReview.count++;
  }
  if(visitStops.length){
+  const stepsTitle=document.createElement('h4');
+  stepsTitle.className='phms-review-journey-title';
+  stepsTitle.textContent='🧭 ขั้นตอนที่ต้องทำตามลำดับ';
+  journeyReview.body.append(stepsTitle);
   const guide=document.createElement('div');guide.className='phms-review-journey-guide';
   guide.setAttribute('aria-label','ขั้นตอนในวันนัดตามลำดับ');
   const addDetail=(target,label,value)=>{
@@ -4926,6 +5010,7 @@ function clearJourneyDraft(){
  clearJourneyGallery(primaryJourney);
  for(const stop of visitStops)clearJourneyGallery(stop);
  visitStops=[];journeyNeedsReview=false;
+ $('journeyFirstStopSame').checked=false;
  renderVisitStops();renderMainJourneyPhotos();refreshJourneyWarning();
 }
 async function prepareJourneyImage(file){
