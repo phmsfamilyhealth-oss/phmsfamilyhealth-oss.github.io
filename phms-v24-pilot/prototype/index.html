@@ -3306,8 +3306,20 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
  #confirmation #preview > details.phms-review-reference-disclosure > summary{padding:11px 13px!important}
  #confirmation #preview > details.phms-review-reference-disclosure > .phms-review-body{padding:4px 12px 9px!important}
 }
+
+/* PHMS v2.4.90.62 — reference/rebooking header matches other review categories.
+   Left-side chevron and existing toggle behaviour remain unchanged. */
+#confirmation #preview > details.phms-review-reference-disclosure > summary{
+ background:#f7eee2!important;
+ color:#39291c!important;
+}
+#confirmation #preview > details.phms-review-reference-disclosure .phms-review-reference-heading{
+ color:#39291c!important;
+ font-size:1.05rem!important;
+ font-weight:750!important;
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.61</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.62</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4387,7 +4399,7 @@ function renderAccessibleAppointmentReview(){
   {id:'prepare',title:'🪪 สิ่งที่ต้องเตรียมและ 🔬 รายการตรวจ',labels:['สิ่งที่ต้องเตรียม','การเตรียมตัวก่อนตรวจ','คำแนะนำก่อนตรวจ','รายการตรวจ','ไฟล์แนบ']},
   {id:'more',title:'📝 ข้อมูลเพิ่มเติม',labels:[]},
   {id:'journey',title:'📍 จุดติดต่อและ 🧭 ขั้นตอนวันนัด',labels:['จุดติดต่อหลัก','อาคาร / ชั้น / ห้องตรวจ','วิธีเดินไปจุดติดต่อหลัก','หมายเหตุจุดติดต่อ','รูปจุดติดต่อหลัก','ขั้นตอนในวันนัด']},
-  {id:'reference',title:'📂 ข้อมูลอ้างอิง',labels:['HN โรงพยาบาล','VN ครั้งนี้','เบอร์ติดต่อโรงพยาบาล','เงื่อนไขการติดต่อ','เบอร์ติดต่อเลื่อนนัด','ติดต่อเลื่อนนัด · วัน','ติดต่อเลื่อนนัด · เวลา','ติดต่อเลื่อนนัด · ล่วงหน้า']}
+  {id:'reference',title:'📞 การเลื่อนนัด',labels:['HN โรงพยาบาล','VN ครั้งนี้','เบอร์ติดต่อโรงพยาบาล','เงื่อนไขการติดต่อ','เบอร์ติดต่อเลื่อนนัด','ติดต่อเลื่อนนัด · วัน','ติดต่อเลื่อนนัด · เวลา','ติดต่อเลื่อนนัด · ล่วงหน้า']}
  ];
  const byLabel=new Map(headingMap.flatMap(group=>group.labels.map(label=>[label,group.id])));
  const reviewIcons={
@@ -4542,7 +4554,7 @@ function renderAccessibleAppointmentReview(){
   const disclosure=document.createElement('details');disclosure.className='phms-review-reference-disclosure';
   const summary=document.createElement('summary');
   const chevron=document.createElement('span');chevron.className='phms-review-reference-chevron';chevron.setAttribute('aria-hidden','true');chevron.textContent='▸';
-  const heading=document.createElement('span');heading.className='phms-review-reference-heading';heading.textContent='📂 ข้อมูลอ้างอิง';
+  const heading=document.createElement('span');heading.className='phms-review-reference-heading';heading.textContent='📞 การเลื่อนนัด';
   summary.append(chevron,heading);
   // Explicit toggle also supports in-app browsers where nested disclosure clicks
   // are swallowed inside the review layout. Prevent the native double-toggle.
