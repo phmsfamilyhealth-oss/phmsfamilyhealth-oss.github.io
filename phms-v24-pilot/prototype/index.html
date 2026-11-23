@@ -3258,8 +3258,56 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
 #confirmation #preview .phms-review-reference-disclosure .phms-review-pair dd{
  font-size:1rem!important;font-weight:500!important;
 }
+
+/* PHMS v2.4.90.61 — a true entry-style accordion, not a card inside a card. */
+#confirmation #preview > details.phms-review-reference-disclosure{
+ display:block!important;width:100%!important;min-width:0!important;
+ box-sizing:border-box!important;
+ margin:0!important;padding:0!important;
+ background:#fff!important;border:1px solid #d68c50!important;
+ border-radius:14px!important;box-shadow:none!important;overflow:hidden!important;
+}
+#confirmation #preview > details.phms-review-reference-disclosure > summary{
+ display:flex!important;flex-direction:row!important;align-items:center!important;
+ justify-content:flex-start!important;gap:12px!important;
+ margin:0!important;padding:12px 16px!important;min-height:66px!important;
+ background:#fff!important;border:0!important;border-radius:0!important;
+ color:#29241e!important;font-size:1.05rem!important;font-weight:700!important;
+ cursor:pointer!important;list-style:none!important;
+}
+#confirmation #preview > details.phms-review-reference-disclosure > summary::after,
+#confirmation #preview > details.phms-review-reference-disclosure > summary::before{
+ display:none!important;content:none!important;
+}
+#confirmation #preview > details.phms-review-reference-disclosure > summary::-webkit-details-marker{
+ display:none!important;
+}
+#confirmation #preview > details.phms-review-reference-disclosure .phms-review-reference-chevron{
+ flex:0 0 16px!important;text-align:center!important;color:#29241e!important;
+ font-size:16px!important;line-height:1!important;transform:none!important;
+}
+#confirmation #preview > details.phms-review-reference-disclosure[open] .phms-review-reference-chevron{
+ transform:rotate(90deg)!important;
+}
+#confirmation #preview > details.phms-review-reference-disclosure > .phms-review-body{
+ box-sizing:border-box!important;display:block!important;width:100%!important;
+ margin:0!important;padding:5px 15px 10px!important;
+ background:#fff!important;border:0!important;border-radius:0!important;
+ border-top:1px solid #ead8c3!important;
+}
+#confirmation #preview > details.phms-review-reference-disclosure:not([open]) > .phms-review-body{
+ display:none!important;
+}
+#confirmation #preview > details.phms-review-reference-disclosure .phms-review-pair{
+ display:grid!important;grid-template-columns:minmax(0,38%) minmax(0,1fr)!important;
+ gap:12px!important;
+}
+@media(max-width:420px){
+ #confirmation #preview > details.phms-review-reference-disclosure > summary{padding:11px 13px!important}
+ #confirmation #preview > details.phms-review-reference-disclosure > .phms-review-body{padding:4px 12px 9px!important}
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.60</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.61</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4336,9 +4384,9 @@ function renderAccessibleAppointmentReview(){
  const headingMap=[
   {id:'overview',title:'📅 ข้อมูลนัดหมาย',labels:['ชื่อนัดหมาย','บุคคล','ประเภทนัด','ประวัติการเลื่อนนัด','หมายเหตุ','โรงพยาบาล','แผนก','แพทย์']},
   {id:'datetime',title:'🕒 วันและเวลา',labels:['วันที่','เวลา','ควรไปถึงโรงพยาบาล','ไปถึงก่อนนัด (นาที)','รูปใบนัด']},
-  {id:'journey',title:'📍 จุดติดต่อและ 🧭 ขั้นตอนวันนัด',labels:['จุดติดต่อหลัก','อาคาร / ชั้น / ห้องตรวจ','วิธีเดินไปจุดติดต่อหลัก','หมายเหตุจุดติดต่อ','รูปจุดติดต่อหลัก','ขั้นตอนในวันนัด']},
   {id:'prepare',title:'🪪 สิ่งที่ต้องเตรียมและ 🔬 รายการตรวจ',labels:['สิ่งที่ต้องเตรียม','การเตรียมตัวก่อนตรวจ','คำแนะนำก่อนตรวจ','รายการตรวจ','ไฟล์แนบ']},
   {id:'more',title:'📝 ข้อมูลเพิ่มเติม',labels:[]},
+  {id:'journey',title:'📍 จุดติดต่อและ 🧭 ขั้นตอนวันนัด',labels:['จุดติดต่อหลัก','อาคาร / ชั้น / ห้องตรวจ','วิธีเดินไปจุดติดต่อหลัก','หมายเหตุจุดติดต่อ','รูปจุดติดต่อหลัก','ขั้นตอนในวันนัด']},
   {id:'reference',title:'📂 ข้อมูลอ้างอิง',labels:['HN โรงพยาบาล','VN ครั้งนี้','เบอร์ติดต่อโรงพยาบาล','เงื่อนไขการติดต่อ','เบอร์ติดต่อเลื่อนนัด','ติดต่อเลื่อนนัด · วัน','ติดต่อเลื่อนนัด · เวลา','ติดต่อเลื่อนนัด · ล่วงหน้า']}
  ];
  const byLabel=new Map(headingMap.flatMap(group=>group.labels.map(label=>[label,group.id])));
@@ -4511,7 +4559,9 @@ function renderAccessibleAppointmentReview(){
    if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleReference();}
   });
   disclosure.append(summary,group.body);
-  group.card.replaceChildren(disclosure);group.card.classList.add('phms-review-reference-card');
+  // Use the disclosure itself as the review card. The old nested card wrapper
+  // inherited review-card styles, giving this control a different appearance.
+  group.card=disclosure;
  }
  const notice=[...containers.datetime.dl.children].find(n=>n.dataset.reviewLabel==='รูปใบนัด');
  if(notice)containers.datetime.dl.append(notice);
