@@ -3318,8 +3318,41 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
  font-size:1.05rem!important;
  font-weight:750!important;
 }
+
+/* PHMS v2.4.90.63 — full-width two-column checklist in review only. */
+#confirmation #preview .phms-review-checklist-pair{
+ display:flex!important;flex-direction:column!important;
+ gap:10px!important;align-items:stretch!important;
+}
+#confirmation #preview .phms-review-checklist-pair > dt{
+ display:block!important;width:100%!important;font-size:1rem!important;
+ color:#554637!important;font-weight:700!important;
+}
+#confirmation #preview .phms-review-checklist-pair > dd{
+ display:block!important;width:100%!important;min-width:0!important;
+ padding:0!important;margin:0!important;
+}
+#confirmation #preview .phms-review-checklist-pair > dd > ul{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:8px!important;padding:0!important;margin:0!important;
+ list-style:none!important;
+}
+#confirmation #preview .phms-review-checklist-pair > dd > ul > li{
+ box-sizing:border-box!important;min-width:0!important;min-height:48px!important;
+ padding:10px 11px!important;margin:0!important;
+ display:flex!important;align-items:center!important;
+ background:#f8f0e5!important;border:0!important;border-radius:10px!important;
+ font-size:1rem!important;line-height:1.5!important;font-weight:500!important;
+ overflow-wrap:anywhere!important;
+}
+@media(max-width:420px){
+ #confirmation #preview .phms-review-checklist-pair > dd > ul{gap:7px!important}
+ #confirmation #preview .phms-review-checklist-pair > dd > ul > li{
+  padding:9px!important;font-size:.95rem!important;
+ }
+}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.62</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.63</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4351,7 +4384,7 @@ if($('detail').value==='full'&&examPrepChoice.value){
  if(['fasting','other'].includes(examPrepChoice.value))previewField('คำแนะนำก่อนตรวจ',examPrepDetails.value.trim());
 }
 
-if(!isPastAppointment()&&checklistItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='สิ่งที่ต้องเตรียม';const ul=document.createElement('ul');for(const item of checklistItems){const li=document.createElement('li');li.textContent=(item.status==='completed'?'☑ ':'☐ ')+item.title;ul.append(li);}dd.append(ul);dl.append(dt,dd);}{for(const [id,label] of Object.entries(detailNames)){const value=$(id).value.trim();if(!value)continue;if(id==='contact_phone')continue;if(id==='walk_in_reason'&&$('scenario').value!=='walk_in')continue;if(['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)&&!isPastAppointment())continue;const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=id==='arrival_lead_minutes'?value+' นาที':value;dl.append(dt,dd);}}if(procedurePreviewItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='รายการตรวจ';const ul=document.createElement('ul');for(const item of procedurePreviewItems){const li=document.createElement('li');li.textContent=item;ul.append(li);}dd.append(ul);dl.append(dt,dd);}if($('relatedSelect').value){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='นัดต้นทาง (ทดลอง)';dd.textContent=$('relatedSelect').selectedOptions[0]?.textContent||'';dl.append(dt,dd);}reviewedDraft={...v,provider_selection:{organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:selectedClinicianId()},hospital:$('hospital').value,department:$('department').value,doctor:$('doctor').value,purpose:$('purpose').value,additional_note:$('additionalNote').value,prep:isPastAppointment()?'':$('prep').value,preparation_items:isPastAppointment()?[]:checklistItems.map(x=>({...x})),extended_details:Object.fromEntries(Object.keys(detailNames).filter(id=>$(id).value.trim()&&(id!=='walk_in_reason'||$('scenario').value==='walk_in')&&(!['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)||isPastAppointment())).map(id=>[id,$(id).value.trim()])),documents:[...$('documents').files].map(f=>({name:f.name,type:f.type,size:f.size}))};// Keep non-image supplemental sections alongside the reviewed draft for
+if(!isPastAppointment()&&checklistItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='สิ่งที่ต้องเตรียม';const ul=document.createElement('ul');for(const item of checklistItems){const li=document.createElement('li');li.textContent=item.title;ul.append(li);}dd.append(ul);dl.append(dt,dd);}{for(const [id,label] of Object.entries(detailNames)){const value=$(id).value.trim();if(!value)continue;if(id==='contact_phone')continue;if(id==='walk_in_reason'&&$('scenario').value!=='walk_in')continue;if(['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)&&!isPastAppointment())continue;const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=id==='arrival_lead_minutes'?value+' นาที':value;dl.append(dt,dd);}}if(procedurePreviewItems.length){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='รายการตรวจ';const ul=document.createElement('ul');for(const item of procedurePreviewItems){const li=document.createElement('li');li.textContent=item;ul.append(li);}dd.append(ul);dl.append(dt,dd);}if($('relatedSelect').value){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent='นัดต้นทาง (ทดลอง)';dd.textContent=$('relatedSelect').selectedOptions[0]?.textContent||'';dl.append(dt,dd);}reviewedDraft={...v,provider_selection:{organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:selectedClinicianId()},hospital:$('hospital').value,department:$('department').value,doctor:$('doctor').value,purpose:$('purpose').value,additional_note:$('additionalNote').value,prep:isPastAppointment()?'':$('prep').value,preparation_items:isPastAppointment()?[]:checklistItems.map(x=>({...x})),extended_details:Object.fromEntries(Object.keys(detailNames).filter(id=>$(id).value.trim()&&(id!=='walk_in_reason'||$('scenario').value==='walk_in')&&(!['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)||isPastAppointment())).map(id=>[id,$(id).value.trim()])),documents:[...$('documents').files].map(f=>({name:f.name,type:f.type,size:f.size}))};// Keep non-image supplemental sections alongside the reviewed draft for
 // a future server transaction; never silently drop a user-entered field.
 reviewedDraft.procedure_items=procedurePreviewItems.map(name=>String(name).trim()).filter(Boolean);
 reviewedDraft.contact_rules={days:selectedContactDays(),hours:selectedContactHours(),notice:selectedContactNotice(),instructions:$('rescheduleInstructions').value.trim(),phones:[...contactPhoneItems]};
@@ -4447,6 +4480,7 @@ function renderAccessibleAppointmentReview(){
   const pair=document.createElement('div');pair.className='phms-review-pair';
   pair.dataset.reviewLabel=entry.label;
   if(entry.label==='รูปใบนัด')pair.classList.add('phms-notice-review-pair');
+  if(entry.label==='สิ่งที่ต้องเตรียม')pair.classList.add('phms-review-checklist-pair');
   if(primaryLabels.has(entry.label))pair.classList.add('phms-review-primary');
   const labelIcon=entry.label==='แผนก'?(/จักษุ|ตา/.test($('department').value)?'👁️':/กระดูก|ข้อ|ออร์โธ/.test($('department').value)?'🦴':/หัวใจ/.test($('department').value)?'❤️':/ทันต|ฟัน/.test($('department').value)?'🦷':'🏷️'):
    entry.label==='แพทย์'?clinicianEmoji($('doctor').value):
@@ -4556,19 +4590,11 @@ function renderAccessibleAppointmentReview(){
   const chevron=document.createElement('span');chevron.className='phms-review-reference-chevron';chevron.setAttribute('aria-hidden','true');chevron.textContent='▸';
   const heading=document.createElement('span');heading.className='phms-review-reference-heading';heading.textContent='📞 การเลื่อนนัด';
   summary.append(chevron,heading);
-  // Explicit toggle also supports in-app browsers where nested disclosure clicks
-  // are swallowed inside the review layout. Prevent the native double-toggle.
-  summary.setAttribute('role','button');
+  // Native <details>/<summary> provides reliable touch and keyboard activation
+  // in LINE LIFF. The old custom preventDefault handler could cancel toggling.
   summary.setAttribute('aria-expanded','false');
-  summary.tabIndex=0;
-  const toggleReference=()=>{
-   const next=!disclosure.open;
-   disclosure.open=next;
-   summary.setAttribute('aria-expanded',String(next));
-  };
-  summary.addEventListener('click',event=>{event.preventDefault();toggleReference();});
-  summary.addEventListener('keydown',event=>{
-   if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleReference();}
+  disclosure.addEventListener('toggle',()=>{
+   summary.setAttribute('aria-expanded',String(disclosure.open));
   });
   disclosure.append(summary,group.body);
   // Use the disclosure itself as the review card. The old nested card wrapper
