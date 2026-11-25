@@ -3412,8 +3412,12 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
  #confirmation #preview .phms-review-location-card{padding:11px!important}
  #confirmation #preview .phms-review-location-card .phms-review-pair{gap:8px!important}
 }
+/* PHMS v2.4.90.68 — separate, collapsed journey steps; reuse native rebooking disclosure. */
+#confirmation #preview > details.phms-review-steps-disclosure .phms-review-steps-heading{display:flex;flex-direction:column;gap:3px;min-width:0;line-height:1.45}
+#confirmation #preview > details.phms-review-steps-disclosure .phms-review-steps-count{font-size:.9rem;font-weight:500;color:#695845}
+#confirmation #preview > details.phms-review-steps-disclosure .phms-review-journey-guide{padding:8px 0 5px!important}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.67</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.68</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -4493,7 +4497,7 @@ function renderAccessibleAppointmentReview(){
   {id:'datetime',title:'🕒 วันและเวลา',labels:['วันที่','เวลา','ควรไปถึงโรงพยาบาล','ไปถึงก่อนนัด (นาที)','รูปใบนัด']},
   {id:'prepare',title:'🎒 สิ่งที่ต้องนำไปและ 🔬 รายการตรวจ',labels:['สิ่งที่ต้องเตรียม','การเตรียมตัวก่อนตรวจ','คำแนะนำก่อนตรวจ','รายการตรวจ','ไฟล์แนบ']},
   {id:'more',title:'🗂️ ข้อมูลเพิ่มเติม',labels:[]},
-  {id:'journey',title:'📍 จุดติดต่อและ 🧭 ขั้นตอนวันนัด',labels:['จุดติดต่อหลัก','อาคาร / ชั้น / ห้องตรวจ','วิธีเดินไปจุดติดต่อหลัก','หมายเหตุจุดติดต่อ','รูปจุดติดต่อหลัก','ขั้นตอนในวันนัด']},
+  {id:'journey',title:'📍 จุดติดต่อหลัก',labels:['จุดติดต่อหลัก','อาคาร / ชั้น / ห้องตรวจ','วิธีเดินไปจุดติดต่อหลัก','หมายเหตุจุดติดต่อ','รูปจุดติดต่อหลัก','ขั้นตอนในวันนัด']},
   {id:'reference',title:'📞 การเลื่อนนัด',labels:['HN โรงพยาบาล','VN ครั้งนี้','เบอร์ติดต่อโรงพยาบาล','เงื่อนไขการติดต่อ','เบอร์ติดต่อเลื่อนนัด','ติดต่อเลื่อนนัด · วัน','ติดต่อเลื่อนนัด · เวลา','ติดต่อเลื่อนนัด · ล่วงหน้า']}
  ];
  const byLabel=new Map(headingMap.flatMap(group=>group.labels.map(label=>[label,group.id])));
@@ -4614,10 +4618,9 @@ function renderAccessibleAppointmentReview(){
  const mainRows=journeyReview.dl.querySelectorAll('.phms-review-pair');
  if(mainRows.length||mainPhotos){
   const section=document.createElement('section');section.className='phms-review-location-card';
-  const title=document.createElement('h4');title.textContent='📍 จุดติดต่อหลัก';
   const hint=document.createElement('p');hint.className='phms-review-location-hint';
   hint.textContent='สถานที่สำหรับเริ่มต้นติดต่อโรงพยาบาล';
-  section.append(title,hint);
+  section.append(hint);
   if(mainRows.length)section.append(journeyReview.dl);
   if($('journeyFirstStopSame').checked&&visitStops.length){
    const relation=document.createElement('p');relation.className='phms-review-location-relation';
@@ -4632,11 +4635,8 @@ function renderAccessibleAppointmentReview(){
   journeyReview.body.append(section);
   if(mainPhotos)journeyReview.count++;
  }
+ let stepsDisclosure=null;
  if(visitStops.length){
-  const stepsTitle=document.createElement('h4');
-  stepsTitle.className='phms-review-journey-title';
-  stepsTitle.textContent='🧭 ขั้นตอนที่ต้องทำตามลำดับ';
-  journeyReview.body.append(stepsTitle);
   const guide=document.createElement('div');guide.className='phms-review-journey-guide';
   guide.setAttribute('aria-label','ขั้นตอนในวันนัดตามลำดับ');
   const addDetail=(target,label,value)=>{
@@ -4680,7 +4680,18 @@ function renderAccessibleAppointmentReview(){
    heading.classList.toggle('has-details',hasTextDetails||!!images);
    guide.append(card);
   }
-  journeyReview.body.append(guide);journeyReview.count++;
+  stepsDisclosure=document.createElement('details');
+  stepsDisclosure.className='phms-review-reference-disclosure phms-review-steps-disclosure';
+  const summary=document.createElement('summary');
+  const chevron=document.createElement('span');chevron.className='phms-review-reference-chevron';chevron.setAttribute('aria-hidden','true');chevron.textContent='▸';
+  const heading=document.createElement('span');heading.className='phms-review-reference-heading phms-review-steps-heading';
+  const label=document.createElement('span');label.textContent='🧭 ขั้นตอนวันนัด';
+  const count=document.createElement('span');count.className='phms-review-steps-count';count.textContent='มีทั้งหมด '+visitStops.length+' ขั้นตอน';
+  heading.append(label,count);summary.append(chevron,heading);
+  summary.setAttribute('aria-expanded','false');
+  stepsDisclosure.addEventListener('toggle',()=>summary.setAttribute('aria-expanded',String(stepsDisclosure.open)));
+  const body=document.createElement('div');body.className='phms-review-body';body.append(guide);
+  stepsDisclosure.append(summary,body);
  }
 
  // Low-priority administrative information is folded by default, at the end.
@@ -4705,7 +4716,10 @@ function renderAccessibleAppointmentReview(){
  }
  const notice=[...containers.datetime.dl.children].find(n=>n.dataset.reviewLabel==='รูปใบนัด');
  if(notice)containers.datetime.dl.append(notice);
- for(const group of headingMap)if(containers[group.id].count)source.append(containers[group.id].card);
+ for(const group of headingMap){
+  if(containers[group.id].count)source.append(containers[group.id].card);
+  if(group.id==='journey'&&stepsDisclosure)source.append(stepsDisclosure);
+ }
  let guide=$('phmsReviewGuide');
  if(!guide){
   guide=document.createElement('p');guide.id='phmsReviewGuide';guide.className='phms-review-guide';
