@@ -3416,8 +3416,10 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
 #confirmation #preview > details.phms-review-steps-disclosure .phms-review-steps-heading{display:flex;flex-direction:column;gap:3px;min-width:0;line-height:1.45}
 #confirmation #preview > details.phms-review-steps-disclosure .phms-review-steps-count{font-size:.9rem;font-weight:500;color:#695845}
 #confirmation #preview > details.phms-review-steps-disclosure .phms-review-journey-guide{padding:8px 0 5px!important}
+#connectionStatus.phms-connection-status.phms-preview-banner{display:block!important;background:#fff4dc;color:#493820}
+#connectionStatus.phms-preview-banner a{display:inline-block;margin-top:6px;color:#76532f;text-decoration:underline}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.68</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.69</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3612,6 +3614,9 @@ import {makeLiffProviderCatalogClient} from '../contracts/liff-provider-catalog-
 import {packJourneyTemplate,collectJourneyGalleries,saveFamilyJourney} from '../contracts/journey-guide-save-client.mjs';
 import {historicalVisitDate,isEligibleSavedVisit,canHandoffSavedVisit,existingPHMSLineCommand} from '../contracts/linked-appointment-workflow.mjs';
 let confirmClient=null;let reviewedDraft=null;let memberId='';let authorizedPersonFromLine=false;
+// Explicit temporary UI-only preview. Never treat this flag as authentication.
+const APPOINTMENT_PREVIEW_ENABLED=true;
+const appointmentPreview=APPOINTMENT_PREVIEW_ENABLED&&new URLSearchParams(location.search).get('preview')==='1';
 function resolveAppointmentMemberDeepLink(){
  const params=new URLSearchParams(location.search);
  let candidate=params.get('member')||'';
@@ -3707,8 +3712,8 @@ if(!memberId&&!requestedMember&&window.liff?.isInClient?.()&&people.activePerson
 if(memberId)select.value=memberId;
 select.dataset.phmsLinePerson=authorizedPersonFromLine?'1':'0';
 picker.classList.remove('hidden');syncPersonSelectionCard();syncAppointmentHeader();updateProgressiveLayout();document.getElementById('selectedPersonLabel').textContent=memberId?select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';if(requestedMember&&!memberId){document.getElementById('personStatus').textContent='ไม่พบสิทธิ์เพิ่มนัดให้บุคคลที่เปิดมา กรุณาเลือกบุคคลที่มีสิทธิ์';}select.addEventListener('change',()=>{authorizedPersonFromLine=false;select.dataset.phmsLinePerson='0';memberId=select.value;picker.classList.remove('hidden');document.getElementById('selectedPersonLabel').textContent=memberId?select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';clearSourceFilled({personChanged:true});linkedVisitState.appointmentId='';linkedVisitState.personId='';$('linkedCareVisit').replaceChildren(new Option('เลือกนัดที่บันทึกไว้แล้ว',''));$('linkedCareVisitActions').classList.add('hidden');$('linkedCareVisitStatus').textContent='กำลังตรวจประวัตินัดของบุคคลนี้';clearAppointmentPhotos();$('hasAppointmentPhotos').value='';authorizedCatalog=null;relatedAllItems=[];sourceAppointments=new Map();relatedLoadGeneration++;$('relatedAppointmentBox').hidden=true;$('relatedCards').replaceChildren();$('relatedClear').classList.add('hidden');document.getElementById('review').disabled=true;document.getElementById('save').disabled=true;if(memberId){void loadSelectedCatalog(window.liff,readEndpoint);}else{refreshProviderPicker();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';}});if(!memberId){document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกบุคคล';return;}showLineLoading('catalog','กำลังโหลดข้อมูลโรงพยาบาล…');const catalogResult=await makeLiffProviderCatalogClient({liff:window.liff,endpoint:readEndpoint})(memberId);stopLineLoading();void loadRelatedAppointments();if(catalogResult.ok&&catalogResult.catalog.organizations.length){authorizedCatalog=catalogResult.catalog;refreshProviderPicker();syncProviderNames();document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE สำเร็จ — กรุณาเลือกโรงพยาบาลและตรวจทานนัด';document.getElementById('review').disabled=false;document.getElementById('save').disabled=true;document.getElementById('save').textContent='บันทึกนัด (ยังไม่เปิด)';void checkSaveCapability();}else{document.getElementById('connectionStatus').textContent='ยังไม่พร้อมบันทึก';document.getElementById('error').textContent='ยังโหลดทะเบียนโรงพยาบาลไม่ได้ กรุณาลองใหม่เมื่อระบบพร้อม';document.getElementById('save').disabled=true;}}catch{stopLineLoading();confirmClient=null;document.getElementById('connectionStatus').textContent='เชื่อมต่อ LINE ไม่สำเร็จ';document.getElementById('error').textContent='ไม่สามารถเชื่อมต่อ LINE ได้ กรุณาเปิดจาก LINE แล้วลองอีกครั้ง';}}
-initializeLiff();
-// No fake catalog. A verified backend integration will invoke setAuthorizedCatalog after LINE authentication.
+if(!appointmentPreview)initializeLiff();
+// No fake catalog in the authenticated production flow. A verified backend integration will invoke setAuthorizedCatalog after LINE authentication.
 let authorizedCatalog=null;
 function fillOptions(id,items,placeholder){const select=document.getElementById(id);select.replaceChildren(new Option(placeholder,''),...items.map(x=>new Option(x.label,x.value)));select.disabled=!items.length;}
 
@@ -3734,6 +3739,7 @@ function topHistoryNames(fieldNames,limit=3){
  return rankedPersonHistory(fieldNames).slice(0,limit).map(x=>x.name);
 }
 function rankedCatalogChoices(kind,entries,selected){
+ if(appointmentPreview)return (entries||[]).slice(0,3);
  const fields=kind==='hospital'?['hospital_name','hospital']:kind==='unit'?['department_name','department','unit_name']:['doctor_name','clinician_name','doctor'];
  const ranked=rankedPersonHistory(fields),byName=new Map();
  for(const item of (entries||[])){
@@ -4397,8 +4403,8 @@ $('scenario').addEventListener('change',()=>{if($('scenario').value==='booked')$
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
 window.addEventListener('pageshow',refresh);
 $('review').addEventListener('click',()=>{reviewAttempted=true;const detailNames={"hospital_hn":"HN โรงพยาบาล","hospital_vn":"VN ครั้งนี้","location_detail":"อาคาร / ชั้น / ห้องตรวจ","contact_phone":"เบอร์ติดต่อโรงพยาบาล","care_topic":"เรื่องที่ติดตามรักษา","coverage_type":"สิทธิรักษาพยาบาล","arrival_lead_minutes":"ไปถึงก่อนนัด (นาที)","visit_outcome_notes":"สรุปหลังพบแพทย์","diagnosis_summary":"การวินิจฉัย (ตามเอกสารที่มี)","treatment_summary":"การรักษาที่ได้รับ","test_results_summary":"ผลตรวจ","medication_plan_notes":"แผนยาที่ได้รับ","next_steps":"สิ่งที่ต้องทำต่อ","walk_in_reason":"เหตุผลที่ไปโดยไม่ได้นัด"};
-updateRequiredFieldStatus();if(!confirmClient||!authorizedCatalog||$('review').disabled){$('error').textContent='ยังเชื่อมต่อ LINE และทะเบียนโรงพยาบาลไม่สำเร็จ กรุณาลองใหม่';return;}const v={scenario:$('scenario').value,date:$('date').value,time_known:$('known').value==='yes',time:$('known').value==='yes'?($('time').value||null):null,status:$('scenario').value==='historical'?'completed':'planned'};if(!checkDateRule()){$('error').textContent=$('date').validationMessage;$('date').reportValidity();$('date').focus();return;}if(!$('date').value){$('error').textContent='กรุณาเลือกวันที่';$('date').focus();return;}if(!$('purpose').value.trim()){$('error').textContent='กรุณากรอกชื่อนัดหมาย เช่น ตรวจเข่า หรือฟังผลเลือด';$('purpose').focus();return;}if(!$('hospital').value.trim()){$('error').textContent='กรุณาเลือกโรงพยาบาล';$('hospitalSearch').focus();return;}if($('scenario').value!=='booked'&&!['yes','no'].includes($('known').value)){$('error').textContent='กรุณาเลือกว่าทราบเวลาหรือไม่';$('known').focus();return;}if(v.time_known&&!v.time){$('error').textContent='กรุณาระบุเวลาให้ครบก่อนตรวจทาน';$('time').focus();return;}const a=validateAppointmentDraft(v);if(!a.ok){$('error').textContent='กรุณาตรวจสอบวันที่และเวลาอีกครั้ง';return;}const packaged=prepareDraftForReview({...v,hospital:$('hospital').value,department:$('department').value,doctor:$('doctor').value,purpose:$('purpose').value,additional_note:$('additionalNote').value,prep:isPastAppointment()?'':$('prep').value,preparation_items:isPastAppointment()?[]:checklistItems.map(x=>({...x})),extended_details:Object.fromEntries(Object.keys(detailNames).filter(id=>$(id).value.trim()&&(id!=='walk_in_reason'||$('scenario').value==='walk_in')&&(!['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)||isPastAppointment())).map(id=>[id,$(id).value.trim()])),provider_selection:{organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:selectedClinicianId()},documents:[...$('documents').files]});if(!packaged.ok){$('error').textContent='ไฟล์แนบหรือรายการเตรียมตัวไม่ถูกต้อง: '+packaged.errors.join(', ');return;}
-if(!authorizedCatalog||!providerPickerState(authorizedCatalog,$('providerOrg').value,$('providerUnit').value,selectedClinicianId()).valid){$('error').textContent='ชื่อใหม่ใช้ได้เฉพาะร่างทดลอง ยังตรวจทานเพื่อบันทึกจริงไม่ได้ กรุณาเลือกโรงพยาบาลจากทะเบียน';return;}$('error').textContent='';const dl=$('preview');dl.replaceChildren();
+updateRequiredFieldStatus();if((!appointmentPreview&&!confirmClient)||!authorizedCatalog||$('review').disabled||!memberId){$('error').textContent='ยังเชื่อมต่อ LINE และทะเบียนโรงพยาบาลไม่สำเร็จ กรุณาลองใหม่';return;}const v={scenario:$('scenario').value,date:$('date').value,time_known:$('known').value==='yes',time:$('known').value==='yes'?($('time').value||null):null,status:$('scenario').value==='historical'?'completed':'planned'};if(!checkDateRule()){$('error').textContent=$('date').validationMessage;$('date').reportValidity();$('date').focus();return;}if(!$('date').value){$('error').textContent='กรุณาเลือกวันที่';$('date').focus();return;}if(!$('purpose').value.trim()){$('error').textContent='กรุณากรอกชื่อนัดหมาย เช่น ตรวจเข่า หรือฟังผลเลือด';$('purpose').focus();return;}if(!$('hospital').value.trim()){$('error').textContent='กรุณาเลือกโรงพยาบาล';$('hospitalSearch').focus();return;}if($('scenario').value!=='booked'&&!['yes','no'].includes($('known').value)){$('error').textContent='กรุณาเลือกว่าทราบเวลาหรือไม่';$('known').focus();return;}if(v.time_known&&!v.time){$('error').textContent='กรุณาระบุเวลาให้ครบก่อนตรวจทาน';$('time').focus();return;}const a=validateAppointmentDraft(v);if(!a.ok){$('error').textContent='กรุณาตรวจสอบวันที่และเวลาอีกครั้ง';return;}const packaged=prepareDraftForReview({...v,hospital:$('hospital').value,department:$('department').value,doctor:$('doctor').value,purpose:$('purpose').value,additional_note:$('additionalNote').value,prep:isPastAppointment()?'':$('prep').value,preparation_items:isPastAppointment()?[]:checklistItems.map(x=>({...x})),extended_details:Object.fromEntries(Object.keys(detailNames).filter(id=>$(id).value.trim()&&(id!=='walk_in_reason'||$('scenario').value==='walk_in')&&(!['visit_outcome_notes','diagnosis_summary','treatment_summary','test_results_summary','medication_plan_notes','next_steps'].includes(id)||isPastAppointment())).map(id=>[id,$(id).value.trim()])),provider_selection:{organizationId:$('providerOrg').value,unitId:$('providerUnit').value,clinicianId:selectedClinicianId()},documents:[...$('documents').files]});if(!packaged.ok){$('error').textContent='ไฟล์แนบหรือรายการเตรียมตัวไม่ถูกต้อง: '+packaged.errors.join(', ');return;}
+if(!authorizedCatalog||(!appointmentPreview&&!providerPickerState(authorizedCatalog,$('providerOrg').value,$('providerUnit').value,selectedClinicianId()).valid)){$('error').textContent='ชื่อใหม่ใช้ได้เฉพาะร่างทดลอง ยังตรวจทานเพื่อบันทึกจริงไม่ได้ กรุณาเลือกโรงพยาบาลจากทะเบียน';return;}$('error').textContent='';const dl=$('preview');dl.replaceChildren();
 function previewField(label,value){if(value===undefined||value===null||String(value).trim()==='')return;const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=String(value);dl.append(dt,dd);}
 const personName=$('personSelect').selectedOptions?.[0]?.textContent||'';
 previewField('บุคคล',personName==='เลือกบุคคล'?'':personName);
@@ -4793,7 +4799,7 @@ async function uploadAppointmentNotice(file,position,appointmentId){
  return data.documentId;
 }
 $('save').addEventListener('click',async()=>{
- if(!confirmClient||!reviewedDraft)return;
+ if(appointmentPreview||!confirmClient||!reviewedDraft)return;
  const button=$('save');button.disabled=true;button.textContent='กำลังบันทึก…';
  try{
   if(!savedAppointmentId){
@@ -7681,6 +7687,40 @@ function updateConnectionBanner(){
 new MutationObserver(updateConnectionBanner).observe(connectionBanner,{childList:true,characterData:true,subtree:true});
 updateConnectionBanner();
 updateProgressiveLayout();refresh();syncChoiceCards();
+if(appointmentPreview){
+ // Synthetic choices stay in memory only. The real LINE SDK, APIs, permission
+ // checks, routes and backend save clients remain intact in normal mode.
+ const exampleId=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
+ const orgs=[{id:exampleId(101),name:'โรงพยาบาลตัวอย่าง A'},{id:exampleId(102),name:'โรงพยาบาลตัวอย่าง B'}];
+ authorizedCatalog={organizations:orgs,units:orgs.flatMap((org,i)=>[
+  {id:exampleId(201+i*10),organization_id:org.id,name:'อายุรกรรม',code:'MED'},
+  {id:exampleId(202+i*10),organization_id:org.id,name:'กระดูกและข้อ',code:'ORTHO'},
+  {id:exampleId(203+i*10),organization_id:org.id,name:'จักษุ',code:'EYE'}
+ ]),clinicians:orgs.map((org,i)=>({id:exampleId(301+i),organization_id:org.id,display_name:'แพทย์ตัวอย่าง'}))};
+ const picker=$('personPicker'),select=$('personSelect');
+ select.replaceChildren(new Option('เลือกบุคคล',''),new Option('ผู้รับนัดตัวอย่าง 1',exampleId(1)),new Option('ผู้รับนัดตัวอย่าง 2',exampleId(2)));
+ select.dataset.phmsLinePerson='0';
+ picker.hidden=false;picker.classList.remove('hidden');
+ // Synchronize member before the existing change handlers reset dependent fields.
+ select.addEventListener('change',()=>{memberId=select.value;},true);
+ select.addEventListener('change',()=>{
+  $('review').disabled=!memberId;
+  $('selectedPersonLabel').textContent=memberId?select.selectedOptions[0].textContent:'ยังไม่ได้เลือกบุคคล';
+  refreshProviderPicker();syncProviderNames();syncPersonSelectionCard();syncAppointmentHeader();updateProgressiveLayout();
+ });
+ const banner=$('connectionStatus');
+ banner.classList.add('phms-preview-banner');
+ banner.textContent='โหมดทดสอบ · ไม่ต้องเข้าสู่ LINE · ใช้ข้อมูลตัวอย่างเท่านั้น';
+ const liveLink=document.createElement('a');const liveUrl=new URL(location.href);
+ liveUrl.searchParams.delete('preview');liveUrl.searchParams.delete('member');liveUrl.searchParams.delete('liff.state');
+ liveLink.href=liveUrl.href;liveLink.textContent='เข้าสู่ LINE เพื่อใช้ข้อมูลจริง';
+ banner.append(document.createElement('br'),liveLink);
+ $('save').disabled=true;$('save').textContent='บันทึกจริง (ต้องเข้าสู่ LINE)';
+ $('saveStatus').textContent='โหมดทดสอบ: ตรวจทานได้ แต่ไม่มีการส่งข้อมูลหรือรูปไปยังระบบจริง';
+ for(const id of ['systemDraftOpen','systemDraftSave']){const button=$(id);if(button){button.disabled=true;button.title='ต้องเข้าสู่ LINE เพื่อใช้ร่างจริง';}}
+ $('draftOpenHint')?.remove();
+ refreshProviderPicker();syncProviderNames();syncPersonSelectionCard();syncAppointmentHeader();updateProgressiveLayout();
+}
 </script><script type="module">
 // Optional location synchronizer. Existing protected API validates LINE identity and
 // person-scoped appointment read access. Never read another person's history.
