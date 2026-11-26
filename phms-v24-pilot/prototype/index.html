@@ -3426,8 +3426,33 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
 #editor#editor#editor#editor#editor button[aria-pressed]:not(.phms-mode-segment):not(.mode-choice):not(.adaptive-provider-more):not(.phms-treatment-more):not(.phms-coverage-more):not(.phms-procedure-more):not([data-choice-action="add"]):not([data-choice-action="search"]):not([aria-expanded]):is(:disabled,[aria-disabled="true"]){background:#f0eeee!important;border-color:#ccc5c7!important;color:#6f686b!important;opacity:1!important}
 #editor#editor#editor#editor#editor button[aria-pressed]:not(.phms-mode-segment):not(.mode-choice):not(.adaptive-provider-more):not(.phms-treatment-more):not(.phms-coverage-more):not(.phms-procedure-more):not([data-choice-action="add"]):not([data-choice-action="search"]):not([aria-expanded]):is(:disabled,[aria-disabled="true"]) :is(strong,small,span,b,p,em,div){color:#6f686b!important}
 #editor#editor#editor#editor#editor button[aria-pressed]:not(.phms-mode-segment):not(.mode-choice):not(.adaptive-provider-more):not(.phms-treatment-more):not(.phms-coverage-more):not(.phms-procedure-more):not([data-choice-action="add"]):not([data-choice-action="search"]):not([aria-expanded]):focus-visible{outline:3px solid #76532F!important;outline-offset:3px!important}
+
+/* PHMS Adaptive Typography Standard — shared visual preference, independent from form data. */
+:root{--phms-type-title:26px;--phms-type-section:24px;--phms-type-label:20px;--phms-type-control:19px;--phms-type-date:20px;--phms-type-help:16px;--phms-type-result:30px;--phms-control-height:56px;--phms-date-height:64px;--phms-choice-height:64px}
+:root[data-phms-type="normal"]{--phms-type-title:22px;--phms-type-section:18px;--phms-type-label:16px;--phms-type-control:16px;--phms-type-date:16px;--phms-type-help:14px;--phms-type-result:24px;--phms-control-height:48px;--phms-date-height:52px;--phms-choice-height:54px}
+.phms-font-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:0 0 auto;max-width:100%}
+.phms-font-tools #phmsFontToggle{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:44px;min-height:44px;height:auto;width:auto;flex:none;border:1px solid var(--phms-font-border,#c9a9b1);border-radius:10px;background:var(--phms-font-bg,#fffafb);color:var(--phms-font-ink,#742b3b);font-size:14px;line-height:1.35;font-weight:700;padding:6px 9px;margin:0;white-space:nowrap;box-shadow:none}
+.phms-font-tools #phmsFontToggle:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.phms-font-tools .font-symbol{font-size:18px;font-weight:750}
+@media(max-width:360px){:root:not([data-phms-type="normal"]){--phms-type-control:18px;--phms-type-date:18px}}
+
+:root{--phms-font-border:#d9c0a1;--phms-font-bg:#fffaf3;--phms-font-ink:#76532f}
+#editor .phms-appointment-header .phms-appointment-header-top{flex-wrap:wrap!important;gap:6px!important}
+#editor .phms-appointment-header .phms-appointment-header-top h1,.phms-appointment-header .phms-appointment-header-top h1{font-size:var(--phms-type-title)!important;line-height:1.4!important;white-space:normal!important}
+#editor #appointmentHeaderPerson,.phms-appointment-header #appointmentHeaderPerson{font-size:var(--phms-type-label)!important;line-height:1.45!important;overflow-wrap:anywhere}
+#editor#editor .appointment-section-title,#editor#editor .appointment-mode-bar .mode-label,#editor#editor #personPicker.embedded-person-picker label[for="personSelect"],#confirmation#confirmation .phms-review-card>h3{font-size:var(--phms-type-section)!important;line-height:1.4!important;white-space:normal!important;overflow-wrap:anywhere}
+#editor#editor label:not(.mode-label),#editor#editor summary,#editor#editor .phms-mini-heading,#confirmation#confirmation #preview details>summary,#confirmation#confirmation #preview .phms-review-reference-heading{font-size:var(--phms-type-label)!important;line-height:1.45!important;white-space:normal!important;overflow-wrap:anywhere}
+#editor#editor #personPicker.embedded-person-picker label[for="personSelect"]{font-size:var(--phms-type-section)!important}
+#editor#editor input:not([type=hidden]):not([type=file]):not([type=checkbox]):not([type=radio]),#editor#editor select,#editor#editor textarea,#personPicker#personPicker select{font-size:var(--phms-type-control)!important;line-height:1.4!important;min-width:0;max-width:100%}
+#editor#editor input:not([type=hidden]):not([type=file]):not([type=checkbox]):not([type=radio]),#editor#editor select{min-height:var(--phms-control-height)!important}
+#editor#editor button:not(#phmsFontToggle),#editor#editor .scenario-copy strong,#editor#editor .phms-mode-segment{font-size:var(--phms-type-control)!important;line-height:1.4!important;white-space:normal!important;overflow-wrap:anywhere}
+#editor#editor .help,#editor#editor .scenario-copy small,#editor#editor .phms-doctor-card-subtitle,#confirmation#confirmation .phms-review-guide{font-size:var(--phms-type-help)!important;line-height:1.5!important}
+#editor#editor .thai-preview,#editor#editor .native-picker-shell>input[type=date],#editor#editor .native-picker-shell>input[type=time]{font-size:var(--phms-type-date)!important}
+#confirmation#confirmation .phms-review-card .phms-review-pair dt,#confirmation#confirmation .phms-review-card .phms-review-pair dd,#confirmation#confirmation #preview .phms-review-stop-detail p{font-size:var(--phms-type-control)!important;line-height:1.5!important}
+#confirmation#confirmation .phms-review-card .phms-review-main-value{font-size:var(--phms-type-label)!important}
+#editor#editor .phms-font-tools #phmsFontToggle{min-height:44px!important;font-size:14px!important;color:#76532f!important;background:#fffaf3!important;border:1px solid #d9c0a1!important}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.71</span></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><div class="phms-font-tools"><button id="phmsFontToggle" type="button" aria-label="ปรับขนาดตัวอักษร"><span class="font-symbol" aria-hidden="true">กก</span><span data-font-label>ตัวใหญ่</span></button><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.72</span></div></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3613,7 +3638,21 @@ main #appointmentSuccess.phms-save-success{box-sizing:border-box;width:100%;max-
  <button id="appointmentSuccessFinish" type="button" class="phms-save-success-finish">เสร็จสิ้น</button>
  <p id="appointmentSuccessCloseHint" class="help hidden" role="status"></p>
 </section>
-</main><script type="module">
+</main><script>
+(function(){
+ const key='phms.ui.typography.v1',root=document.documentElement,button=document.getElementById('phmsFontToggle');
+ if(!button)return;
+ let preferences={};function read(){try{const parsed=JSON.parse(localStorage.getItem(key)||'{}');if(parsed&&typeof parsed==='object')preferences=parsed}catch{}}
+ function effective(mode){return preferences[mode]==='large'||preferences[mode]==='normal'?preferences[mode]:(mode==='simple'?'large':'normal')}
+ let mode='simple';
+ function apply(next){mode=next==='simple'?'simple':'detail';const size=effective(mode);root.dataset.phmsType=size;button.querySelector('[data-font-label]').textContent=size==='large'?'ตัวใหญ่':'ปกติ';button.setAttribute('aria-label','ขนาดตัวอักษรปัจจุบัน '+(size==='large'?'ตัวใหญ่':'ปกติ')+' กดเพื่อเปลี่ยนเป็น'+(size==='large'?'ตัวปกติ':'ตัวใหญ่'))}
+ read();apply('simple');
+ button.addEventListener('click',()=>{preferences[mode]=effective(mode)==='large'?'normal':'large';try{localStorage.setItem(key,JSON.stringify(preferences))}catch{}apply(mode)});
+ window.addEventListener('storage',e=>{if(e.key===key){read();apply(mode)}});
+ window.addEventListener('pageshow',()=>{read();apply(mode)});
+ window.phmsApplyTypography=apply;
+})();
+(function(){const detail=document.getElementById('detail');const sync=()=>window.phmsApplyTypography?.(detail?.value||'simple');detail?.addEventListener('change',sync);window.addEventListener('pageshow',sync);sync()})();</script><script type="module">
 import {validateAppointmentDraft} from '../contracts/scenario-validator.mjs';
 import {prepareDraftForReview} from '../contracts/draft-packager.mjs';
 import {providerPickerState} from '../contracts/provider-picker-state.mjs';

@@ -268,9 +268,35 @@ body:has(#photoPreviewDialog[open]){overflow:hidden}
 .supply-total{display:flex;flex-direction:column;gap:3px;padding:8px 0;border-bottom:1px solid #efdee2}.supply-total span{font-size:18px;font-weight:650}
 #edit #fields .medication-period>div{min-width:0}
 @media(max-width:360px){#edit #fields .period-options>button{font-size:18px}#edit #fields .thai-date-display{font-size:18px}#edit #fields .medication-period label{font-size:18px}}
+
+/* PHMS Adaptive Typography Standard — shared visual preference, independent from form data. */
+:root{--phms-type-title:26px;--phms-type-section:24px;--phms-type-label:20px;--phms-type-control:19px;--phms-type-date:20px;--phms-type-help:16px;--phms-type-result:30px;--phms-control-height:56px;--phms-date-height:64px;--phms-choice-height:64px}
+:root[data-phms-type="normal"]{--phms-type-title:22px;--phms-type-section:18px;--phms-type-label:16px;--phms-type-control:16px;--phms-type-date:16px;--phms-type-help:14px;--phms-type-result:24px;--phms-control-height:48px;--phms-date-height:52px;--phms-choice-height:54px}
+.phms-font-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:0 0 auto;max-width:100%}
+.phms-font-tools #phmsFontToggle{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:44px;min-height:44px;height:auto;width:auto;flex:none;border:1px solid var(--phms-font-border,#c9a9b1);border-radius:10px;background:var(--phms-font-bg,#fffafb);color:var(--phms-font-ink,#742b3b);font-size:14px;line-height:1.35;font-weight:700;padding:6px 9px;margin:0;white-space:nowrap;box-shadow:none}
+.phms-font-tools #phmsFontToggle:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.phms-font-tools .font-symbol{font-size:18px;font-weight:750}
+@media(max-width:360px){:root:not([data-phms-type="normal"]){--phms-type-control:18px;--phms-type-date:18px}}
+
+#edit .header-top{flex-wrap:wrap;gap:6px}
+#edit .header-top h1{font-size:var(--phms-type-title);line-height:1.35}
+#headerPerson{font-size:var(--phms-type-label)}
+#edit #fields .thai-date-display{font-size:var(--phms-type-date)}
+#edit #fields .thai-date-picker{height:var(--phms-date-height);min-height:var(--phms-date-height)}
+#edit #fields .thai-date-picker input[type=date]{height:var(--phms-date-height)!important;min-height:var(--phms-date-height)!important}
+#edit #fields input:not([type=file]):not([type=checkbox]):not([type=date]),#edit #fields select,#edit #personArea select{height:var(--phms-control-height)!important;min-height:var(--phms-control-height)!important}
+#edit #fields .period-options>button,#edit #fields .guided-choices>button{min-height:var(--phms-choice-height);font-size:var(--phms-type-control)}
+#edit #fields .medication-period label{font-size:var(--phms-type-label)}
+#edit details.section>summary,#reviewBody details.section>summary,#doneBody details.section>summary,.med-period-summary h4,.stock-estimate h4{font-size:var(--phms-type-label)}
+.period-result-date,.supply-total span{font-size:var(--phms-type-date)}
+.period-explain,#edit #fields .typed-photo-heading,#edit #fields .photo-remove,#edit #fields .typed-photo-add.compact-photo-add,.adaptive-hint{font-size:var(--phms-type-help)}
+#edit #fields .kind-cards>button{min-height:var(--phms-kind-height,132px)}
+:root[data-phms-type="normal"]{--phms-kind-height:100px}
+#reviewBody .reviewrow,#doneBody .reviewrow{font-size:var(--phms-type-control)}
+#edit #fields .more-options,#edit #fields .source-cards>button{font-size:var(--phms-type-control)}
 </style></head><body><main>
 <div class="panel top" id="edit">
-<header class="phms-medication-header"><div class="header-top"><h1>💊 เพิ่มข้อมูลยา</h1><span class="version">v2.4.30</span></div><p id="headerPerson">ยังไม่ได้เลือกบุคคล</p><div class="seg" id="mode"><button type="button" data-mode="simple" aria-pressed="true">✨ แบบง่าย</button><button type="button" data-mode="detail" aria-pressed="false">🛠️ แบบละเอียด</button></div></header>
+<header class="phms-medication-header"><div class="header-top"><h1>💊 เพิ่มข้อมูลยา</h1><div class="phms-font-tools"><button id="phmsFontToggle" type="button" aria-label="ปรับขนาดตัวอักษร"><span class="font-symbol" aria-hidden="true">กก</span><span data-font-label>ตัวใหญ่</span></button><span class="version">v2.4.31</span></div></div><p id="headerPerson">ยังไม่ได้เลือกบุคคล</p><div class="seg" id="mode"><button type="button" data-mode="simple" aria-pressed="true">✨ แบบง่าย</button><button type="button" data-mode="detail" aria-pressed="false">🛠️ แบบละเอียด</button></div></header>
 <p class="requiredLegend">* จำเป็นต้องกรอก</p>
 <div id="personArea"></div><p id="lineHint" class="muted">ยังไม่พบเซสชัน LINE · ใช้ข้อมูลสมมติได้</p><button id="connectLine" class="secondary line-connect" type="button" hidden>เชื่อมข้อมูลจาก LINE</button><div id="draftOpenArea" hidden><div id="draftStart"><strong>📂 ร่างข้อมูลยา</strong><p class="muted">เคยกรอกค้างไว้? เปิดร่างเพื่อกรอกต่อได้</p><button class="full" id="openDraft">📂 เปิดร่างเพื่อกรอกต่อ</button></div><div id="draftResume" hidden><div class="draft-resume-title"><strong>📂 กำลังกรอกต่อจากร่าง</strong><button type="button" class="draft-link" id="switchDraft">เลือกร่างอื่น</button></div><p id="draftResumeName"></p><p id="draftResumeTime" class="muted"></p><p class="muted">ข้อมูลเดิมถูกนำกลับมาแล้ว</p></div><div id="draftChoiceList" hidden></div><p id="draftFeedback" role="status" aria-live="polite" hidden></p></div>
 <div id="fields"></div><div id="errors" role="alert" class="error"></div><p class="muted" id="saveHint">ยังไม่เปิดบันทึกยาเข้าฐานข้อมูลจริง</p><button class="secondary full" id="saveDraft">บันทึกร่าง</button><button class="full" id="reviewBtn">ตรวจทานข้อมูลยา</button>
@@ -279,6 +305,20 @@ body:has(#photoPreviewDialog[open]){overflow:hidden}
 <div class="panel hidden" id="done"><h2>บันทึกตัวอย่างสำเร็จ</h2><p>ข้อมูลอยู่ในหน่วยความจำของหน้านี้เท่านั้น ไม่มีการส่งเข้าระบบจริง</p><div id="doneBody"></div><div class="footer"><button id="newMed">เพิ่มยาตัวถัดไป</button><button class="secondary" id="download">ส่งออก JSON</button></div></div>
 
 <dialog id="photoPreviewDialog" class="photo-dialog" aria-labelledby="photoPreviewTitle"><div class="photo-dialog-bar"><strong id="photoPreviewTitle">รูปภาพยา</strong><button type="button" class="secondary" id="closePhotoPreview" autofocus>✕ ปิด</button></div><div class="photo-dialog-content"><img id="photoPreviewImage" alt="รูปภาพยา"></div></dialog></main><script>
+(function(){
+ const key='phms.ui.typography.v1',root=document.documentElement,button=document.getElementById('phmsFontToggle');
+ if(!button)return;
+ let preferences={};function read(){try{const parsed=JSON.parse(localStorage.getItem(key)||'{}');if(parsed&&typeof parsed==='object')preferences=parsed}catch{}}
+ function effective(mode){return preferences[mode]==='large'||preferences[mode]==='normal'?preferences[mode]:(mode==='simple'?'large':'normal')}
+ let mode='simple';
+ function apply(next){mode=next==='simple'?'simple':'detail';const size=effective(mode);root.dataset.phmsType=size;button.querySelector('[data-font-label]').textContent=size==='large'?'ตัวใหญ่':'ปกติ';button.setAttribute('aria-label','ขนาดตัวอักษรปัจจุบัน '+(size==='large'?'ตัวใหญ่':'ปกติ')+' กดเพื่อเปลี่ยนเป็น'+(size==='large'?'ตัวปกติ':'ตัวใหญ่'))}
+ read();apply('simple');
+ button.addEventListener('click',()=>{preferences[mode]=effective(mode)==='large'?'normal':'large';try{localStorage.setItem(key,JSON.stringify(preferences))}catch{}apply(mode)});
+ window.addEventListener('storage',e=>{if(e.key===key){read();apply(mode)}});
+ window.addEventListener('pageshow',()=>{read();apply(mode)});
+ window.phmsApplyTypography=apply;
+})();
+</script><script>
 'use strict';
 const $=id=>document.getElementById(id);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -476,7 +516,7 @@ function daysSupplyMarkup(x){const q=daysSupply(x);if(q.reason)return '<p class=
 function stockEstimateEditor(){const s=stockInput(d),du=resolvedUnit(d,'doseUnit');const factor=!s.reason&&du&&s.unit!==du;return '<div class="stock-estimate"><h4>📊 ประมาณการยาพอใช้</h4><div id="stockFactorArea" '+(!factor?'hidden':'')+'><label for="stockFactor">🔄 ปริมาณที่ใช้ได้ใน 1 หน่วยคลัง</label><input id="stockFactor" data-key="stockFactor" type="number" min="0" step="any" value="'+esc(d.stockFactorKey===conversionKey(d)?d.stockFactor:'')+'" placeholder="ตามฉลากจริง"><p class="muted" id="stockFactorHint">'+esc(factor?'1 '+s.unit+' มี '+du+' เท่าไร':'')+'</p></div><div id="stockTotalDoseArea" '+(!['หยอดตา','หยอดหู','ทาภายนอก'].includes(d.route)?'hidden':'')+'><label class="checkline"><input type="checkbox" id="stockTotalDoseConfirmed" '+(d.stockTotalDoseConfirmed?'checked':'')+'> ขนาดยาที่กรอกเป็นยอดรวมทุกตำแหน่ง</label></div><div id="stockEstimateResult">'+daysSupplyMarkup(d)+'</div></div>'}
 function refreshStockEstimate(){const el=$('stockEstimateResult');if(!el)return;const s=stockInput(d),du=resolvedUnit(d,'doseUnit'),factor=!s.reason&&du&&s.unit!==du;const area=$('stockFactorArea');if(area)area.hidden=!factor;const hint=$('stockFactorHint');if(hint)hint.textContent=factor?'1 '+s.unit+' มี '+du+' เท่าไร':'';const input=$('stockFactor');if(input&&d.stockFactorKey!==conversionKey(d))input.value='';const confirm=$('stockTotalDoseConfirmed');if(confirm)confirm.checked=Boolean(d.stockTotalDoseConfirmed);el.innerHTML=daysSupplyMarkup(d)}
 
-function render(){const oldOpen=[...document.querySelectorAll('#fields details')].filter(x=>x.open).map(x=>x.dataset.detail);$('headerPerson').textContent=personLabel(d)||'ยังไม่ได้เลือกบุคคล';$('personArea').innerHTML=section('👤 เพิ่มยาให้ใคร <span class="required">*</span>',personControl()+(d.person==='บุคคลอื่น'?field('personOther','ชื่อสมมติ','text','ชื่อสำหรับทดสอบ',true):''));$('fields').innerHTML=
+function render(){window.phmsApplyTypography?.(mode);const oldOpen=[...document.querySelectorAll('#fields details')].filter(x=>x.open).map(x=>x.dataset.detail);$('headerPerson').textContent=personLabel(d)||'ยังไม่ได้เลือกบุคคล';$('personArea').innerHTML=section('👤 เพิ่มยาให้ใคร <span class="required">*</span>',personControl()+(d.person==='บุคคลอื่น'?field('personOther','ชื่อสมมติ','text','ชื่อสำหรับทดสอบ',true):''));$('fields').innerHTML=
 section('🗒️ บันทึกยาแบบไหน',kindCards())+(kindReady()?'<div id="medicationDetails">'+(d.kind==='เติมยา / รับยาเพิ่ม'?section('💊 ยาที่ได้รับเพิ่ม',field('related','อ้างอิงยาเดิม (ตัวอย่าง)','text','ชื่อรายการยาเดิม',true)):'')+
 section('💊 ข้อมูลยา',field('name','ชื่อยา','text','เช่น Losartan, Paracetamol',true)+formControl()+strengthControls()+field('indication','ใช้รักษาอะไร','text','เช่น ความดันโลหิตสูง')+(mode==='detail'?field('generic','ชื่อสามัญทางยา')+field('brand','ชื่อการค้า')+field('concentration','ความเข้มข้น / ส่วนประกอบตามฉลาก'):'')+photoEditor())+
 schedule()+
@@ -526,7 +566,7 @@ $('saveDraft').onclick=()=>{if(!kindReady())return;if(isRealPerson(d))return ale
 $('openDraft').onclick=()=>{draftListOpen=!draftListOpen;clearDraftFeedback();syncDraftPanel()};
 $('switchDraft').onclick=()=>{draftListOpen=!draftListOpen;clearDraftFeedback();syncDraftPanel()};
 const listAction=e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset;if(a.load!==undefined){if(photoPending)return alert('กำลังอ่านรูป');const target=drafts.find(x=>x.id===a.load);if(!target)return;if(activeDraftId===target.id){draftListOpen=false;syncDraftPanel();return}if(kindReady()&&!window.confirm('เปิดร่างนี้แทนข้อมูลที่กำลังกรอกอยู่หรือไม่? ข้อมูลที่ยังไม่ได้บันทึกร่างอาจหาย'))return;d=clone(target.data);expandedChoices.clear();mode=target.mode;editing=-1;activeDraftId=target.id;draftListOpen=false;clearDraftFeedback();render();show('edit')}else if(a.deleteDraft!==undefined){const target=drafts.find(x=>x.id===a.deleteDraft);if(!target||!window.confirm('ลบร่างนี้หรือไม่?'))return;drafts.splice(drafts.indexOf(target),1);if(activeDraftId===target.id)activeDraftId='';syncDraftPanel()}else if(b.id==='closeDraft'){draftListOpen=false;syncDraftPanel()}};$('draftChoiceList').onclick=listAction;
-$('download').onclick=()=>{const blob=new Blob([JSON.stringify({schema:'phms-medication-pilot-2.4.30',status:'demo_only',records},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='phms-medication-demo.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+$('download').onclick=()=>{const blob=new Blob([JSON.stringify({schema:'phms-medication-pilot-2.4.31',status:'demo_only',records},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='phms-medication-demo.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 $('closePhotoPreview').onclick=()=>$('photoPreviewDialog').close();$('photoPreviewDialog').addEventListener('close',()=>$('photoPreviewImage').removeAttribute('src'));for(const id of ['reviewBody','doneBody'])$(id).addEventListener('click',e=>{const b=e.target.closest('button[data-review-photo]');if(!b)return;const img=b.querySelector('img');if(img)viewMedicationPhoto({data:img.getAttribute('src'),name:img.alt},b.closest('.typed-review-group')?.querySelector('h4')?.textContent)});
 d.times.push({...arrDefaults.times});render();
 // Optional LINE session only. No automatic login and no anonymous requests to the member API.
