@@ -1,3 +1,7 @@
+# PHMS Thai constrained calendar — appointment v2.4.90.76
+
+Use the medication v2.4.38 end-date calendar visual pattern in appointment, with category brown. Full Thai weekday/month/Buddhist year, gray disabled dates, explicit close/cancel, clear and today, month/year navigation. Booked and walk-in permit Bangkok today or future; historical permits today or past, following existing checkDateRule. Calendar year range 1900–2200 matches the existing Thai formatter. Preserve ISO input, existing input/change events, draft, linked appointments, validation and authorization. Existing appointment history/reschedule count unchanged; same scenario date rule applies to rescheduled appointment dates. Time picker unchanged. No database or access changes. Browser visual testing pending.
+
 # Medication v2.4.36 — compact selection and computed period summary
 
 Keep three patient-adaptive initial dosage form options and a dashed additional-options button. After choosing a form, show only the selected item and the additional-options button in two columns. Expansion reveals the other master choices, never duplicates the primary items. A confirmed choice collapses the alternatives; cancellation preserves the old choice and existing units. Custom form remains editable and visible. Computed treatment duration summary is read-only, centered, category-tinted, with dominant total days, full Thai Buddhist start/end dates, divider and automatic-calculation label. Display only for valid period. No medical calculation, authentication, or appointment changes.
