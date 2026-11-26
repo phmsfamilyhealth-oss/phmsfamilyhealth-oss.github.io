@@ -1,3 +1,7 @@
+# v2.4.38 — period type first and constrained PHMS calendar
+
+Three compact columns: มีกำหนด (stored กำหนดระยะเวลา), ใช้ต่อเนื่อง, ไม่ทราบ (stored ไม่ทราบระยะเวลา). Show date fields only after period type is selected; no new mandatory period type requirement. Only fixed treatment has duration and end. Start remains native; end uses PHMS Thai/Buddhist calendar modal with actual disabled buttons and visible gray unavailable days, previous-month navigation disabled before the start month, same-day allowed, clear/cancel/close, no native end picker. State still rejects out-of-range dates. Existing inclusive duration rules and treatment/supply separation preserved. No changes to authentication or production writes. iPhone visual testing pending.
+
 # v2.4.37 — start-first end-date constraint
 
 Keep treatment period order: start, duration and unit, end. End date is disabled until a valid start date is entered, with Thai prompt. Native min equals start; state also rejects any attempted earlier end, preserving the prior valid value. Same-day end allowed (one inclusive day). When changing start in manual-end mode invalidates the end, clear end and derived duration; when duration is authoritative, retain duration and recalculate end. Clearing start removes computed end while retaining entered duration. Final validation catches legacy invalid ranges and end without start. Native picker visual restrictions depend on browser; state enforces the rule. No change to treatment calculations, supply estimates, or authentication.
