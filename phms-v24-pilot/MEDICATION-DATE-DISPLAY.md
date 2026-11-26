@@ -1,0 +1,3 @@
+# PHMS Medication date and optional label display v2.4.25
+
+Use red asterisks for mandatory fields, without repeated optional labels. Render date-only fields using Thai weekday, day, abbreviated month and two-digit Buddhist year (e.g. พุธ 16 ธ.ค. 69). Use exact calendar weekday. Keep Gregorian ISO YYYY-MM-DD in form state, native date picker and data payload; localize review date fields too. No automatic conversion of stored values. Period fields use short labels and equal-sized native date controls. Show reversed date range inline; final validation remains. No production or authentication changes.
