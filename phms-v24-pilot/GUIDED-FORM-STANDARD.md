@@ -1,3 +1,7 @@
+# Compact typography control — medication v2.4.32 / appointment v2.4.90.73
+
+Place the compact font toggle directly below the version badge in a fixed right-hand header column. Small visual pill (26px), actual touch target at least 44px high and wide. Large profile selected = category dark fill, white text; normal = pale fill, category text and light border. Reflect selection using aria-pressed; retain current-size label and existing preference rules. No changes to data or authentication. Other categories should adopt the same placement.
+
 # PHMS Adaptive Typography Standard — medication v2.4.31 / appointment v2.4.90.72
 
 Independent data-entry mode and visual font profile. Simple defaults large; detailed defaults normal. Header toggle has current-size label, 44px minimum target, accessible action label. Explicit preference stored per entry mode using shared origin-local key phms.ui.typography.v1, shared between medication and appointment; not tied to patient or stored in health data. Local browser only, no cross-device/account identity or sync. Changing size does not rerender or reset values. CSS tokens (large/normal): page title 26/22; section 24/18; label 20/16; controls 19/16; date 20/16; result 30/24; help 16/14; control height 56/48; date 64/52. Narrow screens may wrap or use 18px large controls. Preserve user zoom, category colors, semantic emoji, auth and existing functionality. Implemented in both pilot forms; other modules use as design standard, migration pending. Browser/iPhone visual validation pending.
