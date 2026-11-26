@@ -1,3 +1,7 @@
+# v2.4.28 — stable two-column editor (supersedes v2.4.26 layout)
+
+Keep all six categories in fixed master order in a two-column grid, whether empty or populated. Cards do not stretch to row height. Compact contain-fit thumbnails, no crop; tap any thumbnail to open a viewport-sized modal viewer with prominent close button, including review and saved demo. Closing returns to the form; no deletion action inside viewer. Keep existing category limits, per-image delete and add controls, review document layout, data schema, and privacy boundaries. Browser viewport excludes native OS/LINE chrome. No production changes.
+
 # v2.4.26 presentation update
 
 Display populated photo categories in full-width blocks, in master-category order; unpopulated categories follow in a compact two-column grid. Show each attached image separately with intrinsic aspect ratio (no crop), maximum preview height 380px, tap to enlarge, compact 44px delete action directly below. Show add action in the category header only while capacity remains; hide it at capacity rather than show a disabled full-count tile. No repeated count or optional hints. Review previews also single-column. Existing limits, category metadata, data and access boundaries unchanged.
