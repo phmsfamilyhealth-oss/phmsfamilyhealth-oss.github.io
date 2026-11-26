@@ -1,3 +1,8 @@
+# PHMS Unified Rounded Header & Radius Standard — medication v2.4.34 / appointment v2.4.90.75
+
+Use identical header hierarchy across categories: left identity column with page title and selected person directly below, right 82px column with 23px version pill and 27px visual font pill (44px touch target), mode switch full width below both columns. Short appointment heading: เพิ่มนัดหมาย. Radius tokens: main form 24px; top accent stripe 6px following clipped outer radius; mode 16px; section heading 12px; choice 14px; input 12px; disclosure 14px; version and font pills 999px. Same layout and geometry, category-specific colors. Elder-first large default and shared browser-local preference remain. Apply to remaining categories when migrated; not a claim they are already changed. Changes limited to presentation; keep patient identity, permissions, validation and medication logic intact.
+
+## Prior guidance (superseded for header geometry)
 # Elder-first typography preference — medication v2.4.33 / appointment v2.4.90.74
 
 Supersedes mode-specific typography defaults. Both modes default large, independently of data-entry mode. A single explicit browser-local font preference is shared across both forms and modes, retained on reload. New key phms.ui.typography.v2 intentionally starts large once; previous per-mode v1 values are not migrated because they conflict with the new unified preference. Version badge and font control aligned in a fixed 88px right-hand column, equal-width visual pills with 8px radius and 4px visual gap; font control 28px visual height, 44px touch height. Large selected uses category dark fill and white text; normal uses pale fill, category text and border. No data, auth or clinical calculation changes.

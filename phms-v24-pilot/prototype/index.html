@@ -3469,8 +3469,31 @@ html body #editor#editor .phms-font-tools #phmsFontToggle,html body #edit .phms-
 html body .phms-font-tools #phmsFontToggle::before{top:4px;bottom:12px;left:0;right:0;border-radius:8px;background:#fffaf3;border:1px solid #d9c0a1}
 html body .phms-font-tools #phmsFontToggle[aria-pressed="true"]::before{background:#76532f;border-color:#76532f}
 html body .phms-font-tools #phmsFontToggle .font-symbol{font-size:13px!important}
+
+/* PHMS shared rounded header and radius tokens. */
+:root{--phms-radius-form:24px;--phms-radius-mode:16px;--phms-radius-heading:12px;--phms-radius-choice:14px;--phms-radius-input:12px;--phms-radius-disclosure:14px;--phms-radius-pill:999px}
+html body #editor .phms-appointment-header .phms-appointment-header-top,html body #edit .header-top,html body .phms-appointment-header-top{display:grid!important;grid-template-columns:minmax(0,1fr) 82px!important;align-items:center!important;gap:8px!important;width:100%!important;min-width:0!important;margin:0!important}
+html body .phms-header-identity{display:flex;flex-direction:column;justify-content:center;gap:7px;min-width:0}
+html body #editor .phms-appointment-header .phms-header-identity h1,html body #edit .phms-header-identity h1,html body .phms-appointment-header .phms-header-identity h1{font-size:var(--phms-type-title)!important;line-height:1.35!important;font-weight:750!important;margin:0!important;min-width:0;overflow-wrap:anywhere;white-space:normal!important}
+html body #editor .phms-appointment-header #appointmentHeaderPerson,html body #edit #headerPerson,html body .phms-appointment-header #appointmentHeaderPerson{font-size:var(--phms-type-label)!important;line-height:1.4!important;font-weight:700!important;margin:0!important;min-width:0;overflow-wrap:anywhere;white-space:normal!important}
+html body .phms-font-tools{width:82px!important;min-width:82px!important;max-width:82px!important;grid-template-rows:23px 44px!important;align-self:center!important;gap:0!important}
+html body #editor .phms-appointment-header .phms-font-tools .phms-ui-version,html body .phms-font-tools .version,html body .phms-font-tools .phms-ui-version{height:23px!important;min-height:23px!important;border-radius:var(--phms-radius-pill)!important;font-size:11px!important}
+html body #editor#editor .phms-font-tools #phmsFontToggle,html body #edit .phms-font-tools #phmsFontToggle,html body .phms-font-tools #phmsFontToggle{height:44px!important;min-height:44px!important;padding:0 3px 9px!important;border-radius:var(--phms-radius-pill)!important}
+html body .phms-font-tools #phmsFontToggle::before{top:4px;bottom:13px;border-radius:var(--phms-radius-pill)!important}
+@media(max-width:375px){html body #editor .phms-appointment-header .phms-header-identity h1,html body #edit .phms-header-identity h1,html body .phms-appointment-header .phms-header-identity h1{font-size:clamp(20px,6.2vw,var(--phms-type-title))!important}}
+
+html body #editor{border-radius:var(--phms-radius-form)!important;border-top:6px solid #a58b60!important;overflow:hidden}
+html body #editor .phms-appointment-header{padding:15px 18px 17px!important;background:#fff8ec!important}
+html body .phms-appointment-header{border-radius:var(--phms-radius-form)}
+html body #editor .phms-appointment-header .phms-header-person-mode-row{display:block!important;width:100%!important;margin:10px 0 0!important;padding:0!important}
+html body #editor .phms-appointment-header .phms-header-person-mode-row .appointment-mode-bar.phms-header-mode-switch{width:100%!important;margin:0!important;padding:0!important}
+html body #editor .phms-appointment-header .phms-header-person-mode-row .mode-choices.phms-mode-segmented{border-radius:var(--phms-radius-mode)!important}
+html body #editor#editor .appointment-section-title,html body #editor#editor #personPicker.embedded-person-picker label[for="personSelect"]{border-radius:var(--phms-radius-heading)!important}
+html body #editor#editor input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]),html body #editor#editor select,html body #editor#editor textarea{border-radius:var(--phms-radius-input)!important}
+html body #editor#editor .scenario-option,html body #editor#editor .phms-choice-grid>button,html body #editor#editor .phms-treatment-cards>button{border-radius:var(--phms-radius-choice)!important}
+html body #editor#editor details:not(.phms-header-mode-switch),html body #confirmation#confirmation #preview>details{border-radius:var(--phms-radius-disclosure)!important}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><div class="phms-font-tools"><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.74</span><button id="phmsFontToggle" type="button" aria-label="ปรับขนาดตัวอักษร" aria-pressed="true"><span class="font-symbol" aria-hidden="true">กก</span><span data-font-label>ตัวใหญ่</span></button></div></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><div class="phms-header-identity"><h1>📅 เพิ่มนัดหมาย</h1><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></div><div class="phms-font-tools"><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.75</span><button id="phmsFontToggle" type="button" aria-label="ปรับขนาดตัวอักษร" aria-pressed="true"><span class="font-symbol" aria-hidden="true">กก</span><span data-font-label>ตัวใหญ่</span></button></div></div></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -6379,15 +6402,15 @@ for(const [value,label] of [['simple','✨ แบบง่าย'],['full','🛠
 // Use inline-important styles here because legacy CSS rules with !important target
 // the same control through multiple historical selectors.
 const switchStyle=(el,props)=>{for(const [name,value] of Object.entries(props))el.style.setProperty(name,value,'important');};
-switchStyle(modeChoices,{'display':'grid','grid-template-columns':'repeat(2,minmax(0,1fr))','align-items':'stretch','gap':'0px','padding':'0px','margin':'0px','border':'0px','outline':'0px','box-shadow':'none','border-radius':'14px','overflow':'hidden','background':'#f4e9d9','width':'100%','max-width':'100%'});
+switchStyle(modeChoices,{'display':'grid','grid-template-columns':'repeat(2,minmax(0,1fr))','align-items':'stretch','gap':'0px','padding':'0px','margin':'0px','border':'0px','outline':'0px','box-shadow':'none','border-radius':'16px','overflow':'hidden','background':'#f4e9d9','width':'100%','max-width':'100%'});
 for(const button of modeButtons){
  switchStyle(button,{'display':'inline-flex','align-items':'center','justify-content':'center','width':'100%','min-width':'0px','height':'48px','min-height':'48px','max-height':'48px','padding':'0 8px','margin':'0px','border':'0px','outline':'0px','box-shadow':'none','border-radius':'0px','font-size':'15px','font-weight':'700','line-height':'1.25','white-space':'nowrap'});
 }
 modeBar.replaceChildren(modeChoices);modeBar.classList.add('phms-header-mode-switch');
 const personModeRow=document.createElement('div');personModeRow.className='phms-header-person-mode-row';
 const headerPerson=document.getElementById('appointmentHeaderPerson');
-headerPerson.parentNode.insertBefore(personModeRow,headerPerson);
-personModeRow.append(headerPerson,modeBar);
+headerPerson.closest('.phms-appointment-header-top').after(personModeRow);
+personModeRow.append(modeBar);
 const originalModeLabel=document.querySelector('label[for="detail"]');originalModeLabel.classList.add('visually-hidden-form');
 $('detail').classList.add('visually-hidden-form');$('detail').setAttribute('tabindex','-1');$('detail').setAttribute('aria-hidden','true');
 // Scenario selection remains a real form select so the existing validation and state stay intact.
