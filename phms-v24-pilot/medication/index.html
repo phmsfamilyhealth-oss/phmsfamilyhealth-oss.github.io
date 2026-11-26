@@ -304,9 +304,17 @@ html body #editor#editor .phms-font-tools #phmsFontToggle[aria-pressed="true"],h
 html body .phms-font-tools #phmsFontToggle[aria-pressed="true"]::before{background:#963F50;border-color:#963F50}
 .phms-font-tools #phmsFontToggle .font-symbol{font-size:13px!important;line-height:1.2!important;font-weight:750}
 #edit .header-top,.header-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:8px}
+
+/* Unified compact header metadata: equal width, aligned version and font pills. */
+html body .phms-font-tools{width:88px!important;min-width:88px!important;max-width:88px!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:24px 44px!important;gap:0!important;align-items:start!important;justify-items:stretch!important;align-self:start!important}
+html body #editor .phms-appointment-header .phms-font-tools .phms-ui-version,html body .phms-font-tools .version,html body .phms-font-tools .phms-ui-version{display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:100%!important;height:24px!important;min-height:24px!important;padding:0 4px!important;border-radius:8px!important;border:0!important;margin:0!important;background:#f2e2e6!important;color:#78525c!important;font-size:11px!important;font-weight:650!important;line-height:1.2!important;font-variant-numeric:tabular-nums;white-space:nowrap!important}
+html body #editor#editor .phms-font-tools #phmsFontToggle,html body #edit .phms-font-tools #phmsFontToggle,html body .phms-font-tools #phmsFontToggle{width:100%!important;height:44px!important;min-height:44px!important;padding:0 4px 8px!important;gap:4px!important;font-size:12px!important;border-radius:8px!important}
+html body .phms-font-tools #phmsFontToggle::before{top:4px;bottom:12px;left:0;right:0;border-radius:8px;background:#fffafb;border:1px solid #c9a9b1}
+html body .phms-font-tools #phmsFontToggle[aria-pressed="true"]::before{background:#963f50;border-color:#963f50}
+html body .phms-font-tools #phmsFontToggle .font-symbol{font-size:13px!important}
 </style></head><body><main>
 <div class="panel top" id="edit">
-<header class="phms-medication-header"><div class="header-top"><h1>💊 เพิ่มข้อมูลยา</h1><div class="phms-font-tools"><span class="version">v2.4.32</span><button id="phmsFontToggle" type="button" aria-label="ปรับขนาดตัวอักษร" aria-pressed="true"><span class="font-symbol" aria-hidden="true">กก</span><span data-font-label>ตัวใหญ่</span></button></div></div><p id="headerPerson">ยังไม่ได้เลือกบุคคล</p><div class="seg" id="mode"><button type="button" data-mode="simple" aria-pressed="true">✨ แบบง่าย</button><button type="button" data-mode="detail" aria-pressed="false">🛠️ แบบละเอียด</button></div></header>
+<header class="phms-medication-header"><div class="header-top"><h1>💊 เพิ่มข้อมูลยา</h1><div class="phms-font-tools"><span class="version">v2.4.33</span><button id="phmsFontToggle" type="button" aria-label="ปรับขนาดตัวอักษร" aria-pressed="true"><span class="font-symbol" aria-hidden="true">กก</span><span data-font-label>ตัวใหญ่</span></button></div></div><p id="headerPerson">ยังไม่ได้เลือกบุคคล</p><div class="seg" id="mode"><button type="button" data-mode="simple" aria-pressed="true">✨ แบบง่าย</button><button type="button" data-mode="detail" aria-pressed="false">🛠️ แบบละเอียด</button></div></header>
 <p class="requiredLegend">* จำเป็นต้องกรอก</p>
 <div id="personArea"></div><p id="lineHint" class="muted">ยังไม่พบเซสชัน LINE · ใช้ข้อมูลสมมติได้</p><button id="connectLine" class="secondary line-connect" type="button" hidden>เชื่อมข้อมูลจาก LINE</button><div id="draftOpenArea" hidden><div id="draftStart"><strong>📂 ร่างข้อมูลยา</strong><p class="muted">เคยกรอกค้างไว้? เปิดร่างเพื่อกรอกต่อได้</p><button class="full" id="openDraft">📂 เปิดร่างเพื่อกรอกต่อ</button></div><div id="draftResume" hidden><div class="draft-resume-title"><strong>📂 กำลังกรอกต่อจากร่าง</strong><button type="button" class="draft-link" id="switchDraft">เลือกร่างอื่น</button></div><p id="draftResumeName"></p><p id="draftResumeTime" class="muted"></p><p class="muted">ข้อมูลเดิมถูกนำกลับมาแล้ว</p></div><div id="draftChoiceList" hidden></div><p id="draftFeedback" role="status" aria-live="polite" hidden></p></div>
 <div id="fields"></div><div id="errors" role="alert" class="error"></div><p class="muted" id="saveHint">ยังไม่เปิดบันทึกยาเข้าฐานข้อมูลจริง</p><button class="secondary full" id="saveDraft">บันทึกร่าง</button><button class="full" id="reviewBtn">ตรวจทานข้อมูลยา</button>
@@ -316,16 +324,15 @@ html body .phms-font-tools #phmsFontToggle[aria-pressed="true"]::before{backgrou
 
 <dialog id="photoPreviewDialog" class="photo-dialog" aria-labelledby="photoPreviewTitle"><div class="photo-dialog-bar"><strong id="photoPreviewTitle">รูปภาพยา</strong><button type="button" class="secondary" id="closePhotoPreview" autofocus>✕ ปิด</button></div><div class="photo-dialog-content"><img id="photoPreviewImage" alt="รูปภาพยา"></div></dialog></main><script>
 (function(){
- const key='phms.ui.typography.v1',root=document.documentElement,button=document.getElementById('phmsFontToggle');
+ const key='phms.ui.typography.v2',root=document.documentElement,button=document.getElementById('phmsFontToggle');
  if(!button)return;
- let preferences={};function read(){try{const parsed=JSON.parse(localStorage.getItem(key)||'{}');if(parsed&&typeof parsed==='object')preferences=parsed}catch{}}
- function effective(mode){return preferences[mode]==='large'||preferences[mode]==='normal'?preferences[mode]:(mode==='simple'?'large':'normal')}
- let mode='simple';
- function apply(next){mode=next==='simple'?'simple':'detail';const size=effective(mode);root.dataset.phmsType=size;button.setAttribute('aria-pressed',String(size==='large'));button.querySelector('[data-font-label]').textContent=size==='large'?'ตัวใหญ่':'ปกติ';button.setAttribute('aria-label','ขนาดตัวอักษรปัจจุบัน '+(size==='large'?'ตัวใหญ่':'ปกติ')+' กดเพื่อเปลี่ยนเป็น'+(size==='large'?'ตัวปกติ':'ตัวใหญ่'))}
- read();apply('simple');
- button.addEventListener('click',()=>{preferences[mode]=effective(mode)==='large'?'normal':'large';try{localStorage.setItem(key,JSON.stringify(preferences))}catch{}apply(mode)});
- window.addEventListener('storage',e=>{if(e.key===key){read();apply(mode)}});
- window.addEventListener('pageshow',()=>{read();apply(mode)});
+ let size='large';
+ function read(){try{const saved=localStorage.getItem(key);if(saved==='large'||saved==='normal')size=saved;else size='large'}catch{}}
+ function apply(){root.dataset.phmsType=size;button.setAttribute('aria-pressed',String(size==='large'));button.querySelector('[data-font-label]').textContent=size==='large'?'ตัวใหญ่':'ปกติ';button.setAttribute('aria-label','ขนาดตัวอักษรปัจจุบัน '+(size==='large'?'ตัวใหญ่':'ปกติ')+' กดเพื่อเปลี่ยนเป็น'+(size==='large'?'ตัวปกติ':'ตัวใหญ่'))}
+ read();apply();
+ button.addEventListener('click',()=>{size=size==='large'?'normal':'large';try{localStorage.setItem(key,size)}catch{}apply()});
+ window.addEventListener('storage',e=>{if(e.key===key||e.key===null){read();apply()}});
+ window.addEventListener('pageshow',()=>{read();apply()});
  window.phmsApplyTypography=apply;
 })();
 </script><script>
@@ -576,7 +583,7 @@ $('saveDraft').onclick=()=>{if(!kindReady())return;if(isRealPerson(d))return ale
 $('openDraft').onclick=()=>{draftListOpen=!draftListOpen;clearDraftFeedback();syncDraftPanel()};
 $('switchDraft').onclick=()=>{draftListOpen=!draftListOpen;clearDraftFeedback();syncDraftPanel()};
 const listAction=e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset;if(a.load!==undefined){if(photoPending)return alert('กำลังอ่านรูป');const target=drafts.find(x=>x.id===a.load);if(!target)return;if(activeDraftId===target.id){draftListOpen=false;syncDraftPanel();return}if(kindReady()&&!window.confirm('เปิดร่างนี้แทนข้อมูลที่กำลังกรอกอยู่หรือไม่? ข้อมูลที่ยังไม่ได้บันทึกร่างอาจหาย'))return;d=clone(target.data);expandedChoices.clear();mode=target.mode;editing=-1;activeDraftId=target.id;draftListOpen=false;clearDraftFeedback();render();show('edit')}else if(a.deleteDraft!==undefined){const target=drafts.find(x=>x.id===a.deleteDraft);if(!target||!window.confirm('ลบร่างนี้หรือไม่?'))return;drafts.splice(drafts.indexOf(target),1);if(activeDraftId===target.id)activeDraftId='';syncDraftPanel()}else if(b.id==='closeDraft'){draftListOpen=false;syncDraftPanel()}};$('draftChoiceList').onclick=listAction;
-$('download').onclick=()=>{const blob=new Blob([JSON.stringify({schema:'phms-medication-pilot-2.4.32',status:'demo_only',records},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='phms-medication-demo.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+$('download').onclick=()=>{const blob=new Blob([JSON.stringify({schema:'phms-medication-pilot-2.4.33',status:'demo_only',records},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='phms-medication-demo.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 $('closePhotoPreview').onclick=()=>$('photoPreviewDialog').close();$('photoPreviewDialog').addEventListener('close',()=>$('photoPreviewImage').removeAttribute('src'));for(const id of ['reviewBody','doneBody'])$(id).addEventListener('click',e=>{const b=e.target.closest('button[data-review-photo]');if(!b)return;const img=b.querySelector('img');if(img)viewMedicationPhoto({data:img.getAttribute('src'),name:img.alt},b.closest('.typed-review-group')?.querySelector('h4')?.textContent)});
 d.times.push({...arrDefaults.times});render();
 // Optional LINE session only. No automatic login and no anonymous requests to the member API.

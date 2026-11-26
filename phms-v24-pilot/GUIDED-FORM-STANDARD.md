@@ -1,3 +1,8 @@
+# Elder-first typography preference — medication v2.4.33 / appointment v2.4.90.74
+
+Supersedes mode-specific typography defaults. Both modes default large, independently of data-entry mode. A single explicit browser-local font preference is shared across both forms and modes, retained on reload. New key phms.ui.typography.v2 intentionally starts large once; previous per-mode v1 values are not migrated because they conflict with the new unified preference. Version badge and font control aligned in a fixed 88px right-hand column, equal-width visual pills with 8px radius and 4px visual gap; font control 28px visual height, 44px touch height. Large selected uses category dark fill and white text; normal uses pale fill, category text and border. No data, auth or clinical calculation changes.
+
+## Earlier standards (historical where superseded)
 # Compact typography control — medication v2.4.32 / appointment v2.4.90.73
 
 Place the compact font toggle directly below the version badge in a fixed right-hand header column. Small visual pill (26px), actual touch target at least 44px high and wide. Large profile selected = category dark fill, white text; normal = pale fill, category text and light border. Reflect selection using aria-pressed; retain current-size label and existing preference rules. No changes to data or authentication. Other categories should adopt the same placement.

@@ -3461,8 +3461,16 @@ html body #editor#editor .phms-font-tools #phmsFontToggle[aria-pressed="true"],h
 html body .phms-font-tools #phmsFontToggle[aria-pressed="true"]::before{background:#76532F;border-color:#76532F}
 .phms-font-tools #phmsFontToggle .font-symbol{font-size:13px!important;line-height:1.2!important;font-weight:750}
 #editor .phms-appointment-header .phms-appointment-header-top,.phms-appointment-header-top{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:start!important;gap:8px!important}
+
+/* Unified compact header metadata: equal width, aligned version and font pills. */
+html body .phms-font-tools{width:88px!important;min-width:88px!important;max-width:88px!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:24px 44px!important;gap:0!important;align-items:start!important;justify-items:stretch!important;align-self:start!important}
+html body #editor .phms-appointment-header .phms-font-tools .phms-ui-version,html body .phms-font-tools .version,html body .phms-font-tools .phms-ui-version{display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:100%!important;height:24px!important;min-height:24px!important;padding:0 4px!important;border-radius:8px!important;border:0!important;margin:0!important;background:#f6ecdd!important;color:#73583a!important;font-size:11px!important;font-weight:650!important;line-height:1.2!important;font-variant-numeric:tabular-nums;white-space:nowrap!important}
+html body #editor#editor .phms-font-tools #phmsFontToggle,html body #edit .phms-font-tools #phmsFontToggle,html body .phms-font-tools #phmsFontToggle{width:100%!important;height:44px!important;min-height:44px!important;padding:0 4px 8px!important;gap:4px!important;font-size:12px!important;border-radius:8px!important}
+html body .phms-font-tools #phmsFontToggle::before{top:4px;bottom:12px;left:0;right:0;border-radius:8px;background:#fffaf3;border:1px solid #d9c0a1}
+html body .phms-font-tools #phmsFontToggle[aria-pressed="true"]::before{background:#76532f;border-color:#76532f}
+html body .phms-font-tools #phmsFontToggle .font-symbol{font-size:13px!important}
 </style></head><body><main>
-<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><div class="phms-font-tools"><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.73</span><button id="phmsFontToggle" type="button" aria-label="ปรับขนาดตัวอักษร" aria-pressed="true"><span class="font-symbol" aria-hidden="true">กก</span><span data-font-label>ตัวใหญ่</span></button></div></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
+<header class="phms-appointment-header" aria-label="เพิ่มนัดหมายใหม่"><div class="phms-appointment-header-top"><h1>📅 เพิ่มนัดหมายใหม่</h1><div class="phms-font-tools"><span id="phmsUiVersion" class="phms-ui-version">v2.4.90.74</span><button id="phmsFontToggle" type="button" aria-label="ปรับขนาดตัวอักษร" aria-pressed="true"><span class="font-symbol" aria-hidden="true">กก</span><span data-font-label>ตัวใหญ่</span></button></div></div><p id="appointmentHeaderPerson">ยังไม่ได้เลือกบุคคล</p></header><p class="notice phms-connection-status" id="connectionStatus" role="status" aria-live="polite">กำลังเปิด LINE…</p>
 <section id="personPicker" class="box hidden"><h2></h2><label for="personSelect">👤 เพิ่มนัดให้ใคร <span class="required-star" aria-label="จำเป็นต้องเลือก">*</span></label><select id="personSelect"><option value="">เลือกบุคคล</option></select><p class="error" id="personStatus" role="status"></p></section>
 <section id="editor" class="box simple-ui"><h2>รายละเอียดการนัด</h2><p class="help" id="requiredLegend"><span class="required-star" aria-hidden="true">*</span> ช่องที่มีดอกจันจำเป็นต้องกรอก</p><p id="selectedPersonLabel" role="status">ยังไม่ได้เลือกบุคคล</p>
 <label for="detail">วิธีกรอกข้อมูล</label><select id="detail"><option value="simple">แบบง่าย</option><option value="full">แบบละเอียด</option></select>
@@ -3650,16 +3658,15 @@ html body .phms-font-tools #phmsFontToggle[aria-pressed="true"]::before{backgrou
 </section>
 </main><script>
 (function(){
- const key='phms.ui.typography.v1',root=document.documentElement,button=document.getElementById('phmsFontToggle');
+ const key='phms.ui.typography.v2',root=document.documentElement,button=document.getElementById('phmsFontToggle');
  if(!button)return;
- let preferences={};function read(){try{const parsed=JSON.parse(localStorage.getItem(key)||'{}');if(parsed&&typeof parsed==='object')preferences=parsed}catch{}}
- function effective(mode){return preferences[mode]==='large'||preferences[mode]==='normal'?preferences[mode]:(mode==='simple'?'large':'normal')}
- let mode='simple';
- function apply(next){mode=next==='simple'?'simple':'detail';const size=effective(mode);root.dataset.phmsType=size;button.setAttribute('aria-pressed',String(size==='large'));button.querySelector('[data-font-label]').textContent=size==='large'?'ตัวใหญ่':'ปกติ';button.setAttribute('aria-label','ขนาดตัวอักษรปัจจุบัน '+(size==='large'?'ตัวใหญ่':'ปกติ')+' กดเพื่อเปลี่ยนเป็น'+(size==='large'?'ตัวปกติ':'ตัวใหญ่'))}
- read();apply('simple');
- button.addEventListener('click',()=>{preferences[mode]=effective(mode)==='large'?'normal':'large';try{localStorage.setItem(key,JSON.stringify(preferences))}catch{}apply(mode)});
- window.addEventListener('storage',e=>{if(e.key===key){read();apply(mode)}});
- window.addEventListener('pageshow',()=>{read();apply(mode)});
+ let size='large';
+ function read(){try{const saved=localStorage.getItem(key);if(saved==='large'||saved==='normal')size=saved;else size='large'}catch{}}
+ function apply(){root.dataset.phmsType=size;button.setAttribute('aria-pressed',String(size==='large'));button.querySelector('[data-font-label]').textContent=size==='large'?'ตัวใหญ่':'ปกติ';button.setAttribute('aria-label','ขนาดตัวอักษรปัจจุบัน '+(size==='large'?'ตัวใหญ่':'ปกติ')+' กดเพื่อเปลี่ยนเป็น'+(size==='large'?'ตัวปกติ':'ตัวใหญ่'))}
+ read();apply();
+ button.addEventListener('click',()=>{size=size==='large'?'normal':'large';try{localStorage.setItem(key,size)}catch{}apply()});
+ window.addEventListener('storage',e=>{if(e.key===key||e.key===null){read();apply()}});
+ window.addEventListener('pageshow',()=>{read();apply()});
  window.phmsApplyTypography=apply;
 })();
 (function(){const detail=document.getElementById('detail');const sync=()=>window.phmsApplyTypography?.(detail?.value||'simple');detail?.addEventListener('change',sync);window.addEventListener('pageshow',sync);sync()})();</script><script type="module">
