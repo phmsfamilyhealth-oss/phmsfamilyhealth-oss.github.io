@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PHMS — เพิ่มข้อมูลยา</title><meta name="phms-liff-id" content="2011619364-D0xazyre"><meta name="phms-read-api" content="https://buxvdlfrikpwdscdlcfd.supabase.co/functions/v1/phms-v24-appointment-read">
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;color:#302629;background:#fbf5f6;--med-accent:#963f50;--med-soft:#f5e2e6;--line:#e7cbd2}*{box-sizing:border-box}body{margin:0}main{max-width:680px;margin:auto;padding:16px 12px 48px}h1{font-size:1.5rem;margin:5px 0}h2{font-size:1.14rem;margin:0 0 12px}h3{font-size:1.05rem;margin:0 0 10px}p{line-height:1.55;margin:8px 0}.muted,small{color:#78646a;font-size:.88rem}.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 2px 8px #963f5008}.top{border-top:5px solid #b55c6c}.section{border:1px solid #efdee2;border-radius:14px;padding:12px;margin:12px 0}.section h3,summary{background:#faedf0;border-radius:9px;padding:10px;font-weight:700;color:#742b3b}summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}summary:after{content:'⌄';font-size:1.2rem}details[open]>summary:after{content:'⌃'}details .inside{padding:5px 2px}label{display:block;font-weight:650;margin:13px 0 5px}input,select,textarea,button{font:inherit;font-size:1rem;max-width:100%;min-width:0}input,select,textarea{width:100%;min-height:48px;border:1px solid #c9a9b1;border-radius:10px;background:white;padding:10px;color:#302629}textarea{min-height:78px;resize:vertical}button{border:0;min-height:48px;border-radius:11px;background:var(--med-accent);color:white;font-weight:700;padding:10px 12px;cursor:pointer}button.secondary{background:var(--med-soft);color:#742b3b}button.danger{background:#fbe3e2;color:#9b2727}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.choices{display:flex;flex-wrap:wrap;gap:7px;margin:7px 0}.choices button{background:#f6e5e9;color:#592b35;min-height:43px;font-weight:550;flex:1 1 42%;text-align:left}.choices button[aria-pressed=true]{background:var(--med-accent);color:white}.seg{display:flex;background:var(--med-soft);padding:3px;border-radius:12px;gap:0;flex-shrink:0}.seg button{min-height:37px;padding:6px 10px;font-size:.85rem;background:transparent;color:var(--med-accent);border-radius:9px}.seg button[aria-pressed=true]{background:var(--med-accent);color:white}.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.row>*{min-width:0}.full{width:100%;margin-top:8px}.notice{background:#fff6e6;color:#694b24;border-radius:10px;padding:10px;font-size:.88rem}.error{color:#a32e24;font-weight:650;white-space:pre-line}.hidden,[hidden]{display:none!important}.photo{width:100%;max-height:310px;object-fit:contain;border-radius:10px;border:1px solid var(--line);margin:6px 0}.reviewrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:10px;border-bottom:1px solid #f0e1e5;padding:9px 2px;overflow-wrap:anywhere}.reviewrow:last-child{border:0}.reviewrow span:first-child{color:#78646a}.hero{background:#faedf0;border-radius:14px;padding:15px;overflow-wrap:anywhere}.hero strong{font-size:1.25rem}.timeRow,.ruleRow,.lotRow,.stepRow{background:#fdf8f9;border-radius:10px;padding:10px;margin:8px 0;border:1px solid #efdee3}.checkline{display:flex;align-items:center;gap:8px;margin:9px 0}.checkline input{width:23px;min-height:23px;flex:none}.checkline label{margin:0}.tag{background:#f3dde3;padding:4px 8px;border-radius:7px;font-size:.85rem;display:inline-block;margin:2px}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #b96b7b;outline-offset:2px}.footer{display:flex;gap:8px;flex-wrap:wrap}.footer button{flex:1}.entry{border:1px solid var(--line);padding:12px;border-radius:12px;margin:8px 0}.entry button{min-height:40px}.required{color:#a52d22}a{color:var(--med-accent)}@media(max-width:360px){.grid{grid-template-columns:1fr}.panel{padding:12px}.seg button{padding:6px}}
+
+/* Medication UI follows PHMS Appointment v2.4.90.68: unified editor, segmented mode, fixed choice cards, separate disclosure rows. */
+:root{--med-choice:#fffafb;--med-choice-border:#c58a98;--med-selected:#f3dce2;--med-selected-border:#963f50;--med-heading:#f8edf0;--med-outline:#c58a98;color:#292529;background:#f7f6f3}
+main{max-width:680px;padding:18px 14px 52px}
+.panel{padding:16px;border-radius:17px;border:1px solid #e7cbd2;box-shadow:0 2px 8px #963f5008;margin:14px 0}
+#edit{padding:0 16px 18px;overflow:hidden;border-top:0}
+.phms-medication-header{margin:0 -16px 14px;padding:15px 18px 17px;background:#fff4f6}
+.header-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}
+.header-top h1{margin:0;font-size:clamp(21px,5.3vw,25px);font-weight:750;line-height:1.35;color:#2b2426}
+.version{padding:4px 7px;border-radius:10px;font-size:11px;font-weight:600;background:#f6e3e8;color:#815765;white-space:nowrap}
+#headerPerson{font-size:clamp(20px,5.15vw,22px);font-weight:750;line-height:1.5;color:#742b3b;margin:12px 0;overflow-wrap:anywhere}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;padding:0;gap:0;border:0;border-radius:14px;overflow:hidden;box-shadow:none;background:#f5e2e6}
+.seg button{border:0;border-radius:0;box-shadow:none;min-height:48px;height:48px;font-size:15px;padding:0 8px;white-space:nowrap}
+.seg button[aria-pressed=true]{background:#963f50;color:white}
+.demo-note,.requiredLegend{font-size:.84rem;line-height:1.5;color:#78646a;margin:4px 0 9px}
+.section.main-section{border:0;padding:0;background:transparent;margin:14px 0 18px}
+.main-section>h3,.additional-title,.review-title{background:var(--med-heading);border:0;border-radius:12px;padding:11px 13px;margin:7px 0 10px;font-size:1.05rem;font-weight:750;color:#292529;line-height:1.5}
+.section-content{min-width:0;padding:0 1px}
+#personArea .section-content>label:first-child{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+label{margin:12px 0 6px;font-size:1rem;line-height:1.5;color:#292529}
+label:empty{display:none}
+input,select,textarea{min-height:52px;border-radius:11px;font-size:1rem;border-color:#c9a9b1}
+input[type=date],input[type=time]{display:block;width:100%;max-width:100%;min-width:0;-webkit-appearance:none;appearance:none}
+.grid{gap:9px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:7px 0 12px}
+.choices button{display:flex;align-items:center;justify-content:center;min-height:58px;min-width:0;width:100%;text-align:center;white-space:normal;overflow-wrap:anywhere;font-weight:650;font-size:.95rem;line-height:1.4;padding:9px 7px;border:2px solid var(--med-choice-border);border-radius:14px;background:var(--med-choice);color:#38272d;box-shadow:none}
+.choices button[aria-pressed=true]{background:var(--med-selected);border:2px solid var(--med-selected-border);color:#38272d}
+.kind-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+.kind-cards button{flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;text-align:left;min-height:95px;padding:10px 11px}
+.kind-cards strong{font-size:1rem;line-height:1.35}.kind-cards small{font-size:.84rem;line-height:1.35;font-weight:400}.choice-icon{font-size:1.18rem}
+details.section{border:1px solid var(--med-outline);border-radius:13px;padding:0 14px;background:white;margin:10px 0}
+details.section>summary{background:transparent;color:#292529;font-weight:700;font-size:1rem;min-height:56px;line-height:1.5;padding:10px 0;margin:0;border-radius:0;gap:10px}
+details.section[open]>summary{border-bottom:1px solid #e7cbd2;margin-bottom:12px}
+details.section .inside{padding:0 0 12px}
+.photo-add,button[data-add]{background:#fcf7f8;border:2px dashed #c58a98;color:#742b3b;font-weight:700;border-radius:14px}
+#photosView img.photo{height:auto;max-height:420px;background:#fff}
+#draftOpenArea{border:1px solid #e1bec7;border-radius:14px;background:#fff9fa;padding:13px 14px;margin:12px 0 18px}
+#draftOpenArea .muted{margin:5px 0}.entry{background:white}#draftChoiceList{margin-top:8px}
+#saveDraft{margin-top:15px;min-height:49px;border:1px solid #ddc0c9}#reviewBtn{min-height:54px}
+#reviewBody,#doneBody{display:flex;flex-direction:column;gap:12px;min-width:0}
+#reviewBody .review-title,#doneBody .review-title{margin:0}
+#reviewBody .hero,#doneBody .hero,#reviewBody .section-content,#doneBody .section-content{border:1px solid var(--med-outline);border-radius:15px;background:white;padding:7px 15px}
+#reviewBody .main-section,#doneBody .main-section{margin:0}
+#reviewBody .main-section h3,#doneBody .main-section h3{margin:0 0 10px}
+.reviewrow{grid-template-columns:minmax(0,38%) minmax(0,1fr);gap:12px;padding:11px 1px;line-height:1.55}
+.reviewrow strong{font-weight:550;white-space:pre-wrap;min-width:0}.reviewrow span:first-child{font-size:.98rem}
+#reviewBody details.section,#doneBody details.section{margin:0;background:#fff}#reviewBody details.section>summary,#doneBody details.section>summary{color:#742b3b}
+#reviewPanel .footer,#done .footer{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+#reviewPanel .footer button,#done .footer button{min-height:54px}
+@media(max-width:390px){#edit{padding:0 12px 18px}.phms-medication-header{margin-left:-12px;margin-right:-12px}.kind-cards button{padding:9px 7px}}
+@media(max-width:360px){.header-top h1{font-size:20px}.version{font-size:10px}.phms-medication-header{padding:13px 13px 15px}.seg button{font-size:14px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#lineHint{margin:-8px 0 14px;font-size:.82rem;color:#78646a}.line-connect{width:100%;min-height:44px;margin:0 0 10px}button:disabled{opacity:.55;cursor:not-allowed}#saveHint{font-size:.85rem;margin:12px 0 0}
+
+/* v2.4.5 — match appointment v2.4.90.68 screenshot hierarchy and dimensions. */
+#edit{border-top:5px solid #b55c6c;border-radius:17px;padding:0 12px 18px;background:#fff}
+.phms-medication-header{margin:0 -12px 14px;padding:15px 18px 17px;background:#fff4f6}
+.header-top h1{font-size:clamp(21px,5.3vw,25px);font-weight:750}
+.version{font-size:11px;padding:4px 7px;border-radius:20px}
+#headerPerson{font-size:clamp(20px,5.15vw,22px);font-weight:750;margin:12px 0;line-height:1.5}
+.seg{border-radius:14px;overflow:hidden;gap:0}
+.seg button{height:48px;min-height:48px;border:0;border-radius:0;box-shadow:none}
+.requiredLegend{font-size:1rem;font-weight:700;color:#ae3028;margin:12px 0 14px}
+#draftOpenArea{margin:13px 0 24px;padding:13px 14px;border:1px solid #d8b0ba;border-radius:14px;background:#fff9fa}
+#draftOpenArea>strong{display:block;font-size:1.05rem;line-height:1.5;color:#522e38}
+#draftOpenArea .muted{font-size:.95rem;line-height:1.5;margin:7px 0 12px}
+#openDraft{margin:0;min-height:52px;border-radius:11px;font-weight:700;font-size:1rem}
+.kind-cards{grid-template-columns:minmax(0,1fr);gap:10px;margin:8px 0 12px}
+.kind-cards button{min-height:80px;padding:12px 13px;gap:5px;border:2px solid #c58a98;border-radius:14px;background:#fffafb;text-align:left;align-items:flex-start;justify-content:center}
+.kind-cards button strong{font-size:1rem;line-height:1.5}
+.kind-cards button small{font-size:.92rem;line-height:1.45;color:#78646a}
+.kind-cards button:disabled{opacity:1;background:#f5f1f2;border-color:#d9c9cd;color:#82777b}
+.kind-cards button:disabled small{color:#82777b}
+.kind-hint{background:#fff4f6;border-radius:11px;padding:10px 12px;color:#742b3b;line-height:1.5;font-size:.96rem}
+.main-section>h3,.additional-title,.review-title{padding:11px 13px;border-radius:12px;background:#f5e9ed;color:#292529}
+@media(min-width:391px){#edit{padding-left:16px;padding-right:16px}.phms-medication-header{margin-left:-16px;margin-right:-16px}}
+
+/* v2.4.6 — explicit thick category stripe, independent of panel border cascade. */
+#edit.panel.top{position:relative;border-top:0!important;overflow:hidden;border-radius:17px!important}
+#edit.panel.top::before{content:"";display:block;position:relative;z-index:2;height:6px;min-height:6px;background:#b55c6c;margin:0 -12px;width:calc(100% + 24px);border-radius:0;flex-shrink:0;pointer-events:none}
+@media(min-width:391px){#edit.panel.top::before{margin:0 -16px;width:calc(100% + 32px)}}
+[hidden]{display:none!important}
+
+/* v2.4.8 — compact resume state and readable draft selection. */
+#draftOpenArea:has(#draftResume:not([hidden])){margin:10px 0 18px;padding:11px 12px;background:#fff9fa}
+#draftStart>strong,#draftResume strong{font-size:1.04rem;color:#522e38}
+.draft-resume-title,.draft-list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+#draftResumeName{font-size:1rem;font-weight:650;margin:5px 0;overflow-wrap:anywhere}
+#draftResume .muted{font-size:.85rem;margin:3px 0}
+.draft-link{background:transparent;color:#963f50;text-decoration:underline;text-underline-offset:3px;padding:5px 4px;min-height:44px;font-size:.87rem;font-weight:600}
+#draftChoiceList{padding-top:9px;border-top:1px solid #e7cbd2;margin-top:12px}
+.draft-item{padding:0 10px 2px;margin:8px 0;background:#fff;border:1px solid #d8b0ba;border-radius:12px}
+.draft-item-main{display:flex;flex-direction:column;gap:4px;width:100%;text-align:left;background:white;color:#38272d;padding:11px 2px 4px;min-height:84px;overflow-wrap:anywhere}
+.draft-item-main span,.draft-item-main small{font-size:.87rem;font-weight:400;color:#78646a}
+.draft-item-main .draft-continue{font-weight:700;color:#963f50;align-self:flex-end}
+.draft-delete{display:block;margin-left:auto;color:#a52d22;font-weight:500}
+#draftFeedback{color:#742b3b;font-size:.9rem;margin:7px 0 0}
+
+/* v2.4.10 — three equal columns on every viewport, including iPhone. */
+#edit #fields .kind-cards{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin:8px 0 12px}
+#edit #fields .kind-cards>button{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;width:100%;min-width:0;min-height:114px;padding:9px 4px!important;gap:5px!important;white-space:normal;overflow-wrap:anywhere}
+#edit #fields .kind-cards>button .choice-icon{font-size:1.35rem;line-height:1.2}
+#edit #fields .kind-cards>button strong{font-size:.93rem;line-height:1.4;font-weight:700}
+#edit #fields .kind-cards>button small{font-size:.79rem;line-height:1.4}
+@media(max-width:360px){#edit #fields .kind-cards{gap:5px!important}#edit #fields .kind-cards>button{padding:8px 3px!important}#edit #fields .kind-cards>button strong{font-size:.87rem}#edit #fields .kind-cards>button small{font-size:.75rem}}
+
+/* PHMS Choice State C — accessible fixed option cards. */
+#edit#edit#edit #fields .choices>button[aria-pressed]{background:#FFFAFB!important;border:2px solid #963F50!important;color:#302629!important;box-shadow:none!important}
+#edit#edit#edit #fields .choices>button[aria-pressed]:not(:disabled):not([aria-disabled="true"])[aria-pressed="true"]{background:#963F50!important;border-color:#963F50!important;color:#fff!important}
+#edit#edit#edit #fields .choices>button[aria-pressed]:not(:disabled):not([aria-disabled="true"])[aria-pressed="true"] :is(strong,small,span,b,p,em,div){color:#fff!important}
+#edit#edit#edit #fields .choices>button[aria-pressed]:is(:disabled,[aria-disabled="true"]){background:#f0eeee!important;border-color:#ccc5c7!important;color:#6f686b!important;opacity:1!important}
+#edit#edit#edit #fields .choices>button[aria-pressed]:is(:disabled,[aria-disabled="true"]) :is(strong,small,span,b,p,em,div){color:#6f686b!important}
+#edit#edit#edit #fields .choices>button[aria-pressed]:focus-visible{outline:3px solid #963F50!important;outline-offset:3px!important}
+/* v2.4.15 — optional multi-source cards, detail mode only. */
+#edit #fields .source-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#edit #fields .source-cards>button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:78px;line-height:1.4;text-align:center}
+.source-icon{font-size:1.25rem;line-height:1.2}
+
+/* v2.4.16 — appointment-aligned guided form and accessible disclosure. */
+#edit #fields label{font-size:1rem;font-weight:650;line-height:1.55;margin:13px 0 6px}
+.field-icon{display:inline-block;vertical-align:baseline;min-width:1.2em}
+.optional-hint{color:#78646a;font-size:.8em;font-weight:400;white-space:nowrap}
+#edit #fields .grid{align-items:end;gap:9px}
+#edit #fields input:not([type=file]),#edit #fields select{box-sizing:border-box!important;display:block;width:100%;min-width:0;height:52px!important;min-height:52px!important;max-height:none;line-height:1.4;padding:10px 12px;border-radius:12px;font-size:16px}
+#edit #fields .grid>div{min-width:0}
+#edit #fields .guided-choices{gap:8px}
+#edit #fields .guided-choices>button{min-height:56px;padding:8px 7px;gap:5px;line-height:1.4;flex-wrap:wrap}
+#edit #fields .more-options{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;width:100%;margin:-4px 0 12px;background:#fff9fa;border:1.5px dashed #c58a98;color:#742b3b;border-radius:12px;font-size:.94rem}
+.native-picker{position:relative;min-width:0;width:100%}
+.native-picker input{position:relative;width:100%}
+.native-picker .picker-prompt{display:none;position:absolute;left:12px;right:10px;top:50%;transform:translateY(-50%);color:#78646a;pointer-events:none;font-size:.93rem;line-height:1.3;white-space:normal}
+.native-picker.is-empty .picker-prompt{display:block}
+.native-picker.is-empty input{color:transparent}
+.native-picker.is-empty input::-webkit-datetime-edit{color:transparent}
+.native-picker input:focus{color:#302629}
+.native-picker input:focus::-webkit-datetime-edit{color:#302629}
+.native-picker:focus-within .picker-prompt{display:none}
+#edit details.section,#reviewBody details.section,#doneBody details.section{border:1px solid #b97b8a;border-radius:13px;padding:0 14px}
+#edit details.section>summary,#reviewBody details.section>summary,#doneBody details.section>summary{display:flex;align-items:center;justify-content:flex-start;gap:9px;min-height:58px;background:transparent;color:#292529;font-size:1rem;padding:11px 0}
+details.section>summary::after{content:none!important}
+details.section>summary::-webkit-details-marker{display:none}
+.disclosure-arrow{width:10px;flex:0 0 10px;font-size:.8rem;color:#302629}
+.disclosure-arrow::before{content:'▸'}
+details[open]>summary .disclosure-arrow::before{content:'▾'}
+.disclosure-name{flex:1;min-width:0;overflow-wrap:anywhere}
+.data-status{flex:0 0 auto;padding:4px 7px;background:#f5e2e6;color:#742b3b;border-radius:7px;font-size:.77rem;font-weight:650}
+#edit details.section[open]>summary{border-bottom:1px solid #e7cbd2}
+#edit #fields .photo-add{min-height:52px;background:#fff9fa;border:2px dashed #c58a98;color:#742b3b}
+#edit #fields .additional-title{margin-top:22px}
+@media(max-width:360px){#edit #fields input:not([type=file]),#edit #fields select{padding:9px 7px}.native-picker .picker-prompt{left:7px;font-size:.84rem}#edit #fields .guided-choices>button{font-size:.9rem}}
+
+/* Patient-adaptive quick forms: three suggestions + one discovery card. */
+#edit #fields .adaptive-form-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#edit #fields .adaptive-form-cards .form-more{border:2px dashed #b97b8a!important;background:#fff9fa!important;color:#742b3b!important;font-weight:650;min-height:56px}
+.adaptive-hint{color:#78646a;font-size:.85rem;margin:3px 0 7px}
+</style></head><body><main>
+<div class="panel top" id="edit">
+<header class="phms-medication-header"><div class="header-top"><h1>💊 เพิ่มข้อมูลยา</h1><span class="version">v2.4.20</span></div><p id="headerPerson">ยังไม่ได้เลือกบุคคล</p><div class="seg" id="mode"><button type="button" data-mode="simple" aria-pressed="true">✨ แบบง่าย</button><button type="button" data-mode="detail" aria-pressed="false">🛠️ แบบละเอียด</button></div></header>
+<p class="requiredLegend">* จำเป็นต้องกรอก</p>
+<div id="personArea"></div><p id="lineHint" class="muted">ยังไม่พบเซสชัน LINE · ใช้ข้อมูลสมมติได้</p><button id="connectLine" class="secondary line-connect" type="button" hidden>เชื่อมข้อมูลจาก LINE</button><div id="draftOpenArea" hidden><div id="draftStart"><strong>📂 ร่างข้อมูลยา</strong><p class="muted">เคยกรอกค้างไว้? เปิดร่างเพื่อกรอกต่อได้</p><button class="full" id="openDraft">📂 เปิดร่างเพื่อกรอกต่อ</button></div><div id="draftResume" hidden><div class="draft-resume-title"><strong>📂 กำลังกรอกต่อจากร่าง</strong><button type="button" class="draft-link" id="switchDraft">เลือกร่างอื่น</button></div><p id="draftResumeName"></p><p id="draftResumeTime" class="muted"></p><p class="muted">ข้อมูลเดิมถูกนำกลับมาแล้ว</p></div><div id="draftChoiceList" hidden></div><p id="draftFeedback" role="status" aria-live="polite" hidden></p></div>
+<div id="fields"></div><div id="errors" role="alert" class="error"></div><p class="muted" id="saveHint">ยังไม่เปิดบันทึกยาเข้าฐานข้อมูลจริง</p><button class="secondary full" id="saveDraft">บันทึกร่าง</button><button class="full" id="reviewBtn">ตรวจทานข้อมูลยา</button>
+</div>
+<div class="panel hidden" id="reviewPanel"><h2>🔍 ตรวจทานข้อมูลยา</h2><div id="reviewBody"></div><p class="notice">ตรวจสอบกับฉลากหรือคำสั่งแพทย์ก่อนใช้จริง การยืนยันหน้านี้เป็นการบันทึกตัวอย่างเท่านั้น</p><div class="footer"><button class="secondary" id="back">แก้ไขข้อมูล</button><button id="confirm">ยืนยันบันทึกตัวอย่าง</button></div></div>
+<div class="panel hidden" id="done"><h2>บันทึกตัวอย่างสำเร็จ</h2><p>ข้อมูลอยู่ในหน่วยความจำของหน้านี้เท่านั้น ไม่มีการส่งเข้าระบบจริง</p><div id="doneBody"></div><div class="footer"><button id="newMed">เพิ่มยาตัวถัดไป</button><button class="secondary" id="download">ส่งออก JSON</button></div></div>
+
+</main><script>
+'use strict';
+const $=id=>document.getElementById(id);
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
+const empty=()=>({person:'',personOther:'',kind:'',source:'',sources:[],related:'',name:'',generic:'',brand:'',strength:'',strengthUnit:'',strengthUnitOther:'',concentration:'',form:'',formOther:'',route:'',site:'',regimen:'',frequency:'',dose:'',doseUnit:'',doseUnitOther:'',meal:'',times:[],days:[],interval:'',indication:'',start:'',end:'',instructions:'',hospital:'',department:'',doctor:'',warnings:'',sideEffects:'',prnSymptom:'',prnGap:'',prnMax:'',rules:[],steps:[],sequenceGroup:'',sequenceNumber:'',sequenceGap:'',storage:'',openDate:'',openLife:'',openUnit:'',supply:'',supplyUnit:'',supplyUnitOther:'',reserve:'',receivedDate:'',lots:[],price:'',paidBy:'',note:'',recorder:'',changeReason:'',photos:[]});
+let d=empty(),mode='simple',drafts=[],records=[],editing=-1,photoPending=false;let expandedChoices=new Set();let activeDraftId='',draftSeq=0,draftListOpen=false;let linePeople=[],lineSessionReady=false,lineActivePerson='',lineInit=null;
+const isRealPerson=x=>linePeople.some(p=>p.id===x.person);
+const personLabel=x=>linePeople.find(p=>p.id===x.person)?.name||(x.person==='บุคคลอื่น'?x.personOther:x.person);
+function personControl(){const choices=lineSessionReady?linePeople.map(p=>({value:p.id,label:p.name})):[{value:'ผู้ป่วยตัวอย่าง 1',label:'ผู้ป่วยตัวอย่าง 1'},{value:'ผู้ป่วยตัวอย่าง 2',label:'ผู้ป่วยตัวอย่าง 2'},{value:'บุคคลอื่น',label:'บุคคลอื่น'}];return '<label for="person">เลือกบุคคล</label><select id="person" data-key="person"><option value="">เลือกบุคคล</option>'+choices.map(p=>'<option value="'+esc(p.value)+'" '+(d.person===p.value?'selected':'')+'>'+esc(p.label)+'</option>').join('')+'</select>'}
+const fieldIcons={personOther:'👤',name:'📝',strength:'⚖️',strengthUnit:'📏',form:'🧴',indication:'🩺',generic:'🧪',brand:'🏷️',concentration:'🧪',related:'🔗',regimen:'📅',dose:'⚖️',doseUnit:'📏',route:'💊',site:'📍',prnSymptom:'🩺',prnGap:'⏱️',prnMax:'⚠️',interval:'⏱️',frequency:'🔁',instructions:'📝',start:'📅',end:'📅',hospital:'🏥',department:'🏷️',doctor:'👨‍⚕️',warnings:'⚠️',sideEffects:'🩺',sequenceGroup:'📋',sequenceNumber:'🔢',sequenceGap:'⏱️',receivedDate:'📅',supply:'📦',supplyUnit:'📏',reserve:'📦',storage:'📍',openDate:'📅',openLife:'⏳',openUnit:'📏',price:'💰',paidBy:'👤',note:'📝',recorder:'👤'};
+const optionalKeys=new Set(['indication','generic','brand','concentration','site','instructions','start','end','hospital','department','doctor','warnings','sideEffects','sequenceGroup','sequenceNumber','sequenceGap','receivedDate','reserve','storage','openDate','openLife','price','paidBy','note','recorder']);
+const labelText=(key,title,req=false)=>(fieldIcons[key]?'<span class="field-icon" aria-hidden="true">'+fieldIcons[key]+'</span> ':'')+esc(title.replace(/ \(ถ้ามี\)$/,''))+(req?' <span class="required">*</span>':optionalKeys.has(key)?' <small class="optional-hint">(ถ้ามี)</small>':'');
+const field=(key,title,type='text',placeholder='',req=false)=>'<label for="'+key+'">'+labelText(key,title,req)+'</label>'+inputMarkup('id="'+key+'" data-key="'+key+'"',type,d[key],placeholder);
+const inputMarkup=(attrs,type,value,placeholder)=>{const input='<input '+attrs+' type="'+type+'" '+(type==='number'?'min="0" step="any"':'')+' value="'+esc(value)+'" placeholder="'+esc(placeholder)+'">';return ['date','time'].includes(type)?'<div class="native-picker '+(!value?'is-empty':'')+'">'+input+'<span class="picker-prompt" aria-hidden="true">'+(type==='date'?'📅 กดเลือกวันที่':'🕒 กดเลือกเวลา')+'</span></div>':input};
+const area=(key,title,ph='')=>'<label for="'+key+'">'+labelText(key,title)+'</label><textarea id="'+key+'" data-key="'+key+'" placeholder="'+esc(ph)+'">'+esc(d[key])+'</textarea>';
+const optionIcons={form:{'ยาผง / ยาแกรนูล':'🧂','ยาเหน็บ':'📋','แผ่นแปะยา':'🩹','ยาอม / ฟิล์ม':'👄','ยาหยอด / พ่นจมูก':'👃','ยาสูดพ่นชนิดผง':'🌬️','ยาน้ำสำหรับเครื่องพ่นละออง':'💨','น้ำยาบ้วนปาก':'🫗','เม็ด':'💊','แคปซูล':'💊','ยาน้ำ':'🥄','ยาหยอดตา':'👁️','ยาหยอดหู':'👂','ยาทา':'🧴','ยาพ่น':'🌬️','ยาฉีด':'💉','อื่น ๆ':'📋'},route:{'รับประทาน':'🥄','หยอดตา':'👁️','หยอดหู':'👂','พ่น / สูด':'🌬️','ทาภายนอก':'🧴','ฉีด':'💉','เหน็บ':'📋','อื่น ๆ':'➕'},regimen:{'ทุกวัน':'📅','เฉพาะบางวัน':'🗓️','ทุกระยะเวลา':'⏱️','เมื่อมีอาการ (PRN)':'🩺','ตามเงื่อนไข':'📋'}};
+const choiceLabel=(key,v)=>{if(key==='form'&&v==='อื่น ๆ')return '<span aria-hidden="true">✏️</span> <span data-custom-form-label>'+esc(d.form==='อื่น ๆ'&&d.formOther.trim()?d.formOther.trim():'ระบุรูปแบบยาเอง')+'</span>';const icon=optionIcons[key]?.[v];return (icon?'<span aria-hidden="true">'+icon+'</span> ':'')+esc(v)};
+const choose=(key,title,opts,req=false)=>{const compact=['form','route'].includes(key)&&opts.length>4;const expanded=expandedChoices.has(key);let visible=compact&&!expanded?opts.slice(0,4):opts;if(compact&&!expanded&&opts.includes(d[key])&&!visible.includes(d[key]))visible=[...visible,d[key]];return '<label>'+labelText(key,title,req)+'</label><div class="choices guided-choices">'+visible.map(v=>'<button type="button" data-choice="'+key+'" data-value="'+esc(v)+'" aria-pressed="'+(d[key]===v)+'">'+choiceLabel(key,v)+'</button>').join('')+'</div>'+(compact?'<button type="button" class="more-options" data-expand="'+key+'" aria-expanded="'+expanded+'">'+(expanded?'แสดงเฉพาะตัวเลือกหลัก':'ดู'+(key==='form'?'รูปแบบยา':'วิธีให้ยา')+'อื่น ๆ')+' <span aria-hidden="true">'+(expanded?'▴':'▾')+'</span></button>':'')};
+const select=(key,title,opts,req=false)=>'<label for="'+key+'">'+labelText(key,title,req)+'</label><select id="'+key+'" data-key="'+key+'"><option value="">'+(key.endsWith('Unit')?'เลือกหน่วย':'เลือก'+esc(title))+'</option>'+opts.map(v=>'<option '+(d[key]===v?'selected':'')+'>'+esc(v)+'</option>').join('')+'</select>';
+const formUnits={
+'เม็ด':{s:['mg','mcg','g','IU','units','mmol','mEq'],d:['เม็ด','mg','mcg','g','IU','units'],i:['เม็ด','แผง','กล่อง']},
+'แคปซูล':{s:['mg','mcg','g','IU','units'],d:['แคปซูล','mg','mcg','g','IU','units'],i:['แคปซูล','แผง','กล่อง']},
+'ยาน้ำ':{s:['mg/mL','mg/5 mL','mcg/mL','g/mL','g/5 mL','%','IU/mL','units/mL','mmol/mL','mEq/mL'],d:['mL','หยด','mg','mcg','g','IU','units','ช้อนชา'],i:['mL','ขวด','ซอง','กล่อง']},
+'ยาหยอดตา':{s:['%','mg/mL','mcg/mL','IU/mL','units/mL'],d:['หยด','mL','ครั้ง'],i:['ขวด','หลอด','mL','กล่อง']},
+'ยาหยอดหู':{s:['%','mg/mL','mcg/mL','IU/mL'],d:['หยด','mL','ครั้ง'],i:['ขวด','หลอด','mL','กล่อง']},
+'ยาทา':{s:['%','mg/g','mcg/g','mg/mL','IU/g','units/g','g/g'],d:['ครั้ง','g','mL','mg','หน่วยปลายนิ้ว (FTU)'],i:['หลอด','กระปุก','ขวด','g','mL','กล่อง']},
+'ยาพ่น':{s:['mcg/พัฟ','mg/พัฟ','mcg/ครั้ง','mg/ครั้ง','mg/mL','%'],d:['พัฟ','ครั้งพ่น','mL','mg','mcg'],i:['ขวด','หลอด','ตลับ','พัฟ','กล่อง']},
+'ยาฉีด':{s:['mg/mL','mcg/mL','g/mL','IU/mL','units/mL','mg','mcg','g','IU','units','mmol/mL','mEq/mL','%'],d:['mL','mg','mcg','g','IU','units','mmol','mEq'],i:['ขวด','แอมพูล','ปากกา','กระบอก','mL','กล่อง']},
+'ยาผง / ยาแกรนูล':{s:['mg','mcg','g','mg/g','IU','units','mg/ซอง','g/ซอง'],d:['ซอง','g','mg','mL','ช้อนตวง','IU','units'],i:['ซอง','ขวด','กระปุก','g','กล่อง']},
+'ยาเหน็บ':{s:['mg','mcg','g','IU','%'],d:['แท่ง','เม็ด','mg','g'],i:['แท่ง','เม็ด','แผง','กล่อง']},
+'แผ่นแปะยา':{s:['mg','mcg','mg/24 h','mcg/h','mg/h','mg/แผ่น'],d:['แผ่น'],i:['แผ่น','ซอง','กล่อง']},
+'ยาอม / ฟิล์ม':{s:['mg','mcg','g','IU'],d:['เม็ด','แผ่น','mg','mcg'],i:['เม็ด','แผ่น','แผง','ซอง','กล่อง']},
+'ยาหยอด / พ่นจมูก':{s:['%','mg/mL','mcg/mL','mcg/ครั้ง','mg/ครั้ง'],d:['หยด','ครั้งพ่น','mL'],i:['ขวด','หลอด','mL','กล่อง']},
+'ยาสูดพ่นชนิดผง':{s:['mcg/ครั้ง','mg/ครั้ง','mcg','mg'],d:['ครั้งสูด','แคปซูล','พัฟ','mg','mcg'],i:['ตลับ','แคปซูล','ครั้งสูด','กล่อง']},
+'ยาน้ำสำหรับเครื่องพ่นละออง':{s:['mg/mL','mcg/mL','mg/หลอด','%'],d:['mL','หลอด','mg','mcg'],i:['หลอด','ขวด','mL','กล่อง']},
+'น้ำยาบ้วนปาก':{s:['%','mg/mL','mcg/mL'],d:['mL','ครั้ง'],i:['ขวด','mL','กล่อง']},
+'อื่น ๆ':{s:['mg','mcg','g','%','mg/mL','IU','units'],d:['ครั้ง','mg','mL','g','หน่วย'],i:['ชิ้น','ขวด','กล่อง']}
+};
+const unitOptions=k=>{const all=formUnits[d.form]?.[k]||[];const key={s:'strengthUnit',d:'doseUnit',i:'supplyUnit'}[k];const history=rankHistory(patientHistory().filter(x=>x.form===d.form),key,all);return [...new Set([...history,...all]),'อื่น ๆ']};
+const resolvedUnit=(x,key)=>x[key]==='อื่น ๆ'?(x[key+'Other']||''):x[key];
+const unitControl=(key,title,k,required=false)=>select(key,title,unitOptions(k),required)+(d[key]==='อื่น ๆ'?field(key+'Other','ระบุหน่วยตามฉลาก','text','พิมพ์หน่วยจริง',true):'');
+// Only confirmed demo records from this page are available in this pilot.
+// Never infer real patient history from names, other people, or unverified drafts.
+const baselineForms=['เม็ด','ยาทา','ยาหยอดตา'];
+const patientHistory=()=>!lineSessionReady&&['ผู้ป่วยตัวอย่าง 1','ผู้ป่วยตัวอย่าง 2'].includes(d.person)?records.filter(x=>x.person===d.person&&x.status==='demo_unverified'&&x.kind!=='เติมยา / รับยาเพิ่ม'):[];
+function rankHistory(rows,key,allowed){const scores=new Map();for(const row of rows){const val=row[key];if(!allowed.includes(val)||val==='อื่น ๆ')continue;const prev=scores.get(val)||{count:0,last:''};prev.count++;if((row.recordedAt||'')>prev.last)prev.last=row.recordedAt||'';scores.set(val,prev)}return [...scores].sort((a,b)=>b[1].count-a[1].count||b[1].last.localeCompare(a[1].last)||allowed.indexOf(a[0])-allowed.indexOf(b[0])).map(x=>x[0])}
+const formOrder=()=>[...new Set([...rankHistory(patientHistory(),'form',Object.keys(formUnits)),...baselineForms,...Object.keys(formUnits)])];
+function quickForms(){const first=formOrder().slice(0,3);if(d.form&&Object.hasOwn(formUnits,d.form)&&!first.includes(d.form))first[2]=d.form;return first}
+const formControl=()=>{const expanded=expandedChoices.has('form');const visible=expanded?formOrder():quickForms();const seen=rankHistory(patientHistory(),'form',Object.keys(formUnits));return '<label>'+labelText('form','รูปแบบยา',true)+'</label>'+(seen.length?'<p class="adaptive-hint">แสดงรูปแบบยาที่เคยบันทึกของบุคคลนี้ก่อน</p>':'')+'<div class="choices guided-choices adaptive-form-cards">'+visible.map(v=>'<button type="button" data-choice="form" data-value="'+esc(v)+'" aria-pressed="'+(d.form===v)+'">'+choiceLabel('form',v)+'</button>').join('')+(expanded?'':'<button type="button" class="form-more" data-expand="form" aria-expanded="false">＋ ดูรูปแบบยาเพิ่มเติม</button>')+'</div>'+(expanded?'<button type="button" class="more-options" data-expand="form" aria-expanded="true">แสดงเฉพาะตัวเลือกหลัก ▴</button>':'')+(d.form==='อื่น ๆ'?field('formOther','✏️ ระบุรูปแบบยาเอง','text','พิมพ์รูปแบบยาตามฉลาก',true):'')};
+
+const strengthControls=()=>d.form?'<div class="grid"><div>'+field('strength','ความแรง','number','เช่น 500')+'</div><div>'+unitControl('strengthUnit','หน่วยความแรง','s')+'</div></div><p class="muted">ระบุความแรงตามฉลาก ไม่ใช่จำนวนที่ใช้ต่อครั้ง</p>':'<p class="muted">เลือกรูปแบบยาก่อน เพื่อแสดงหน่วยความแรงที่เกี่ยวข้อง</p>';
+const section=(title,body)=>'<section class="section main-section"><h3>'+title+'</h3><div class="section-content">'+body+'</div></section>';
+const detailFields={'🩺 เงื่อนไขการใช้ยา':['rules'],'🏥 ข้อมูลการรักษา':['hospital','department','doctor'],'⚠️ ข้อควรระวัง':['warnings','sideEffects'],'📋 ลำดับและขั้นตอนการให้ยา':['sequenceGroup','sequenceNumber','sequenceGap','steps'],'📦 จำนวนยาและการจัดเก็บ':['receivedDate','supply','reserve','storage','lots'],'🧴 อายุหลังเปิดใช้':['openDate','openLife'],'💰 ค่าใช้จ่าย':['price','paidBy'],'🗒️ บันทึกอื่น ๆ':['note','recorder','sources']};
+const meaningful=v=>Array.isArray(v)?v.some(x=>typeof x==='object'?Object.values(x).some(meaningful):meaningful(x)):v!==undefined&&v!==null&&String(v).trim()!=='';
+const detailHas=title=>(detailFields[title]||[]).some(k=>meaningful(d[k]));
+const summaryMarkup=(title,has)=>'<summary><span class="disclosure-arrow" aria-hidden="true"></span><span class="disclosure-name">'+title+'</span><span class="data-status" '+(!has?'hidden':'')+'>มีข้อมูล</span></summary>';
+const details=(title,body)=>'<details class="section" data-detail="'+esc(title)+'">'+summaryMarkup(title,detailHas(title))+'<div class="inside">'+body+'</div></details>';
+function updateDetailStatus(){document.querySelectorAll('#fields details[data-detail]').forEach(el=>{const badge=el.querySelector('.data-status');if(badge)badge.hidden=!detailHas(el.dataset.detail)})}
+function updatePicker(t){const wrap=t.closest?.('.native-picker');if(wrap)wrap.classList.toggle('is-empty',!t.value)}
+
+const nested=(arr,i,k,v,type='text',ph='')=>inputMarkup('aria-label="'+esc(ph)+'" data-arr="'+arr+'" data-i="'+i+'" data-prop="'+k+'"',type,v,ph);
+const nestedSelect=(arr,i,k,v,opts)=>'<select data-arr="'+arr+'" data-i="'+i+'" data-prop="'+k+'" aria-label="'+esc(k)+'"><option value="">เลือก</option>'+opts.map(x=>'<option '+(x===v?'selected':'')+'>'+esc(x)+'</option>').join('')+'</select>';
+const add=(arr,label)=>'<button type="button" class="secondary full" data-add="'+arr+'">＋ '+label+'</button>';
+const rem=(arr,i)=>'<button type="button" class="danger" data-del="'+arr+'" data-i="'+i+'">ลบ</button>';
+const times=()=>d.times.map((t,i)=>'<div class="timeRow"><div class="row"><strong>เวลา '+(i+1)+'</strong>'+rem('times',i)+'</div><div class="grid"><div><label>🕒 เวลา</label>'+nested('times',i,'time',t.time,'time','เวลา')+'</div><div><label>⚖️ ขนาดยาเฉพาะเวลา <small class="optional-hint">(ถ้ามี)</small></label>'+nested('times',i,'dose',t.dose,'number','ขนาดยา')+'</div></div><label>🍽️ ช่วงเวลา / อาหาร</label>'+nestedSelect('times',i,'meal',t.meal,['ก่อนอาหารเช้า','หลังอาหารเช้า','ก่อนอาหารกลางวัน','หลังอาหารกลางวัน','ก่อนอาหารเย็น','หลังอาหารเย็น','ก่อนนอน','ไม่เกี่ยวกับอาหาร'])+'</div>').join('')+add('times','เพิ่มเวลาใช้ยา');
+const multi=(key,opts)=>'<div class="choices">'+opts.map(v=>'<button type="button" data-multi="'+key+'" data-value="'+v+'" aria-pressed="'+d[key].includes(v)+'">'+v+'</button>').join('')+'</div>';
+const sourceOptions=[['🏷️','ฉลากยา'],['📄','ใบสั่งยา / รายการยา'],['👨‍⚕️','แพทย์แจ้ง'],['📝','ข้อมูลที่จดไว้']];
+const sourceCards=()=>'<div class="choices source-cards">'+sourceOptions.map(([icon,v])=>'<button type="button" data-multi="sources" data-value="'+esc(v)+'" aria-pressed="'+d.sources.includes(v)+'"><span class="source-icon" aria-hidden="true">'+icon+'</span><strong>'+esc(v)+'</strong></button>').join('')+'</div>';
+const doseNeeded=()=>d.kind!=='เติมยา / รับยาเพิ่ม';
+const personReady=()=>Boolean(d.person&&(lineSessionReady?isRealPerson(d):!(/^[0-9a-f-]{36}$/i.test(d.person)))&&(d.person!=='บุคคลอื่น'||d.personOther.trim()));
+const kindReady=()=>personReady()&&['เพิ่มยาใหม่','บันทึกยาที่ใช้อยู่','เติมยา / รับยาเพิ่ม'].includes(d.kind);
+function syncProgress(){const ready=kindReady();for(const id of ['medicationDetails','saveHint','saveDraft','reviewBtn','errors']){const el=$(id);if(el)el.hidden=!ready}if(!ready)$('errors').textContent='';$('reviewBtn').disabled=!ready;$('saveDraft').disabled=!ready;}
+const kindCards=()=> (!personReady()?'<p class="kind-hint">👤 เลือกบุคคลด้านบนก่อน จึงจะเลือกประเภทการบันทึกยาได้</p>':'')+'<div class="choices kind-cards" style="display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px">'+[['💊','เพิ่มยาใหม่','เพิ่มยาใหม่','เพิ่งเริ่มใช้ยา'],['📋','บันทึกยาที่ใช้อยู่','ยาที่ใช้อยู่','ยังไม่มีในระบบ'],['📦','เติมยา / รับยาเพิ่ม','รับยาเพิ่ม','เพิ่มจำนวนยาเดิม']].map(([icon,v,label,h])=>'<button type="button" data-choice="kind" data-value="'+esc(v)+'" aria-pressed="'+(d.kind===v)+'" '+(!personReady()?'disabled':'')+'><span class="choice-icon" aria-hidden="true">'+icon+'</span><strong>'+esc(label)+'</strong><small>'+esc(h)+'</small></button>').join('')+'</div>';
+const schedule=()=>{if(!doseNeeded()||!d.form)return '';return section('⏰ วิธีใช้ยา',choose('regimen','ใช้ยาแบบไหน',['ทุกวัน','เฉพาะบางวัน','ทุกระยะเวลา','เมื่อมีอาการ (PRN)','ตามเงื่อนไข'],true)+'<div class="grid"><div>'+field('dose','ขนาดยาต่อครั้ง','number','เช่น 1',true)+'</div><div>'+unitControl('doseUnit','หน่วยที่ใช้ต่อครั้ง','d',true)+'</div></div>'+choose('route','วิธีให้ยา',['รับประทาน','หยอดตา','หยอดหู','พ่น / สูด','ทาภายนอก','ฉีด','เหน็บ','อื่น ๆ'],true)+(['หยอดตา','หยอดหู','ทาภายนอก','ฉีด'].includes(d.route)?field('site','ตำแหน่งที่ใช้','text','เช่น ตาทั้งสองข้าง'):'')+(d.regimen==='เมื่อมีอาการ (PRN)'?field('prnSymptom','ใช้เมื่อมีอาการอะไร','text','ตามคำสั่งแพทย์',true)+field('prnGap','ระยะห่างขั้นต่ำ (ชั่วโมง)','number','ตามคำสั่งแพทย์')+field('prnMax','ขนาดสูงสุดใน 24 ชั่วโมง (ระบุหน่วยด้วย)','text','ตามคำสั่งแพทย์'):d.regimen==='ทุกระยะเวลา'?field('interval','ใช้ทุกกี่ชั่วโมง','number','ระบุชั่วโมง',true):((d.regimen==='เฉพาะบางวัน'?'<label>🗓️ วันที่ใช้ยา <span class="required">*</span></label>'+multi('days',['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์']):'')+field('frequency','จำนวนครั้งต่อวัน','number','เช่น 2')+times()))+area('instructions','คำแนะนำวิธีใช้เพิ่มเติม','ตามฉลากหรือคำสั่งแพทย์'))};
+const rules=()=>details('🩺 เงื่อนไขการใช้ยา', '<p class="muted">คัดลอกเงื่อนไขตามแพทย์ ไม่คำนวณหรือปรับยาให้อัตโนมัติ</p>'+d.rules.map((x,i)=>'<div class="ruleRow"><div class="row"><strong>เงื่อนไข '+(i+1)+'</strong>'+rem('rules',i)+'</div><label>🩺 ค่าที่ติดตาม</label>'+nestedSelect('rules',i,'metric',x.metric,['DTX (mg/dL)','ความดันตัวบน (mmHg)','ความดันตัวล่าง (mmHg)','ชีพจร (bpm)','อาการ','อื่น ๆ'])+'<div class="grid"><div><label>🔢 เปรียบเทียบ</label>'+nestedSelect('rules',i,'op',x.op,['<','≤','=','≥','>','พบอาการ'])+'</div><div><label>📝 ค่าหรืออาการ</label>'+nested('rules',i,'value',x.value,'text','ค่าตามแพทย์')+'</div></div><label>📋 คำสั่งเมื่อเข้าเงื่อนไข</label>'+nested('rules',i,'action',x.action,'text','คำสั่งตามแพทย์')+'</div>').join('')+add('rules','เพิ่มเงื่อนไข'));
+const lotFields=()=>d.lots.map((x,i)=>'<div class="lotRow"><div class="row"><strong>ชุดยา '+(i+1)+'</strong>'+rem('lots',i)+'</div><label>🏷️ เลขล็อต <small class="optional-hint">(ถ้ามี)</small></label>'+nested('lots',i,'lot',x.lot,'text','LOT')+'<div class="grid"><div><label>📦 จำนวนรับจริง</label>'+nested('lots',i,'qty',x.qty,'number','จำนวน')+'</div><div><label>📏 หน่วย</label>'+nestedSelect('lots',i,'unit',x.unit,unitOptions('i'))+(x.unit==='อื่น ๆ'?nested('lots',i,'unitOther',x.unitOther,'text','ระบุหน่วยจริง'):'')+'</div><div><label>📅 วันหมดอายุ</label>'+nested('lots',i,'expiry',x.expiry,'date','วันหมดอายุ')+'</div><div><label>📅 วันที่เปิดใช้</label>'+nested('lots',i,'opened',x.opened,'date','วันที่เปิดใช้')+'</div></div><label>📍 ตำแหน่งจัดเก็บ</label>'+nested('lots',i,'location',x.location,'text','เช่น ตู้ยา')+'</div>').join('')+add('lots','เพิ่มล็อต / บรรจุภัณฑ์');
+function render(){const oldOpen=[...document.querySelectorAll('#fields details')].filter(x=>x.open).map(x=>x.dataset.detail);$('headerPerson').textContent=personLabel(d)||'ยังไม่ได้เลือกบุคคล';$('personArea').innerHTML=section('👤 เพิ่มยาให้ใคร <span class="required">*</span>',personControl()+(d.person==='บุคคลอื่น'?field('personOther','ชื่อสมมติ','text','ชื่อสำหรับทดสอบ',true):''));$('fields').innerHTML=
+section('💊 บันทึกยาแบบไหน',kindCards())+(kindReady()?'<div id="medicationDetails">'+(d.kind==='เติมยา / รับยาเพิ่ม'?section('💊 ยาที่ได้รับเพิ่ม',field('related','อ้างอิงยาเดิม (ตัวอย่าง)','text','ชื่อรายการยาเดิม',true)):'')+
+section('💊 ข้อมูลยา',field('name','ชื่อยา','text','เช่น Losartan, Paracetamol',true)+formControl()+strengthControls()+field('indication','ใช้รักษาอะไร','text','เช่น ความดันโลหิตสูง')+(mode==='detail'?field('generic','ชื่อสามัญทางยา')+field('brand','ชื่อการค้า')+field('concentration','ความเข้มข้น / ส่วนประกอบตามฉลาก'):'')+'<label for="photos">📷 รูปยา / ฉลาก / ใบสั่งยา</label><input id="photos" type="file" accept="image/*" multiple hidden><button type="button" class="secondary full photo-add" data-photo-add>📷 เพิ่มรูปยา / ฉลาก (สูงสุด 4 รูป)</button><div id="photosView">'+d.photos.map((x,i)=>'<div><img class="photo" src="'+esc(x.data)+'" alt="'+esc(x.name)+'">'+rem('photos',i)+'</div>').join('')+'</div>')+
+schedule()+
+section('📅 ระยะเวลาการใช้ยา','<div class="grid"><div>'+field('start','วันที่เริ่ม / วันที่มีผล','date')+'</div><div>'+field('end','วันสิ้นสุด (ถ้ามี)','date')+'</div></div>' )+
+'<h3 class="additional-title">🗂️ ข้อมูลเพิ่มเติม</h3>'+((mode==='detail'||d.regimen==='ตามเงื่อนไข'||d.rules.length)?rules():'')+
+details('🏥 ข้อมูลการรักษา',field('hospital','โรงพยาบาล')+field('department','แผนก / คลินิก')+field('doctor','แพทย์ผู้สั่งยา'))+
+details('⚠️ ข้อควรระวัง',area('warnings','ข้อควรระวัง / ข้อห้ามตามฉลาก')+area('sideEffects','อาการที่ต้องเฝ้าระวัง'))+
+details('📋 ลำดับและขั้นตอนการให้ยา',field('sequenceGroup','กลุ่มการให้ยา','text','เช่น ยาหยอดตา')+'<div class="grid"><div>'+field('sequenceNumber','ลำดับที่','number')+'</div><div>'+field('sequenceGap','เว้นจากยาก่อนหน้า (นาที)','number')+'</div></div>'+d.steps.map((x,i)=>'<div class="stepRow"><div class="row"><strong>ขั้นตอน '+(i+1)+'</strong>'+rem('steps',i)+'</div>'+nested('steps',i,'text',x.text,'text','รายละเอียดขั้นตอน')+'</div>').join('')+add('steps','เพิ่มขั้นตอน'))+
+details('📦 จำนวนยาและการจัดเก็บ',field('receivedDate','วันที่รับยา','date')+'<div class="grid"><div>'+field('supply','จำนวนที่ได้รับ','number')+'</div><div>'+unitControl('supplyUnit','หน่วยจำนวน','i')+'</div></div>'+field('reserve','จำนวนสำรอง (หน่วยเดียวกัน)','number')+field('storage','วิธี / สถานที่จัดเก็บ')+lotFields())+
+details('🧴 อายุหลังเปิดใช้','<div class="grid"><div>'+field('openDate','วันที่เปิดใช้','date')+'</div><div>'+field('openLife','ใช้ได้หลังเปิด','number')+'</div></div>'+select('openUnit','หน่วยอายุหลังเปิด',['ชั่วโมง','วัน','สัปดาห์','เดือน'])+'<p class="muted">กรอกตามฉลากจริง ไม่ใช้ค่าเริ่มต้นแทนคำแนะนำผู้ผลิต</p>')+
+details('💰 ค่าใช้จ่าย',field('price','ค่าใช้จ่ายรวม (บาท)','number')+field('paidBy','สิทธิ / ผู้ชำระเงิน'))+
+details('🗒️ บันทึกอื่น ๆ',area('note','หมายเหตุ')+field('recorder','ผู้บันทึก (ชื่อสมมติ)')+(mode==='detail'?'<label>📄 แหล่งข้อมูลอ้างอิง <span class="muted">(ถ้ามี เลือกได้หลายข้อ)</span></label>'+sourceCards():''))+'</div>':'');
+document.querySelectorAll('#fields details').forEach(x=>{if(oldOpen.includes(x.dataset.detail)|| (d.regimen==='ตามเงื่อนไข'&&x.querySelector('summary').textContent.includes('เงื่อนไข'))||(d.kind==='เติมยา / รับยาเพิ่ม'&&x.querySelector('summary').textContent.includes('จำนวนยา')))x.open=true});
+$('mode').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.mode===mode));syncProgress();syncDraftPanel();}
+const arrDefaults={times:{time:'',dose:'',meal:''},rules:{metric:'',op:'',value:'',action:''},lots:{lot:'',qty:'',unit:'',unitOther:'',expiry:'',opened:'',location:''},steps:{text:''}};
+$('personArea').addEventListener('change',e=>{if(e.target.id!=='person')return;const value=e.target.value;if(d.person&&d.person!==value&&!window.confirm('เปลี่ยนบุคคลและล้างข้อมูลยาที่กำลังกรอกหรือไม่?')){e.target.value=d.person;return}if(d.person&&d.person!==value){d=empty();d.times.push({...arrDefaults.times});editing=-1;activeDraftId='';draftListOpen=false;clearDraftFeedback()}d.person=value;d.personOther='';expandedChoices.clear();render()});$('personArea').addEventListener('input',e=>{if(e.target.id==='personOther'){d.personOther=e.target.value;$('headerPerson').textContent=d.personOther||'บุคคลอื่น';document.querySelectorAll('.kind-cards button').forEach(b=>b.disabled=!personReady());const hint=document.querySelector('.kind-hint');if(hint)hint.hidden=personReady();syncProgress()}});
+$('fields').addEventListener('input',e=>{const t=e.target;if(t.dataset.key)d[t.dataset.key]=t.value;if(t.dataset.key==='formOther')document.querySelectorAll('[data-custom-form-label]').forEach(el=>el.textContent=t.value.trim()||'ระบุรูปแบบยาเอง');if(t.dataset.arr)d[t.dataset.arr][+t.dataset.i][t.dataset.prop]=t.value;updatePicker(t);updateDetailStatus()});
+$('fields').addEventListener('change',async e=>{const t=e.target;if(t.dataset.key)d[t.dataset.key]=t.value;if(t.dataset.arr)d[t.dataset.arr][+t.dataset.i][t.dataset.prop]=t.value;updatePicker(t);updateDetailStatus();if(['strengthUnit','doseUnit','supplyUnit'].includes(t.dataset.key)||(t.dataset.arr==='lots'&&t.dataset.prop==='unit')){render();return}if(t.id!=='photos'||photoPending)return;const target=d;const files=[...t.files].slice(0,4-d.photos.length);photoPending=true;try{for(const f of files){if(!f.type.startsWith('image/')||f.size>8*1024*1024){alert('รองรับรูปภาพขนาดไม่เกิน 8 MB ต่อรูป');continue}const data=await new Promise((res,rej)=>{const reader=new FileReader();reader.onload=()=>res(reader.result);reader.onerror=rej;reader.readAsDataURL(f)});if(d===target)target.photos.push({name:f.name,data})}}catch{alert('ไม่สามารถอ่านรูปได้')}finally{photoPending=false;render()}});
+$('fields').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const a=b.dataset;if(a.choice==='kind'&&(!personReady()||!['เพิ่มยาใหม่','บันทึกยาที่ใช้อยู่','เติมยา / รับยาเพิ่ม'].includes(a.value)))return;if(a.choice!=='kind'&&!kindReady())return;if(a.expand){if(expandedChoices.has(a.expand))expandedChoices.delete(a.expand);else expandedChoices.add(a.expand);render();return}if(a.photoAdd!==undefined){$('photos').click();return}if(a.choice){if(a.choice==='form'&&d.form!==a.value){const changed=Boolean(d.form);if(changed&&(d.strength||d.dose||d.supply||d.reserve||d.lots.length||d.times.some(t=>t.dose))&&!window.confirm('เปลี่ยนรูปแบบยา? กรุณาตรวจสอบและกรอกหน่วยกับจำนวนยาใหม่'))return;if(changed){for(const k of ['strength','strengthUnit','strengthUnitOther','dose','doseUnit','doseUnitOther','supply','supplyUnit','supplyUnitOther','reserve','formOther'])d[k]='';d.times.forEach(t=>t.dose='');d.lots.forEach(t=>{t.qty='';t.unit='';t.unitOther=''})}}if(a.choice==='person'&&d.person&&d.person!==a.value){if(!window.confirm('เปลี่ยนบุคคลและล้างข้อมูลยาที่กำลังกรอกหรือไม่?'))return;d=empty();d.times.push({...arrDefaults.times});editing=-1}d[a.choice]=a.value;if(a.choice==='person')d.personOther='';if(a.choice==='regimen'&&['ทุกวัน','เฉพาะบางวัน','ตามเงื่อนไข'].includes(d.regimen)&&!d.times.length)d.times.push({...arrDefaults.times});render()}else if(a.multi){d[a.multi]=d[a.multi].includes(a.value)?d[a.multi].filter(x=>x!==a.value):[...d[a.multi],a.value];if(a.multi==='sources')d.source=d.sources.join(' · ');render()}else if(a.add){d[a.add].push({...arrDefaults[a.add]});render()}else if(a.del){d[a.del].splice(+a.i,1);render()}});
+$('mode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(b){mode=b.dataset.mode;render()}});
+function validate(){const err=[];if(!d.person||(lineSessionReady&&!isRealPerson(d))||(!lineSessionReady&&/^[0-9a-f-]{36}$/i.test(d.person))||(d.person==='บุคคลอื่น'&&!d.personOther.trim()))err.push('เลือกบุคคล');if(!kindReady())err.push('เลือกบุคคลและประเภทการบันทึกยาที่รองรับ');if(!d.name.trim())err.push('ระบุชื่อยา');if(!d.form||!formUnits[d.form])err.push('เลือกรูปแบบยา');if(d.form==='อื่น ๆ'&&!d.formOther.trim())err.push('ระบุรูปแบบยา');for(const k of ['strengthUnit','doseUnit','supplyUnit'])if(d[k]==='อื่น ๆ'&&!String(d[k+'Other']||'').trim())err.push('ระบุหน่วยอื่นตามฉลาก');if(d.strength&&(!(Number(d.strength)>0)||!resolvedUnit(d,'strengthUnit')))err.push('ตรวจสอบความแรงและหน่วย');if(d.times.some(x=>x.dose!==''&&!(Number(x.dose)>0)))err.push('ขนาดยาเฉพาะเวลาต้องมากกว่า 0');if(d.kind==='เติมยา / รับยาเพิ่ม'&&!d.related.trim())err.push('ระบุยาเดิม');if(doseNeeded()){if(!d.regimen)err.push('เลือกความถี่การใช้ยา');if(!(Number(d.dose)>0)||!resolvedUnit(d,'doseUnit'))err.push('ระบุขนาดยาและหน่วย');if(!d.route)err.push('เลือกวิธีให้ยา');if(d.regimen==='เฉพาะบางวัน'&&!d.days.length)err.push('เลือกวันใช้ยา');if(d.regimen==='ทุกระยะเวลา'&&!(Number(d.interval)>0))err.push('ระบุระยะห่าง');if(d.regimen==='เมื่อมีอาการ (PRN)'&&!d.prnSymptom.trim())err.push('ระบุอาการที่ใช้ยา');if(['ทุกวัน','เฉพาะบางวัน','ตามเงื่อนไข'].includes(d.regimen)){if(!d.times.length||d.times.some(x=>!x.time))err.push('เพิ่มเวลาและระบุเวลาให้ครบ');if(new Set(d.times.map(x=>x.time)).size!==d.times.length)err.push('เวลาใช้ยาซ้ำกัน');if(d.frequency&&Number(d.frequency)!==d.times.length)err.push('จำนวนครั้งต่อวันไม่ตรงกับจำนวนเวลา')}if(d.regimen==='ตามเงื่อนไข'&&!d.rules.length)err.push('เพิ่มเงื่อนไขตามคำสั่งแพทย์')}if(d.rules.some(x=>!x.metric||!x.op||!x.value||!x.action))err.push('กรอกเงื่อนไขยาให้ครบ');if(d.lots.some(x=>!(Number(x.qty)>0)||!x.unit||(x.unit==='อื่น ๆ'&&!String(x.unitOther||'').trim())))err.push('ระบุจำนวนรับจริงและหน่วยของทุกล็อต');if(d.kind==='เติมยา / รับยาเพิ่ม'&&!(Number(d.supply)>0)&&!d.lots.length)err.push('ระบุจำนวนยาที่รับจริง');if((d.supply||d.reserve)&&!d.supplyUnit)err.push('เลือกหน่วยจำนวนยา');if(d.openLife&&(!(Number(d.openLife)>0)||!d.openUnit))err.push('ระบุอายุหลังเปิดใช้และหน่วย');if(d.start&&d.end&&d.start>d.end)err.push('วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่ม');if(photoPending)err.push('กำลังอ่านรูปภาพ');return err}
+const person=x=>personLabel(x);
+const rr=(a,b)=>b===undefined||b===null||b===''?'':'<div class="reviewrow"><span>'+esc(a)+'</span><strong>'+esc(b)+'</strong></div>';
+const group=(title,body)=>body?'<details class="section">'+summaryMarkup(title,true)+'<div class="inside">'+body+'</div></details>':'';
+function card(x){const isDose=x.kind!=='เติมยา / รับยาเพิ่ม';const strength=x.strength?[x.strength,resolvedUnit(x,'strengthUnit')].filter(Boolean).join(' '):'';const prn=x.regimen==='เมื่อมีอาการ (PRN)';const timing=isDose?(prn?rr('เมื่อมีอาการ',x.prnSymptom)+rr('ระยะห่างขั้นต่ำ',x.prnGap?x.prnGap+' ชม.':'')+rr('ขนาดสูงสุดใน 24 ชม.',x.prnMax):x.regimen==='ทุกระยะเวลา'?rr('ระยะห่าง','ทุก '+x.interval+' ชั่วโมง'):x.times.slice().sort((a,b)=>a.time.localeCompare(b.time)).map(t=>rr(t.time+' น. '+(t.meal||''),(t.dose||x.dose)+' '+resolvedUnit(x,'doseUnit'))).join('')+rr('วันที่ใช้',x.days.join(' · '))):'';
+return '<h3 class="review-title">💊 ข้อมูลยา</h3><div class="hero"><small>👤 '+esc(person(x))+' · '+esc(x.kind)+'</small><p><strong>'+esc(x.name)+' '+esc(strength)+'</strong></p><p>'+esc([x.form==='อื่น ๆ'?x.formOther:x.form,isDose?x.route:'',isDose?x.site:''].filter(Boolean).join(' · '))+'</p>'+(isDose?'<p><strong>'+esc(x.regimen)+' · '+esc(x.dose)+' '+esc(x.doseUnit)+'/ครั้ง</strong></p>':'')+timing+rr('ใช้รักษา',x.indication)+rr('วิธีใช้เพิ่มเติม',isDose?x.instructions:'')+'</div>'+
+section('📄 รายละเอียดยา',rr('ชื่อสามัญ',x.generic)+rr('ชื่อการค้า',x.brand)+rr('ความเข้มข้น',x.concentration)+rr('อ้างอิงยาเดิม',x.related)+rr('วันที่เริ่ม / วันที่มีผล',x.start)+rr('วันสิ้นสุด',x.end)+rr('เหตุผล',x.changeReason)+x.photos.map(p=>'<img class="photo" src="'+esc(p.data)+'" alt="'+esc(p.name)+'">').join(''))+
+group('🏥 ข้อมูลการรักษา',rr('โรงพยาบาล',x.hospital)+rr('แผนก / คลินิก',x.department)+rr('แพทย์ผู้สั่งยา',x.doctor))+
+group('🩺 เงื่อนไขการใช้ยา',x.rules.map(t=>rr([t.metric,t.op,t.value].join(' '),t.action)).join(''))+
+group('⚠️ ข้อควรระวัง',rr('ข้อควรระวัง',x.warnings)+rr('อาการที่ต้องเฝ้าระวัง',x.sideEffects))+
+group('📋 ลำดับและขั้นตอนการให้ยา',rr('กลุ่ม',x.sequenceGroup)+rr('ลำดับที่',x.sequenceNumber)+rr('เว้นระยะ',x.sequenceGap?x.sequenceGap+' นาที':'')+x.steps.map((t,i)=>rr('ขั้นตอน '+(i+1),t.text)).join(''))+
+group('📦 จำนวนยาและการจัดเก็บ',rr('วันที่รับ',x.receivedDate)+rr('จำนวนรับ',x.supply?x.supply+' '+resolvedUnit(x,'supplyUnit'):'')+rr('สำรอง',x.reserve?x.reserve+' '+resolvedUnit(x,'supplyUnit'):'')+rr('จัดเก็บ',x.storage)+x.lots.slice().sort((a,b)=>(a.expiry||'9999').localeCompare(b.expiry||'9999')).map(t=>'<div class="lotRow">'+rr('ล็อต',t.lot)+rr('จำนวน',t.qty+' '+(t.unit==='อื่น ๆ'?t.unitOther:t.unit))+rr('หมดอายุ',t.expiry)+rr('เปิดใช้',t.opened)+rr('จัดเก็บ',t.location)+'</div>').join(''))+
+group('🧴 อายุหลังเปิดใช้',rr('วันที่เปิดใช้',x.openDate)+rr('อายุหลังเปิด',x.openLife?x.openLife+' '+x.openUnit:''))+
+group('💰 ค่าใช้จ่าย',rr('รวม',x.price?x.price+' บาท':'')+rr('ผู้ชำระเงิน',x.paidBy))+
+group('🗒️ บันทึกอื่น ๆ',rr('หมายเหตุ',x.note)+rr('ผู้บันทึก',x.recorder)+rr('แหล่งข้อมูลอ้างอิง',Array.isArray(x.sources)?x.sources.map(v=>{const match=sourceOptions.find(o=>o[1]===v);return match?match.join(' '):v}).join('\n'):x.source));}
+const clone=x=>JSON.parse(JSON.stringify(x));
+function show(id){for(const k of ['edit','reviewPanel','done'])$(k).hidden=k!==id,$(k).classList.toggle('hidden',k!==id);window.scrollTo(0,0)}
+$('reviewBtn').onclick=()=>{if(!kindReady())return;const errors=validate();$('errors').textContent=errors.length?'กรุณาตรวจสอบ:\n'+errors.join('\n'):'';if(errors.length){$('errors').scrollIntoView({block:'center'});return}$('reviewBody').innerHTML=card(d);$('confirm').disabled=isRealPerson(d);$('confirm').textContent=isRealPerson(d)?'ยังไม่เปิดบันทึกยาจริง':'ยืนยันบันทึกตัวอย่าง';show('reviewPanel')};
+$('back').onclick=()=>show('edit');
+$('confirm').onclick=()=>{if(validate().length)return;if(isRealPerson(d)){alert('ยังไม่เปิดบันทึกยาจริงผ่านเว็บ กรุณาใช้ระบบยาใน LINE');return;}const item={...clone(d),status:'demo_unverified',recordedAt:new Date().toISOString()};if(editing>=0)records[editing]=item;else records.push(item);if(activeDraftId)drafts=drafts.filter(x=>x.id!==activeDraftId);activeDraftId='';draftListOpen=false;syncDraftPanel();editing=-1;$('doneBody').innerHTML=card(item);show('done')};
+$('newMed').onclick=()=>{const p=d.person,o=d.personOther;activeDraftId='';draftListOpen=false;clearDraftFeedback();expandedChoices.clear();d=empty();d.person=p;d.personOther=o;d.times.push({...arrDefaults.times});editing=-1;render();show('edit')};
+function draftTime(value){return new Intl.DateTimeFormat('th-TH',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Bangkok'}).format(new Date(value))}
+function clearDraftFeedback(){const el=$('draftFeedback');el.hidden=true;el.textContent=''}
+function draftFeedback(message){const el=$('draftFeedback');el.textContent=message;el.hidden=false}
+function syncDraftPanel(){$('draftOpenArea').hidden=drafts.length===0;if(!drafts.length){activeDraftId='';draftListOpen=false;clearDraftFeedback()}const active=drafts.find(x=>x.id===activeDraftId);$('draftStart').hidden=Boolean(active);$('draftResume').hidden=!active;if(active){$('draftResumeName').textContent=[active.data.name||'ยังไม่ระบุชื่อยา',person(active.data),active.data.kind].filter(Boolean).join(' · ');$('draftResumeTime').textContent='บันทึกล่าสุด '+draftTime(active.savedAt);$('switchDraft').hidden=drafts.length<2}const list=$('draftChoiceList');list.hidden=!draftListOpen;if(!draftListOpen){list.innerHTML='';return}list.innerHTML='<div class="draft-list-head"><strong>เลือกร่างที่ต้องการกรอกต่อ</strong><button class="draft-link" id="closeDraft" type="button">ปิด</button></div>'+(drafts.length?drafts.map(x=>'<div class="entry draft-item"><button type="button" class="draft-item-main" data-load="'+esc(x.id)+'"><strong>'+esc(x.data.name||'ยังไม่ระบุชื่อยา')+'</strong><span>'+esc(person(x.data)||'ยังไม่เลือกบุคคล')+' · '+esc(x.data.kind||'ยังไม่เลือกประเภท')+'</span><small>บันทึกล่าสุด '+esc(draftTime(x.savedAt))+'</small><span class="draft-continue">'+(x.id===activeDraftId?'ร่างที่กำลังกรอก':'กรอกต่อ ›')+'</span></button><button type="button" class="draft-link draft-delete" data-delete-draft="'+esc(x.id)+'">ลบร่าง</button></div>').join(''):'<p class="muted">ยังไม่มีร่างที่บันทึกไว้ในหน้านี้</p>')}
+$('saveDraft').onclick=()=>{if(!kindReady())return;if(isRealPerson(d))return alert('ยังไม่เปิดบันทึกร่างสำหรับข้อมูลจริงผ่านเว็บ');if(photoPending)return alert('กำลังอ่านรูป');const existing=drafts.find(x=>x.id===activeDraftId);const row={id:existing?.id||String(++draftSeq),data:clone(d),mode,savedAt:new Date().toISOString()};if(existing)drafts[drafts.indexOf(existing)]=row;else drafts.push(row);activeDraftId=row.id;draftListOpen=false;syncDraftPanel();draftFeedback('บันทึกร่างในหน้านี้แล้ว');$('draftOpenArea').scrollIntoView({block:'nearest',behavior:'smooth'})};
+$('openDraft').onclick=()=>{draftListOpen=!draftListOpen;clearDraftFeedback();syncDraftPanel()};
+$('switchDraft').onclick=()=>{draftListOpen=!draftListOpen;clearDraftFeedback();syncDraftPanel()};
+const listAction=e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset;if(a.load!==undefined){if(photoPending)return alert('กำลังอ่านรูป');const target=drafts.find(x=>x.id===a.load);if(!target)return;if(activeDraftId===target.id){draftListOpen=false;syncDraftPanel();return}if(kindReady()&&!window.confirm('เปิดร่างนี้แทนข้อมูลที่กำลังกรอกอยู่หรือไม่? ข้อมูลที่ยังไม่ได้บันทึกร่างอาจหาย'))return;d=clone(target.data);expandedChoices.clear();mode=target.mode;editing=-1;activeDraftId=target.id;draftListOpen=false;clearDraftFeedback();render();show('edit')}else if(a.deleteDraft!==undefined){const target=drafts.find(x=>x.id===a.deleteDraft);if(!target||!window.confirm('ลบร่างนี้หรือไม่?'))return;drafts.splice(drafts.indexOf(target),1);if(activeDraftId===target.id)activeDraftId='';syncDraftPanel()}else if(b.id==='closeDraft'){draftListOpen=false;syncDraftPanel()}};$('draftChoiceList').onclick=listAction;
+$('download').onclick=()=>{const blob=new Blob([JSON.stringify({schema:'phms-medication-pilot-2.4.20',status:'demo_only',records},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='phms-medication-demo.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+d.times.push({...arrDefaults.times});render();
+// Optional LINE session only. No automatic login and no anonymous requests to the member API.
+async function initializeOptionalLine(){if(lineInit)return lineInit;lineInit=(async()=>{try{
+ const sdk=document.createElement('script');sdk.src='https://static.line-scdn.net/liff/edge/2/sdk.js';await new Promise((resolve,reject)=>{const t=setTimeout(reject,8000);sdk.onload=()=>{clearTimeout(t);resolve()};sdk.onerror=()=>{clearTimeout(t);reject()};document.head.append(sdk)});
+ await window.liff.init({liffId:document.querySelector('meta[name="phms-liff-id"]').content,withLoginOnExternalBrowser:false});
+ if(!window.liff.isLoggedIn()||!window.liff.getIDToken())return;
+ const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),10000);let response,data;try{response=await fetch(document.querySelector('meta[name="phms-read-api"]').content,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+window.liff.getIDToken()},body:JSON.stringify({action:'person_options'}),signal:ctl.signal});data=await response.json()}finally{clearTimeout(timer)}
+ if(!response.ok||data?.ok!==true||!Array.isArray(data.people))return;
+ const people=data.people.filter(p=>/^[0-9a-f-]{36}$/i.test(p?.id)&&typeof p.name==='string');if(!people.length)return;
+ if(d.person||d.name||d.photos.length||drafts.length||records.length){$('lineHint').textContent='พบเซสชัน LINE · เริ่มฟอร์มใหม่เพื่อใช้รายชื่อจริง';$('connectLine').hidden=false;$('connectLine').onclick=()=>{if(!window.confirm('เริ่มฟอร์มใหม่และล้างรายการตัวอย่างในหน้านี้หรือไม่?'))return;drafts=[];records=[];activate(people,data.activePersonId);$('connectLine').hidden=true;};return}
+ activate(people,data.activePersonId);
+ }catch{ /* No login redirect or anonymous member fallback. */ }})();return lineInit}
+function activate(people,active){expandedChoices.clear();linePeople=people;lineSessionReady=true;lineActivePerson=people.some(p=>p.id===active)?active:'';d=empty();d.times.push({...arrDefaults.times});d.person=lineActivePerson;editing=-1;activeDraftId='';draftListOpen=false;clearDraftFeedback();$('lineHint').textContent='เชื่อมรายชื่อจาก LINE แล้ว · ยังไม่เปิดบันทึกยาเข้าระบบจริง';render()}
+void initializeOptionalLine();
+</script></body></html>
