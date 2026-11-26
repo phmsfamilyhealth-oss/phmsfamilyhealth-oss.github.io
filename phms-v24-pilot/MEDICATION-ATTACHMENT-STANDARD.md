@@ -1,3 +1,7 @@
+# v2.4.26 presentation update
+
+Display populated photo categories in full-width blocks, in master-category order; unpopulated categories follow in a compact two-column grid. Show each attached image separately with intrinsic aspect ratio (no crop), maximum preview height 380px, tap to enlarge, compact 44px delete action directly below. Show add action in the category header only while capacity remains; hide it at capacity rather than show a disabled full-count tile. No repeated count or optional hints. Review previews also single-column. Existing limits, category metadata, data and access boundaries unchanged.
+
 # PHMS Medication Attachment Standard v2.4.23
 
 Six optional categories in a 2-column / 3-row grid: appearance, packaging (primary: strip/bottle/tube), secondary_packaging (manufacturer carton), label, prescription, other. Existing packaging key remains backward compatible; old images are not inferred or automatically reclassified. New carton has 2/4 simple/detail limit. Total new attachments 12/26; existing images retained when switching modes. Hide persistent maximum counts and helper text; title/icon and ＋ เพิ่มรูป only on empty tiles. On reaching limit the button indicates full; upload errors still report remaining capacity. Preserve category-specific previews, delete, enlarged viewer, review grouping, compression and access boundaries.
